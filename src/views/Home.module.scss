@@ -1,0 +1,196 @@
+.home {
+	width: 100vw;
+	height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+
+.icon {
+	width: 32px;
+	height: 32px;
+	margin: 8px 10px;
+	flex: none;
+
+	overflow: hidden;
+	border-radius: 50%;
+
+	position: relative;
+
+	box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.details {
+	padding: 8px 10px;
+	padding-left: 0;
+
+	display: flex;
+
+	flex-direction: column;
+
+	flex-grow: 1;
+
+	flex-shrink: 1;
+	overflow: hidden;
+}
+
+.top,
+.bottom {
+	flex-grow: 1;
+	flex-shrink: 1;
+	width: 100%;
+	overflow: hidden;
+	display: flex;
+}
+
+.meta {
+	margin-left: 2px;
+	display: flex;
+	align-items: center;
+}
+
+.count {
+	float: left;
+	font-size: 12px;
+
+	color: white;
+
+	background-color: var(--accent-dark);
+
+	padding: 2px 5px;
+	min-width: 20px;
+
+	height: 20px;
+
+	line-height: 16px;
+
+	border-radius: 20px;
+
+	text-align: center;
+
+	font-weight: 500;
+
+	&.muted {
+		background-color: #6a6a6a;
+	}
+}
+
+.name {
+	flex-grow: 1;
+
+	flex-shrink: 1;
+	white-space: nowrap;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.time {
+	margin-left: 8px;
+
+	flex-grow: 0;
+
+	flex-shrink: 0;
+
+	color: #6a6a6a;
+
+	font-size: 12px;
+}
+
+.bottom {
+	display: flex;
+
+	flex-grow: 1;
+
+	flex-shrink: 1;
+}
+
+.bottom {
+	color: #6a6a6a;
+}
+
+.desc {
+	flex-grow: 1;
+	flex-shrink: 1;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	font-size: 14px;
+
+	&::after {
+		content: "i";
+		opacity: 0;
+	}
+}
+
+.sender {
+	color: black;
+}
+
+.check {
+	color: var(--accent-dark);
+
+	margin-right: 2px;
+
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+
+	height: 100%;
+
+	float: left;
+
+	span {
+		font-size: 18px;
+		float: left;
+	}
+}
+
+.icons {
+	font-size: 14px;
+	margin-top: 1px;
+	margin-right: 4px;
+}
+
+.verified {
+	@extend .icons;
+	color: var(--accent-dark);
+	display: inline-block;
+	float: left;
+}
+
+.dialog {
+	display: flex;
+
+	flex-direction: row;
+	align-items: center;
+
+	min-height: 60px;
+
+	&:focus {
+		background-color: var(--accent-dark);
+
+		* {
+			color: white;
+		}
+
+		.count {
+			background-color: white;
+			color: var(--accent-dark);
+		}
+
+		.verified {
+			--color: var(--accent-dark);
+		}
+	}
+}
+
+.dialogs {
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+	position: absolute;
+	top: 0;
+	left: 0;
+}

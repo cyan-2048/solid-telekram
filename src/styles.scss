@@ -1,0 +1,64 @@
+* {
+	font-family: Roboto, roboto, "Open Sans", "Noto Sans Symbols 2", sans-serif, twemoji;
+	box-sizing: border-box;
+}
+
+@font-face {
+	font-family: twemoji;
+	src: url("./assets/Twemoji Mozilla.ttf");
+	font-display: swap;
+}
+
+:root {
+	--accent: #3b90bc;
+	--accent-dark: #3b90bc;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: white;
+}
+
+:focus {
+	outline: none;
+}
+
+html {
+	line-height: 1.445;
+
+	font-size: 17px;
+	line-height: 1.445;
+	color: #323232;
+}
+
+@font-face {
+	font-family: tgico;
+	src: url(./assets/tgico.ttf?ix597f) format("truetype"),
+		url(./assets/tgico.woff?ix597f) format("woff"),
+		url(./assets/tgico.svg?ix597f#tgico) format("svg");
+	font-weight: 400;
+	font-style: normal;
+	font-display: block;
+}
+.tgico {
+	font-family: tgico !important;
+	font-style: normal;
+	font-weight: 400;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	float: left;
+}
+
+/* noto-sans-symbols-2-regular - symbols */
+@font-face {
+	font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+	font-family: "Noto Sans Symbols 2";
+	font-style: normal;
+	font-weight: 400;
+	src: url("./assets/noto-sans-symbols-2-v23-symbols-regular.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}

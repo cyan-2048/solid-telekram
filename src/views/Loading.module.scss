@@ -1,0 +1,56 @@
+.loading,
+:global(.LOADING) {
+	position: fixed;
+	bottom: 0;
+	height: 320px;
+	max-height: 320px;
+	width: 100vw;
+	background-color: #000;
+	color: white;
+	z-index: 999;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		background-image: url("/icon112.png");
+		width: 84.5px;
+		height: 84.5px;
+		background-repeat: no-repeat;
+		background-size: contain;
+		transform: translate(-50%, -50%);
+	}
+}
+
+.progressRing {
+	position: fixed;
+	bottom: calc(15vh - (24px / 2));
+	left: 50%;
+	transform: translate(-50%, 0);
+}
+
+.progressRing circle {
+	stroke: white;
+	fill: none;
+	stroke-width: 2px;
+	stroke-linecap: round;
+	transform-origin: 50% 50%;
+	transition: all 0.2s ease-in-out 0s;
+	animation: 2s linear 0s infinite normal none running spin-infinite;
+}
+
+@keyframes spin-infinite {
+	0% {
+		stroke-dasharray: 0.01px, 43.97px;
+		transform: rotate(0deg);
+	}
+	50% {
+		stroke-dasharray: 21.99px, 21.99px;
+		transform: rotate(450deg);
+	}
+	100% {
+		stroke-dasharray: 0.01px, 43.97px;
+		transform: rotate(1080deg);
+	}
+}

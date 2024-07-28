@@ -1,0 +1,44 @@
+{
+	"name": "Kaigram",
+	"description": "Unofficial Telegram Client for KaiOS.",
+	"version": "1.0.5",
+	"launch_path": "/index.html",
+	"theme": "#fff",
+	"theme_color": "#fff",
+	"background_color": "#fff",
+	"orientation": "default",
+
+	"categories": ["social"],
+
+	"icons": {
+		"56": "/icon56.png",
+		"112": "/icon112.png"
+	},
+	"developer": {
+		"name": "cyan-2048",
+		"url": "https://github.com/Discord4KaiOS"
+	},
+	"origin": "app://kaigram.cyankindasus.com",
+	"type": "privileged",
+	"permissions": {
+		"spatialnavigation-app-manage": {},
+		"systemXHR": {},
+		"audio-capture": {},
+		"video-capture": {
+			"description": "Reading Codes using the Camera"
+		},
+		"desktop-notification": {},
+		"tcp-socket": { "description": "Required to do any TCP" }
+	},
+	"locales": {
+		"en-US": {
+			"name": "Kaigram",
+			"subtitle": "Telegram for KaiOS",
+			"description": "Unofficial Telegram Client for KaiOS."
+		}
+	},
+
+	"priority": "high",
+
+	"default_locale": "en"
+}

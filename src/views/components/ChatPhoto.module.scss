@@ -1,0 +1,98 @@
+:root {
+	--peer-avatar-red-top: #ff845e;
+	--peer-avatar-red-bottom: #d45246;
+	--peer-avatar-orange-top: #febb5b;
+	--peer-avatar-orange-bottom: #f68136;
+	--peer-avatar-violet-top: #b694f9;
+	--peer-avatar-violet-bottom: #6c61df;
+	--peer-avatar-green-top: #9ad164;
+	--peer-avatar-green-bottom: #46ba43;
+	--peer-avatar-cyan-top: #53edd6;
+	--peer-avatar-cyan-bottom: #28c9b7;
+	--peer-avatar-blue-top: #5caffa;
+	--peer-avatar-blue-bottom: #408acf;
+	--peer-avatar-pink-top: #ff8aac;
+	--peer-avatar-pink-bottom: #d95574;
+
+	--saved-color: #3390ec;
+	--light-filled-saved-color: #7cb7f2;
+
+	--peer-avatar-saved-top: var(--light-filled-saved-color);
+	--peer-avatar-saved-bottom: var(--saved-color);
+}
+
+.color {
+	--color-top: var(--avatar-color-top);
+	--color-bottom: var(--avatar-color-bottom);
+	border-radius: 50%;
+	background: linear-gradient(var(--color-top), var(--color-bottom));
+	color: white;
+	font-size: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-transform: uppercase;
+	line-height: 15px;
+}
+.color[data-color="red"] {
+	--color-top: var(--peer-avatar-red-top);
+	--color-bottom: var(--peer-avatar-red-bottom);
+}
+.color[data-color="orange"] {
+	--color-top: var(--peer-avatar-orange-top);
+	--color-bottom: var(--peer-avatar-orange-bottom);
+}
+.color[data-color="violet"] {
+	--color-top: var(--peer-avatar-violet-top);
+	--color-bottom: var(--peer-avatar-violet-bottom);
+}
+.color[data-color="green"] {
+	--color-top: var(--peer-avatar-green-top);
+	--color-bottom: var(--peer-avatar-green-bottom);
+}
+.color[data-color="cyan"] {
+	--color-top: var(--peer-avatar-cyan-top);
+	--color-bottom: var(--peer-avatar-cyan-bottom);
+}
+.color[data-color="pink"] {
+	--color-top: var(--peer-avatar-pink-top);
+	--color-bottom: var(--peer-avatar-pink-bottom);
+}
+.color[data-color="blue"] {
+	--color-top: var(--peer-avatar-blue-top);
+	--color-bottom: var(--peer-avatar-blue-bottom);
+}
+
+.color[data-color="saved"] {
+	--color-top: var(--peer-avatar-saved-top);
+	--color-bottom: var(--peer-avatar-saved-bottom);
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.photo,
+.color {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.photo {
+	&.thumb {
+		filter: blur(3px);
+	}
+
+	&.animate {
+		animation: fadeIn 0.5s ease;
+	}
+}

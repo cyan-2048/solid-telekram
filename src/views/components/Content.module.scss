@@ -1,0 +1,15 @@
+.content {
+	display: flex;
+	height: calc(100vh - 30px);
+	width: 100vw;
+	flex-direction: column;
+	overflow: hidden;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+.main {
+	flex: 1;
+	overflow: auto;
+}

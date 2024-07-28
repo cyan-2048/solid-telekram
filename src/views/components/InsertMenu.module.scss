@@ -1,0 +1,62 @@
+.grid {
+	height: 240px;
+
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	align-content: start;
+	grid-gap: 1px;
+}
+
+.gridItem {
+	padding: 7px 7px 4px;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 100%;
+	overflow: hidden;
+
+	&:focus {
+		background-color: #aec8d4;
+	}
+}
+
+.icon {
+	border-radius: 50%;
+	margin-bottom: 3px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 48px;
+	height: 48px;
+
+	color: #fff;
+	fill: #fff;
+
+	background: linear-gradient(hsla(0, 0%, 100%, 0.3), rgba(0, 0, 0, 0.22));
+
+	.icon_container {
+		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+		font-size: 27px;
+
+		svg {
+			width: 32px;
+			height: 32px;
+			display: inline-block;
+			float: left;
+		}
+	}
+}
+
+.iconText {
+	text-align: center;
+
+	width: 100%;
+	font-size: 12px;
+	font-weight: 600;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	white-space: nowrap;
+}

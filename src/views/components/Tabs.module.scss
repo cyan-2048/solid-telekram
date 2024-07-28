@@ -1,0 +1,42 @@
+.tabs {
+	display: flex;
+	align-items: center;
+	overflow-x: auto;
+
+	padding: 0 3px;
+	background-color: #fff;
+}
+
+.tab {
+	padding: 5px 7px;
+
+	position: relative;
+	flex: none;
+	max-width: calc(100vw - 60px);
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 14px;
+
+	font-weight: 400;
+
+	hyphens: none;
+	white-space: pre;
+	word-wrap: normal;
+
+	&.selected {
+		font-weight: 700;
+
+		&::after {
+			content: "";
+			position: absolute;
+			width: calc(100% - 4px);
+			height: 2px;
+			bottom: 2px;
+
+			border-radius: 2px;
+			background-color: var(--accent-dark);
+			left: 2px;
+		}
+	}
+}

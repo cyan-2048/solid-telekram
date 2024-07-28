@@ -1,0 +1,42 @@
+.wrap {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	font-size: inherit;
+
+	&::before {
+		content: "i";
+		color: rgba(0, 0, 0, 0);
+		text-shadow: none;
+	}
+
+	.inner {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+		white-space: nowrap;
+
+		&.marquee {
+			transition: transform var(--time) linear;
+		}
+	}
+
+	/*
+	&.marquee {
+		&::after {
+			content: "";
+			top: 0;
+			left: 0;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			z-index: 2;
+			background-image: linear-gradient(to right, var(--accent-dark), rgba(0, 0, 0, 0) 4px),
+				linear-gradient(to left, var(--accent-dark), rgba(0, 0, 0, 0) 4px);
+		}
+	}
+	*/
+}

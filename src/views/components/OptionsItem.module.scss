@@ -1,0 +1,14 @@
+.item {
+	padding: 10px;
+	font-size: 17px;
+	line-height: 1.445;
+
+	&.tick {
+		svg {
+			float: right;
+			height: 32px;
+			width: 32px;
+			fill: currentColor;
+		}
+	}
+}

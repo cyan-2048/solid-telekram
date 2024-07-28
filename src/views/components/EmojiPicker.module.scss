@@ -1,0 +1,105 @@
+.categories {
+	height: 28px;
+	width: 100vw;
+	background-color: rgb(230, 230, 230);
+	display: flex;
+
+	white-space: nowrap;
+
+	overflow: hidden;
+}
+
+.category {
+	margin-right: 4px;
+
+	&:last-child {
+		margin-right: 0;
+	}
+
+	height: 28px;
+	width: 28px;
+	color: black;
+
+	padding: 3px;
+
+	svg {
+		fill: currentColor;
+	}
+	flex: none;
+}
+
+.selected {
+	background-color: #bababa;
+
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+	}
+}
+
+.emojis {
+	background-color: white;
+	height: 216px;
+	position: relative;
+
+	display: grid;
+
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.emojiItem {
+	border-radius: 16px;
+	margin: 6px auto;
+	display: flex;
+
+	justify-content: center;
+
+	align-items: center;
+
+	position: relative;
+
+	height: 42px;
+
+	width: 42px;
+	background-color: rgb(230, 230, 230);
+
+	&:focus {
+		background-color: #81a7b9;
+	}
+}
+
+.num {
+	position: absolute;
+	bottom: -4px;
+
+	right: -6px;
+
+	text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+	font-weight: 700;
+	font-size: 20px;
+	color: #8c8c8c;
+}
+
+.emoji {
+	font-size: 32px;
+	white-space: nowrap;
+	span:not(:first-child) {
+		display: none;
+	}
+}
+
+.scrollbar {
+	width: 7px;
+	position: absolute;
+	background-color: #8c8c8c;
+	border-radius: 5px;
+	border: 1px solid white;
+}
+
+.scrollbar_container {
+	position: absolute;
+	height: 216px;
+	width: 7px;
+	right: 0;
+	bottom: 0;
+}
