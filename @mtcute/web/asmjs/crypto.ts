@@ -3,36 +3,48 @@ import {
 	IAesCtr,
 	ICryptoProvider,
 	IEncryptionScheme,
-	concatBuffers,
 } from "@mtcute/core/utils.js";
 
 import { deflate, inflate } from "pako";
-import { createCipheriv } from "../ctr/index.js";
 
-import RushaURL from "rusha/dist/rusha.min.js?url";
+import MtcuteAsmURL from "./mtcute.asm.js?url";
+import MtcuteMemURL from "./mtcute.asm.js.mem?url";
 
-let Rusha: import("rusha") = null as any;
+let asm: any = null;
 
-async function loadRusha() {
+let compressor!: number;
+let decompressor!: number;
+let sharedOutPtr!: number;
+let sharedKeyPtr!: number;
+let sharedIvPtr!: number;
+
+function getUint8Memory(): Uint8Array {
+	return asm.HEAPU8;
+}
+
+function getAvailableMemory() {
+	return 16777216 - asm._getUsedMemory();
+}
+
+async function loadAsm() {
 	if (import.meta.env.DEV) {
-		console.log("DEV MODE!!! IMPORTING RUSHA VIA DYNAMIC IMPORT");
-		await import("rusha").then((m) => {
-			Rusha = m.default;
+		// thanks commonjs plugin lmao
+		const factory = require("./mtcute.asm.js");
+		asm = await factory({
+			locateFile() {
+				return MtcuteMemURL;
+			},
 		});
-
-		const e = require("./rlottie-wasm.js");
-		console.log("EEEE", e);
 	} else {
-		console.log("PROD MODE!!! IMPORTING RUSHA VIA SYSTEMJS");
-		await System.import<{
-			default: typeof Rusha;
-		}>(RushaURL).then((m) => {
-			Rusha = m.default;
+		const factory = (await System.import(MtcuteAsmURL)).default;
+
+		asm = await factory({
+			locateFile() {
+				return MtcuteMemURL;
+			},
 		});
 	}
 }
-
-import "./crypto-js.js";
 
 const ALGO_TO_SUBTLE: Record<string, string> = {
 	sha256: "SHA-256",
@@ -44,98 +56,223 @@ export interface WebCryptoProviderOptions {
 	crypto?: Crypto;
 }
 
-// FROM WEBOGRAM
+/**
+ * Create a context for AES-CTR-256 en/decryption
+ *
+ * > **Note**: `freeCtr256` must be called on the returned context when it's no longer needed
+ */
+function createCtr256(key: Uint8Array, iv: Uint8Array) {
+	getUint8Memory().set(key, sharedKeyPtr);
+	getUint8Memory().set(iv, sharedIvPtr);
 
-function bytesFromWords(wordArray: CryptoJS.lib.WordArray) {
-	var words = wordArray.words;
-	var sigBytes = wordArray.sigBytes;
-	var bytes = new Uint8Array(sigBytes);
-
-	for (var i = 0; i < sigBytes; i++) {
-		bytes[i] = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
-	}
-
-	return bytes;
+	return asm._ctr256_alloc();
 }
 
-function bytesToWords(bytes: Uint8Array) {
-	var len = bytes.length;
-	var words: number[] = [];
-	var i;
-	for (i = 0; i < len; i++) {
-		words[i >>> 2] |= bytes[i] << (24 - (i % 4) * 8);
-	}
-
-	return CryptoJS.lib.WordArray.create(words, len);
+/**
+ * Release a context for AES-CTR-256 en/decryption
+ */
+function freeCtr256(ctx: number) {
+	asm._ctr256_free(ctx);
 }
 
-function bufferConcat(buffer1: Uint8Array, buffer2: Uint8Array) {
-	return concatBuffers([buffer1, buffer2]);
+/**
+ * Pefrorm AES-CTR-256 en/decryption
+ *
+ * @param ctx  context returned by `createCtr256`
+ * @param data  data to en/decrypt (must be a multiple of 16 bytes)
+ */
+function ctr256(ctx: number, data: Uint8Array): Uint8Array {
+	console.time("AES ctr " + data.length);
+	const { _malloc, _free } = asm;
+	const inputPtr = _malloc(data.length);
+	const outputPtr = _malloc(data.length);
+
+	const mem = getUint8Memory();
+	mem.set(data, inputPtr);
+
+	asm._ctr256(ctx, inputPtr, data.length, outputPtr);
+
+	const result = mem.slice(outputPtr, outputPtr + data.length);
+	_free(outputPtr);
+
+	console.timeEnd("AES ctr " + data.length);
+
+	return result;
 }
 
-function addPadding(bytes: Uint8Array, blockSize?: number, zeroes?: number) {
-	blockSize = blockSize || 16;
-	var len = bytes.byteLength || bytes.length;
-	var needPadding = blockSize - (len % blockSize);
-	if (needPadding > 0 && needPadding < blockSize) {
-		var padding = new Uint8Array(needPadding);
-		if (zeroes) {
-			for (var i = 0; i < needPadding; i++) {
-				padding[i] = 0;
-			}
-		} else {
-			// is this useful???
-			// SecureRandom is a thing in jsbn one of webogram's dependencies
-			// new SecureRandom().nextBytes(padding);
-		}
+/**
+ * Calculate a SHA-256 hash
+ *
+ * @param data  data to hash
+ */
+function sha256(data: Uint8Array): Uint8Array {
+	const { _malloc, _free } = asm;
+	const inputPtr = _malloc(data.length);
 
-		bytes = bufferConcat(bytes, padding);
-	}
+	const mem = getUint8Memory();
+	mem.set(data, inputPtr);
 
-	return bytes;
+	asm._sha256(inputPtr, data.length);
+	_free(inputPtr);
+
+	return mem.slice(sharedOutPtr, sharedOutPtr + 32);
 }
 
-function aesEncryptSync(bytes: Uint8Array, keyBytes: Uint8Array, ivBytes: Uint8Array) {
-	// var len = bytes.byteLength || bytes.length
+/**
+ * Pefrorm AES-IGE-256 encryption
+ *
+ * @param data  data to encrypt (must be a multiple of 16 bytes)
+ * @param key  encryption key (32 bytes)
+ * @param iv  initialization vector (32 bytes)
+ */
+function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
+	console.time("AES encrypt");
 
-	// console.time('AES encrypt')
-	// console.log(dT(), 'AES encrypt start', len/*, bytesToHex(keyBytes), bytesToHex(ivBytes)*/)
-	bytes = addPadding(bytes);
+	const ptr = asm._malloc(data.length + data.length);
 
-	var encryptedWords = CryptoJS.AES.encrypt(bytesToWords(bytes), bytesToWords(keyBytes), {
-		iv: bytesToWords(ivBytes),
-		padding: CryptoJS.pad.NoPadding,
-		// @ts-ignore
-		mode: CryptoJS.mode.IGE,
-	}).ciphertext;
+	const inputPtr = ptr;
+	const outputPtr = inputPtr + data.length;
 
-	var encryptedBytes = bytesFromWords(encryptedWords);
-	// console.log(dT(), 'AES encrypt finish')
-	// console.timeEnd('AES encrypt')
+	const mem = getUint8Memory();
+	mem.set(data, inputPtr);
+	mem.set(key, sharedKeyPtr);
+	mem.set(iv, sharedIvPtr);
 
-	return encryptedBytes;
+	asm._ige256_encrypt(inputPtr, data.length, outputPtr);
+	const result = mem.slice(outputPtr, outputPtr + data.length);
+
+	asm._free(ptr);
+
+	console.timeEnd("AES encrypt");
+
+	return result;
 }
 
-function aesDecryptSync(encryptedBytes: Uint8Array, keyBytes: Uint8Array, ivBytes: Uint8Array) {
-	// console.log(dT(), 'AES decrypt start', encryptedBytes.length)
+/**
+ * Pefrorm AES-IGE-256 decryption
+ *
+ * @param data  data to decrypt (must be a multiple of 16 bytes)
+ * @param key  encryption key (32 bytes)
+ * @param iv  initialization vector (32 bytes)
+ */
+function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
 	console.time("AES decrypt");
-	var decryptedWords = CryptoJS.AES.decrypt(
-		// @ts-ignore
-		{ ciphertext: bytesToWords(encryptedBytes) },
-		bytesToWords(keyBytes),
-		{
-			iv: bytesToWords(ivBytes),
-			padding: CryptoJS.pad.NoPadding,
-			// @ts-ignore
-			mode: CryptoJS.mode.IGE,
+
+	const ptr = asm._malloc(data.length + data.length);
+
+	const inputPtr = ptr;
+	const outputPtr = inputPtr + data.length;
+
+	const mem = getUint8Memory();
+	mem.set(data, inputPtr);
+	mem.set(key, sharedKeyPtr);
+	mem.set(iv, sharedIvPtr);
+
+	asm._ige256_decrypt(inputPtr, data.length, outputPtr);
+	const result = mem.slice(outputPtr, outputPtr + data.length);
+
+	asm._free(ptr);
+
+	console.timeEnd("AES decrypt");
+
+	return result;
+}
+
+/**
+ * Deflate some data with zlib headers and max output size
+ *
+ * @returns null if the compressed data is larger than `size`, otherwise the compressed data
+ */
+function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
+	console.time("gzip " + bytes.length);
+
+	if (bytes.length > getAvailableMemory()) {
+		console.warn("asm.js out of memory!! will use pako.");
+
+		const result = deflate(bytes);
+
+		if (result.length > size) {
+			console.timeEnd("gzip " + bytes.length);
+			return null;
 		}
+
+		console.timeEnd("gzip " + bytes.length);
+		return result;
+	}
+
+	const outputPtr = asm._malloc(size);
+	const inputPtr = asm._malloc(bytes.length);
+
+	const mem = getUint8Memory();
+	mem.set(bytes, inputPtr);
+
+	const written = asm._libdeflate_zlib_compress(
+		compressor,
+		inputPtr,
+		bytes.length,
+		outputPtr,
+		size
+	);
+	asm._free(inputPtr);
+
+	if (written === 0) {
+		asm._free(outputPtr);
+		console.timeEnd("gzip " + bytes.length);
+		return null;
+	}
+
+	const result = mem.slice(outputPtr, outputPtr + written);
+	asm._free(outputPtr);
+
+	console.timeEnd("gzip " + bytes.length);
+
+	return result;
+}
+
+/**
+ * Try to decompress some data with zlib headers
+ *
+ * @throws  Error if the data is invalid
+ * @param defaultCapacity  default capacity of the output buffer. Defaults to `bytes.length * 2`
+ */
+function gunzip(bytes: Uint8Array): Uint8Array {
+	console.time("gunzip " + bytes.length);
+
+	if (bytes.length > getAvailableMemory()) {
+		console.warn("asm.js out of memory!! will use pako.");
+
+		const result = inflate(bytes);
+
+		console.timeEnd("gunzip " + bytes.length);
+		return result;
+	}
+
+	const inputPtr = asm._malloc(bytes.length);
+	getUint8Memory().set(bytes, inputPtr);
+
+	const size = asm._libdeflate_gzip_get_output_size(inputPtr, bytes.length);
+	const outputPtr = asm._malloc(size);
+
+	const ret = asm._libdeflate_gzip_decompress(
+		decompressor,
+		inputPtr,
+		bytes.length,
+		outputPtr,
+		size
 	);
 
-	var bytes = bytesFromWords(decryptedWords);
-	console.timeEnd("AES decrypt");
-	// console.log(dT(), 'AES decrypt finish')
+	/* c8 ignore next 3 */
+	if (ret === -1) throw new Error("gunzip error -- bad data");
+	if (ret === -2) throw new Error("gunzip error -- short output");
+	if (ret === -3) throw new Error("gunzip error -- short input"); // should never happen
 
-	return bytes;
+	const result = getUint8Memory().slice(outputPtr, outputPtr + size);
+	asm._free(inputPtr);
+	asm._free(outputPtr);
+
+	console.timeEnd("gunzip " + bytes.length);
+
+	return result;
 }
 
 export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
@@ -144,70 +281,56 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 	rushaInstance: any = null;
 
 	sha1(data: Uint8Array): Uint8Array {
-		// @ts-ignore
-		this.rushaInstance = this.rushaInstance || new Rusha(1024 * 1024);
+		const { _malloc, _free } = asm;
 
 		console.time("sha1 hash");
-		const hash = new Uint8Array(this.rushaInstance.rawDigest(data).buffer);
+
+		const inputPtr = _malloc(data.length);
+
+		const mem = getUint8Memory();
+		mem.set(data, inputPtr);
+
+		asm._sha1(inputPtr, data.length);
+		_free(inputPtr);
+
+		const res = mem.slice(sharedOutPtr, sharedOutPtr + 20);
 
 		console.timeEnd("sha1 hash");
-		return hash;
+
+		return res;
 	}
 
 	sha256(bytes: Uint8Array): Uint8Array {
-		// console.time('sha26')
-		// console.log(dT(), 'SHA-2 hash start', bytes.byteLength || bytes.length)
-		var hashWords = CryptoJS.SHA256(bytesToWords(bytes));
-		// console.log(dT(), 'SHA-2 hash finish')
+		console.time("sha26");
 
-		var hashBytes = bytesFromWords(hashWords);
+		var hashBytes = sha256(bytes);
 
-		// console.timeEnd('sha26')
+		console.timeEnd("sha26");
 		return hashBytes;
 	}
 
 	createAesCtr(key: Uint8Array, iv: Uint8Array): IAesCtr {
-		const cipher = createCipheriv(`aes-256-ctr`, key, iv);
-
-		const update = (data: Uint8Array) => {
-			// console.time('AES-CTR')
-			const ciph = cipher.update(data);
-			// console.timeEnd('AES-CTR')
-
-			return ciph;
-		};
+		const ctx = createCtr256(key, iv);
 
 		return {
-			process: update,
-			close: () => cipher.destroy(),
+			process: (data) => ctr256(ctx, data),
+			close: () => freeCtr256(ctx),
 		};
 	}
 
 	createAesIge(key: Uint8Array, iv: Uint8Array): IEncryptionScheme {
 		return {
-			encrypt: (data) => aesEncryptSync(data, key, iv),
-			decrypt: (data) => aesDecryptSync(data, key, iv),
+			encrypt: (data) => ige256Encrypt(data, key, iv),
+			decrypt: (data) => ige256Decrypt(data, key, iv),
 		};
 	}
 
 	gzip(data: Uint8Array, maxSize: number): Uint8Array | null {
-		// console.time('gzip')
-		const result = deflate(data, {
-			level: 9,
-			// @ts-ignore
-			gzip: true,
-		});
-		// console.timeEnd('gzip')
-		if (result.byteLength > maxSize) return null;
-
-		return result;
+		return deflateMaxSize(data, maxSize);
 	}
 
 	gunzip(data: Uint8Array): Uint8Array {
-		// console.time('gunzip')
-		const _ = inflate(data);
-		// console.timeEnd('gunzip')
-		return _;
+		return gunzip(data);
 	}
 
 	constructor(params?: WebCryptoProviderOptions) {
@@ -224,7 +347,22 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 		// @ts-ignore
 		console.log("INIT CRYPTO", typeof importScripts == "function" ? "WORKER" : "MAIN THREAD");
 
-		await loadRusha();
+		await loadAsm();
+
+		compressor = asm._libdeflate_alloc_compressor(6);
+		decompressor = asm._libdeflate_alloc_decompressor();
+		sharedOutPtr = asm.___get_shared_out();
+		sharedKeyPtr = asm.___get_shared_key_buffer();
+		sharedIvPtr = asm.___get_shared_iv_buffer();
+
+		// console.error(
+		// 	getUint8Memory().byteLength,
+		// 	compressor,
+		// 	decompressor,
+		// 	sharedOutPtr,
+		// 	sharedKeyPtr,
+		// 	sharedIvPtr
+		// );
 	}
 
 	async pbkdf2(
@@ -238,8 +376,8 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 			"deriveBits",
 		]);
 
-		// const e = performance.now()
-		// console.time('pkdf2-' + e)
+		const e = performance.now();
+		console.time("pkdf2-" + e);
 
 		return this.crypto.subtle
 			.deriveBits(
@@ -254,7 +392,7 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 			)
 			.then((result) => {
 				const buf = new Uint8Array(result);
-				// console.timeEnd('pkdf2-' + e)
+				console.timeEnd("pkdf2-" + e);
 				return buf;
 			});
 	}
@@ -284,5 +422,9 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 		// console.time('getRandomValues')
 		this.crypto.getRandomValues(buf);
 		// console.timeEnd('getRandomValues')
+	}
+
+	getAvailableMemory() {
+		return getAvailableMemory();
 	}
 }

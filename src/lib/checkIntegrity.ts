@@ -17,7 +17,7 @@ export default async function checkIntegrity(fileURL: string) {
 	}
 
 	const isKai3 = import.meta.env.VITE_KAIOS == 3;
-	const manifest = import.meta.env.MANIFEST;
+	const manifest = "MANIFEST_GOES_HERE";
 
 	const manifestURL = isKai3 ? "/manifest.webmanifest" : "/manifest.webapp";
 

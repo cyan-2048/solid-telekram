@@ -1,8 +1,8 @@
 {
-	"id": "kaigram",
-	"name": "Kaigram",
-	"short_name": "Kaigram",
-	"description": "Unofficial Telegram Client for KaiOS.",
+	"id": "telekram-solid",
+	"name": "Nekogram K",
+	"short_name": "Nekogram K",
+	"description": "Telegram Client for KaiOS.",
 
 	"start_url": "/index.html",
 	"orientation": "natural",
@@ -34,19 +34,19 @@
 	"type": "privileged",
 
 	"b2g_features": {
-		"display": "Kaigram",
-		"version": "3.0.5",
+		"display": "Nekogram K",
+		"version": "3.0.0",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {
-			"name": "cyan-2048",
-			"url": "https://github.com/Discord4KaiOS"
+			"name": "Cyan",
+			"url": "https://discord.gg/W9DF2q3Vv2"
 		},
 
 		"cursor": false,
 		"fullscreen": false,
 
-		"origin": "kaigram",
+		"origin": "telekram-solid",
 
 		"focus_color": "#fff",
 

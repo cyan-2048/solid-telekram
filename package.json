@@ -12,10 +12,10 @@
     "kaistore": "bun run build && bun run build:v3"
   },
   "dependencies": {
-    "@mtcute/file-id": "latest",
-    "@mtcute/markdown-parser": "^0.15.0",
-    "@mtcute/tl": "latest",
-    "@mtcute/tl-runtime": "latest",
+    "@mtcute/file-id": "^0.16.0",
+    "@mtcute/markdown-parser": "^0.16.0",
+    "@mtcute/tl": "^184.0.0",
+    "@mtcute/tl-runtime": "^0.16.0",
     "@types/crypto-js": "^4.2.2",
     "big-integer": "^1.6.52",
     "buffer": "^6.0.3",

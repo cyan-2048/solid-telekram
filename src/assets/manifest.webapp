@@ -1,7 +1,7 @@
 {
-	"name": "Kaigram",
-	"description": "Unofficial Telegram Client for KaiOS.",
-	"version": "1.0.5",
+	"name": "Nekogram K",
+	"description": "Telegram Client for KaiOS.",
+	"version": "1.0.0",
 	"launch_path": "/index.html",
 	"theme": "#fff",
 	"theme_color": "#fff",
@@ -15,10 +15,10 @@
 		"112": "/icon112.png"
 	},
 	"developer": {
-		"name": "cyan-2048",
-		"url": "https://github.com/Discord4KaiOS"
+		"name": "Cyan",
+		"url": "https://discord.gg/W9DF2q3Vv2"
 	},
-	"origin": "app://kaigram.cyankindasus.com",
+	"origin": "app://telekram.cyankindasus.com",
 	"type": "privileged",
 	"permissions": {
 		"spatialnavigation-app-manage": {},
@@ -32,9 +32,9 @@
 	},
 	"locales": {
 		"en-US": {
-			"name": "Kaigram",
+			"name": "Nekogram K",
 			"subtitle": "Telegram for KaiOS",
-			"description": "Unofficial Telegram Client for KaiOS."
+			"description": "Telegram Client for KaiOS."
 		}
 	},
 
