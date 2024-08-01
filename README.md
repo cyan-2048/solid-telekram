@@ -74,7 +74,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 
 ## Developing
 
-Please create a `.env.local` file and replace the values in `.env`
+Please create a `.env.local` file and add the values in `.env` replacing the APP_ID and APP_HASH with your own.
 
 Dev Mode:
 
@@ -123,5 +123,8 @@ All donations go to feeding my cats. (really need to spay my cats lmao)
 
 ## Discord Server
 
-for updates and joining the testers (app will be shown in the KaiStore).
+for updates and to join the app testers.
+
 [![Discord server](https://invidget.switchblade.xyz/W9DF2q3Vv2)](https://discord.gg/W9DF2q3Vv2)
+
+testers will be able to install the app directly from the KaiStore.
