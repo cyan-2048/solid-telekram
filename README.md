@@ -57,6 +57,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
   - [ ] Forwarding
   - [x] Markdown
 - [ ] Login
+  - [x] QR Code
   - [ ] SMS Code
   - [x] Telegram Send Code
   - [x] 2FA
