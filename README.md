@@ -6,27 +6,27 @@ HELP!!! I need a better name for this client. (TeleKram is taken)
 
 ## Features
 
-- [-] Chats
+- [ ] Chats
   - [ ] Chat Info
   - [ ] User Info
   - [x] Private Chats
   - [x] Private Groups
-  - [-] Supergroup
+  - [ ] Supergroup
     - [ ] migrated chats
     - [ ] Forum Topics
   - [x] Broadcast Channels
-  - [-] Bots
-  - [-] Gigagroups
-- [-] Messages
+  - [ ] Bots
+  - [ ] Gigagroups
+- [ ] Messages
   - [ ] Push Notifications
-  - [-] Telegram System Messages
-  - [-] Message Attachments
-    - [-] Stickers
+  - [ ] Telegram System Messages
+  - [ ] Message Attachments
+    - [ ] Stickers
       - [ ] Sticker Picker
       - [x] webp
       - [x] webm
-      - [-] lottie
-    - [-] Emojis
+      - [ ] lottie
+    - [ ] Emojis
       - [x] Emoji Picker
       - [x] Apple Emojis
       - [ ] Emoji history
@@ -35,7 +35,7 @@ HELP!!! I need a better name for this client. (TeleKram is taken)
   - [x] Replying
   - [x] Editing
   - [x] Deleting
-- [-] Login
+- [ ] Login
   - [ ] SMS Code
   - [x] Telegram Send Code
   - [x] 2FA
