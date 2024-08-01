@@ -37,21 +37,26 @@ Telegram client for KaiOS.
     - [ ] Voice Messages
     - [ ] Music
     - [ ] Videos
+    - [ ] Location
+      - [ ] Live Location (o.map help me lmao)
   - [x] Replying
   - [x] Editing
   - [x] Deleting
   - [ ] Forwarding
+  - [x ] Markdown
 - [ ] Login
   - [ ] SMS Code
   - [x] Telegram Send Code
   - [x] 2FA
   - [ ] Email
+- [ ] Settings
 - [ ] Telegram Stories
 
 ## Additional Info
 
 - Currently Forum Groups will act as "View as Messages" as in the Telegram Web K client.
 - pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets)
+- using this app on a 256MB RAM KaiOS device is kinda unstable.
 -
 
 ## Developing
@@ -68,7 +73,7 @@ Build:
 bun run build
 ```
 
-add the `:v3` prefix for KaiOS 3.0 (example: `bun run dev:v3`)
+add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 
 ## Technical Info
 
@@ -79,3 +84,6 @@ add the `:v3` prefix for KaiOS 3.0 (example: `bun run dev:v3`)
   - mtcute web worker proxy
   - heavy tasks worker for blocking operations
   - (not yet implemented) rlottie
+- ezgif is used for webp -> png conversion when libwebpjs (taken from whatsapp) fails to convert a webp image. (using ezgif as an unofficial api is not prohibited[^1])
+
+[^1]: https://ezgif.com/help/ezgif-api
