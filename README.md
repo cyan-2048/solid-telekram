@@ -1,12 +1,16 @@
-<p>
-  <img width="100%" src="https://assets.solidjs.com/banner?project=Telegram4KaiOS" alt="Solid Docs">
-</p>
-
 # Telegram4KaiOS
 
 ### HELP!!! I need a better name for this client. (TeleKram is taken)
 
 Telegram client for KaiOS.
+
+### Made with
+
+- [mtcute](https://github.com/mtcute/mtcute) (amazing mtproto library)
+- solid.js
+- 👀🙌
+
+The app is heavily inspired by Telegram Web K and the dead WhatsApp client for KaiOS.
 
 ## Features
 
@@ -96,10 +100,11 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
   - heavy tasks worker for blocking operations (webp to png, md5, etc.)
   - (not yet implemented) rlottie
 - ezgif is used for webp -> png conversion when libwebpjs (taken from whatsapp) fails to convert a webp image. (using ezgif as an unofficial api is not prohibited[^1])
+- SystemJS is used to simulate esm modules on KaiOS 2.5, it is also used to import asm.js files in order for it to preserve asm.js syntax.
 
 [^1]: https://ezgif.com/help/ezgif-api
 
-### Dependencies
+## Dependencies
 
 - [mtcute](https://github.com/mtcute/mtcute) ([MIT License](https://github.com/mtcute/mtcute/blob/master/LICENSE))
 - [fflate](https://github.com/101arrowz/fflate) ([MIT License](https://github.com/101arrowz/fflate/blob/master/LICENSE))
@@ -108,3 +113,14 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 - [js-spatial-navigation](https://github.com/luke-chang/js-spatial-navigation) ([MPL-2.0 License](https://github.com/luke-chang/js-spatial-navigation/blob/master/LICENSE))
 - [big-integer](https://github.com/peterolson/BigInteger.js) ([Unlicense License](https://github.com/peterolson/BigInteger.js/blob/master/LICENSE))
 - libwebpjs
+- many more
+
+## GIVE ME MONEY
+
+All donations go to feeding my cats. (really need to spay my cats lmao)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H7LIPNW)
+
+## Discord Server
+
+for updates and joining the testers (app will be shown in the KaiStore).
+[![Discord server](https://invidget.switchblade.xyz/W9DF2q3Vv2)](https://discord.gg/W9DF2q3Vv2)
