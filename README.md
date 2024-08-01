@@ -19,8 +19,9 @@ HELP!!! I need a better name for this client. (TeleKram is taken)
   - [ ] Gigagroups
 - [ ] Messages
   - [ ] Push Notifications
-  - [ ] Telegram System Messages
+  - [ ] Telegram System Messages (not complete)
   - [ ] Message Attachments
+    - [ ] Uploading Files
     - [ ] Stickers
       - [ ] Sticker Picker
       - [x] webp
@@ -35,6 +36,7 @@ HELP!!! I need a better name for this client. (TeleKram is taken)
   - [x] Replying
   - [x] Editing
   - [x] Deleting
+  - [ ] Forwarding
 - [ ] Login
   - [ ] SMS Code
   - [x] Telegram Send Code
@@ -45,6 +47,7 @@ HELP!!! I need a better name for this client. (TeleKram is taken)
 ## Additional Info
 
 - Currently Forum Groups will act as "View as Messages" as in the Telegram Web K client.
+- pre-optimized stickers are stickers converted from lottie to apng so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets)
 -
 
 ## Developing
@@ -69,6 +72,6 @@ add the `:v3` prefix for KaiOS 3.0 (example: `bun run dev:v3`)
 - mtcute is modified to use big-integer, this means it is BigInt can be used in KaiOS 2.5 and native BigInts are used for KaiOS 3.0.
 - mtcute is also modified in order for asm.js to be used.
 - there are 3 Web Workers
-  1. mtcute web worker proxy
-  2. heavy tasks worker for blocking operations
-  3. (not yet implemented) rlottie
+  - 1. mtcute web worker proxy
+  - 2. heavy tasks worker for blocking operations
+  - 3. (not yet implemented) rlottie
