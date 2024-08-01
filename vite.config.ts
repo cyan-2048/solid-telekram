@@ -98,7 +98,7 @@ export default defineConfig({
 		minifySyntax: true,
 		minifyWhitespace: false,
 		minifyIdentifiers: false,
-		drop: ["console"],
+		drop: production ? ["console"] : [],
 	},
 
 	resolve: {

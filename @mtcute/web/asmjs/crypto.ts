@@ -5,10 +5,9 @@ import {
 	IEncryptionScheme,
 } from "@mtcute/core/utils.js";
 
-import { deflate, inflate } from "pako";
-
 import MtcuteAsmURL from "./mtcute.asm.js?url";
 import MtcuteMemURL from "./mtcute.asm.js.mem?url";
+import { gunzipSync, gzipSync } from "@/lib/fflate";
 
 let asm: any = null;
 
@@ -187,9 +186,9 @@ function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
 	// console.time("gzip " + bytes.length);
 
 	if (bytes.length > getAvailableMemory()) {
-		console.warn("asm.js out of memory!! will use pako.");
+		console.warn("asm.js out of memory!! will use fflate.");
 
-		const result = deflate(bytes);
+		const result = gzipSync(bytes);
 
 		if (result.length > size) {
 			// console.timeEnd("gzip " + bytes.length);
@@ -239,9 +238,9 @@ function gunzip(bytes: Uint8Array): Uint8Array {
 	// console.time("gunzip " + bytes.length);
 
 	if (bytes.length > getAvailableMemory()) {
-		console.warn("asm.js out of memory!! will use pako.");
+		console.warn("asm.js out of memory!! will use fflate.");
 
-		const result = inflate(bytes);
+		const result = gunzipSync(bytes);
 
 		// console.timeEnd("gunzip " + bytes.length);
 		return result;

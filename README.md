@@ -1,28 +1,63 @@
-## Usage
+# Telegram4KaiOS
 
-```bash
-$ npm install # or pnpm install or yarn install
+Telegram client for KaiOS.
+
+HELP!!! I need a better name for this client.
+
+## Features
+
+- [ ] Chats
+  - [ ] Chat Info
+  - [ ] User Info
+  - [ ] Private Chats
+  - [ ] Private Groups
+  - [ ] Supergroup
+    - [ ] migrated chats
+    - [ ] Forum Topics
+  - [ ] Broadcast Channels
+  - [ ] Bots
+  - [ ] Gigagroups
+- [ ] Messages
+  - [ ] Push Notifications
+  - [ ] Telegram System Messages
+  - [ ] Message Attachments
+    - [ ] Stickers
+      - [ ] Sticker Picker
+      - [ ] webp
+      - [ ] webm
+      - [ ] lottie
+      - [ ]
+    - [ ] Emojis
+      - [ ] Emoji Picker
+      - [ ] Apple Emojis
+    - [ ] Photos
+    - [ ] Voice Messages
+  - [ ] Replying
+  - [ ] Editing
+  - [ ] Deleting
+- [ ] Login
+  - [ ] SMS Code
+  - [ ] Telegram Send Code
+  - [ ] 2FA
+  - [ ] Email
+- [ ] Telegram Stories
+
+## Additional Info
+
+- Currently Forum Groups will render as " "
+
+## Developing
+
+Dev Mode:
+
+```
+bun run dev
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+Build:
 
-## Available Scripts
+```
+bun run build
+```
 
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html)
+add the `:v3` prefix for KaiOS 3.0 (example: `bun run dev:v3`)

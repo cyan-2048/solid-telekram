@@ -313,8 +313,6 @@ export function getTextFromContentEditable(e: HTMLElement) {
 		}
 	});
 
-	console.log(text);
-
 	return text;
 }
 
