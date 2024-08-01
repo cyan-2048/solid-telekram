@@ -118,6 +118,8 @@
 .action_message {
 	@extend .message;
 	margin: 2px 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .action_message_inner {
@@ -132,6 +134,16 @@
 	max-width: calc(100vw - 2 * 8px);
 
 	position: relative;
+
+	overflow: hidden;
+
+	span {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		width: 100%;
+		overflow: hidden;
+		float: left;
+	}
 }
 
 .message_inner {

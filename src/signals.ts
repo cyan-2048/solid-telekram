@@ -1,4 +1,4 @@
-import { batch, createSignal, observable } from "solid-js";
+import { batch, createSignal, observable, createMemo } from "solid-js";
 import { EventEmitter } from "eventemitter3";
 import { telegram } from "./lib/telegram";
 import {
@@ -26,6 +26,13 @@ import { capitalizeFirstLetter, sleep } from "./lib/utils";
 import Deferred from "./lib/Deffered";
 import dayjs from "dayjs";
 import Queue from "queue";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
+
+export const LowMemoryMode = () => !!localStorage.getItem("low_memory");
 
 const [softleft, setSoftleft] = createSignal("");
 const [softcenter, setSoftcenter] = createSignal("");
@@ -72,8 +79,12 @@ export const [editingMessage, setEditingMessage] = createSignal<null | UIMessage
 
 export const [room, setRoom] = createSignal<Chat | UIDialog | null>(null);
 
+export const chat = createMemo(() => {
+	const _room = room();
+	return _room && "$" in _room ? _room.$.chat : _room;
+});
+
 type StringCallback = (s: string) => void;
-type VoidCallback = () => void;
 
 export const EE = new EventEmitter<{
 	phone: StringCallback;
@@ -250,6 +261,49 @@ export class UIMessage {
 					break;
 				}
 
+				case "topic_created":
+					newText = $.action.title + " was created";
+					break;
+
+				case "topic_edited":
+					if ($.action.closed) {
+						newText = $.sender.displayName + " closed the topic";
+					}
+					break;
+
+				case "call":
+					if ($.action.duration) {
+						newText =
+							($.isOutgoing ? "Outgoing Call" : "Incoming Call") +
+							` (${dayjs.duration($.action.duration, "s").humanize()})`;
+					} else if ($.action.reason) {
+						/**
+						 * Phone call discard reason. Can be:
+						 *  - `missed`: The call was missed
+						 *  - `disconnect`: The connection has interrupted
+						 *  - `hangup`: The call was ended normally
+						 *  - `busy`: The call was discarded because the user is in another call
+						 */
+						switch ($.action.reason) {
+							case "busy":
+								newText = "Call Busy";
+								break;
+							case "disconnect":
+								newText = "Call Disconnected";
+								break;
+
+							case "hangup":
+								newText = "Call Ended";
+								break;
+
+							case "missed":
+								newText = "Missed Call";
+								break;
+						}
+					}
+
+					break;
+
 				default: {
 					newText = "Unsupported Message Action: " + $.action.type;
 				}
@@ -347,6 +401,17 @@ export class UIMessage {
 
 	getDialog() {
 		return dialogsJar.get(this.$.chat.peer.id) || null;
+	}
+
+	isReply() {
+		const isForum = this.$.chat.isForum;
+		const raw = this.$.replyToMessage?.raw;
+
+		if (raw && isForum && raw.forumTopic && !raw.replyToTopId) {
+			return false;
+		}
+
+		return this.$.replyToMessage;
 	}
 
 	// thanks mtcute guy
@@ -477,7 +542,7 @@ class MessagesJar extends Map<number, UIMessage> {
 	sort() {
 		const messages = this.list();
 		messages.sort((a, b) => {
-			return +a.date - +b.date;
+			return a.date.getTime() - b.date.getTime();
 		});
 
 		this.sorted.set(messages);
@@ -536,11 +601,15 @@ class MessagesJar extends Map<number, UIMessage> {
 
 		this[hasLoadedBefore ? "isLoadingMore" : "isLoading"].set(true);
 
+		await sleep(2000);
+
 		try {
 			const e = await tg.getHistory(this.dialog.$.chat, {
-				limit: 60,
+				limit: 40,
 				offset: this.lastOffset,
 			});
+
+			// console.log(e);
 
 			this.hasLoadedBefore = true;
 			this.lastOffset = e.next;
@@ -1024,7 +1093,7 @@ export function resetLocalStorage() {
 	location.reload();
 }
 
-async function getInitialState() {
+function getInitialState() {
 	console.log("USING LOCALSTORAGE FOR STATE");
 
 	const state = localStorage.getItem("state");
@@ -1034,229 +1103,227 @@ async function getInitialState() {
 
 let state_init = false;
 
-getInitialState().then((state) => {
-	telegram.startSession(
-		state,
-		// LOGIN SUCESSFUL
-		async (tg) => {
-			setClient(tg);
+telegram.startSession(
+	getInitialState(),
+	// LOGIN SUCESSFUL
+	async (tg) => {
+		setClient(tg);
 
-			await initDialogs(tg);
+		await initDialogs(tg);
 
-			tg.setOffline(false);
+		tg.setOffline(false);
 
-			tg.on("raw_update", (upd) => {
-				console.log("RAW_UPDATE", upd);
+		tg.on("raw_update", (upd) => {
+			console.log("RAW_UPDATE", upd);
 
-				switch (upd._) {
-					case "updateChatParticipants": {
-						if (upd.participants._ == "chatParticipants") {
-							const has = dialogsJar.get(upd.participants.chatId);
+			switch (upd._) {
+				case "updateChatParticipants": {
+					if (upd.participants._ == "chatParticipants") {
+						const has = dialogsJar.get(upd.participants.chatId);
 
-							if (has) {
-								has.memberCount.set(upd.participants.participants.length);
-							} else {
-								console.error("chat participant was not found, refreshing dialogs");
-								refreshDialogsByPeer([upd.participants.chatId]);
+						if (has) {
+							has.memberCount.set(upd.participants.participants.length);
+						} else {
+							console.error("chat participant was not found, refreshing dialogs");
+							refreshDialogsByPeer([upd.participants.chatId]);
+						}
+					}
+
+					break;
+				}
+
+				case "updateChannel": {
+					refreshDialogsByPeer([upd.channelId]);
+					break;
+				}
+
+				// this doesn't seem to work well when doing pinned messages stuff?
+				case "updateFolderPeers":
+				case "updatePinnedDialogs": {
+					// tg.getPeerDialogs seems to be cached
+					refreshDialogs();
+					break;
+				}
+			}
+		});
+
+		tg.on("update", function e(update) {
+			switch (update.name) {
+				case "new_message": {
+					const message = update.data;
+
+					const found = dialogsJar.get(message.chat.peer.id);
+
+					if (found) {
+						console.log("UPDATING LAST MESSAGE");
+						found.lastMessage.set(found.messages.add(new UIMessage(message)));
+
+						refreshDialogsByPeer([found.id]);
+					} else {
+						console.error("dialog was not found for message, refreshing");
+						refreshDialogsByPeer([message.chat.peer.id]);
+					}
+
+					break;
+				}
+
+				case "history_read": {
+					const data = update.data;
+					const peerId = data.chatId;
+
+					setDialogs((e) => {
+						const found = e.find((a) => a.$.chat.id == peerId);
+						if (found) {
+							if (data.isOutbox == true) {
+								found.lastReadOutgoing.set(data.maxReadId);
 							}
+
+							if (data.isOutbox == false && data.isDiscussion == false) {
+								found.count.set(data.unreadCount);
+							}
+						} else {
+							console.error("dialog was not found for history read refreshing");
+							refreshDialogsByPeer([peerId]);
 						}
 
-						break;
-					}
-
-					case "updateChannel": {
-						refreshDialogsByPeer([upd.channelId]);
-						break;
-					}
-
-					// this doesn't seem to work well when doing pinned messages stuff?
-					case "updateFolderPeers":
-					case "updatePinnedDialogs": {
-						// tg.getPeerDialogs seems to be cached
-						refreshDialogs();
-						break;
-					}
+						return e;
+					});
+					break;
 				}
-			});
 
-			tg.on("update", function e(update) {
-				switch (update.name) {
-					case "new_message": {
-						const message = update.data;
+				case "delete_message": {
+					const message = update.data;
 
-						const found = dialogsJar.get(message.chat.peer.id);
+					setDialogs((e) => {
+						const found = e.find((a) => {
+							return message.messageIds.find((b) => a.messages.has(b));
+						});
 
 						if (found) {
-							console.log("UPDATING LAST MESSAGE");
-							found.lastMessage.set(found.messages.add(new UIMessage(message)));
+							const messages = found.messages;
+							messages.deleteBulk(message.messageIds);
 
 							refreshDialogsByPeer([found.id]);
 						} else {
-							console.error("dialog was not found for message, refreshing");
-							refreshDialogsByPeer([message.chat.peer.id]);
-						}
-
-						break;
-					}
-
-					case "history_read": {
-						const data = update.data;
-						const peerId = data.chatId;
-
-						setDialogs((e) => {
-							const found = e.find((a) => a.$.chat.id == peerId);
-							if (found) {
-								if (data.isOutbox == true) {
-									found.lastReadOutgoing.set(data.maxReadId);
-								}
-
-								if (data.isOutbox == false && data.isDiscussion == false) {
-									found.count.set(data.unreadCount);
-								}
-							} else {
-								console.error("dialog was not found for history read refreshing");
-								refreshDialogsByPeer([peerId]);
-							}
-
-							return e;
-						});
-						break;
-					}
-
-					case "delete_message": {
-						const message = update.data;
-
-						setDialogs((e) => {
-							const found = e.find((a) => {
-								return message.messageIds.find((b) => a.messages.has(b));
-							});
-
-							if (found) {
-								const messages = found.messages;
-								messages.deleteBulk(message.messageIds);
-
-								refreshDialogsByPeer([found.id]);
-							} else {
-								console.error("dialog was not found for message, refreshing", message);
-								if (message.channelId) {
-									refreshDialogsByPeer([message.channelId]);
-								} else refreshDialogs();
-							}
-
-							return e;
-						});
-						break;
-					}
-
-					case "edit_message": {
-						const message = update.data;
-
-						const _dialogs = dialogs();
-
-						const found = _dialogs.find((a) => a.$.chat.peer.id == message.chat.peer.id);
-
-						if (found) {
-							found.messages.update(message.id, message);
-						} else {
 							console.error("dialog was not found for message, refreshing", message);
-							refreshDialogsByPeer([message.chat.peer.id]);
+							if (message.channelId) {
+								refreshDialogsByPeer([message.channelId]);
+							} else refreshDialogs();
 						}
 
-						break;
-					}
-
-					case "user_status": {
-						const status = update.data;
-						const _ = userStatusJar.get(status.userId).update(status);
-						console.log("STATUS", _);
-						break;
-					}
-
-					case "poll": {
-						const pollUpdate = update.data;
-
-						const id = pollUpdate.pollId.toInt();
-
-						if (pollUpdate.isShort) {
-							const pollCached = pollJar.get(id);
-							if (!pollCached) {
-								console.error("isShort poll update and poll not cached", pollUpdate);
-								break;
-							}
-
-							if (!pollUpdate.poll.results) {
-								console.error("isShort poll does not have results, useless", pollUpdate);
-								break;
-							}
-
-							pollCached.resultsUpdate(pollUpdate.poll.results);
-						} else {
-							const pollCached = pollJar.add(pollUpdate.poll);
-
-							pollCached.update(pollUpdate.poll);
-						}
-						break;
-					}
+						return e;
+					});
+					break;
 				}
 
-				console.log("PARSED UPDATEEEE", update);
-			});
+				case "edit_message": {
+					const message = update.data;
 
-			setView("home");
-		},
-		// WORKER REQUEST FOR PHONE
-		() => {
-			setView("login");
-			setLoginState(LoginState.Phone);
-			return new Promise((res) => {
-				EE.once("phone", res);
-			});
-		},
-		// WORKER REQUEST FOR PASSWORD
-		() => {
-			setView("login");
-			console.log("worker is requesting 2FA");
-			setLoginState(LoginState.Password);
-			return new Promise((res) => {
-				EE.once("password", res);
-			});
-		},
-		// WORKER REQUEST FOR CODE
-		() => {
-			setView("login");
-			setLoginState(LoginState.Code);
-			return new Promise((res) => {
-				EE.once("code", res);
-			});
-		},
-		(url) => {
-			setQrLink(url);
-		},
-		(state) => {
-			lastState = state;
-			if (!state_init) {
-				saveState();
-				state_init = true;
-				return;
+					const _dialogs = dialogs();
+
+					const found = _dialogs.find((a) => a.$.chat.peer.id == message.chat.peer.id);
+
+					if (found) {
+						found.messages.update(message.id, message);
+					} else {
+						console.error("dialog was not found for message, refreshing", message);
+						refreshDialogsByPeer([message.chat.peer.id]);
+					}
+
+					break;
+				}
+
+				case "user_status": {
+					const status = update.data;
+					const _ = userStatusJar.get(status.userId).update(status);
+					console.log("STATUS", _);
+					break;
+				}
+
+				case "poll": {
+					const pollUpdate = update.data;
+
+					const id = pollUpdate.pollId.toInt();
+
+					if (pollUpdate.isShort) {
+						const pollCached = pollJar.get(id);
+						if (!pollCached) {
+							console.error("isShort poll update and poll not cached", pollUpdate);
+							break;
+						}
+
+						if (!pollUpdate.poll.results) {
+							console.error("isShort poll does not have results, useless", pollUpdate);
+							break;
+						}
+
+						pollCached.resultsUpdate(pollUpdate.poll.results);
+					} else {
+						const pollCached = pollJar.add(pollUpdate.poll);
+
+						pollCached.update(pollUpdate.poll);
+					}
+					break;
+				}
 			}
-			debounced_saveState();
-		},
 
-		// CLIENT ERRORS
-		(message) => {
-			console.error(message);
-		},
-		// LOGIN ERRORS
-		(step, code, message) => {
-			console.error(`step: ${step},  ${code}:${message}`);
+			console.log("PARSED UPDATEEEE", update);
+		});
 
-			if (code != 0) {
-				alert(`Error Occured: ${message}`);
-				EE.emit("loginError", { code: code, message: message });
-			}
+		setView("home");
+	},
+	// WORKER REQUEST FOR PHONE
+	() => {
+		setView("login");
+		setLoginState(LoginState.Phone);
+		return new Promise((res) => {
+			EE.once("phone", res);
+		});
+	},
+	// WORKER REQUEST FOR PASSWORD
+	() => {
+		setView("login");
+		console.log("worker is requesting 2FA");
+		setLoginState(LoginState.Password);
+		return new Promise((res) => {
+			EE.once("password", res);
+		});
+	},
+	// WORKER REQUEST FOR CODE
+	() => {
+		setView("login");
+		setLoginState(LoginState.Code);
+		return new Promise((res) => {
+			EE.once("code", res);
+		});
+	},
+	(url) => {
+		setQrLink(url);
+	},
+	(state) => {
+		lastState = state;
+		if (!state_init) {
+			saveState();
+			state_init = true;
+			return;
 		}
-	);
-});
+		debounced_saveState();
+	},
+
+	// CLIENT ERRORS
+	(message) => {
+		console.error(message);
+	},
+	// LOGIN ERRORS
+	(step, code, message) => {
+		console.error(`step: ${step},  ${code}:${message}`);
+
+		if (code != 0) {
+			alert(`Error Occured: ${message}`);
+			EE.emit("loginError", { code: code, message: message });
+		}
+	}
+);
 
 const emptyCombo = "0".repeat(10);
 let combo = emptyCombo;
@@ -1288,6 +1355,11 @@ handleCombo("79", async () => {
 	await localforage.clear();
 	await localforage.setItem("token", result);
 	location.reload();
+});
+
+handleCombo("7569", () => {
+	localStorage.low_memory = "1";
+	window.close();
 });
 
 const keydownEM = new EventEmitter<{ keydown: [KeyboardEvent]; scroll: [] }>();

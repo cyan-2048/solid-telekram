@@ -22,8 +22,6 @@ import localforage from "localforage";
 import("./dev");
 // }
 
-import { Buffer } from "buffer";
-
-Object.assign(window, { localforage, Buffer });
+Object.assign(window, { localforage });
 
 render(() => <App />, document.body);

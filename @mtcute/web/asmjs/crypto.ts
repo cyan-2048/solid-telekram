@@ -82,7 +82,7 @@ function freeCtr256(ctx: number) {
  * @param data  data to en/decrypt (must be a multiple of 16 bytes)
  */
 function ctr256(ctx: number, data: Uint8Array): Uint8Array {
-	console.time("AES ctr " + data.length);
+	// console.time("AES ctr " + data.length);
 	const { _malloc, _free } = asm;
 	const inputPtr = _malloc(data.length);
 	const outputPtr = _malloc(data.length);
@@ -95,7 +95,7 @@ function ctr256(ctx: number, data: Uint8Array): Uint8Array {
 	const result = mem.slice(outputPtr, outputPtr + data.length);
 	_free(outputPtr);
 
-	console.timeEnd("AES ctr " + data.length);
+	// console.timeEnd("AES ctr " + data.length);
 
 	return result;
 }
@@ -126,7 +126,7 @@ function sha256(data: Uint8Array): Uint8Array {
  * @param iv  initialization vector (32 bytes)
  */
 function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-	console.time("AES encrypt");
+	// console.time("AES encrypt");
 
 	const ptr = asm._malloc(data.length + data.length);
 
@@ -143,7 +143,7 @@ function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8
 
 	asm._free(ptr);
 
-	console.timeEnd("AES encrypt");
+	// console.timeEnd("AES encrypt");
 
 	return result;
 }
@@ -156,7 +156,7 @@ function ige256Encrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8
  * @param iv  initialization vector (32 bytes)
  */
 function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8Array {
-	console.time("AES decrypt");
+	// console.time("AES decrypt");
 
 	const ptr = asm._malloc(data.length + data.length);
 
@@ -173,7 +173,7 @@ function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8
 
 	asm._free(ptr);
 
-	console.timeEnd("AES decrypt");
+	// console.timeEnd("AES decrypt");
 
 	return result;
 }
@@ -184,7 +184,7 @@ function ige256Decrypt(data: Uint8Array, key: Uint8Array, iv: Uint8Array): Uint8
  * @returns null if the compressed data is larger than `size`, otherwise the compressed data
  */
 function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
-	console.time("gzip " + bytes.length);
+	// console.time("gzip " + bytes.length);
 
 	if (bytes.length > getAvailableMemory()) {
 		console.warn("asm.js out of memory!! will use pako.");
@@ -192,11 +192,11 @@ function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
 		const result = deflate(bytes);
 
 		if (result.length > size) {
-			console.timeEnd("gzip " + bytes.length);
+			// console.timeEnd("gzip " + bytes.length);
 			return null;
 		}
 
-		console.timeEnd("gzip " + bytes.length);
+		// console.timeEnd("gzip " + bytes.length);
 		return result;
 	}
 
@@ -217,14 +217,14 @@ function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
 
 	if (written === 0) {
 		asm._free(outputPtr);
-		console.timeEnd("gzip " + bytes.length);
+		// console.timeEnd("gzip " + bytes.length);
 		return null;
 	}
 
 	const result = mem.slice(outputPtr, outputPtr + written);
 	asm._free(outputPtr);
 
-	console.timeEnd("gzip " + bytes.length);
+	// console.timeEnd("gzip " + bytes.length);
 
 	return result;
 }
@@ -236,14 +236,14 @@ function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
  * @param defaultCapacity  default capacity of the output buffer. Defaults to `bytes.length * 2`
  */
 function gunzip(bytes: Uint8Array): Uint8Array {
-	console.time("gunzip " + bytes.length);
+	// console.time("gunzip " + bytes.length);
 
 	if (bytes.length > getAvailableMemory()) {
 		console.warn("asm.js out of memory!! will use pako.");
 
 		const result = inflate(bytes);
 
-		console.timeEnd("gunzip " + bytes.length);
+		// console.timeEnd("gunzip " + bytes.length);
 		return result;
 	}
 
@@ -270,7 +270,7 @@ function gunzip(bytes: Uint8Array): Uint8Array {
 	asm._free(inputPtr);
 	asm._free(outputPtr);
 
-	console.timeEnd("gunzip " + bytes.length);
+	// console.timeEnd("gunzip " + bytes.length);
 
 	return result;
 }
@@ -283,7 +283,7 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 	sha1(data: Uint8Array): Uint8Array {
 		const { _malloc, _free } = asm;
 
-		console.time("sha1 hash");
+		// console.time("sha1 hash");
 
 		const inputPtr = _malloc(data.length);
 
@@ -295,17 +295,17 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 
 		const res = mem.slice(sharedOutPtr, sharedOutPtr + 20);
 
-		console.timeEnd("sha1 hash");
+		// console.timeEnd("sha1 hash");
 
 		return res;
 	}
 
 	sha256(bytes: Uint8Array): Uint8Array {
-		console.time("sha26");
+		// console.time("sha26");
 
 		var hashBytes = sha256(bytes);
 
-		console.timeEnd("sha26");
+		// console.timeEnd("sha26");
 		return hashBytes;
 	}
 
@@ -377,7 +377,7 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 		]);
 
 		const e = performance.now();
-		console.time("pkdf2-" + e);
+		// console.time("pkdf2-" + e);
 
 		return this.crypto.subtle
 			.deriveBits(
@@ -392,14 +392,14 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 			)
 			.then((result) => {
 				const buf = new Uint8Array(result);
-				console.timeEnd("pkdf2-" + e);
+				// console.timeEnd("pkdf2-" + e);
 				return buf;
 			});
 	}
 
 	async hmacSha256(data: Uint8Array, key: Uint8Array): Promise<Uint8Array> {
 		// const e = performance.now()
-		//  console.time('hmac256-' + e)
+		//  // console.time('hmac256-' + e)
 
 		const keyMaterial = await this.crypto.subtle.importKey(
 			"raw",
@@ -413,15 +413,15 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 
 		const buf = new Uint8Array(res);
 
-		// console.time('hmac256-' + e)
+		// // console.time('hmac256-' + e)
 
 		return buf;
 	}
 
 	randomFill(buf: Uint8Array): void {
-		// console.time('getRandomValues')
+		// // console.time('getRandomValues')
 		this.crypto.getRandomValues(buf);
-		// console.timeEnd('getRandomValues')
+		// // console.timeEnd('getRandomValues')
 	}
 
 	getAvailableMemory() {

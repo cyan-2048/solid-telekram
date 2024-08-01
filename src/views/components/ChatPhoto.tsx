@@ -39,7 +39,6 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto }) {
 
 		const download = downloadFile(file, {
 			retries: 20,
-			timeout: 8_000,
 		});
 
 		download.result.then((url) => {

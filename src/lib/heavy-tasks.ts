@@ -92,6 +92,7 @@ function convertToJpegBlob(_canvas: HTMLCanvasElement, width: number, height: nu
 export const md5 = wrapped.md5;
 export const getEmojiPage = wrapped.getEmojiPage;
 export const getLastEmojiPage = wrapped.getLastEmojiPage;
+export const getOptimizedSticker = wrapped.getOptimizedSticker;
 
 export default async function processWebpToCanvas(
 	canvas: HTMLCanvasElement,

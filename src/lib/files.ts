@@ -5,15 +5,34 @@ import { untrack } from "solid-js/web";
 import { simpleHash, sleep } from "./utils";
 import localforage from "localforage";
 import Deferred from "./Deffered";
-import { toUniqueFileId } from "@mtcute/file-id";
 import { getPlatform } from "@mtcute/core/platform";
+import { TelegramClient } from "@mtcute/web";
 
 const queue = new Queue({
 	concurrency: 5,
 	autostart: true,
 });
 
-function hashFile(location: FileLocation["location"]) {
+const cacheVersion = 1;
+
+const localforageReady = new Deferred<void>();
+
+if ((localStorage.getItem("cache_version") as any) != cacheVersion) {
+	localforage.clear().then(() => {
+		localforageReady.resolve();
+	});
+	localStorage.setItem("cache_version", cacheVersion as any);
+} else {
+	localforageReady.resolve();
+}
+
+function hashFile(fileLocation: FileLocation) {
+	const location = fileLocation.location;
+
+	if ("uniqueFileId" in fileLocation) {
+		return simpleHash(String(fileLocation.uniqueFileId));
+	}
+
 	if ("localId" in location) {
 		return simpleHash(String(location.localId));
 	}
@@ -24,12 +43,14 @@ function hashFile(location: FileLocation["location"]) {
 		return simpleHash(long.toString(36));
 	}
 
-	if (location instanceof Uint8Array) {
-		return simpleHash(Buffer.from(location).toString("base64"));
+	if (fileLocation instanceof Uint8Array) {
+		return simpleHash(getPlatform().base64Encode(fileLocation));
 	}
 
 	if (typeof location == "function") {
-		return hashFile(location());
+		return hashFile({
+			location: location(),
+		});
 	}
 
 	if ("id" in location) {
@@ -48,24 +69,26 @@ interface DownloadOptions<T = string> {
 	 */
 	retries: number;
 
-	/**
-	 * @internal
-	 * @private
-	 */
 	deffered: Deferred<T>;
 	buffer: boolean;
+	hash: null | number;
 }
 
 interface Download<T = string> {
 	retry: () => void;
 	cancel: () => void;
 	result: Promise<T>;
-	options?: Partial<DownloadOptions>;
+	options?: Partial<DownloadOptions<T>>;
+	hash: null | number;
 }
 
 const neverEndingPromise = new Promise<never>(() => {});
 
 export const Downloads = new Set<Download<any>>();
+
+function downloadInChunks(tg: TelegramClient, file: FileLocation) {
+	tg.downloadAsStream; //
+}
 
 export function downloadFile<T = string>(
 	file: FileLocation,
@@ -78,7 +101,9 @@ export function downloadFile<T = string>(
 	let cancel = () => {};
 	const deffered = options?.deffered ?? new Deferred<T>();
 
-	const current = {
+	const hash = options?.hash || hashFile(file);
+
+	const current: Download<T> = {
 		retry: () => {
 			retry();
 		},
@@ -87,16 +112,17 @@ export function downloadFile<T = string>(
 		},
 		result: deffered.promise,
 		options: options,
+		hash: hash,
 	};
 
 	const timeout = typeof options?.timeout == "number";
 	let retries = options?.retries ?? 0;
 
-	const hash = hashFile(file.location);
-
 	let cancelled = false;
 
 	queue.push(async () => {
+		await localforageReady.promise;
+
 		Downloads.add(current as any);
 
 		const controller = new AbortController();
@@ -113,6 +139,7 @@ export function downloadFile<T = string>(
 				retries: Math.max(0, retries - 1),
 				deffered: deffered,
 				buffer: options?.buffer,
+				hash: hash,
 			});
 
 			cancel = download.cancel;
@@ -141,7 +168,7 @@ export function downloadFile<T = string>(
 			tg
 				.downloadAsBuffer(file, {
 					progressCallback: (e, a) => {
-						// console.log("DOWNLOAD PROGRESS", Math.floor((e / a) * 100));
+						console.log("DOWNLOAD PROGRESS", Math.floor((e / a) * 100));
 					},
 					abortSignal: controller.signal,
 				})
@@ -172,7 +199,7 @@ export function downloadFile<T = string>(
 		}
 	});
 
-	return current as any;
+	return current;
 }
 
 let runningCalculate: Promise<number> | null = null;

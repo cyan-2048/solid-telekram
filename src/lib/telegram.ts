@@ -8,7 +8,8 @@ import Deferred from "./Deffered";
 import EventEmitter from "eventemitter3";
 import { TelegramClient, TelegramWorkerPort } from "@mtcute/web";
 import { tl } from "@mtcute/tl";
-import { LogManager } from "@mtcute/core/utils.js";
+
+import TelegramWorkerURL from "./worker.js?worker&url";
 
 type Country = (typeof countries)[number];
 
@@ -27,7 +28,7 @@ const EE = new EventEmitter<{
 	worker: (e: any) => void;
 }>();
 
-const worker = new Worker(new URL("./worker.ts", import.meta.url) + location.hash, {
+const worker = new Worker(TelegramWorkerURL + location.hash, {
 	type: "module",
 });
 

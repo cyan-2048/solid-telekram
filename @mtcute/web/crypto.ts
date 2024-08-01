@@ -1,17 +1,19 @@
-import { MaybePromise } from "@mtcute/core";
-import { AsmCryptoProvider } from "./asmjs/crypto";
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from "./utils";
+import type { MaybePromise } from "@mtcute/core";
+import type { AsmCryptoProvider } from "./asmjs/crypto";
+import type { WasmCryptoProvider } from "./wasm/crypto";
+import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from "./utils";
 
 export * from "./asmjs/crypto";
 
 export class WebCryptoProvider implements ICryptoProvider {
-	instance!: AsmCryptoProvider;
+	instance!: AsmCryptoProvider | WasmCryptoProvider;
 
 	async initialize() {
 		const isKai3 = import.meta.env.VITE_KAIOS == 3;
 
 		if (isKai3) {
-			// TODO
+			const m = await import("./wasm/crypto");
+			this.instance = new m.WasmCryptoProvider();
 		} else {
 			const m = await import("./asmjs/crypto");
 			this.instance = new m.AsmCryptoProvider();

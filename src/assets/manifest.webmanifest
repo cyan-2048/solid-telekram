@@ -35,7 +35,7 @@
 
 	"b2g_features": {
 		"display": "Nekogram K",
-		"version": "3.0.0",
+		"version": "3.0.1",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {

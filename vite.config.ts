@@ -98,9 +98,7 @@ export default defineConfig({
 		minifySyntax: true,
 		minifyWhitespace: false,
 		minifyIdentifiers: false,
-		supported: {
-			bigint: false,
-		},
+		drop: ["console"],
 	},
 
 	resolve: {
@@ -151,8 +149,6 @@ export default defineConfig({
 		"import.meta.env.VITE_APP_HASH": JSON.stringify(process.env.VITE_APP_HASH || ""),
 		"import.meta.env.VITE_DEBUG_URL": JSON.stringify(process.env.VITE_DEBUG_URL || ""),
 		"import.meta.env.MANIFEST": JSON.stringify(manifest),
-
-		BigInt: isKai3 ? null : "undefined",
 	},
 
 	worker: {

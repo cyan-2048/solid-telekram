@@ -2,6 +2,9 @@ import MiniSearch from "minisearch";
 import Content from "./Content";
 import Search from "./Search";
 import type countries from "@/assets/country_dial_info.json";
+
+import CountryDialInfoURL from "../../assets/country_dial_info.json?url";
+
 import styles from "./CountryCodePicker.module.scss";
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 import MarqueeOrNot from "./MarqueeOrNot";
@@ -68,7 +71,7 @@ export default function CountryCodePicker(props: {
 					setCountries(countries);
 					minisearch.addAll(countries);
 				} else {
-					await fetch(new URL("../../assets/country_dial_info.json", import.meta.url))
+					await fetch(CountryDialInfoURL)
 						.then((e) => e.json())
 						.then((json) => {
 							countriesCache = json;

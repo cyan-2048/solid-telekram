@@ -133,7 +133,12 @@ export function polyfillKaiOSWorker(options) {
 							const code = output.code.replace(regexp, "for(let  ");
 							if (!code) continue;
 							// add import for polyfills for workers
-							output.code = 'importScripts("/polyfills.js");' + code;
+
+							if (!self.__POLYFILL__) {
+							}
+
+							output.code =
+								'self.__POLYFILL__||(importScripts("/polyfills.js"),self.__POLYFILL__=!0);' + code;
 						}
 					}
 				}

@@ -15,6 +15,8 @@ export default function kaiManifest({ isKai3 = false, manifest = {} }) {
 	let integrityJS = "";
 	let indexJS = "";
 	const asmFiles = [];
+	const wasmFiles = [];
+	const memFiles = [];
 
 	if (production)
 		return {
@@ -35,8 +37,20 @@ export default function kaiManifest({ isKai3 = false, manifest = {} }) {
 					isKai3 ? "manifest.webmanifest" : "manifest.webapp"
 				);
 
-				if (!isKai3) {
+				if (isKai3) {
+					asmFiles.forEach((a) => {
+						fs.rmSync(resolve(distFolder, a));
+					});
+
+					memFiles.forEach((a) => {
+						fs.rmSync(resolve(distFolder, a));
+					});
+				} else {
 					manifest.precompile = asmFiles;
+
+					wasmFiles.forEach((a) => {
+						fs.rmSync(resolve(distFolder, a));
+					});
 				}
 
 				fs.writeFileSync(filePath, JSON.stringify(manifest));
@@ -61,10 +75,19 @@ export default function kaiManifest({ isKai3 = false, manifest = {} }) {
 
 			generateBundle(options, bundle) {
 				for (const fileName in bundle) {
+					if (fileName.endsWith(".wasm")) {
+						wasmFiles.push(fileName);
+					}
+
+					if (fileName.endsWith(".mem")) {
+						memFiles.push(fileName);
+					}
+
 					if (fileName.endsWith(".js")) {
 						if (fileName.includes("asm")) {
 							asmFiles.push(fileName);
 						}
+
 						if (fileName.includes("checkIntegrity")) integrityJS = fileName;
 						if (fileName.includes("index")) indexJS = fileName;
 					}

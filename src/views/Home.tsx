@@ -21,7 +21,7 @@ import {
 import Search from "./components/Search";
 import Content from "./components/Content";
 import Tabs, { Tab } from "./components/Tabs";
-import { resumeKeypress, useStore } from "@/lib/utils";
+import { resumeKeypress, sleep, useStore } from "@/lib/utils";
 import MarqueeOrNot from "./components/MarqueeOrNot";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -235,8 +235,13 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 			onBlur={() => {
 				setFocused(false);
 			}}
-			on:sn-enter-down={() => {
+			on:sn-enter-down={async () => {
+				if (!props.$.messages.hasLoadedBefore) {
+					props.$.messages.loadMore();
+					await sleep(0);
+				}
 				setRoom(props.$.$.chat);
+				await sleep(0);
 				setView("room");
 			}}
 			tabIndex={-1}
@@ -347,7 +352,7 @@ export default function Home(props: { hidden: boolean }) {
 				before={
 					<Tabs>
 						<Tab selected>Chats</Tab>
-						<Tab>Stories</Tab>
+						{/* <Tab>Stories</Tab> */}
 					</Tabs>
 				}
 			>

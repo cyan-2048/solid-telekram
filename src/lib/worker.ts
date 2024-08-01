@@ -43,7 +43,7 @@ const appVersion = new Promise<string>((res) => {
 			const manifest = await m.json();
 			const version = isKai3 ? manifest.b2g_features.version : manifest.version;
 
-			res(version + "😺");
+			res(version);
 		});
 	}
 });
@@ -212,9 +212,12 @@ addEventListener("message", function init({ data }) {
 				}),
 
 				initConnectionOptions: {
-					...fromUA,
+					deviceModel: navigator.userAgent,
+					systemVersion: fromUA.systemVersion.replace("/", " "),
 					appVersion: version,
 				},
+
+				testMode: false,
 
 				logLevel: 3,
 			});

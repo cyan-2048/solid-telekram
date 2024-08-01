@@ -1,4 +1,4 @@
-import { Chat, InputPeerLike, Message, tl, User } from "@mtcute/core";
+import { Chat, Message, Thumbnail, tl, User } from "@mtcute/core";
 import styles from "./Room.module.scss";
 import Content from "./components/Content";
 import {
@@ -25,6 +25,7 @@ import {
 	refreshDialogsByPeer,
 	replyingMessage,
 	room,
+	chat,
 	setEditingMessage,
 	setReplyingMessage,
 	setSoftkeys,
@@ -36,7 +37,6 @@ import {
 	getColorFromPeer,
 	getTextFromContentEditable,
 	isSelectionAtStart,
-	last,
 	RawPeer,
 	sleep,
 	typeInTextbox,
@@ -44,7 +44,7 @@ import {
 } from "@/lib/utils";
 import dayjs from "dayjs";
 import Markdown, { ModifyString } from "./components/Markdown";
-import TelegramIcon, { TestAllIcons } from "./components/TelegramIcon";
+import TelegramIcon from "./components/TelegramIcon";
 import AutoResizeTextbox from "./components/AutoResizeTextarea";
 import scrollIntoView from "scroll-into-view-if-needed";
 import SpatialNavigation from "@/lib/spatial_navigation";
@@ -55,14 +55,10 @@ import OptionsMenuMaxHeight from "./components/OptionsMenuMaxHeight";
 import { md } from "@mtcute/markdown-parser";
 import { debounce } from "lodash-es";
 import { downloadFile } from "@/lib/files";
-import processWebpToCanvas from "@/lib/heavy-tasks";
-import { get } from "@/lib/stores";
+import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
 import EmojiPicker from "./components/EmojiPicker";
-import { StickersMap } from "@/lib/pre-optimized-stickers";
-import webm2png from "@/lib/webm/ezgif-webm2png";
 import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
-import Queue from "queue";
 
 /**
  * Chat type. Can be:
@@ -90,7 +86,7 @@ function getMembersCount(chat: Chat) {
 }
 
 const isOverflown = ({ clientHeight, scrollHeight }: HTMLElement) => {
-	return scrollHeight - 4 > clientHeight;
+	return scrollHeight - 8 > clientHeight;
 };
 
 function toMidnight(date: dayjs.Dayjs) {
@@ -173,7 +169,9 @@ function decideShowUsername(before: UIMessage | undefined, after: UIMessage) {
 function ActionMessage(props: { children: JSXElement; focusable?: boolean }) {
 	return (
 		<div class={styles.action_message}>
-			<div class={styles.action_message_inner}>{props.children}</div>
+			<div class={styles.action_message_inner}>
+				<span>{props.children}</span>
+			</div>
 		</div>
 	);
 }
@@ -772,6 +770,26 @@ function MessageAdditionalInfo(props: {
 	);
 }
 
+function StickerThumbnail(props: { $: UIMessage }) {
+	if (props.$.$.media?.type != "sticker") throw new Error("NOT A STICKER!");
+
+	return (
+		<div>
+			<svg
+				version="1.1"
+				xmlns="http://www.w3.org/2000/svg"
+				xmlns:xlink="http://www.w3.org/1999/xlink"
+				viewBox="0 0 512 512"
+			>
+				<path
+					fill="rgba(0, 0, 0, 0.08)"
+					d={props.$.$.media.getThumbnail(Thumbnail.THUMB_OUTLINE)!.path}
+				/>
+			</svg>
+		</div>
+	);
+}
+
 function StickerMedia(props: { $: UIMessage }) {
 	if (props.$.$.media?.type !== "sticker") throw new Error("NOT STICKER MEDIA");
 
@@ -812,18 +830,17 @@ function StickerMedia(props: { $: UIMessage }) {
 				media.emoji,
 				media,
 
-				Buffer.from(media.uniqueFileId, "base64"),
 				media.raw.id.toInt(),
 				props.$.$.date
 			);
 
-			const hasPrecompiled = StickersMap.get(media.uniqueFileId);
-
-			if (hasPrecompiled) {
-				setSrc(hasPrecompiled);
-			} else {
-				setShowUnsupported(true);
-			}
+			getOptimizedSticker(media.uniqueFileId).then((hasPrecompiled) => {
+				if (hasPrecompiled) {
+					setSrc(hasPrecompiled);
+				} else {
+					setShowUnsupported(true);
+				}
+			});
 		}
 	});
 
@@ -859,10 +876,12 @@ function StickerMedia(props: { $: UIMessage }) {
 			buffer: true,
 		});
 
+		let url: string | undefined;
+
 		download.result.then((buffer) => {
 			processWebpToCanvas(canvasRef, buffer).then((res) => {
 				if (res != null) {
-					setSrc(URL.createObjectURL(res));
+					setSrc((url = URL.createObjectURL(res)));
 				} else {
 					setLoading(false);
 				}
@@ -871,6 +890,7 @@ function StickerMedia(props: { $: UIMessage }) {
 
 		onCleanup(() => {
 			download.cancel();
+			url && URL.revokeObjectURL(url);
 		});
 	});
 
@@ -883,7 +903,9 @@ function StickerMedia(props: { $: UIMessage }) {
 						when={video()}
 						fallback={
 							<>
-								<Show when={loading()}>loading...</Show>
+								<Show when={loading()}>
+									<StickerThumbnail $={props.$}></StickerThumbnail>
+								</Show>
 								<Show
 									when={src()}
 									fallback={<canvas ref={canvasRef} width={128} height={128}></canvas>}
@@ -962,7 +984,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 	const [reply, setReply] = createSignal(null as UIMessage | null | 0);
 
 	createEffect(() => {
-		const _ = props.$.$.replyToMessage;
+		const _ = props.$.isReply();
 
 		if (_) {
 			props.$.getReply(props.dialog).then((msg) => {
@@ -974,11 +996,6 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 	});
 
 	const [infoWidth, setInfoWidth] = createSignal(0);
-
-	const chat = createMemo(() => {
-		const _room = room();
-		return _room instanceof UIDialog ? _room.$.chat : _room;
-	});
 
 	return (
 		<>
@@ -1008,7 +1025,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						outgoing={props.$.isOutgoing}
 						tail={
 							props.$.isSticker
-								? props.$.$.replyToMessage
+								? props.$.isReply()
 									? decideTail(props.before, props.$)
 									: false
 								: decideTail(props.before, props.$)
@@ -1017,7 +1034,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						message={props.$.$}
 						$={props.$}
 						isSticker={props.$.isSticker}
-						isReply={!!props.$.$.replyToMessage}
+						isReply={!!props.$.isReply()}
 						showUsername={decideShowUsername(props.before, props.$)}
 					>
 						<Show when={decideShowUsername(props.before, props.$)}>
@@ -1026,7 +1043,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 							</UsernameContainer>
 						</Show>
 
-						<Show when={props.$.$.replyToMessage && reply() === null}>
+						<Show when={props.$.isReply() && reply() === null}>
 							<LoadingReplyMessage />
 						</Show>
 						<Switch>
@@ -1167,7 +1184,9 @@ function TextBoxOptionsWrap(props: {
 									}
 
 									props.textboxRef.textContent = "";
-									typeInTextbox("", props.textboxRef);
+									// ignore please
+									props.textboxRef.appendChild((<br></br>) as Node);
+									props.textboxRef.dispatchEvent(new Event("input", { bubbles: true }));
 
 									SpatialNavigation.focus("room");
 
@@ -1361,19 +1380,6 @@ function Messages(props: { dialog: UIDialog }) {
 
 	const loading = useStore(() => props.dialog.messages.isLoading);
 
-	const chat = createMemo(() => {
-		const _room = room()!;
-		return _room instanceof UIDialog ? _room.$.chat : _room;
-	});
-
-	createEffect(() => {
-		const dialog = props.dialog;
-		if (!dialog.messages.hasLoadedBefore) {
-			console.log("LOADING MORE");
-			dialog.messages.loadMore();
-		}
-	});
-
 	createEffect(() => {
 		const _ = loading();
 
@@ -1433,7 +1439,7 @@ function Messages(props: { dialog: UIDialog }) {
 					</For>
 				</WhenMounted>
 
-				<Show when={chat().chatType !== "channel"}>
+				<Show when={chat()!.chatType !== "channel"}>
 					<TextBox dialog={props.dialog} />
 				</Show>
 			</Show>
@@ -1561,11 +1567,6 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 export default function Room(props: { hidden: boolean }) {
 	const [uiDialog, setUIDialog] = createSignal<null | UIDialog>(null);
 
-	const chat = createMemo(() => {
-		const _room = room();
-		return _room instanceof UIDialog ? _room.$.chat : _room;
-	});
-
 	const interacting = createMemo(() => {
 		const editing = editingMessage();
 		const replying = replyingMessage();
@@ -1583,7 +1584,7 @@ export default function Room(props: { hidden: boolean }) {
 		if (_room) {
 			tg.openChat(_room);
 
-			console.log(dialogsJar.get(_room.id), _room.id, _room);
+			// console.log(dialogsJar.get(_room.id), _room.id, _room);
 
 			if (_room instanceof UIDialog) {
 				setUIDialog(_room);
