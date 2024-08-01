@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@mtcute/file-id": "^0.16.0",
-    "@mtcute/markdown-parser": "^0.16.0",
-    "@mtcute/tl": "^184.0.0",
+    "@mtcute/markdown-parser": "^0.16.3",
+    "@mtcute/tl": "^185.0.0",
     "@mtcute/tl-runtime": "^0.16.0",
     "@mtcute/wasm": "^0.16.0",
     "@types/crypto-js": "^4.2.2",
