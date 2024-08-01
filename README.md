@@ -118,6 +118,7 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 ## GIVE ME MONEY
 
 All donations go to feeding my cats. (really need to spay my cats lmao)
+
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H7LIPNW)
 
 ## Discord Server
