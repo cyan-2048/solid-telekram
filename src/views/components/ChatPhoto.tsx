@@ -1,11 +1,11 @@
-import { downloadFile } from "@/lib/files";
 import { Chat, ChatPhoto } from "@mtcute/core";
 import { createSignal, createEffect, onCleanup, onMount, Show, JSXElement } from "solid-js";
 import styles from "./ChatPhoto.module.scss";
 import TelegramIcon from "./TelegramIcon";
 import { getColorFromPeer } from "@/lib/utils";
+import { downloadFile } from "@/lib/files/download";
 
-function ChatPhotoWithIcon(props: { src: ChatPhoto }) {
+function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
 	const [placeholder, setPlaceholder] = createSignal<string | null>(null);
 
 	createEffect(() => {
@@ -37,26 +37,46 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto }) {
 	createEffect(() => {
 		const file = props.src.small;
 
-		const download = downloadFile(file, {
-			retries: 20,
-		});
+		const download = downloadFile(file);
 
-		download.result.then((url) => {
-			if (mounted) setSrc(url);
-		});
+		let url!: string;
+
+		function stateChange() {
+			if (download.state == "done") {
+				if (mounted) {
+					// console.error("DOWNLOAD RESULT", download.result);
+					setSrc((url = URL.createObjectURL(download.result)));
+				}
+			}
+		}
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
 
 		onCleanup(() => {
-			download.cancel();
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
 		});
 	});
 
 	return (
 		<div class={styles.photo}>
 			<Show when={placeholder()}>
-				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src()} />}
+				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=2"} />}
 			</Show>
 			<Show when={src()}>
-				{(src) => <img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src()} />}
+				{(src) => (
+					<img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=2"} />
+				)}
 			</Show>
 		</div>
 	);
@@ -95,7 +115,7 @@ export default function ChatPhotoIcon(props: { chat: Chat }) {
 				</ChatPhotoColor>
 			}
 		>
-			<Show when={props.chat.photo}>{(photo) => <ChatPhotoWithIcon src={photo()} />}</Show>
+			<Show when={props.chat.photo}>{(photo) => <ChatPhotoWithIcon chat={props.chat} src={photo()} />}</Show>
 		</Show>
 	);
 }

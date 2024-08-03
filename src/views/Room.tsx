@@ -54,11 +54,11 @@ import { Portal } from "solid-js/web";
 import OptionsMenuMaxHeight from "./components/OptionsMenuMaxHeight";
 import { md } from "@mtcute/markdown-parser";
 import { debounce } from "lodash-es";
-import { downloadFile } from "@/lib/files";
 import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
 import EmojiPicker from "./components/EmojiPicker";
 import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
+import { downloadFile } from "@/lib/files/download";
 
 /**
  * Chat type. Can be:
@@ -192,10 +192,7 @@ const enum TextboxOptionsSelected {
 	VIEW,
 }
 
-function TextboxOptions(props: {
-	canSend: boolean;
-	onSelect: (e: TextboxOptionsSelected | null) => void;
-}) {
+function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsSelected | null) => void }) {
 	onMount(() => {
 		SpatialNavigation.add(SN_ID_OPTIONS, {
 			selector: ".option",
@@ -334,9 +331,7 @@ function MessageOptions(props: {
 						Edit
 					</OptionsItem>
 				</Show>
-				<Show
-					when={canDeleteForEverone(props.message, props.dialog) || canDeleteForMe(props.dialog)}
-				>
+				<Show when={canDeleteForEverone(props.message, props.dialog) || canDeleteForMe(props.dialog)}>
 					<OptionsItem
 						classList={{ option: true, [styles.option_item]: true }}
 						on:sn-enter-down={() => {
@@ -727,19 +722,13 @@ function UsernameContainer(props: { children: JSXElement; peer: RawPeer }) {
 	return (
 		<div class={styles.username}>
 			<div class={styles.username_inner}>
-				<span style={{ color: `var(--peer-avatar-${getColorFromPeer(props.peer)}-bottom)` }}>
-					{props.children}
-				</span>
+				<span style={{ color: `var(--peer-avatar-${getColorFromPeer(props.peer)}-bottom)` }}>{props.children}</span>
 			</div>
 		</div>
 	);
 }
 
-function MessageAdditionalInfo(props: {
-	$: UIMessage;
-	dialog: UIDialog;
-	setWidth: (n: number) => void;
-}) {
+function MessageAdditionalInfo(props: { $: UIMessage; dialog: UIDialog; setWidth: (n: number) => void }) {
 	const edited = useStore(() => props.$.editDate);
 	const lastReadOutgoing = useStore(() => props.dialog.lastReadOutgoing);
 
@@ -781,10 +770,7 @@ function StickerThumbnail(props: { $: UIMessage }) {
 				xmlns:xlink="http://www.w3.org/1999/xlink"
 				viewBox="0 0 512 512"
 			>
-				<path
-					fill="rgba(0, 0, 0, 0.08)"
-					d={props.$.$.media.getThumbnail(Thumbnail.THUMB_OUTLINE)!.path}
-				/>
+				<path fill="rgba(0, 0, 0, 0.08)" d={props.$.$.media.getThumbnail(Thumbnail.THUMB_OUTLINE)!.path} />
 			</svg>
 		</div>
 	);
@@ -801,22 +787,45 @@ function StickerMedia(props: { $: UIMessage }) {
 	const [loading, setLoading] = createSignal(true);
 	const [showUnsupported, setShowUnsupported] = createSignal(false);
 
+	let mounted = true;
+
+	onCleanup(() => {
+		mounted = false;
+	});
+
 	onMount(() => {
 		const media = props.$.$.media;
 		if (!media) return;
 		if (media.type !== "sticker") return;
 
 		if (media.mimeType.includes("webm")) {
-			const download = downloadFile(media, {
-				retries: 12,
-			});
+			const download = downloadFile(media);
 
-			download.result.then((url) => {
-				setVideo(url);
-			});
+			let url!: string;
+
+			function stateChange() {
+				if (download.state == "done") {
+					if (mounted) {
+						setVideo((url = URL.createObjectURL(download.result)));
+					}
+				}
+			}
+
+			if (download.state == "done") {
+				stateChange();
+
+				onCleanup(() => {
+					URL.revokeObjectURL(url);
+				});
+
+				return;
+			}
+
+			download.on("state", stateChange);
 
 			onCleanup(() => {
-				download.cancel();
+				download.off("state", stateChange);
+				URL.revokeObjectURL(url);
 			});
 			return;
 		}
@@ -856,41 +865,72 @@ function StickerMedia(props: { $: UIMessage }) {
 
 		// if kai3 use img tag
 		if (isKai3) {
-			const download = downloadFile(media, {
-				retries: 12,
-			});
+			const download = downloadFile(media);
 
-			download.result.then((url) => {
-				setSrc(url);
-			});
+			let url!: string;
+
+			const stateChange = () => {
+				if (download.state == "done") {
+					if (mounted) {
+						setVideo((url = URL.createObjectURL(download.result)));
+					}
+				}
+			};
+
+			if (download.state == "done") {
+				stateChange();
+
+				onCleanup(() => {
+					URL.revokeObjectURL(url);
+				});
+
+				return;
+			}
+
+			download.on("state", stateChange);
 
 			onCleanup(() => {
-				download.cancel();
+				download.off("state", stateChange);
+				URL.revokeObjectURL(url);
+			});
+			return;
+		}
+
+		const download = downloadFile(media);
+
+		let url!: string;
+
+		const stateChange = async () => {
+			if (download.state == "done") {
+				if (mounted) {
+					const buffer = await download.result.arrayBuffer();
+
+					processWebpToCanvas(canvasRef, new Uint8Array(buffer)).then((res) => {
+						if (res != null) {
+							setSrc((url = URL.createObjectURL(res)));
+						} else {
+							setLoading(false);
+						}
+					});
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
 			});
 
 			return;
 		}
 
-		const download = downloadFile<Uint8Array>(media, {
-			retries: 12,
-			buffer: true,
-		});
-
-		let url: string | undefined;
-
-		download.result.then((buffer) => {
-			processWebpToCanvas(canvasRef, buffer).then((res) => {
-				if (res != null) {
-					setSrc((url = URL.createObjectURL(res)));
-				} else {
-					setLoading(false);
-				}
-			});
-		});
+		download.on("state", stateChange);
 
 		onCleanup(() => {
-			download.cancel();
-			url && URL.revokeObjectURL(url);
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
 		});
 	});
 
@@ -906,10 +946,7 @@ function StickerMedia(props: { $: UIMessage }) {
 								<Show when={loading()}>
 									<StickerThumbnail $={props.$}></StickerThumbnail>
 								</Show>
-								<Show
-									when={src()}
-									fallback={<canvas ref={canvasRef} width={128} height={128}></canvas>}
-								>
+								<Show when={src()} fallback={<canvas ref={canvasRef} width={128} height={128}></canvas>}>
 									{(src) => (
 										<img
 											onLoad={() => {
@@ -919,7 +956,7 @@ function StickerMedia(props: { $: UIMessage }) {
 												console.error("ERROR OCCURED STICKER", e);
 											}}
 											width={128}
-											src={src()}
+											src={src() + "#-moz-samplesize=2"}
 										/>
 									)}
 								</Show>
@@ -937,7 +974,86 @@ function StickerMedia(props: { $: UIMessage }) {
 					</Show>
 				}
 			>
-				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href}></img>
+				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=2"}></img>
+			</Show>
+		</div>
+	);
+}
+
+function PhotoMedia(props: { $: UIMessage }) {
+	if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
+
+	const [src, setSrc] = createSignal("");
+	const [loading, setLoading] = createSignal(true);
+	const [showUnsupported, setShowUnsupported] = createSignal(false);
+	const [thumb, setThumb] = createSignal("");
+
+	let mounted = true;
+
+	onCleanup(() => {
+		mounted = false;
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
+
+		const media = props.$.$.media;
+		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
+
+		let url!: string;
+
+		if (thumb && "byteLength" in thumb.location) {
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+		}
+
+		onCleanup(() => {
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
+
+		const media = props.$.$.media;
+
+		const download = downloadFile(media);
+
+		let url!: string;
+
+		const stateChange = () => {
+			if (download.state == "done") {
+				if (mounted) {
+					setLoading(false);
+					setSrc((url = URL.createObjectURL(download.result)));
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	return (
+		<div class={styles.photo}>
+			<Show when={thumb() && (loading() || !src() || showUnsupported())}>
+				<img class={styles.thumb} src={thumb()}></img>
+			</Show>
+			<Show when={src()}>
+				<img src={src() + "#-moz-samplesize=2"}></img>
 			</Show>
 		</div>
 	);
@@ -1038,11 +1154,8 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						showUsername={decideShowUsername(props.before, props.$)}
 					>
 						<Show when={decideShowUsername(props.before, props.$)}>
-							<UsernameContainer peer={(props.$.sender as User).raw}>
-								{props.$.sender.displayName}
-							</UsernameContainer>
+							<UsernameContainer peer={(props.$.sender as User).raw}>{props.$.sender.displayName}</UsernameContainer>
 						</Show>
-
 						<Show when={props.$.isReply() && reply() === null}>
 							<LoadingReplyMessage />
 						</Show>
@@ -1057,7 +1170,12 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						<Show when={props.$.isSticker}>
 							<StickerMedia $={props.$} />
 						</Show>
-						<Show when={!props.$.isSticker}>
+						<Switch>
+							<Match when={props.$.$.media?.type == "photo" && props.$.$.media}>
+								<PhotoMedia $={props.$} />
+							</Match>
+						</Switch>
+						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
 							<div class={styles.text_container}>
 								<div ref={textWrapRef} class={styles.text_wrap}>
 									<div class={styles.text}>
@@ -1069,10 +1187,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 											<div class={styles.more_fade}></div>
 											<div class={styles.more_button}>
 												more
-												<span
-													class={styles.extra_width}
-													style={{ width: infoWidth() + "px" }}
-												></span>
+												<span class={styles.extra_width} style={{ width: infoWidth() + "px" }}></span>
 											</div>
 										</div>
 									</Show>
@@ -1315,8 +1430,7 @@ function TextBox(props: { dialog: UIDialog }) {
 					}}
 					onKeyDown={(e) => {
 						keyup = false;
-						const canUseKeyboard =
-							!getTextFromContentEditable(e.currentTarget) || isSelectionAtStart();
+						const canUseKeyboard = !getTextFromContentEditable(e.currentTarget) || isSelectionAtStart();
 
 						if (e.key == "Backspace" && canUseKeyboard) {
 							setView("home");
@@ -1498,9 +1612,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 			<div classList={{ [styles.floating_textbox]: true, [styles.focused]: true }}>
 				<div
 					style={{
-						"--border": `var(--peer-avatar-${getColorFromPeer(
-							(props.message.sender as User).raw
-						)}-bottom)`,
+						"--border": `var(--peer-avatar-${getColorFromPeer((props.message.sender as User).raw)}-bottom)`,
 					}}
 				>
 					<ReplyMessage $={props.message} />
@@ -1517,8 +1629,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 						setSoftkeys("tg:add", "Enter", "tg:more");
 					}}
 					onKeyDown={(e) => {
-						const canUseKeyboard =
-							!getTextFromContentEditable(e.currentTarget) || isSelectionAtStart();
+						const canUseKeyboard = !getTextFromContentEditable(e.currentTarget) || isSelectionAtStart();
 
 						if (e.key == "Backspace" && canUseKeyboard) {
 							batch(() => {
@@ -1622,19 +1733,12 @@ export default function Room(props: { hidden: boolean }) {
 										<Show
 											when={chat().chatType != "private"}
 											fallback={
-												<Show
-													when={
-														!chat().isSupport &&
-														chat().peer._ == "user" &&
-														!(chat().peer as tl.RawUser).bot
-													}
-												>
+												<Show when={!chat().isSupport && chat().peer._ == "user" && !(chat().peer as tl.RawUser).bot}>
 													<UserStatusIndicator userId={chat().peer.id} />
 												</Show>
 											}
 										>
-											{getMembersCount(chat())}{" "}
-											{chat().chatType == "channel" ? "Subscribers" : "Members"}
+											{getMembersCount(chat())} {chat().chatType == "channel" ? "Subscribers" : "Members"}
 										</Show>
 									</span>
 								</div>
@@ -1645,9 +1749,7 @@ export default function Room(props: { hidden: boolean }) {
 					after={
 						<Show when={uiDialog()}>
 							{(dialog) => (
-								<Show when={interacting()}>
-									{(msg) => <FloatingTextbox dialog={dialog()} message={msg()} />}
-								</Show>
+								<Show when={interacting()}>{(msg) => <FloatingTextbox dialog={dialog()} message={msg()} />}</Show>
 							)}
 						</Show>
 					}

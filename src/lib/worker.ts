@@ -51,10 +51,7 @@ const appVersion = new Promise<string>((res) => {
 class LocalStorageDriver extends BaseStorageDriver implements MemoryStorageDriver {
 	readonly states: Map<string, object>;
 
-	constructor(
-		initialState: Map<any, any> | null,
-		private onStateUpdate: (state: Map<any, any>) => void
-	) {
+	constructor(initialState: Map<any, any> | null, private onStateUpdate: (state: Map<any, any>) => void) {
 		super();
 
 		this.states = initialState ?? new Map();

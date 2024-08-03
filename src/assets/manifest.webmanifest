@@ -1,7 +1,7 @@
 {
 	"id": "telekram-solid",
-	"name": "Nekogram K",
-	"short_name": "Nekogram K",
+	"name": "KGram",
+	"short_name": "KGram",
 	"description": "Telegram Client for KaiOS.",
 
 	"start_url": "/index.html",
@@ -34,8 +34,8 @@
 	"type": "privileged",
 
 	"b2g_features": {
-		"display": "Nekogram K",
-		"version": "3.0.1",
+		"display": "KGram",
+		"version": "3.0.2",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {

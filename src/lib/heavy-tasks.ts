@@ -2,6 +2,10 @@ import HeavyTasksWorker from "./heavy-tasks.worker?worker";
 import * as Comlink from "comlink";
 import type { Exposed } from "./heavy-tasks.worker";
 import webp2png from "./webp/ezgif-webp2png";
+import Queue from "queue";
+import { sleep } from "./helpers";
+import { addToCache, getFileFromCache } from "./files/downloader";
+import Deferred from "./Deffered";
 
 const wrapped = Comlink.wrap<Exposed>(new HeavyTasksWorker());
 
@@ -94,21 +98,46 @@ export const getEmojiPage = wrapped.getEmojiPage;
 export const getLastEmojiPage = wrapped.getLastEmojiPage;
 export const getOptimizedSticker = wrapped.getOptimizedSticker;
 
-export default async function processWebpToCanvas(
-	canvas: HTMLCanvasElement,
-	bufferLike: Uint8Array,
-	saveToJpeg?: boolean
-) {
+const taskQueue = new Queue({
+	concurrency: 1,
+	autostart: true,
+});
+
+export default async function processWebpToCanvas(canvas: HTMLCanvasElement, bufferLike: Uint8Array) {
 	console.warn(`WebP: processing webp as device doesn't support Webp natively`);
 
-	const result = await wrapped.decodeWebP(
-		Comlink.transfer(bufferLike, [bufferLike.buffer]),
-		saveToJpeg ? 2 : 1
-	);
+	const hash = await md5(bufferLike);
+	const filename = "sticker-" + hash;
+
+	const deferred = new Deferred<void>();
+
+	const fromCache = await new Promise<Blob | null>((res) => {
+		taskQueue.push(async () => {
+			res(getFileFromCache(filename));
+			// we wait until this current task is finished;
+			await deferred.promise;
+		});
+	});
+
+	if (fromCache) {
+		deferred.resolve();
+		return fromCache;
+	}
+
+	const result = await wrapped.decodeWebP(Comlink.transfer(bufferLike, [bufferLike.buffer]), 1);
+
+	// console.error("LIBWEBPJS RESULT", "rgba" in result ? result.rgba.byteLength : result.byteLength);
 
 	if (result instanceof Uint8Array) {
-		console.error("libwebpjs doesn't work using ezgif");
-		return webp2png(result).catch(() => null);
+		console.error("libwebpjs doesn't work using ezgif to convert to png");
+
+		const webpFromEzgif = await webp2png(result).catch(() => null);
+		if (webpFromEzgif) {
+			const file = await addToCache(filename, webpFromEzgif);
+			deferred.resolve();
+			return file;
+		}
+		return null;
 	}
 
 	performance.now();
@@ -118,5 +147,12 @@ export default async function processWebpToCanvas(
 
 	canvas.getContext("2d")!.putImageData(imageData, 0, 0);
 
-	return saveToJpeg ? convertToJpegBlob(canvas, result.width, result.height) : null;
+	canvas.toBlob(async (blob) => {
+		if (blob) {
+			await addToCache(filename, blob);
+			deferred.resolve();
+		}
+	}, "image/png");
+
+	return null;
 }

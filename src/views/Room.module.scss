@@ -2,6 +2,42 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.photo {
+	max-height: 50vh;
+	min-height: 50px;
+	overflow: hidden;
+	border-radius: 4px;
+
+	height: 256px;
+	width: 80vw;
+
+	img {
+		display: block;
+
+		object-position: center;
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+
+	.thumb {
+		filter: blur(10px);
+	}
+}
+
+.photo + .text_container {
+	margin-top: 4px;
+	.text_wrap {
+		max-height: 25px !important;
+	}
+}
+
+.isReply {
+	.photo {
+		height: 120px;
+	}
+}
+
 .header {
 	background-color: var(--accent);
 	padding: 0 10px;
@@ -200,6 +236,10 @@
 		.text_container {
 			padding-top: 0;
 		}
+
+		.text_wrap {
+			max-height: 130px;
+		}
 	}
 
 	&:not(.showUsername) {
@@ -249,7 +289,7 @@
 }
 
 .text_wrap {
-	max-height: calc(6 * 1.445 * 17px);
+	max-height: 148px;
 	overflow: hidden;
 
 	position: relative;

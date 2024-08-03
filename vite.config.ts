@@ -57,10 +57,7 @@ const fixTelegram = () => ({
 
 		if (src.includes(codeToReplace))
 			return {
-				code: src.replace(
-					codeToReplace,
-					`input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))`
-				),
+				code: src.replace(codeToReplace, `input > BigInt(2) ** BigInt(32) || input < -(BigInt(2) ** BigInt(32))`),
 				map: null,
 			};
 	},
@@ -98,7 +95,6 @@ export default defineConfig({
 		minifySyntax: true,
 		minifyWhitespace: false,
 		minifyIdentifiers: false,
-		drop: production ? ["console"] : [],
 	},
 
 	resolve: {

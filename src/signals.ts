@@ -65,9 +65,7 @@ export function setSoftkeys(
 	});
 }
 
-export const [currentView, setView] = createSignal(
-	"loading" as "login" | "loading" | "home" | "room" | "info"
-);
+export const [currentView, setView] = createSignal("loading" as "login" | "loading" | "home" | "room" | "info");
 
 export const [messageInfo, setMessageInfo] = createSignal<null | {
 	dialog: UIDialog | null;
@@ -741,9 +739,7 @@ export class UIDialog {
 
 		this.permissions = writable($.chat.permissions);
 
-		this.lastMessage = writable(
-			$.lastMessage ? this.messages.add(new UIMessage($.lastMessage)) : null
-		);
+		this.lastMessage = writable($.lastMessage ? this.messages.add(new UIMessage($.lastMessage)) : null);
 
 		this.inputPeer = $.chat.inputPeer;
 
@@ -773,9 +769,7 @@ export class UIDialog {
 	update($: Dialog) {
 		const peer = $.chat.peer;
 
-		this.lastMessage.set(
-			$.lastMessage ? this.messages.update($.lastMessage.id, $.lastMessage) : null
-		);
+		this.lastMessage.set($.lastMessage ? this.messages.update($.lastMessage.id, $.lastMessage) : null);
 
 		this.$ = $;
 
@@ -1379,10 +1373,33 @@ window.addEventListener("keydown", (e) => {
 	}
 });
 
-export const integrityCheck = import("./lib/checkIntegrity").then((m) =>
-	m.default(import.meta.url)
-);
+export const integrityCheck = import("./lib/checkIntegrity").then((m) => m.default(import.meta.url));
 
 integrityCheck.then((integrity) => {
 	console.log("INTEGRITY CHECK PASSED:", integrity);
 });
+
+const toastConnections = navigator.mozApps?.getSelf().then((a) => a.connect("systoaster"));
+
+export async function toaster(text: string, latency?: number) {
+	// thanks tbrrss
+	if (typeof WebActivity != "undefined") {
+		const s = new WebActivity("show-toast", {
+			text,
+			timeout: latency,
+		});
+		s.start();
+		return;
+	}
+
+	const conns = await toastConnections;
+
+	if (!conns) {
+		alert("pretend this is a toast: " + text);
+		return;
+	}
+
+	conns.forEach(function (conn) {
+		conn.postMessage({ message: text, latency });
+	});
+}

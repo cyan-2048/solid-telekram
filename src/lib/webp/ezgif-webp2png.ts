@@ -1,15 +1,4 @@
-import { md5 } from "../heavy-tasks";
-
-const cache = new Map<string, Blob>();
-
 export default async function webp2png(blob: Uint8Array) {
-	const hash = await md5(blob);
-	const has = cache.get(hash);
-
-	if (has) {
-		return has;
-	}
-
 	return new Promise<Blob>((resolve, reject) => {
 		// @ts-ignore: KAI
 		const xhr = new XMLHttpRequest({ mozSystem: true, mozAnon: true });
@@ -68,8 +57,6 @@ export default async function webp2png(blob: Uint8Array) {
 						xhr.onload = function () {
 							if (this.status === 200) {
 								const blob = this.response;
-
-								cache.set(hash, blob);
 
 								resolve(blob);
 							}

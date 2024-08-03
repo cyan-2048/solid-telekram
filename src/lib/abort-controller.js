@@ -73,4 +73,8 @@ class AbortController {
 	}
 }
 
-Object.assign(self, { AbortController, AbortSignal });
+const isKai3 = import.meta.env.VITE_KAIOS == 3;
+
+if (import.meta.env.DEV || !isKai3) {
+	Object.assign(self, { AbortController, AbortSignal });
+}

@@ -1,7 +1,9 @@
 {
-	"name": "Nekogram K",
+	"name": "KGram",
 	"description": "Telegram Client for KaiOS.",
-	"version": "1.0.1",
+	"display": "Telegram",
+	"short_name": "Telegram",
+	"version": "1.0.2",
 	"launch_path": "/index.html",
 	"theme": "#fff",
 	"theme_color": "#fff",
@@ -19,7 +21,7 @@
 		"url": "https://discord.gg/W9DF2q3Vv2"
 	},
 	"origin": "app://telekram.cyankindasus.com",
-	"type": "privileged",
+	"type": "certified",
 	"permissions": {
 		"spatialnavigation-app-manage": {},
 		"systemXHR": {},
@@ -28,13 +30,16 @@
 			"description": "Reading Codes using the Camera"
 		},
 		"desktop-notification": {},
-		"tcp-socket": { "description": "Required to do any TCP" }
+		"tcp-socket": { "description": "Required to do any TCP" },
+		"device-storage:sdcard": { "access": "readwrite" }
 	},
 	"locales": {
 		"en-US": {
-			"name": "Nekogram K",
+			"name": "KGram",
 			"subtitle": "Telegram for KaiOS",
-			"description": "Telegram Client for KaiOS."
+			"description": "Telegram Client for KaiOS.",
+			"display": "Telegram",
+			"short_name": "Telegram"
 		}
 	},
 

@@ -35,26 +35,12 @@ if (import.meta.env.VITE_KAIOS != 3) {
 		};
 	}
 
-	function promisify(obj) {
-		return new Promise(function (resolve, reject) {
-			obj.onload = obj.onerror = function (evt) {
-				obj.onload = obj.onerror = null;
-
-				evt.type === "load"
-					? resolve(obj.result || obj)
-					: reject(new Error("Failed to read the blob/file"));
-			};
-		});
-	}
-
 	if (self.Blob) {
 		const blob = Blob.prototype;
 
 		if (!blob.arrayBuffer) {
-			blob.arrayBuffer = function arrayBuffer() {
-				var fr = new FileReader();
-				fr.readAsArrayBuffer(this);
-				return promisify(fr);
+			blob.arrayBuffer = function () {
+				return new Response(this).arrayBuffer();
 			};
 		}
 	}
@@ -144,10 +130,7 @@ if (import.meta.env.VITE_KAIOS != 3) {
 				var rootScrollingElement = document.scrollingElement || document.documentElement;
 
 				while (parent && parent !== rootScrollingElement) {
-					if (
-						parent.offsetHeight < parent.scrollHeight ||
-						parent.offsetWidth < parent.scrollWidth
-					) {
+					if (parent.offsetHeight < parent.scrollHeight || parent.offsetWidth < parent.scrollWidth) {
 						scrollableElements.push([parent, parent.scrollTop, parent.scrollLeft]);
 					}
 					parent = parent.parentNode;
@@ -169,12 +152,7 @@ if (import.meta.env.VITE_KAIOS != 3) {
 			function isElementInViewport(el) {
 				var rect = el.getBoundingClientRect();
 
-				return (
-					rect.top >= 0 &&
-					rect.left >= 0 &&
-					rect.bottom <= window.innerHeight &&
-					rect.right <= window.innerWidth
-				);
+				return rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth;
 			}
 
 			var patchedFocus = function (args) {
@@ -198,9 +176,7 @@ if (import.meta.env.VITE_KAIOS != 3) {
 				const docFrag = document.createDocumentFragment();
 
 				args.forEach((argItem) =>
-					docFrag.appendChild(
-						argItem instanceof Node ? argItem : document.createTextNode(String(argItem))
-					)
+					docFrag.appendChild(argItem instanceof Node ? argItem : document.createTextNode(String(argItem)))
 				);
 
 				return docFrag;
@@ -229,9 +205,7 @@ if (import.meta.env.VITE_KAIOS != 3) {
 						var docFrag = document.createDocumentFragment();
 
 						argArr.forEach(function (argItem) {
-							docFrag.appendChild(
-								argItem instanceof Node ? argItem : document.createTextNode(String(argItem))
-							);
+							docFrag.appendChild(argItem instanceof Node ? argItem : document.createTextNode(String(argItem)));
 						});
 
 						this.parentNode.insertBefore(docFrag, this.nextSibling);
