@@ -1,6 +1,6 @@
 import * as signals from "./signals";
 import * as utils from "./lib/utils";
-import * as files from "./lib/files";
+import * as files from "./lib/files/download";
 import * as stores from "./lib/stores";
 import * as solid from "solid-js";
 import { md } from "@mtcute/markdown-parser";
@@ -22,11 +22,7 @@ Object.defineProperty(KeyboardEvent.prototype, "key", {
 			return "Soft" + evt_key.slice(5);
 		}
 
-		if (
-			this.shiftKey &&
-			evt_key.startsWith("Arrow") &&
-			(evt_key.endsWith("Left") || evt_key.endsWith("Right"))
-		) {
+		if (this.shiftKey && evt_key.startsWith("Arrow") && (evt_key.endsWith("Left") || evt_key.endsWith("Right"))) {
 			return evt_key.endsWith("Left") ? "*" : "#";
 		}
 		return evt_key;
