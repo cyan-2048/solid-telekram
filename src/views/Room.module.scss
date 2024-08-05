@@ -2,6 +2,27 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.location {
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	height: 160px;
+	width: 192px;
+
+	.pin {
+		width: 21px;
+		height: 30px;
+		background-image: url(../assets/map_pin.png);
+		background-size: contain;
+		position: absolute;
+		left: 0;
+		right: 0;
+		margin: auto;
+		top: 50px;
+	}
+}
+
 .photo {
 	max-height: 50vh;
 	min-height: 50px;
@@ -34,6 +55,33 @@
 
 .video {
 	@extend .photo;
+
+	position: relative;
+
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+
+	.gif {
+		position: absolute;
+		width: 40px;
+		height: 40px;
+
+		background-color: rgba(0, 0, 0, 0.5);
+		border-radius: 20px;
+		overflow: hidden;
+		text-align: center;
+		line-height: 40px;
+
+		color: white;
+
+		margin: auto;
+
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+	}
 }
 
 .isReply {

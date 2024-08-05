@@ -166,6 +166,8 @@ export class UIMessage {
 	private __deferredReply = new Deferred<UIMessage | null>();
 	private __isGettingUser = false;
 
+	isLocation = false;
+
 	poll: UIPoll | null = null;
 
 	updateText($: Message) {
@@ -314,6 +316,7 @@ export class UIMessage {
 			switch ($.media.type) {
 				case "location": {
 					newText = "Location";
+					this.isLocation = true;
 					break;
 				}
 
@@ -330,6 +333,15 @@ export class UIMessage {
 					newText = $.media.emoji + " Sticker";
 
 					this.isSticker = true;
+					break;
+				}
+
+				case "video": {
+					newText = "Video";
+					if ($.media.isAnimation || $.media.isLegacyGif) {
+						newText = "GIF";
+					}
+
 					break;
 				}
 

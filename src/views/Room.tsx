@@ -36,6 +36,7 @@ import {
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
+	clampImageDimension,
 	getColorFromPeer,
 	getTextFromContentEditable,
 	isSelectionAtStart,
@@ -1178,21 +1179,48 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 	});
 
 	const [width, setWidth] = createSignal(0);
-	const [height, setHeight] = createSignal(0);
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+		const dimensions = props.$.$.media.attr;
+
+		const { w } = clampImageDimension(dimensions.h, dimensions.w, window.innerHeight / 2, window.innerWidth * 0.85 - 8);
+
+		setWidth(w);
+		console.error("WIDTH CALCULATED", w);
+	});
 
 	return (
-		<div class={styles.video}>
+		<div
+			class={styles.video}
+			style={
+				preview()
+					? {
+							"background-image": `url(${preview()})`,
+					  }
+					: undefined
+			}
+		>
 			<Show when={isGif()} fallback={<></>}>
 				<Show
 					when={props.focused && src()}
 					fallback={
-						<Show when={preview()} fallback={<img class={styles.thumb} src={thumb() + "#-moz-samplesize=2"}></img>}>
+						<Show
+							when={preview()}
+							fallback={
+								<img
+									onLoad={(e) => {
+										setWidth(e.currentTarget.clientWidth);
+									}}
+									class={styles.thumb}
+									src={thumb() + "#-moz-samplesize=2"}
+								></img>
+							}
+						>
 							<img
-								ref={(e) => {
-									setTimeout(() => {
-										setHeight(e.offsetHeight);
-										setWidth(e.offsetWidth);
-									}, 2);
+								onLoad={(e) => {
+									setWidth(e.currentTarget.clientWidth);
 								}}
 								src={preview() + "#-moz-samplesize=2"}
 							></img>
@@ -1203,9 +1231,15 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 						when={isGif() === 1}
 						fallback={
 							<video
-								style={{
-									width: width() + "px",
-									height: height() + "px",
+								style={
+									width()
+										? {
+												width: width() + "px",
+										  }
+										: undefined
+								}
+								onLoadedMetadata={(e) => {
+									setWidth(e.currentTarget.clientWidth);
 								}}
 								autoplay
 								loop
@@ -1214,15 +1248,88 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 						}
 					>
 						<img
-							style={{
-								width: width() + "px",
-								height: height() + "px",
+							style={
+								width()
+									? {
+											width: width() + "px",
+									  }
+									: undefined
+							}
+							onLoad={(e) => {
+								setWidth(e.currentTarget.clientWidth);
 							}}
 							src={src()}
 						></img>
 					</Show>
 				</Show>
+				<Show when={!props.focused}>
+					<div class={styles.gif}>GIF</div>
+				</Show>
 			</Show>
+		</div>
+	);
+}
+
+function LocationMedia(props: { $: UIMessage }) {
+	if (props.$.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
+
+	const [src, setSrc] = createSignal("");
+	const [loading, setLoading] = createSignal(true);
+
+	let mounted = true;
+	onCleanup(() => {
+		mounted = false;
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
+
+		const media = props.$.$.media;
+
+		const download = downloadFile(
+			media.preview({
+				width: 192,
+				height: 160,
+			})
+		);
+
+		let url!: string;
+
+		const stateChange = () => {
+			if (download.state == "done") {
+				if (mounted) {
+					setLoading(false);
+					setSrc((url = URL.createObjectURL(download.result)));
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	return (
+		<div
+			class={styles.location}
+			style={{
+				"background-image": `url(${src()})`,
+			}}
+		>
+			<div class={styles.pin}></div>
 		</div>
 	);
 }
@@ -1351,6 +1458,9 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 								<VideoMedia focused={focused()} $={props.$} />
 							</Match>
 							<Match when={mediaType() == "audio"}>supposed to be a audio here</Match>
+							<Match when={mediaType() == "location"}>
+								<LocationMedia $={props.$} />
+							</Match>
 						</Switch>
 						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
 							<div class={styles.text_container}>

@@ -163,7 +163,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 													? generateHiddenCodeThing(a.source.length)
 													: a.source
 											)
-											.join("")
+											.join("") || get(lastMsg.text)
 								  )
 								: set(get(lastMsg.text));
 						})

@@ -7,18 +7,32 @@ import { client } from "@signals";
 
 function hashFile(fileLocation: FileLocation) {
 	const location = fileLocation.location;
-
 	// let's hope this works haha
 	if ("uniqueFileId" in fileLocation) {
 		return simpleHash(String(fileLocation.uniqueFileId));
 	}
 
-	// doesn't seem to be accurate?
-	// if ("localId" in location) {
-	// 	return simpleHash(String(location.localId));
-	// }
+	if ("geoPoint" in location) {
+		let str = "";
+
+		str += location.w;
+		str += location.h;
+		str += location.scale;
+		str += location.zoom;
+		if ("lat" in location.geoPoint) {
+			str += location.geoPoint.lat;
+			str += location.geoPoint.long;
+		}
+
+		return simpleHash(str);
+	}
 
 	if ("photoId" in location) {
+		// doesn't seem to be accurate?
+		// if ("localId" in location) {
+		// 	return simpleHash(String(location.localId));
+		// }
+
 		const long = location.photoId;
 		return simpleHash(long.toString(36));
 	}

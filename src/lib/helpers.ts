@@ -39,3 +39,17 @@ export const simpleHash = (str: string) => {
 	// Convert to 32bit unsigned integer in base 36 and pad with "0" to ensure length is 7.
 	return hash >>> 0;
 };
+
+export function clampImageDimension(imageHeight: number, imageWidth: number, maxHeight: number, maxWidth: number) {
+	// Calculate which adjustment is the smallest, width or height
+	// otherwise we'd overflow one of them.
+	const widthPercent = maxWidth / imageWidth;
+	const heightPercent = maxHeight / imageHeight;
+	const smallestPercent = Math.min(widthPercent, heightPercent);
+
+	// This works for both scaling up and scaling down
+	return {
+		w: imageWidth * smallestPercent,
+		h: imageHeight * smallestPercent,
+	};
+}
