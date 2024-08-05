@@ -2,6 +2,12 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.media_checks {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+}
+
 .location {
 	position: relative;
 	background-repeat: no-repeat;
@@ -39,6 +45,7 @@
 		object-fit: cover;
 		width: 100%;
 		height: 100%;
+		overflow: hidden;
 	}
 
 	.thumb {
@@ -579,10 +586,10 @@ span.extra_width {
 		margin-right: 3px;
 		color: rgb(112, 117, 121);
 	}
+}
 
-	.info_check {
-		color: var(--accent);
-	}
+.info_check {
+	color: var(--accent);
 }
 
 .outgoing {

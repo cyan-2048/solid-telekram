@@ -43,6 +43,7 @@ import {
 	RawPeer,
 	sleep,
 	typeInTextbox,
+	useMessageChecks,
 	useStore,
 } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -742,10 +743,13 @@ function UsernameContainer(props: { children: JSXElement; peer: RawPeer }) {
 
 function MessageAdditionalInfo(props: { $: UIMessage; dialog: UIDialog; setWidth: (n: number) => void }) {
 	const edited = useStore(() => props.$.editDate);
-	const lastReadOutgoing = useStore(() => props.dialog.lastReadOutgoing);
 
-	// returns false if double check
-	const check = () => lastReadOutgoing() < props.$.id;
+	const check = useMessageChecks(
+		() => props.$,
+		() => props.dialog
+	);
+
+	const lastReadOutgoing = useStore(() => props.dialog.lastReadOutgoing);
 
 	let divRef!: HTMLDivElement;
 
@@ -1071,8 +1075,25 @@ function PhotoMedia(props: { $: UIMessage }) {
 	);
 }
 
-function VideoMedia(props: { $: UIMessage; focused: boolean }) {
+function MediaChecks(props: { $: UIMessage; dialog: UIDialog }) {
+	const check = useMessageChecks(
+		() => props.$,
+		() => props.dialog
+	);
+
+	return (
+		<div class={styles.media_checks}>
+			<div class={styles.info_check}>
+				<TelegramIcon name={check() ? "check" : "checks"} />
+			</div>
+		</div>
+	);
+}
+
+function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
 	if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+	const round = () => (props.$.$.media as any).isRound as boolean;
 
 	const [src, setSrc] = createSignal("");
 	const [loading, setLoading] = createSignal(true);
@@ -1200,7 +1221,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 		<div
 			class={styles.video}
 			style={
-				preview()
+				preview() && isGif()
 					? {
 							"background-image": `url(${preview()})`,
 					  }
@@ -1224,6 +1245,13 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 							}
 						>
 							<img
+								style={
+									round()
+										? {
+												"border-radius": "50%",
+										  }
+										: undefined
+								}
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
@@ -1309,6 +1337,9 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 				<Show when={!props.focused}>
 					<div class={styles.gif}>GIF</div>
 				</Show>
+			</Show>
+			<Show when={props.$.isOutgoing}>
+				<MediaChecks $={props.$} dialog={props.dialog} />
 			</Show>
 		</div>
 	);
@@ -1499,7 +1530,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 								<PhotoMedia $={props.$} />
 							</Match>
 							<Match when={mediaType() == "video"}>
-								<VideoMedia focused={focused()} $={props.$} />
+								<VideoMedia focused={focused()} $={props.$} dialog={props.dialog} />
 							</Match>
 							<Match when={mediaType() == "audio"}>supposed to be a audio here</Match>
 							<Match when={mediaType() == "location"}>

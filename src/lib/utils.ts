@@ -2,6 +2,7 @@ import { tl } from "@mtcute/tl";
 import scrollIntoViewNPM from "scroll-into-view";
 import { Accessor, createEffect, createSignal, onCleanup } from "solid-js";
 import { Readable, get } from "./stores";
+import { UIDialog, UIMessage } from "@signals";
 
 export * from "./helpers";
 
@@ -87,11 +88,15 @@ export function resumeKeypress() {
 
 export { isKeypressPaused };
 
-export const useKeypress = (
-	keys: string | string[],
-	handler: (e: KeyboardEvent) => void,
-	force = false
-) => {
+export function useMessageChecks(message: () => UIMessage, dialog: () => UIDialog) {
+	const lastReadOutgoing = useStore(() => dialog().lastReadOutgoing);
+
+	// returns false if double check
+	const check = () => lastReadOutgoing() < message().id;
+	return check;
+}
+
+export const useKeypress = (keys: string | string[], handler: (e: KeyboardEvent) => void, force = false) => {
 	const eventListener = (event: KeyboardEvent) => {
 		if (isKeypressPaused() && !force) return;
 
@@ -221,12 +226,7 @@ export function hexaToHsla(hexa: string) {
 	return rgbaToHsla(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
-export type RawPeer =
-	| tl.RawUser
-	| tl.RawChat
-	| tl.RawChannel
-	| tl.RawChatForbidden
-	| tl.RawChannelForbidden;
+export type RawPeer = tl.RawUser | tl.RawChat | tl.RawChannel | tl.RawChatForbidden | tl.RawChannelForbidden;
 
 function getPeerColorIndexById(peerId: number) {
 	return Math.abs(peerId) % 7;
@@ -249,9 +249,7 @@ export function getColorFromPeer(peer: RawPeer) {
 	const assertColor = (color?: number) => (color ? color != -1 && color : false);
 
 	let idx =
-		"color" in peer
-			? assertColor(peer.color?.color) || getPeerColorIndexById(peer.id)
-			: getPeerColorIndexById(peer.id);
+		"color" in peer ? assertColor(peer.color?.color) || getPeerColorIndexById(peer.id) : getPeerColorIndexById(peer.id);
 
 	let color = DialogColors[idx];
 
