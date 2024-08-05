@@ -9,9 +9,9 @@
 	border-radius: 4px;
 
 	height: 256px;
-	width: 80vw;
 
-	img {
+	img,
+	video {
 		display: block;
 
 		object-position: center;
@@ -32,8 +32,13 @@
 	}
 }
 
+.video {
+	@extend .photo;
+}
+
 .isReply {
-	.photo {
+	.photo,
+	.video {
 		height: 120px;
 	}
 }

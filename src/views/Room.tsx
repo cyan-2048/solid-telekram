@@ -13,6 +13,7 @@ import {
 	onMount,
 	Match,
 	batch,
+	createRenderEffect,
 } from "solid-js";
 import {
 	EE,
@@ -31,6 +32,7 @@ import {
 	setSoftkeys,
 	setView,
 	userStatusJar,
+	uiDialog,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -491,6 +493,7 @@ function MessageContainer(props: {
 	isSticker: boolean;
 	isReply: boolean;
 	showUsername: boolean;
+	setFocused: (e: boolean) => void;
 }) {
 	const tg = client()!;
 
@@ -565,9 +568,13 @@ function MessageContainer(props: {
 							block: "center",
 							inline: "center",
 						});
+						props.setFocused(true);
 					}
 
 					setSoftkeys("tg:arrow_down", "INFO", "tg:more");
+				}}
+				onBlur={() => {
+					props.setFocused(false);
 				}}
 				on:sn-navigatefailed={async (e) => {
 					const direction = e.detail.direction;
@@ -1059,6 +1066,167 @@ function PhotoMedia(props: { $: UIMessage }) {
 	);
 }
 
+function VideoMedia(props: { $: UIMessage; focused: boolean }) {
+	if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+	const [src, setSrc] = createSignal("");
+	const [loading, setLoading] = createSignal(true);
+	const [showUnsupported, setShowUnsupported] = createSignal(false);
+	const [thumb, setThumb] = createSignal("");
+	const [preview, setPreview] = createSignal("");
+
+	// if legacy use 1
+	const [isGif, setIsGif] = createSignal<boolean | 1>(false);
+
+	let mounted = true;
+
+	onCleanup(() => {
+		mounted = false;
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+		const media = props.$.$.media;
+		setIsGif(media.isLegacyGif ? 1 : media.isAnimation);
+
+		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
+
+		let url!: string;
+
+		if (thumb && "byteLength" in thumb.location) {
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+		}
+
+		onCleanup(() => {
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+		const media = props.$.$.media;
+		const thumb = media.getThumbnail("m");
+
+		if (thumb) {
+			const download = downloadFile(thumb);
+
+			let url!: string;
+
+			const stateChange = () => {
+				if (download.state == "done") {
+					if (mounted) {
+						setPreview((url = URL.createObjectURL(download.result)));
+					}
+				}
+			};
+
+			if (download.state == "done") {
+				stateChange();
+
+				onCleanup(() => {
+					URL.revokeObjectURL(url);
+				});
+
+				return;
+			}
+
+			download.on("state", stateChange);
+
+			onCleanup(() => {
+				download.off("state", stateChange);
+				URL.revokeObjectURL(url);
+			});
+		}
+	});
+
+	onMount(() => {
+		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
+
+		const media = props.$.$.media;
+
+		const download = downloadFile(media);
+
+		let url!: string;
+
+		const stateChange = () => {
+			if (download.state == "done") {
+				if (mounted) {
+					setLoading(false);
+					setSrc((url = URL.createObjectURL(download.result)));
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	const [width, setWidth] = createSignal(0);
+	const [height, setHeight] = createSignal(0);
+
+	return (
+		<div class={styles.video}>
+			<Show when={isGif()} fallback={<></>}>
+				<Show
+					when={props.focused && src()}
+					fallback={
+						<Show when={preview()} fallback={<img class={styles.thumb} src={thumb() + "#-moz-samplesize=2"}></img>}>
+							<img
+								ref={(e) => {
+									setTimeout(() => {
+										setHeight(e.offsetHeight);
+										setWidth(e.offsetWidth);
+									}, 2);
+								}}
+								src={preview() + "#-moz-samplesize=2"}
+							></img>
+						</Show>
+					}
+				>
+					<Show
+						when={isGif() === 1}
+						fallback={
+							<video
+								style={{
+									width: width() + "px",
+									height: height() + "px",
+								}}
+								autoplay
+								loop
+								src={src()}
+							></video>
+						}
+					>
+						<img
+							style={{
+								width: width() + "px",
+								height: height() + "px",
+							}}
+							src={src()}
+						></img>
+					</Show>
+				</Show>
+			</Show>
+		</div>
+	);
+}
+
 // wtf typescript????
 function MessageAction(props: {
 	$: UIMessage & {
@@ -1083,6 +1251,8 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 		throw new Error("CLIENT NOT READY !!!!");
 	}
 
+	const [focused, setFocused] = createSignal(false);
+
 	const text = useStore(() => props.$.text);
 	const entities = useStore(() => props.$.entities);
 
@@ -1099,7 +1269,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 	// 0 when deleted message
 	const [reply, setReply] = createSignal(null as UIMessage | null | 0);
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		const _ = props.$.isReply();
 
 		if (_) {
@@ -1112,6 +1282,8 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 	});
 
 	const [infoWidth, setInfoWidth] = createSignal(0);
+
+	const mediaType = () => props.$.$.media?.type;
 
 	return (
 		<>
@@ -1136,6 +1308,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 				when={props.$.$.action}
 				fallback={
 					<MessageContainer
+						setFocused={setFocused}
 						actualLast={props.last}
 						last={props.last && chat()?.chatType == "channel"}
 						outgoing={props.$.isOutgoing}
@@ -1171,9 +1344,13 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 							<StickerMedia $={props.$} />
 						</Show>
 						<Switch>
-							<Match when={props.$.$.media?.type == "photo" && props.$.$.media}>
+							<Match when={mediaType() == "photo"}>
 								<PhotoMedia $={props.$} />
 							</Match>
+							<Match when={mediaType() == "video"}>
+								<VideoMedia focused={focused()} $={props.$} />
+							</Match>
+							<Match when={mediaType() == "audio"}>supposed to be a audio here</Match>
 						</Switch>
 						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
 							<div class={styles.text_container}>
@@ -1676,8 +1853,6 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 }
 
 export default function Room(props: { hidden: boolean }) {
-	const [uiDialog, setUIDialog] = createSignal<null | UIDialog>(null);
-
 	const interacting = createMemo(() => {
 		const editing = editingMessage();
 		const replying = replyingMessage();
@@ -1690,25 +1865,12 @@ export default function Room(props: { hidden: boolean }) {
 
 		const _room = room();
 
-		let clean = true;
-
 		if (_room) {
 			tg.openChat(_room);
 
 			// console.log(dialogsJar.get(_room.id), _room.id, _room);
 
-			if (_room instanceof UIDialog) {
-				setUIDialog(_room);
-			} else {
-				tg.getPeerDialogs(_room).then(([e]) => {
-					if (e && clean) {
-						setUIDialog(dialogsJar.add(e));
-					}
-				});
-			}
-
 			onCleanup(() => {
-				clean = false;
 				tg.closeChat(_room);
 			});
 		}

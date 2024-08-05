@@ -1,21 +1,15 @@
 import styles from "./Home.module.scss";
-import {
-	For,
-	Show,
-	createEffect,
-	createRenderEffect,
-	createSignal,
-	from,
-	onCleanup,
-	onMount,
-} from "solid-js";
+import { For, Show, batch, createEffect, createRenderEffect, createSignal, from, onCleanup, onMount } from "solid-js";
 import {
 	UIDialog,
+	client,
 	dialogs,
 	dialogsJar,
+	room,
 	setRoom,
 	setSoftkeys,
 	setStatusbarColor,
+	setUIDialog,
 	setView,
 } from "@signals";
 import Search from "./components/Search";
@@ -134,12 +128,8 @@ function DialogSender(props: { $: UIDialog }) {
 					<TelegramIcon name={lastReadOutgoing() < lastMessage()!.id ? "check" : "checks"} />
 				</div>
 			</Show>
-			<Show
-				when={lastMessage() && !lastMessage()!.isOutgoing && (chat().isGroup || chat().isForum)}
-			>
-				<span class={styles.sender}>
-					{lastMessage()!.sender.firstName || lastMessage()!.sender.displayName}:{" "}
-				</span>
+			<Show when={lastMessage() && !lastMessage()!.isOutgoing && (chat().isGroup || chat().isForum)}>
+				<span class={styles.sender}>{lastMessage()!.sender.firstName || lastMessage()!.sender.displayName}: </span>
 			</Show>
 		</Show>
 	);
@@ -201,10 +191,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 		const isSupport = props.$.$.chat.isSupport;
 
 		return (
-			_text &&
-			(isSupport
-				? _text.replace(/Login code: \d\d\d\d\d/, "Login code: " + generateHiddenCodeThing())
-				: _text)
+			_text && (isSupport ? _text.replace(/Login code: \d\d\d\d\d/, "Login code: " + generateHiddenCodeThing()) : _text)
 		);
 	};
 
@@ -238,11 +225,19 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 			on:sn-enter-down={async () => {
 				if (!props.$.messages.hasLoadedBefore) {
 					props.$.messages.loadMore();
-					await sleep(0);
+				} else if (room()?.id != props.$.id) {
+					const msgs = props.$.messages;
+					msgs.isLoading.set(true);
+					setTimeout(() => {
+						msgs.isLoading.set(false);
+					}, 200);
 				}
-				setRoom(props.$.$.chat);
-				await sleep(0);
-				setView("room");
+
+				batch(() => {
+					setUIDialog(props.$);
+					setRoom(props.$.$.chat);
+					setView("room");
+				});
 			}}
 			tabIndex={-1}
 			classList={{ [styles.dialog]: true, focusable }}
@@ -373,9 +368,7 @@ export default function Home(props: { hidden: boolean }) {
 
 						<Show when={searchText() && searchResults().length}>
 							<div>
-								<For each={searchResults()}>
-									{(dialog) => <DialogItem $={dialog} isSearchResult />}
-								</For>
+								<For each={searchResults()}>{(dialog) => <DialogItem $={dialog} isSearchResult />}</For>
 							</div>
 						</Show>
 						<div

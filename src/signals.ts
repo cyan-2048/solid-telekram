@@ -76,6 +76,7 @@ export const [replyingMessage, setReplyingMessage] = createSignal<null | UIMessa
 export const [editingMessage, setEditingMessage] = createSignal<null | UIMessage>(null);
 
 export const [room, setRoom] = createSignal<Chat | UIDialog | null>(null);
+export const [uiDialog, setUIDialog] = createSignal<null | UIDialog>(null);
 
 export const chat = createMemo(() => {
 	const _room = room();
