@@ -149,7 +149,7 @@ class Download extends EventEmitter<{
 
 		this._state = "started";
 
-		await sleep(1000);
+		await sleep(50);
 
 		const cached = await getFileFromCache(this.hash);
 
@@ -179,7 +179,7 @@ class Download extends EventEmitter<{
 
 		this.result = await download.finalize();
 
-		await sleep(1000);
+		await sleep(50);
 
 		this._state = "done";
 	}

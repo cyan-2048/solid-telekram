@@ -32,6 +32,9 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 ## Features
 
 - [ ] Chats
+  - [ ] Typing Indicator
+    - [x] Self (others can see you type)
+    - [ ] Others
   - [x] Pinned Chats
   - [ ] Archived Chats
   - [x] Unread/Muted/Sent/Received
@@ -62,11 +65,14 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
       - [ ] Emoji history
     - [ ] Gifs
       - [ ] Gif Picker
+      - [x] Gif previews
     - [ ] Photos
+      - [x] Photo previews
     - [ ] Voice Messages
     - [ ] Music
     - [ ] Videos
     - [ ] Location
+      - [x] Location Previews
       - [ ] Live Location (o.map help me lmao)
   - [x] Replying
   - [x] Editing

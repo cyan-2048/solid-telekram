@@ -563,6 +563,10 @@ function MessageContainer(props: {
 				ref={divRef}
 				tabIndex={-1}
 				onFocus={(e) => {
+					if (props.actualLast) {
+						props.dialog.readHistory();
+					}
+
 					if (e.currentTarget == e.target) {
 						scrollIntoView(e.currentTarget, {
 							behavior: "instant",
@@ -1089,6 +1093,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
 
 		const media = props.$.$.media;
+
 		setIsGif(media.isLegacyGif ? 1 : media.isAnimation);
 
 		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
@@ -1202,7 +1207,46 @@ function VideoMedia(props: { $: UIMessage; focused: boolean }) {
 					: undefined
 			}
 		>
-			<Show when={isGif()} fallback={<></>}>
+			<Show
+				when={isGif()}
+				fallback={
+					<>
+						<Show
+							when={preview()}
+							fallback={
+								<img
+									onLoad={(e) => {
+										setWidth(e.currentTarget.clientWidth);
+									}}
+									class={styles.thumb}
+									src={thumb() + "#-moz-samplesize=2"}
+								></img>
+							}
+						>
+							<img
+								onLoad={(e) => {
+									setWidth(e.currentTarget.clientWidth);
+								}}
+								src={preview() + "#-moz-samplesize=2"}
+							></img>
+						</Show>
+						<div class={styles.play}>
+							<svg viewBox="0 0 20 20" class="MX">
+								<path d="M4 3.1v13.8c0 .9 1 1.5 1.8 1 3.1-1.7 9.4-5.2 12.5-6.9.8-.5.8-1.6 0-2.1L5.8 2C5 1.6 4 2.2 4 3.1z"></path>
+							</svg>
+						</div>
+						<div class={styles.time}>
+							<svg viewBox="0 0 18 18" class="PL">
+								<path
+									d="M13.518 7.626v-2.82a.72.72 0 00-.247-.583.905.905 0 00-.65-.222H1.9a.905.905 0 00-.651.222.72.72 0 00-.247.584v8.386a.72.72 0 00.247.584.905.905 0 00.651.222h10.72a.905.905 0 00.65-.222.72.72 0 00.247-.584v-2.82l.1.09 2.613 2.44a.49.49 0 00.49.088.408.408 0 00.28-.372V5.382a.407.407 0 00-.279-.374.49.49 0 00-.492.089l-2.591 2.421-.122.109h.002z"
+									fill-rule="evenodd"
+								></path>
+							</svg>
+							0:05
+						</div>
+					</>
+				}
+			>
 				<Show
 					when={props.focused && src()}
 					fallback={
@@ -1345,7 +1389,7 @@ function MessageAction(props: {
 	const text = useStore(() => props.$.text);
 
 	return (
-		<Show when={props.$.$.action.type != "history_cleared"}>
+		<Show when={props.$.$.action.type != "history_cleared" && props.$.$.action.type != "contact_joined"}>
 			<ActionMessage>{text()}</ActionMessage>
 		</Show>
 	);

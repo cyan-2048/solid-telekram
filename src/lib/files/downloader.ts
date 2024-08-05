@@ -198,7 +198,7 @@ function createDownloaderStorage(hash: string | number): Downloader {
 
 async function getFileFromCacheStorage(hash: string | number) {
 	await kaigramFolder;
-	await sleep(1000);
+	await sleep(50);
 	const filename = hash + ".tgcache";
 	return systemStorage
 		.get("kaigram/" + filename)
@@ -218,7 +218,7 @@ async function addToCacheStorage(hash: string | number, ...buffer: BlobPart[]) {
 		.addNamed(new Blob(buffer), "kaigram/" + filename)
 		.then((a) => a)
 		.catch(() => null);
-	await sleep(1000);
+	await sleep(50);
 	return systemStorage
 		.get("kaigram/" + filename)
 		.then((a) => a)

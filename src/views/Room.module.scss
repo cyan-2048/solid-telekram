@@ -53,6 +53,27 @@
 	}
 }
 
+%gif {
+	position: absolute;
+	width: 40px;
+	height: 40px;
+
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: 20px;
+	overflow: hidden;
+	text-align: center;
+	line-height: 40px;
+
+	color: white;
+
+	margin: auto;
+
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
 .video {
 	@extend .photo;
 
@@ -62,25 +83,54 @@
 	background-size: cover;
 	background-repeat: no-repeat;
 
-	.gif {
-		position: absolute;
-		width: 40px;
-		height: 40px;
+	.gif,
+	.play {
+		@extend %gif;
+	}
 
-		background-color: rgba(0, 0, 0, 0.5);
-		border-radius: 20px;
-		overflow: hidden;
-		text-align: center;
-		line-height: 40px;
+	.play {
+		padding: 10px;
+		fill: white;
+		svg {
+			display: block;
+		}
+	}
 
+	.time {
 		color: white;
 
-		margin: auto;
-
 		left: 0;
-		right: 0;
-		top: 0;
+		padding: 3px 10px 0 5px;
+		border-top-right-radius: 20px;
+		background: linear-gradient(
+			to top right,
+			#000,
+			rgba(0, 0, 0, 0.95932) 5.79%,
+			rgba(0, 0, 0, 0.8912) 10.88%,
+			rgba(0, 0, 0, 0.80156) 15.63%,
+			rgba(0, 0, 0, 0.6963) 20.37%,
+			rgba(0, 0, 0, 0.58131) 25.46%,
+			rgba(0, 0, 0, 0.4625) 31.25%,
+			rgba(0, 0, 0, 0.34578) 38.08%,
+			rgba(0, 0, 0, 0.23704) 46.3%,
+			rgba(0, 0, 0, 0.14219) 56.25%,
+			rgba(0, 0, 0, 0.06713) 68.29%,
+			rgba(0, 0, 0, 0.01777) 82.75%,
+			transparent
+		);
+		position: absolute;
 		bottom: 0;
+		color: white;
+		font-size: 14px;
+		font-weight: 600;
+
+		svg {
+			float: left;
+			margin-right: 3px;
+			padding-top: 3px;
+			fill: white;
+			width: 14px;
+		}
 	}
 }
 
