@@ -96,26 +96,46 @@ function ChatPhotoColor(props: { color: string; children: JSXElement }) {
 	);
 }
 
-export default function ChatPhotoIcon(props: { chat: Chat }) {
+export default function ChatPhotoIcon(props: { chat: Chat; showSavedIcon?: boolean }) {
 	return (
 		<Show
-			when={props.chat.photo && !props.chat.isSelf}
+			when={props.showSavedIcon === undefined || props.showSavedIcon}
 			fallback={
-				<ChatPhotoColor color={props.chat.isSelf ? "saved" : getColorFromPeer(props.chat.peer)}>
-					<Show
-						when={props.chat.isSelf}
-						fallback={props.chat.displayName
-							.split(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]|\s/gi)
-							.map((a) => Array.from(a)[0])
-							.join("")
-							.slice(0, 2)}
-					>
-						<TelegramIcon style={{ "font-size": "1.1rem" }} name="saved" />
-					</Show>
-				</ChatPhotoColor>
+				<Show
+					when={props.chat.photo}
+					fallback={
+						<ChatPhotoColor color={getColorFromPeer(props.chat.peer)}>
+							{props.chat.displayName
+								.split(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]|\s/gi)
+								.map((a) => Array.from(a)[0])
+								.join("")
+								.slice(0, 2)}
+						</ChatPhotoColor>
+					}
+				>
+					<Show when={props.chat.photo}>{(photo) => <ChatPhotoWithIcon chat={props.chat} src={photo()} />}</Show>
+				</Show>
 			}
 		>
-			<Show when={props.chat.photo}>{(photo) => <ChatPhotoWithIcon chat={props.chat} src={photo()} />}</Show>
+			<Show
+				when={props.chat.photo && !props.chat.isSelf}
+				fallback={
+					<ChatPhotoColor color={props.chat.isSelf ? "saved" : getColorFromPeer(props.chat.peer)}>
+						<Show
+							when={props.chat.isSelf}
+							fallback={props.chat.displayName
+								.split(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]|\s/gi)
+								.map((a) => Array.from(a)[0])
+								.join("")
+								.slice(0, 2)}
+						>
+							<TelegramIcon style={{ "font-size": "1.1rem" }} name="saved" />
+						</Show>
+					</ChatPhotoColor>
+				}
+			>
+				<Show when={props.chat.photo}>{(photo) => <ChatPhotoWithIcon chat={props.chat} src={photo()} />}</Show>
+			</Show>
 		</Show>
 	);
 }

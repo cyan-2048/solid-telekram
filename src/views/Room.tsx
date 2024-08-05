@@ -54,7 +54,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import Options from "./components/Options";
 import OptionsItem from "./components/OptionsItem";
-import { Portal } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 import OptionsMenuMaxHeight from "./components/OptionsMenuMaxHeight";
 import { md } from "@mtcute/markdown-parser";
 import { debounce } from "lodash-es";
@@ -63,6 +63,7 @@ import EmojiPicker from "./components/EmojiPicker";
 import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
 import { downloadFile } from "@/lib/files/download";
+import { PeerPhotoIcon } from "./components/PeerPhoto";
 
 /**
  * Chat type. Can be:
@@ -996,7 +997,7 @@ function StickerMedia(props: { $: UIMessage }) {
 	);
 }
 
-function PhotoMedia(props: { $: UIMessage }) {
+function PhotoMedia(props: { $: UIMessage; dialog: UIDialog; showChecks: boolean }) {
 	if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
 
 	const [src, setSrc] = createSignal("");
@@ -1070,6 +1071,9 @@ function PhotoMedia(props: { $: UIMessage }) {
 			</Show>
 			<Show when={src()}>
 				<img src={src() + "#-moz-samplesize=2"}></img>
+			</Show>
+			<Show when={props.showChecks}>
+				<MediaChecks $={props.$} dialog={props.dialog} />
 			</Show>
 		</div>
 	);
@@ -1345,6 +1349,36 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog })
 	);
 }
 
+function VoiceAvatar(props: { $: UIMessage }) {
+	return <div></div>;
+}
+
+function VoiceMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+	console.error("SENDER", props.$.sender);
+	return (
+		<>
+			<div class={styles.voice}>
+				<div class={styles.photo}>
+					<PeerPhotoIcon showSavedIcon={false} peer={props.$.sender} />
+				</div>
+			</div>
+			<Show when={props.$.isOutgoing}>
+				<MediaChecks $={props.$} dialog={props.dialog} />
+			</Show>
+		</>
+	);
+}
+
+function MusicMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+	return null;
+}
+
+function AudioMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+	if (!(props.$.$.media?.type == "audio" || props.$.$.media?.type == "voice")) throw new Error("NOT AUDIO MEDIA");
+
+	return <Dynamic component={props.$.$.media.type == "voice" ? VoiceMedia : MusicMedia} {...props} />;
+}
+
 function LocationMedia(props: { $: UIMessage }) {
 	if (props.$.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
 
@@ -1527,14 +1561,20 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						</Show>
 						<Switch>
 							<Match when={mediaType() == "photo"}>
-								<PhotoMedia $={props.$} />
+								<PhotoMedia
+									$={props.$}
+									dialog={props.dialog}
+									showChecks={props.$.isOutgoing && !(!props.$.isSticker && (entities().entities || entities().text))}
+								/>
 							</Match>
 							<Match when={mediaType() == "video"}>
 								<VideoMedia focused={focused()} $={props.$} dialog={props.dialog} />
 							</Match>
-							<Match when={mediaType() == "audio"}>supposed to be a audio here</Match>
 							<Match when={mediaType() == "location"}>
 								<LocationMedia $={props.$} />
+							</Match>
+							<Match when={mediaType() == "audio" || mediaType() == "voice"}>
+								<AudioMedia $={props.$} focused={focused()} dialog={props.dialog} />
 							</Match>
 						</Switch>
 						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>

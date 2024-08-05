@@ -8,6 +8,22 @@
 	right: 0;
 }
 
+.voice {
+	width: 80vw;
+	padding: 4px;
+	position: relative;
+	display: flex;
+
+	.photo {
+		width: 40px;
+		height: 40px;
+		overflow: hidden;
+		position: relative;
+		min-height: unset;
+		border-radius: 40px;
+	}
+}
+
 .location {
 	position: relative;
 	background-repeat: no-repeat;
@@ -30,6 +46,7 @@
 }
 
 .photo {
+	position: relative;
 	max-height: 50vh;
 	min-height: 50px;
 	overflow: hidden;
