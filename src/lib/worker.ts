@@ -14,6 +14,7 @@ import {
 	IMtStorageProvider,
 	IPeersRepository,
 	ITelegramStorageProvider,
+	MaybePromise,
 	MemoryStorageDriver,
 	TelegramWorker,
 } from "@mtcute/web";
@@ -82,6 +83,7 @@ class LocalStorageDriver extends BaseStorageDriver implements MemoryStorageDrive
 			}
 		}
 	}
+
 	async _save() {
 		this.sync();
 	}
@@ -96,17 +98,14 @@ class LocalStorageKeyValueRepo extends MemoryKeyValueRepository {
 
 	set(key: string, value: Uint8Array): void {
 		super.set(key, value);
-		this._driver.sync();
 	}
 
 	delete(key: string): void {
 		super.delete(key);
-		this._driver.sync();
 	}
 
 	deleteAll(): void {
 		super.deleteAll();
-		this._driver.sync();
 	}
 }
 
@@ -139,12 +138,10 @@ class LocalStoragePeersRepo extends MemoryPeersRepository {
 
 	store(peer: IPeersRepository.PeerInfo): void {
 		super.store(peer);
-		this._driver.sync();
 	}
 
 	deleteAll(): void {
 		super.deleteAll();
-		this._driver.sync();
 	}
 }
 
@@ -153,22 +150,18 @@ class LocalStorageRefMessagesRepo extends MemoryRefMessagesRepository {
 
 	store(peerId: number, chatId: number, msgId: number): void {
 		super.store(peerId, chatId, msgId);
-		this._driver.sync();
 	}
 
 	delete(chatId: number, msgIds: number[]): void {
 		super.delete(chatId, msgIds);
-		this._driver.sync();
 	}
 
 	deleteByPeer(peerId: number): void {
 		super.deleteByPeer(peerId);
-		this._driver.sync();
 	}
 
 	deleteAll(): void {
 		super.deleteAll();
-		this._driver.sync();
 	}
 }
 
@@ -187,6 +180,8 @@ class LocalStorageProvider implements IMtStorageProvider, ITelegramStorageProvid
 		this.refMessages = new LocalStorageRefMessagesRepo(this.driver);
 	}
 }
+
+console.error("WORKER TEST IF STORAGE AVAILABLE IN WORKER", navigator.getDeviceStorage);
 
 addEventListener("message", function init({ data }) {
 	if (data && "__INIT__" in data) {

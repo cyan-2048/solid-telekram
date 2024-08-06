@@ -1033,7 +1033,15 @@ function PhotoMedia(props: { $: UIMessage; dialog: UIDialog; showChecks: boolean
 
 		const media = props.$.$.media;
 
-		const download = downloadFile(media);
+		// this is good enough?
+		const thumb = media.getThumbnail(Thumbnail.THUMB_320x320_BOX);
+
+		if (!thumb) {
+			console.error("THUMB M IS NOT PRESENT, SKIPPING");
+			return;
+		}
+
+		const download = downloadFile(thumb);
 
 		let url!: string;
 
@@ -1094,7 +1102,7 @@ function MediaChecks(props: { $: UIMessage; dialog: UIDialog }) {
 	);
 }
 
-function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; showChecks: boolean }) {
 	if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
 
 	const round = () => (props.$.$.media as any).isRound as boolean;
@@ -1177,6 +1185,28 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog })
 
 		const media = props.$.$.media;
 
+		const fileSize = media.fileSize;
+
+		console.error("FILESIZE VIDEO", fileSize);
+
+		if (!media.fileSize) {
+			// found memory issue with this lmao
+			return;
+		}
+
+		if (media.fileSize > 5242880) {
+			console.error("SKIPPING DOWNLOAD BECAUSE FILE SIZE TOO BIG");
+			// todo do to something about this
+			return;
+		}
+
+		const isGif = media.isLegacyGif ? 1 : media.isAnimation;
+
+		if (!isGif) {
+			console.error("SKIPPING DOWNLOAD BECAUSE IT IS NOT A GIF???");
+			return;
+		}
+
 		const download = downloadFile(media);
 
 		let url!: string;
@@ -1209,17 +1239,6 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog })
 	});
 
 	const [width, setWidth] = createSignal(0);
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
-
-		const dimensions = props.$.$.media.attr;
-
-		const { w } = clampImageDimension(dimensions.h, dimensions.w, window.innerHeight / 2, window.innerWidth * 0.85 - 8);
-
-		setWidth(w);
-		console.error("WIDTH CALCULATED", w);
-	});
 
 	return (
 		<div
@@ -1342,7 +1361,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog })
 					<div class={styles.gif}>GIF</div>
 				</Show>
 			</Show>
-			<Show when={props.$.isOutgoing}>
+			<Show when={props.showChecks}>
 				<MediaChecks $={props.$} dialog={props.dialog} />
 			</Show>
 		</div>
@@ -1353,7 +1372,14 @@ function VoiceAvatar(props: { $: UIMessage }) {
 	return <div></div>;
 }
 
-function VoiceMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+interface AudioMediaProps {
+	$: UIMessage;
+	focused: boolean;
+	dialog: UIDialog;
+	showChecks: boolean;
+}
+
+function VoiceMedia(props: AudioMediaProps) {
 	console.error("SENDER", props.$.sender);
 	return (
 		<>
@@ -1362,18 +1388,18 @@ function VoiceMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog })
 					<PeerPhotoIcon showSavedIcon={false} peer={props.$.sender} />
 				</div>
 			</div>
-			<Show when={props.$.isOutgoing}>
+			<Show when={props.showChecks}>
 				<MediaChecks $={props.$} dialog={props.dialog} />
 			</Show>
 		</>
 	);
 }
 
-function MusicMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+function MusicMedia(props: AudioMediaProps) {
 	return null;
 }
 
-function AudioMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog }) {
+function AudioMedia(props: AudioMediaProps) {
 	if (!(props.$.$.media?.type == "audio" || props.$.$.media?.type == "voice")) throw new Error("NOT AUDIO MEDIA");
 
 	return <Dynamic component={props.$.$.media.type == "voice" ? VoiceMedia : MusicMedia} {...props} />;
@@ -1499,7 +1525,12 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 
 	const [infoWidth, setInfoWidth] = createSignal(0);
 
-	const mediaType = () => props.$.$.media?.type;
+	const mediaType = createMemo(() => props.$.$.media?.type);
+
+	const showChecks = createMemo(() => props.$.isOutgoing && !(entities().entities || entities().text));
+
+	const tail = createMemo(() => decideTail(props.before, props.$));
+	const username = createMemo(() => decideShowUsername(props.before, props.$));
 
 	return (
 		<>
@@ -1528,53 +1559,43 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						actualLast={props.last}
 						last={props.last && chat()?.chatType == "channel"}
 						outgoing={props.$.isOutgoing}
-						tail={
-							props.$.isSticker
-								? props.$.isReply()
-									? decideTail(props.before, props.$)
-									: false
-								: decideTail(props.before, props.$)
-						}
+						tail={props.$.isSticker ? (props.$.isReply() ? tail() : false) : tail()}
 						dialog={props.dialog}
 						message={props.$.$}
 						$={props.$}
 						isSticker={props.$.isSticker}
-						isReply={!!props.$.isReply()}
-						showUsername={decideShowUsername(props.before, props.$)}
+						isReply={props.$.isReply()}
+						showUsername={username()}
 					>
-						<Show when={decideShowUsername(props.before, props.$)}>
+						<Show when={username()}>
 							<UsernameContainer peer={(props.$.sender as User).raw}>{props.$.sender.displayName}</UsernameContainer>
 						</Show>
-						<Show when={props.$.isReply() && reply() === null}>
-							<LoadingReplyMessage />
-						</Show>
 						<Switch>
+							<Match when={props.$.isReply() && reply() === null}>
+								<LoadingReplyMessage />
+							</Match>
 							<Match when={reply() === 0}>
 								<DeletedReplyMessage />
 							</Match>
-							<Match when={reply() instanceof UIMessage}>
+							<Match when={reply()}>
 								<ReplyMessage $={reply() as UIMessage} />
 							</Match>
 						</Switch>
-						<Show when={props.$.isSticker}>
-							<StickerMedia $={props.$} />
-						</Show>
 						<Switch>
+							<Match when={mediaType() == "sticker"}>
+								<StickerMedia $={props.$} />
+							</Match>
 							<Match when={mediaType() == "photo"}>
-								<PhotoMedia
-									$={props.$}
-									dialog={props.dialog}
-									showChecks={props.$.isOutgoing && !(!props.$.isSticker && (entities().entities || entities().text))}
-								/>
+								<PhotoMedia $={props.$} dialog={props.dialog} showChecks={showChecks()} />
 							</Match>
 							<Match when={mediaType() == "video"}>
-								<VideoMedia focused={focused()} $={props.$} dialog={props.dialog} />
+								<VideoMedia focused={focused()} $={props.$} dialog={props.dialog} showChecks={showChecks()} />
 							</Match>
 							<Match when={mediaType() == "location"}>
 								<LocationMedia $={props.$} />
 							</Match>
 							<Match when={mediaType() == "audio" || mediaType() == "voice"}>
-								<AudioMedia $={props.$} focused={focused()} dialog={props.dialog} />
+								<AudioMedia $={props.$} focused={focused()} dialog={props.dialog} showChecks={showChecks()} />
 							</Match>
 						</Switch>
 						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>

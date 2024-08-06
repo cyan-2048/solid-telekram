@@ -165,7 +165,7 @@ class Download extends EventEmitter<{
 			abortSignal: this.abortController.signal,
 			progressCallback: (downloaded) => {
 				const total = this.location.fileSize || 0;
-				console.error("progress", downloaded, total, Math.floor((downloaded / 0) * 100));
+				console.error("progress", downloaded, total, Math.floor((downloaded / total) * 100));
 			},
 		})) {
 			this._state = "downloading";

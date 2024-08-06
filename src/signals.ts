@@ -420,7 +420,7 @@ export class UIMessage {
 			return false;
 		}
 
-		return this.$.replyToMessage;
+		return !!this.$.replyToMessage;
 	}
 
 	// thanks mtcute guy
@@ -1003,22 +1003,6 @@ function saveState() {
 	console.log("STATE SYNC DONE", e);
 }
 
-const debounced_saveState = debounce(saveState, 20_000);
-
-window.addEventListener(
-	"keydown",
-	(e) => {
-		if (e.key == "Backspace" || e.key == "EndCall") {
-			const target = e.target;
-			if (import.meta.env.DEV && target && "value" in target && target.value) {
-				return;
-			}
-			saveState();
-		}
-	},
-	true
-);
-
 class UIStatus {
 	userId: number;
 
@@ -1060,8 +1044,6 @@ class UserStatusJar extends Map<number, UIStatus> {
 }
 
 export const userStatusJar = new UserStatusJar();
-
-window.addEventListener("beforeunload", saveState);
 
 function stringify(obj: any) {
 	return JSON.stringify(obj, (key, val) => {
@@ -1107,8 +1089,6 @@ function getInitialState() {
 
 	return state ? parse(state) : null;
 }
-
-let state_init = false;
 
 telegram.startSession(
 	getInitialState(),
@@ -1309,12 +1289,8 @@ telegram.startSession(
 	},
 	(state) => {
 		lastState = state;
-		if (!state_init) {
-			saveState();
-			state_init = true;
-			return;
-		}
-		debounced_saveState();
+
+		saveState();
 	},
 
 	// CLIENT ERRORS

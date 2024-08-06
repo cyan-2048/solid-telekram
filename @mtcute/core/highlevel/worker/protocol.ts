@@ -12,7 +12,7 @@ export type WorkerInboundMessage =
           id: number
           target: 'custom' | 'client' | 'storage' | 'storage-self' | 'storage-peers' | 'app-config'
           method: string
-          args: unknown[]
+          args: SerializedResult<unknown[]>
           void: boolean
           withAbort: boolean
       }
@@ -62,6 +62,8 @@ export type WorkerCustomMethods = Record<string, (...args: any[]) => Promise<any
 export type SerializedResult<T> = { __serialized__: T }
 
 export function serializeResult<T>(result: T): SerializedResult<T> {
+    if (ArrayBuffer.isView(result)) return result as unknown as SerializedResult<T>
+
     if (Array.isArray(result)) {
         return result.map(serializeResult) as unknown as SerializedResult<T>
     }
@@ -76,26 +78,34 @@ export function serializeResult<T>(result: T): SerializedResult<T> {
 
     if (result && typeof result === 'object') {
         // replace Long instances with a special object
+        const newResult: Record<string, unknown> = {}
+
         for (const [key, value] of Object.entries(result)) {
             if (Long.isLong(value)) {
                 // eslint-disable-next-line
-                ;(result as any)[key] = {
+                newResult[key] = {
                     __type: 'long',
                     low: value.low,
                     high: value.high,
                     unsigned: value.unsigned,
                 }
-            } else {
+            } else if (typeof value === 'object') {
                 // eslint-disable-next-line
-                ;(result as any)[key] = serializeResult(value)
+                newResult[key] = serializeResult(value)
+            } else {
+                newResult[key] = value
             }
         }
+
+        return newResult as unknown as SerializedResult<T>
     }
 
     return result as unknown as SerializedResult<T>
 }
 
 export function deserializeResult<T>(result: SerializedResult<T>): T {
+    if (ArrayBuffer.isView(result)) return result as unknown as T
+
     if (Array.isArray(result)) {
         return result.map(deserializeResult) as unknown as T
     }
@@ -114,7 +124,7 @@ export function deserializeResult<T>(result: SerializedResult<T>): T {
             if (value && typeof value === 'object' && (value as Record<string, string>).__type === 'long') {
                 // eslint-disable-next-line
                 ;(result as any)[key] = Long.fromValue(value as unknown as Long)
-            } else {
+            } else if (typeof value === 'object') {
                 // eslint-disable-next-line
                 ;(result as any)[key] = deserializeResult(value as SerializedResult<unknown>)
             }

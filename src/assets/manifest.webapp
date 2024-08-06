@@ -3,7 +3,7 @@
 	"description": "Telegram Client for KaiOS.",
 	"display": "Telegram",
 	"short_name": "Telegram",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"launch_path": "/index.html",
 	"theme": "#fff",
 	"theme_color": "#fff",

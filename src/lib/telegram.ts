@@ -16,8 +16,6 @@ type Country = (typeof countries)[number];
 const apiId = import.meta.env.VITE_APP_ID;
 const apiHash = import.meta.env.VITE_APP_HASH;
 
-console.log(apiId);
-
 let client_not_ready: TelegramClient | null = null;
 
 const clientInit = new Deferred<void>();
@@ -83,6 +81,8 @@ class App {
 
 			client: port,
 		});
+
+		Object.assign(window, { tg });
 
 		async function checkSignedIn() {
 			// Try calling any method that requires authorization
