@@ -366,9 +366,13 @@ export default function Home(props: { hidden: boolean }) {
 							</div>
 						</Show>
 						<div
-							style={{
-								display: searchText() ? "none" : undefined,
-							}}
+							style={
+								searchText()
+									? {
+											display: "none",
+									  }
+									: undefined
+							}
 						>
 							<For each={dialogs()}>{(dialog) => <DialogItem $={dialog} />}</For>
 						</div>

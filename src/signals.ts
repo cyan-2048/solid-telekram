@@ -17,9 +17,9 @@ import {
 } from "@mtcute/web";
 import { debounce } from "lodash-es";
 import { get, writable, Writable } from "./lib/stores";
-import playVideo from "./lib/playVideo";
-import localforage from "localforage";
-import { QRCode } from "./lib/qrCode";
+// import playVideo from "./lib/playVideo";
+// import localforage from "localforage";
+// import { QRCode } from "./lib/qrCode";
 import { GetHistoryOffset } from "@mtcute/core/methods";
 import { capitalizeFirstLetter, sleep } from "./lib/utils";
 import Deferred from "./lib/Deffered";
@@ -1000,7 +1000,7 @@ function saveState() {
 		lastState = null;
 	}
 
-	console.trace("STATE SYNC DONE", e);
+	console.log("STATE SYNC DONE", e);
 }
 
 const debounced_saveState = debounce(saveState, 20_000);
@@ -1352,17 +1352,17 @@ handleCombo("555", () => {
 
 const nekoweb = "https://cyandiscordclient.nekoweb.org/";
 
-handleCombo("1234567", () => {
-	playVideo(nekoweb + "7.mp4");
-});
+// handleCombo("1234567", () => {
+// 	playVideo(nekoweb + "7.mp4");
+// });
 
-handleCombo("79", async () => {
-	// do the qr thing
-	const result = await new QRCode().readAsText();
-	await localforage.clear();
-	await localforage.setItem("token", result);
-	location.reload();
-});
+// handleCombo("79", async () => {
+// 	// do the qr thing
+// 	const result = await new QRCode().readAsText();
+// 	await localforage.clear();
+// 	await localforage.setItem("token", result);
+// 	location.reload();
+// });
 
 handleCombo("7569", () => {
 	localStorage.low_memory = "1";

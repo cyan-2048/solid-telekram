@@ -3,8 +3,6 @@ import type { AsmCryptoProvider } from "./asmjs/crypto";
 import type { WasmCryptoProvider } from "./wasm/crypto";
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from "./utils";
 
-export * from "./asmjs/crypto";
-
 export class WebCryptoProvider implements ICryptoProvider {
 	instance!: AsmCryptoProvider | WasmCryptoProvider;
 
