@@ -225,12 +225,6 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 			on:sn-enter-down={async () => {
 				if (!props.$.messages.hasLoadedBefore) {
 					props.$.messages.loadMore();
-				} else if (room()?.id != props.$.id) {
-					const msgs = props.$.messages;
-					msgs.isLoading.set(true);
-					setTimeout(() => {
-						msgs.isLoading.set(false);
-					}, 200);
 				}
 
 				batch(() => {

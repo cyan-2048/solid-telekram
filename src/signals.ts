@@ -9,14 +9,13 @@ import {
 	Message,
 	Peer,
 	Poll,
-	PollUpdate,
 	TelegramClient,
 	TextWithEntities,
 	tl,
 	UserStatus,
 	UserStatusUpdate,
 } from "@mtcute/web";
-import { capitalize, debounce } from "lodash-es";
+import { debounce } from "lodash-es";
 import { get, writable, Writable } from "./lib/stores";
 import playVideo from "./lib/playVideo";
 import localforage from "localforage";
@@ -31,8 +30,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
-
-export const LowMemoryMode = () => !!localStorage.getItem("low_memory");
 
 const [softleft, setSoftleft] = createSignal("");
 const [softcenter, setSoftcenter] = createSignal("");
@@ -414,6 +411,7 @@ export class UIMessage {
 		return dialogsJar.get(this.$.chat.peer.id) || null;
 	}
 
+	// decide whether the reply thing should show up idk
 	isReply() {
 		const isForum = this.$.chat.isForum;
 		const raw = this.$.replyToMessage?.raw;
@@ -616,7 +614,7 @@ class MessagesJar extends Map<number, UIMessage> {
 
 		try {
 			const e = await tg.getHistory(this.dialog.$.chat, {
-				limit: 40,
+				limit: localStorage.getItem("low_memory") ? 10 : 40,
 				offset: this.lastOffset,
 			});
 
@@ -868,6 +866,7 @@ async function initDialogs(tg: TelegramClient) {
 	for await (const dialog of tg.iterDialogs({
 		pinned: "keep",
 		archived: "exclude",
+		limit: localStorage.getItem("low_memory") ? 10 : Infinity,
 	})) {
 		if ("left" in dialog.chat.peer && dialog.chat.peer.left) {
 			continue;
@@ -967,6 +966,7 @@ async function refreshDialogs() {
 	for await (const dialog of tg.iterDialogs({
 		pinned: "keep",
 		archived: "exclude",
+		limit: localStorage.getItem("low_memory") ? 10 : Infinity,
 	})) {
 		if ("left" in dialog.chat.peer && dialog.chat.peer.left) {
 			continue;
@@ -1366,6 +1366,8 @@ handleCombo("79", async () => {
 
 handleCombo("7569", () => {
 	localStorage.low_memory = "1";
+	toaster("Please re-launch the app.");
+
 	window.close();
 });
 
