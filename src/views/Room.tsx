@@ -876,7 +876,7 @@ function StickerMedia(props: { $: UIMessage }) {
 		if (media.type !== "sticker") return;
 		if (!media.mimeType.includes("webp")) return;
 
-		console.error("STICKEERRRR", media, media.thumbnails);
+		// console.error("STICKEERRRR", media, media.thumbnails);
 
 		const isKai3 = import.meta.env.VITE_KAIOS == 3;
 
@@ -970,10 +970,10 @@ function StickerMedia(props: { $: UIMessage }) {
 												setLoading(false);
 											}}
 											onError={(e) => {
-												console.error("ERROR OCCURED STICKER", e);
+												console.error("ERROR OCCURED STICKER", e.currentTarget);
 											}}
 											width={128}
-											src={src() + "#-moz-samplesize=2"}
+											src={src() + "#-moz-samplesize=1"}
 										/>
 									)}
 								</Show>
@@ -982,7 +982,14 @@ function StickerMedia(props: { $: UIMessage }) {
 					>
 						<video
 							onError={(e) => {
-								console.error("VIDEO STICKER ERROR", e);
+								const err = [
+									"Unknown",
+									"MEDIA_ERR_ABORTED",
+									"MEDIA_ERR_NETWORK",
+									"MEDIA_ERR_DECODE",
+									"MEDIA_ERR_SRC_NOT_SUPPORTED",
+								][e.currentTarget.error?.code || 0];
+								console.error("VIDEO ERROR", err, e.target);
 							}}
 							autoplay
 							loop
@@ -991,7 +998,7 @@ function StickerMedia(props: { $: UIMessage }) {
 					</Show>
 				}
 			>
-				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=2"}></img>
+				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=1"}></img>
 			</Show>
 		</div>
 	);
@@ -1078,7 +1085,7 @@ function PhotoMedia(props: { $: UIMessage; dialog: UIDialog; showChecks: boolean
 				<img class={styles.thumb} src={thumb()}></img>
 			</Show>
 			<Show when={src()}>
-				<img src={src() + "#-moz-samplesize=2"}></img>
+				<img src={src() + "#-moz-samplesize=1"}></img>
 			</Show>
 			<Show when={props.showChecks}>
 				<MediaChecks $={props.$} dialog={props.dialog} />
@@ -1187,15 +1194,13 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 
 		const fileSize = media.fileSize;
 
-		console.error("FILESIZE VIDEO", fileSize);
-
 		if (!media.fileSize) {
 			// found memory issue with this lmao
 			return;
 		}
 
 		if (media.fileSize > 5242880) {
-			console.error("SKIPPING DOWNLOAD BECAUSE FILE SIZE TOO BIG");
+			console.error("SKIPPING DOWNLOAD BECAUSE FILE SIZE TOO BIG", fileSize);
 			// todo do to something about this
 			return;
 		}
@@ -1263,7 +1268,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 										setWidth(e.currentTarget.clientWidth);
 									}}
 									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=2"}
+									src={thumb() + "#-moz-samplesize=1"}
 								></img>
 							}
 						>
@@ -1278,7 +1283,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
-								src={preview() + "#-moz-samplesize=2"}
+								src={preview() + "#-moz-samplesize=1"}
 							></img>
 						</Show>
 						<div class={styles.play}>
@@ -1309,7 +1314,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 										setWidth(e.currentTarget.clientWidth);
 									}}
 									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=2"}
+									src={thumb() + "#-moz-samplesize=1"}
 								></img>
 							}
 						>
@@ -1317,7 +1322,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
-								src={preview() + "#-moz-samplesize=2"}
+								src={preview() + "#-moz-samplesize=1"}
 							></img>
 						</Show>
 					}
@@ -1380,7 +1385,7 @@ interface AudioMediaProps {
 }
 
 function VoiceMedia(props: AudioMediaProps) {
-	console.error("SENDER", props.$.sender);
+	// console.error("SENDER", props.$.sender);
 	return (
 		<>
 			<div class={styles.voice}>

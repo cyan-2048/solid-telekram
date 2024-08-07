@@ -990,19 +990,6 @@ async function refreshDialogs() {
 	setDialogs(sortDialogs(_dialogs.filter((a) => ids_to_keep.has(a.id))));
 }
 
-let lastState: any = null;
-
-function saveState() {
-	let e: boolean = false;
-	if (lastState) {
-		e = lastState !== null;
-		localStorage.setItem("state", stringify(lastState));
-		lastState = null;
-	}
-
-	console.log("STATE SYNC DONE", e);
-}
-
 class UIStatus {
 	userId: number;
 
@@ -1045,35 +1032,6 @@ class UserStatusJar extends Map<number, UIStatus> {
 
 export const userStatusJar = new UserStatusJar();
 
-function stringify(obj: any) {
-	return JSON.stringify(obj, (key, val) => {
-		if (val instanceof Map) {
-			return { __map__: Array.from(val) };
-		}
-
-		if (val instanceof Uint8Array) {
-			return { __buffer__: Array.from(val) };
-		}
-
-		if (val instanceof Set) {
-			return { __set__: Array.from(val) };
-		}
-
-		return val;
-	});
-}
-
-function parse(str: string) {
-	return JSON.parse(str, (key, val) => {
-		if (val && typeof val == "object") {
-			if (val.__map__) return new Map(val.__map__);
-			if (val.__buffer__) return new Uint8Array(val.__buffer__);
-			if (val.__set__) return new Set(val.__set__);
-		}
-		return val;
-	});
-}
-
 export function resetLocalStorage() {
 	const localStorage = window.localStorage;
 	// @ts-ignore
@@ -1082,16 +1040,7 @@ export function resetLocalStorage() {
 	location.reload();
 }
 
-function getInitialState() {
-	console.log("USING LOCALSTORAGE FOR STATE");
-
-	const state = localStorage.getItem("state");
-
-	return state ? parse(state) : null;
-}
-
 telegram.startSession(
-	getInitialState(),
 	// LOGIN SUCESSFUL
 	async (tg) => {
 		setClient(tg);
@@ -1287,15 +1236,10 @@ telegram.startSession(
 	(url) => {
 		setQrLink(url);
 	},
-	(state) => {
-		lastState = state;
-
-		saveState();
-	},
 
 	// CLIENT ERRORS
 	(message) => {
-		console.error(message);
+		console.error("CLIENT ERROR", message);
 	},
 	// LOGIN ERRORS
 	(step, code, message) => {

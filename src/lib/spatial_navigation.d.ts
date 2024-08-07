@@ -96,21 +96,31 @@ export interface NavigateFailedEvent extends Event {
 }
 
 export interface SpatialNavigationEventMap {
-	"sn-willmove": WillMoveEvent;
-	"sn-willunfocus": WillUnFocusEvent;
-	"sn-unfocused": UnFocusedEvent;
-	"sn-willfocus": WillFocusEvent;
-	"sn-focused": Event;
-	"sn-navigatefailed": NavigateFailedEvent;
-	"sn-enter-down": Event;
-	"sn-enter-up": Event;
 	keydown: KeyboardEvent;
 }
 
 declare module "solid-js" {
 	namespace JSX {
-		interface CustomEvents extends SpatialNavigationEventMap {}
-		interface CustomCaptureEvents extends SpatialNavigationEventMap {}
+		interface CustomEvents {
+			"sn-willmove": WillMoveEvent;
+			"sn-willunfocus": WillUnFocusEvent;
+			"sn-unfocused": UnFocusedEvent;
+			"sn-willfocus": WillFocusEvent;
+			"sn-focused": Event;
+			"sn-navigatefailed": NavigateFailedEvent;
+			"sn-enter-down": Event;
+			"sn-enter-up": Event;
+		}
+		interface CustomCaptureEvents {
+			"sn-willmove": WillMoveEvent;
+			"sn-willunfocus": WillUnFocusEvent;
+			"sn-unfocused": UnFocusedEvent;
+			"sn-willfocus": WillFocusEvent;
+			"sn-focused": Event;
+			"sn-navigatefailed": NavigateFailedEvent;
+			"sn-enter-down": Event;
+			"sn-enter-up": Event;
+		}
 	}
 }
 

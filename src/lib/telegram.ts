@@ -22,7 +22,6 @@ const clientInit = new Deferred<void>();
 
 const EE = new EventEmitter<{
 	qr: () => void;
-	workerReady: () => void;
 	worker: (e: any) => void;
 }>();
 
@@ -34,18 +33,12 @@ const port = new TelegramWorkerPort({
 	worker,
 });
 
-worker.onmessage = (ev) => {
-	if (ev.data && "__READY__" in ev.data) {
-		EE.emit("workerReady");
-	}
-	EE.emit("worker", ev.data);
-};
+worker.onmessage = (ev) => {};
 
 let abortQr: null | AbortController = null;
 
 class App {
 	async startSession(
-		initialState: Map<any, any> | null,
 		onLogin: (tg: TelegramClient) => void,
 		phoneNumber: () => Promise<string>,
 		password: (hint?: string) => Promise<string>,
@@ -53,24 +46,10 @@ class App {
 
 		qrCode: (url: string | null) => void,
 
-		onStateUpdate: (state: any) => void,
-
 		onError: (message: string) => void,
 		onLoginError: (step: number, code: number, message: string) => void
 	) {
 		this.getCountries();
-		EE.on("worker", (data) => {
-			if (data && "__STATE__" in data) {
-				// console.log("STATE WORKER POSTMESSAGE", data.__STATE__);
-				onStateUpdate(data.__STATE__);
-			}
-		});
-
-		await new Promise<void>((res) => {
-			EE.once("workerReady", res);
-
-			worker.postMessage({ __INIT__: initialState });
-		});
 
 		// @ts-ignore
 		navigator.requestWakeLock?.("cpu");
@@ -81,6 +60,8 @@ class App {
 
 			client: port,
 		});
+
+		console.error("HIIII");
 
 		Object.assign(window, { tg });
 
@@ -185,7 +166,7 @@ class App {
 		}
 
 		tg.onError(async function (err: any) {
-			console.error("client_error", err);
+			// console.error("client_error", err);
 
 			onError(err && err.message);
 
@@ -199,6 +180,8 @@ class App {
 		await tg.connect();
 
 		client_not_ready = tg;
+
+		console.error("HIIIIIII");
 
 		// abortQr = new AbortController();
 		// const signal = abortQr.signal;
