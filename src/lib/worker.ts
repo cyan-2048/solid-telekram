@@ -4,7 +4,7 @@ import "./abort-controller.js";
 const apiId = import.meta.env.VITE_APP_ID;
 const apiHash = import.meta.env.VITE_APP_HASH;
 
-import { BaseTelegramClient, TelegramWorker } from "@mtcute/web";
+import { BaseTelegramClient, defaultReconnectionStrategy, TelegramWorker } from "@mtcute/web";
 import parseUserAgent from "./parseUserAgent.js";
 
 const isKai3 = import.meta.env.VITE_KAIOS == 3;
@@ -45,6 +45,11 @@ const tg = new BaseTelegramClient({
 		deviceModel: navigator.userAgent,
 		systemVersion: fromUA.systemVersion.replace("/", " "),
 		appVersion: version,
+	},
+
+	reconnectionStrategy: (params, lastError, consequentFails, previousWait) => {
+		console.error("RECONNECTION STRATEGYYYY", params, lastError, consequentFails, previousWait);
+		return defaultReconnectionStrategy(params, lastError, consequentFails, previousWait);
 	},
 
 	testMode: false,

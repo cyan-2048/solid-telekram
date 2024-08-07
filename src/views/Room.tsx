@@ -973,7 +973,7 @@ function StickerMedia(props: { $: UIMessage }) {
 												console.error("ERROR OCCURED STICKER", e.currentTarget);
 											}}
 											width={128}
-											src={src() + "#-moz-samplesize=1"}
+											src={src() + "#-moz-samplesize=8"}
 										/>
 									)}
 								</Show>
@@ -1322,7 +1322,7 @@ function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; s
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
-								src={preview() + "#-moz-samplesize=1"}
+								src={preview() + "#-moz-samplesize=8"}
 							></img>
 						</Show>
 					}

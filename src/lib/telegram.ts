@@ -175,6 +175,8 @@ class App {
 			}
 		});
 
+		tg.onConnectionState(console.error.bind(console));
+
 		console.log(tg);
 
 		await tg.connect();

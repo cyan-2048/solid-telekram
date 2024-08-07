@@ -282,17 +282,31 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 	);
 }
 
+const ONE_FOCUSABLE = ".focusable";
+const TWO_FOCUSABLE = ONE_FOCUSABLE.repeat(2);
+
+let lastUsedFocusableClass = TWO_FOCUSABLE;
+
+function refreshFocusables() {
+	SpatialNavigation.remove("dialogs");
+
+	const focusableToUse = (lastUsedFocusableClass =
+		lastUsedFocusableClass == ONE_FOCUSABLE ? TWO_FOCUSABLE : ONE_FOCUSABLE);
+
+	SpatialNavigation.add("dialogs", {
+		selector: `.${styles.dialogs} ${focusableToUse}`,
+		rememberSource: true,
+		restrict: "self-only",
+		defaultElement: `.${styles.dialog}`,
+		enterTo: "last-focused",
+	});
+}
+
 export default function Home(props: { hidden: boolean }) {
 	const [mounted, setMounted] = createSignal(false);
 
 	onMount(() => {
-		SpatialNavigation.add("dialogs", {
-			selector: `.${styles.dialogs} .focusable`,
-			rememberSource: true,
-			restrict: "self-only",
-			defaultElement: `.${styles.dialog}`,
-			enterTo: "last-focused",
-		});
+		refreshFocusables();
 
 		setMounted(true);
 	});

@@ -302,7 +302,7 @@ declare global {
 	class WebActivity {
 		constructor(name: string, data: {}) {}
 
-		start(): void;
+		start(): any;
 	}
 }
 

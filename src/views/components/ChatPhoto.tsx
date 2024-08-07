@@ -71,11 +71,11 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
 	return (
 		<div class={styles.photo}>
 			<Show when={placeholder()}>
-				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=2"} />}
+				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=8"} />}
 			</Show>
 			<Show when={src()}>
 				{(src) => (
-					<img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=2"} />
+					<img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=8"} />
 				)}
 			</Show>
 		</div>
