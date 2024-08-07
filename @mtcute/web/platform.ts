@@ -32,18 +32,14 @@ export class WebPlatform implements ICorePlatform {
     onNetworkChanged(fn: (connected: boolean) => void) {
         if (!('onLine' in navigator)) return () => {}
 
-        const onlineHandler = () => fn(navigator.onLine)
-        globalThis.addEventListener('online', onlineHandler)
-        globalThis.addEventListener('offline', onlineHandler)
+        fn(true);
 
         return () => {
-            globalThis.removeEventListener('online', onlineHandler)
-            globalThis.removeEventListener('offline', onlineHandler)
         }
     }
 
     isOnline(): boolean {
-        return navigator.onLine
+        return true
     }
 
     // ITlPlatform

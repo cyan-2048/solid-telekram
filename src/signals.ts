@@ -1312,6 +1312,9 @@ export const integrityCheck = import("./lib/checkIntegrity").then((m) => m.defau
 
 integrityCheck.then((integrity) => {
 	console.log("INTEGRITY CHECK PASSED:", integrity);
+	if (!integrity) {
+		alert("The app failed its integrity check, this means the app was modified maliciously, please don't use it.");
+	}
 });
 
 const toastConnections = navigator.mozApps?.getSelf().then((a) => a.connect("systoaster"));
