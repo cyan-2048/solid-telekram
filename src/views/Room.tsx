@@ -668,17 +668,11 @@ function MessageAdditionalInfo(props: { setWidth: (n: number) => void }) {
 }
 
 // wtf typescript????
-function MessageAction(props: {
-	$: UIMessage & {
-		$: Message & {
-			action: {};
-		};
-	};
-}) {
-	const text = useStore(() => props.$.text);
+function MessageAction() {
+	const { text, actionType } = useMessageContext();
 
 	return (
-		<Show when={props.$.$.action.type != "history_cleared" && props.$.$.action.type != "contact_joined"}>
+		<Show when={actionType() != "history_cleared" && actionType() != "contact_joined"}>
 			<ActionMessage>{text()}</ActionMessage>
 		</Show>
 	);
@@ -759,7 +753,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 					</MessageContainer>
 				}
 			>
-				<MessageAction $={props.$ as any} />
+				<MessageAction />
 			</Show>
 		</>
 	);

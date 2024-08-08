@@ -620,11 +620,26 @@ span.extra_width {
 	height: 128px;
 	position: relative;
 
+	background-size: contain;
+	background-repeat: no-repeat;
+
 	font-size: 15px;
+
+	> .svg {
+		display: flex;
+
+		align-content: center;
+		align-items: center;
+
+		svg {
+			display: block;
+		}
+	}
 
 	> img,
 	> canvas,
-	> video {
+	> video,
+	> .svg {
 		width: 128px;
 		height: 128px;
 		object-fit: contain;

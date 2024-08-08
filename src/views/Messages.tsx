@@ -12,7 +12,16 @@ import {
 } from "solid-js";
 import styles from "./Room.module.scss";
 import { useMessageChecks, useStore } from "@/lib/utils";
-import { TextWithEntities, MessageMediaType, Message, Photo, Sticker, Thumbnail, Video } from "@mtcute/core";
+import {
+	TextWithEntities,
+	MessageMediaType,
+	Message,
+	Photo,
+	Sticker,
+	Thumbnail,
+	Video,
+	MessageMedia,
+} from "@mtcute/core";
 import { TelegramClient } from "@mtcute/web";
 import { UIMessage, UIDialog, client, chat } from "@signals";
 import dayjs from "dayjs";
@@ -124,6 +133,10 @@ export const MessageContext = createContext<{
 	text: () => string;
 	entities: () => TextWithEntities;
 	mediaType: () => MessageMediaType | undefined;
+	media: () => MessageMedia;
+	action: () => Message["action"];
+	actionType: () => MessageActionTypes;
+
 	reply: () => UIMessage | null | 0;
 	dialog: () => UIDialog;
 	message: () => UIMessage;
@@ -143,6 +156,8 @@ export const MessageContext = createContext<{
 	last: () => boolean;
 	tg: TelegramClient;
 }>();
+
+type MessageActionTypes = NonNullable<Message["action"]>["type"] | undefined;
 
 export function MessageProvider(props: {
 	$: UIMessage;
@@ -185,12 +200,18 @@ export function MessageProvider(props: {
 		props.$.isSticker ? (props.$.isReply() ? showTail() : false) : showTail()
 	);
 
+	const actionType = () => props.$.$.action?.type;
+
 	const showDateSeparator = createMemo(() => decideDateSepatator(props.before?.date, props.$.date));
 
 	return (
 		<MessageContext.Provider
 			value={{
 				tg,
+
+				actionType,
+				media: () => props.$.$.media,
+				action: () => props.$.$.action,
 
 				focused,
 				setFocused,
@@ -230,7 +251,7 @@ function StickerThumbnail() {
 
 	return (
 		<Show when={thumbnail()}>
-			<div>
+			<div class={styles.svg}>
 				<svg
 					version="1.1"
 					xmlns="http://www.w3.org/2000/svg"
@@ -378,9 +399,9 @@ function StickerMedia() {
 
 					processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((res) => {
 						if (res != null) {
-							setSrc((url = URL.createObjectURL(res)));
+							// setSrc((url = URL.createObjectURL(res)));
 						} else {
-							setLoading(false);
+							// setLoading(false);
 						}
 					});
 				}

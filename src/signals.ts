@@ -165,10 +165,17 @@ export class UIMessage {
 
 	isLocation = false;
 
+	/**
+	 * this means this will render synchrously (no scroll jumps)
+	 */
+	sync = true;
+
 	poll: UIPoll | null = null;
 
 	updateText($: Message) {
 		let newText = $.text;
+
+		this.sync = true;
 
 		if ($.action) {
 			switch ($.action.type) {
@@ -181,6 +188,7 @@ export class UIMessage {
 					break;
 				}
 				case "message_pinned": {
+					this.sync = false;
 					this.getReply().then((msg) => {
 						if (msg) {
 							const text = msg.$.text;
@@ -207,6 +215,8 @@ export class UIMessage {
 						newText = sender + " joined the group";
 						break;
 					}
+
+					this.sync = false;
 
 					client()!
 						.getUsers($.action.users[0])
@@ -237,6 +247,7 @@ export class UIMessage {
 						break;
 					}
 
+					this.sync = false;
 					client()!
 						.getUsers($.action.user)
 						.then((_user) => {
@@ -258,6 +269,10 @@ export class UIMessage {
 
 					break;
 				}
+
+				case "user_left":
+					newText = $.sender.displayName + " left the group";
+					break;
 
 				case "topic_created":
 					newText = $.action.title + " was created";
@@ -300,6 +315,14 @@ export class UIMessage {
 						}
 					}
 
+					break;
+
+				case "user_joined_link":
+					newText = $.sender.displayName + "  joined the group via invite link";
+					break;
+
+				case "custom":
+					newText = $.action.action;
 					break;
 
 				default: {
