@@ -283,7 +283,7 @@ emojidata
 	});
 */
 
-console.log(categoryPlusEmojis);
+// console.log(categoryPlusEmojis);
 
 Object.entries(categoryPlusEmojis).forEach((e) => {
 	// @ts-ignore
@@ -294,10 +294,6 @@ console.log(categoryPlusEmojis);
 
 async function _decodeWebP(buffer: Uint8Array, scaleCount: number) {
 	const result = await decodeWebP(buffer, scaleCount).catch(() => null);
-
-	if (result === null) {
-		return Comlink.transfer(buffer, [buffer.buffer]);
-	}
 
 	return result;
 }

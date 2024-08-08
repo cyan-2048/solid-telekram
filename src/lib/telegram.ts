@@ -9,7 +9,10 @@ import EventEmitter from "eventemitter3";
 import { TelegramClient, TelegramWorkerPort } from "@mtcute/web";
 import { tl } from "@mtcute/tl";
 
+import * as Comlink from "comlink";
+
 import TelegramWorkerURL from "./worker.js?worker&url";
+import type { Exposed } from "./worker.js";
 
 type Country = (typeof countries)[number];
 
@@ -33,7 +36,12 @@ const port = new TelegramWorkerPort({
 	worker,
 });
 
-worker.onmessage = (ev) => {};
+const wrapped = Comlink.wrap<Exposed>(worker);
+
+export const gunzip = wrapped.gunzip;
+export const gzip = wrapped.gzip;
+export const webp = wrapped.webp;
+export const getAvailableMemory = wrapped.getAvailableMemory;
 
 let abortQr: null | AbortController = null;
 
@@ -311,4 +319,4 @@ export type { App };
 
 export const telegram = new App();
 
-Object.assign(self, { telegram });
+Object.assign(self, { telegram, _tg: wrapped });

@@ -1,4 +1,4 @@
-import { Chat, Message, Thumbnail, tl, User } from "@mtcute/core";
+import { Chat, Message, Sticker, Thumbnail, tl, User } from "@mtcute/core";
 import styles from "./Room.module.scss";
 import Content from "./components/Content";
 import {
@@ -777,23 +777,25 @@ function MessageAdditionalInfo(props: { $: UIMessage; dialog: UIDialog; setWidth
 }
 
 function StickerThumbnail(props: { $: UIMessage }) {
-	if (props.$.$.media?.type != "sticker") throw new Error("NOT A STICKER!");
+	const thumbnail = () => (props.$.$.media as Sticker).getThumbnail(Thumbnail.THUMB_OUTLINE);
 
 	return (
-		<div>
-			<svg
-				version="1.1"
-				xmlns="http://www.w3.org/2000/svg"
-				xmlns:xlink="http://www.w3.org/1999/xlink"
-				viewBox="0 0 512 512"
-			>
-				<path fill="rgba(0, 0, 0, 0.08)" d={props.$.$.media.getThumbnail(Thumbnail.THUMB_OUTLINE)!.path} />
-			</svg>
-		</div>
+		<Show when={thumbnail()}>
+			<div>
+				<svg
+					version="1.1"
+					xmlns="http://www.w3.org/2000/svg"
+					xmlns:xlink="http://www.w3.org/1999/xlink"
+					viewBox="0 0 512 512"
+				>
+					<path fill="rgba(0, 0, 0, 0.08)" d={thumbnail()!.path} />
+				</svg>
+			</div>
+		</Show>
 	);
 }
 
-function StickerMedia(props: { $: UIMessage }) {
+function StickerMedia(props: { $: UIMessage; focused: boolean }) {
 	if (props.$.$.media?.type !== "sticker") throw new Error("NOT STICKER MEDIA");
 
 	let canvasRef!: HTMLCanvasElement;
@@ -878,11 +880,14 @@ function StickerMedia(props: { $: UIMessage }) {
 
 		// console.error("STICKEERRRR", media, media.thumbnails);
 
+		// use media preview instead of actual file if available
+		const file = media.getThumbnail("m") || media;
+
 		const isKai3 = import.meta.env.VITE_KAIOS == 3;
 
 		// if kai3 use img tag
 		if (isKai3) {
-			const download = downloadFile(media);
+			const download = downloadFile(file);
 
 			let url!: string;
 
@@ -913,7 +918,7 @@ function StickerMedia(props: { $: UIMessage }) {
 			return;
 		}
 
-		const download = downloadFile(media);
+		const download = downloadFile(file);
 
 		let url!: string;
 
@@ -922,7 +927,7 @@ function StickerMedia(props: { $: UIMessage }) {
 				if (mounted) {
 					const buffer = await download.result.arrayBuffer();
 
-					processWebpToCanvas(canvasRef, new Uint8Array(buffer)).then((res) => {
+					processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((res) => {
 						if (res != null) {
 							setSrc((url = URL.createObjectURL(res)));
 						} else {
@@ -973,7 +978,7 @@ function StickerMedia(props: { $: UIMessage }) {
 												console.error("ERROR OCCURED STICKER", e.currentTarget);
 											}}
 											width={128}
-											src={src() + "#-moz-samplesize=8"}
+											src={src() + "#-moz-samplesize=2"}
 										/>
 									)}
 								</Show>
@@ -1588,7 +1593,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 						</Switch>
 						<Switch>
 							<Match when={mediaType() == "sticker"}>
-								<StickerMedia $={props.$} />
+								<StickerMedia $={props.$} focused={focused()} />
 							</Match>
 							<Match when={mediaType() == "photo"}>
 								<PhotoMedia $={props.$} dialog={props.dialog} showChecks={showChecks()} />

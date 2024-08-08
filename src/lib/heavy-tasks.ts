@@ -1,11 +1,12 @@
 import HeavyTasksWorker from "./heavy-tasks.worker?worker";
 import * as Comlink from "comlink";
 import type { Exposed } from "./heavy-tasks.worker";
-import webp2png from "./webp/ezgif-webp2png";
+// import webp2png from "./webp/ezgif-webp2png";
 import Queue from "queue";
 import { sleep } from "./helpers";
 import { addToCache, getFileFromCache } from "./files/downloader";
 import Deferred from "./Deffered";
+import { webp } from "./telegram";
 
 const wrapped = Comlink.wrap<Exposed>(new HeavyTasksWorker());
 
@@ -103,7 +104,12 @@ const taskQueue = new Queue({
 	autostart: true,
 });
 
-export default async function processWebpToCanvas(canvas: HTMLCanvasElement, bufferLike: Uint8Array) {
+export default async function processWebpToCanvas(
+	canvas: HTMLCanvasElement,
+	bufferLike: Uint8Array,
+	width: number,
+	height: number
+) {
 	console.warn(`WebP: processing webp as device doesn't support Webp natively`);
 
 	const hash = await md5(bufferLike);
@@ -124,20 +130,32 @@ export default async function processWebpToCanvas(canvas: HTMLCanvasElement, buf
 		return fromCache;
 	}
 
-	const result = await wrapped.decodeWebP(Comlink.transfer(bufferLike, [bufferLike.buffer]), 1);
+	let result = await wrapped.decodeWebP(bufferLike, 1);
 
-	// console.error("LIBWEBPJS RESULT", "rgba" in result ? result.rgba.byteLength : result.byteLength);
+	console.error("LIBWEBPJS RESULT", result ? result.rgba.byteLength : null);
 
-	if (result instanceof Uint8Array) {
-		console.error("libwebpjs doesn't work using ezgif to convert to png");
+	// if (result instanceof Uint8Array) {
+	// 	console.error("libwebpjs doesn't work using ezgif to convert to png");
+	//
+	// 	const webpFromEzgif = await webp2png(result).catch(() => null);
+	// 	if (webpFromEzgif) {
+	// 		const file = await addToCache(filename, webpFromEzgif);
+	// 		deferred.resolve();
+	// 		return file;
+	// 	}
+	// 	return null;
+	// }
 
-		const webpFromEzgif = await webp2png(result).catch(() => null);
-		if (webpFromEzgif) {
-			const file = await addToCache(filename, webpFromEzgif);
+	if (!result) {
+		console.error("libwebpjs didn't work, using libwebp asm.js");
+
+		result = await webp(bufferLike, width, height);
+
+		if (!result) {
+			console.error("asm.js libwebp didn't work as well!!!");
 			deferred.resolve();
-			return file;
+			return null;
 		}
-		return null;
 	}
 
 	performance.now();

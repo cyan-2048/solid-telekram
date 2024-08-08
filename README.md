@@ -123,10 +123,7 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
   - mtcute web worker proxy
   - heavy tasks worker for blocking operations (webp to png, md5, etc.)
   - (not yet implemented) rlottie
-- ezgif is used for webp -> png conversion when libwebpjs (taken from whatsapp) fails to convert a webp image. (using ezgif as an unofficial api is not prohibited[^1])
 - SystemJS is used to simulate esm modules on KaiOS 2.5, it is also used to import asm.js files in order for it to preserve asm.js syntax.
-
-[^1]: https://ezgif.com/help/ezgif-api
 
 ## Dependencies
 

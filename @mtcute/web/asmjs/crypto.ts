@@ -1,9 +1,4 @@
-import {
-	BaseCryptoProvider,
-	IAesCtr,
-	ICryptoProvider,
-	IEncryptionScheme,
-} from "@mtcute/core/utils.js";
+import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from "@mtcute/core/utils.js";
 
 import MtcuteAsmURL from "./mtcute.asm.js?url";
 import MtcuteMemURL from "./mtcute.asm.js.mem?url";
@@ -21,8 +16,10 @@ function getUint8Memory(): Uint8Array {
 	return asm.HEAPU8;
 }
 
+const MAX_MEMORY = 16777216;
+
 function getAvailableMemory() {
-	return 16777216 - asm._getUsedMemory();
+	return MAX_MEMORY - asm._getUsedMemory();
 }
 
 async function loadAsm() {
@@ -205,13 +202,7 @@ function deflateMaxSize(bytes: Uint8Array, size: number): Uint8Array | null {
 	const mem = getUint8Memory();
 	mem.set(bytes, inputPtr);
 
-	const written = asm._libdeflate_zlib_compress(
-		compressor,
-		inputPtr,
-		bytes.length,
-		outputPtr,
-		size
-	);
+	const written = asm._libdeflate_zlib_compress(compressor, inputPtr, bytes.length, outputPtr, size);
 	asm._free(inputPtr);
 
 	if (written === 0) {
@@ -252,13 +243,7 @@ function gunzip(bytes: Uint8Array): Uint8Array {
 	const size = asm._libdeflate_gzip_get_output_size(inputPtr, bytes.length);
 	const outputPtr = asm._malloc(size);
 
-	const ret = asm._libdeflate_gzip_decompress(
-		decompressor,
-		inputPtr,
-		bytes.length,
-		outputPtr,
-		size
-	);
+	const ret = asm._libdeflate_gzip_decompress(decompressor, inputPtr, bytes.length, outputPtr, size);
 
 	/* c8 ignore next 3 */
 	if (ret === -1) throw new Error("gunzip error -- bad data");
@@ -274,10 +259,70 @@ function gunzip(bytes: Uint8Array): Uint8Array {
 	return result;
 }
 
+// _webp_decode
+// _webp_free
+// _webp_getHeight
+// _webp_getWidth
+
+interface WebpDecoded {
+	width: number;
+	height: number;
+	rgba: Uint8ClampedArray;
+}
+
 export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
 	readonly crypto: Crypto;
 
-	rushaInstance: any = null;
+	/**
+	 * convert webp to rgba
+	 * width and height is required so no OOM will occur
+	 */
+	webp(buff: Uint8Array, width: number, height: number): WebpDecoded | null {
+		if (buff.length + width * height * 4 > getAvailableMemory()) {
+			console.error("WEBP CONVERSION FAILED BECAUSE NOT ENOUGH MEMORY");
+			return null;
+		}
+
+		console.time("webp");
+
+		console.info("available memory before allocating", getAvailableMemory());
+		const pointer = asm._malloc(buff.length);
+		console.info("available memory after allocating", getAvailableMemory());
+		const mem = getUint8Memory();
+		mem.set(buff, pointer);
+
+		// returns zero if failed
+		const decodedPtr = asm._webp_decode(pointer, buff.length);
+		console.info("available memory after decoding", getAvailableMemory());
+
+		if (!decodedPtr) {
+			console.error("error occured while decoding webp using asm.js");
+			asm._free(pointer);
+			console.info("available memory after freeing buffer", getAvailableMemory());
+
+			console.timeEnd("webp");
+			return null;
+		}
+
+		width = asm._webp_getWidth();
+		height = asm._webp_getHeight();
+
+		const rgba = new Uint8ClampedArray(mem.slice(decodedPtr, decodedPtr + width * height * 4).buffer);
+
+		// asm._webp_free(decodedPtr);
+		console.info("available memory after freeing decodedBuffer", getAvailableMemory());
+
+		asm._free(pointer);
+		console.info("available memory after freeing buffer", getAvailableMemory());
+
+		console.timeEnd("webp");
+
+		return {
+			rgba,
+			width,
+			height,
+		};
+	}
 
 	sha1(data: Uint8Array): Uint8Array {
 		const { _malloc, _free } = asm;
@@ -343,7 +388,6 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 	}
 
 	async initialize(): Promise<void> {
-		// @ts-ignore
 		console.log("INIT CRYPTO", typeof importScripts == "function" ? "WORKER" : "MAIN THREAD");
 
 		await loadAsm();
@@ -371,9 +415,7 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 		keylen?: number | undefined,
 		algo?: string | undefined
 	): Promise<Uint8Array> {
-		const keyMaterial = await this.crypto.subtle.importKey("raw", password, "PBKDF2", false, [
-			"deriveBits",
-		]);
+		const keyMaterial = await this.crypto.subtle.importKey("raw", password, "PBKDF2", false, ["deriveBits"]);
 
 		const e = performance.now();
 		// console.time("pkdf2-" + e);
