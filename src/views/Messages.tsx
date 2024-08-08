@@ -246,8 +246,10 @@ export function useMessageContext() {
 }
 
 function StickerThumbnail() {
-	const { message } = useMessageContext();
-	const thumbnail = () => (message().$.media as Sticker).getThumbnail(Thumbnail.THUMB_OUTLINE);
+	const { media } = useMessageContext();
+	const thumbnail = createMemo(() => (media() as Sticker).getThumbnail(Thumbnail.THUMB_OUTLINE));
+
+	const photoSize = createMemo(() => (media() as Sticker).attr2);
 
 	return (
 		<Show when={thumbnail()}>
@@ -256,7 +258,7 @@ function StickerThumbnail() {
 					version="1.1"
 					xmlns="http://www.w3.org/2000/svg"
 					xmlns:xlink="http://www.w3.org/1999/xlink"
-					viewBox="0 0 512 512"
+					viewBox={`0 0 ${photoSize()?.w || 512} ${photoSize()?.h || 512}`}
 				>
 					<path fill="rgba(0, 0, 0, 0.08)" d={thumbnail()!.path} />
 				</svg>
@@ -399,9 +401,9 @@ function StickerMedia() {
 
 					processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((res) => {
 						if (res != null) {
-							// setSrc((url = URL.createObjectURL(res)));
+							setSrc((url = URL.createObjectURL(res)));
 						} else {
-							// setLoading(false);
+							setLoading(false);
 						}
 					});
 				}

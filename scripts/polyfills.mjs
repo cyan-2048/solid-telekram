@@ -22,6 +22,24 @@ s.Worker.native = originalWorker;
 s.Worker.prototype = originalWorker.prototype;
 Object.assign(s.Worker, originalWorker);
 
+// Lesson learned: take polyfills from the actual proposal instead of random code you find online
+if (!Object.hasOwnProperty("getOwnPropertyDescriptors")) {
+	Object.defineProperty(Object, "getOwnPropertyDescriptors", {
+		configurable: true,
+		writable: true,
+		value: function getOwnPropertyDescriptors(object) {
+			return Reflect.ownKeys(object).reduce((descriptors, key) => {
+				return Object.defineProperty(descriptors, key, {
+					configurable: true,
+					enumerable: true,
+					writable: true,
+					value: Object.getOwnPropertyDescriptor(object, key),
+				});
+			}, {});
+		},
+	});
+}
+
 if (import.meta.env.VITE_KAIOS != 3) {
 	if (typeof s.queueMicrotask !== "function") {
 		s.queueMicrotask = function (callback) {
@@ -214,22 +232,6 @@ if (import.meta.env.VITE_KAIOS != 3) {
 			});
 		})([Element.prototype, Document.prototype, DocumentFragment.prototype]);
 	}
-
-	// this is needed because esbuild es6 transpiled code requires it
-	Object.getOwnPropertyDescriptors ||= function getOwnPropertyDescriptors(obj) {
-		if (obj === null || obj === undefined) {
-			throw new TypeError("Cannot convert undefined or null to object");
-		}
-
-		const protoPropDescriptor = Object.getOwnPropertyDescriptor(obj, "__proto__");
-		const descriptors = protoPropDescriptor ? { ["__proto__"]: protoPropDescriptor } : {};
-
-		for (let name of Object.getOwnPropertyNames(obj)) {
-			descriptors[name] = Object.getOwnPropertyDescriptor(obj, name);
-		}
-
-		return descriptors;
-	};
 
 	if (s.NodeList) NodeList.prototype.forEach ||= Array.prototype.forEach;
 

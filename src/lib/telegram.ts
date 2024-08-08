@@ -69,7 +69,7 @@ class App {
 			client: port,
 		});
 
-		console.error("HIIII");
+		// console.error("HIIII");
 
 		Object.assign(window, { tg });
 

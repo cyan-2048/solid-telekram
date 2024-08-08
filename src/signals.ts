@@ -12,6 +12,7 @@ import {
 	TelegramClient,
 	TextWithEntities,
 	tl,
+	TypingStatus,
 	UserStatus,
 	UserStatusUpdate,
 } from "@mtcute/web";
@@ -102,6 +103,22 @@ export const [qrLink, setQrLink] = createSignal<null | string>(null);
 export { telegram };
 
 export const [client, setClient] = createSignal<TelegramClient | null>(null);
+
+class UITypingIndicator {
+	status = writable<TypingStatus | null>(null);
+
+	private timeout: any;
+
+	update(newStatus: TypingStatus) {
+		clearTimeout(this.timeout);
+
+		this.status.set(newStatus);
+
+		this.timeout = setTimeout(() => {
+			this.status.set(null);
+		}, 6_000);
+	}
+}
 
 export class UIPoll {
 	closed = writable(false);
@@ -1068,174 +1085,188 @@ export function resetLocalStorage() {
 	location.reload();
 }
 
-telegram.startSession(
-	// LOGIN SUCESSFUL
-	async (tg) => {
-		setClient(tg);
+async function telegramReady(tg: TelegramClient) {
+	setClient(tg);
 
-		await initDialogs(tg);
+	await initDialogs(tg);
 
-		tg.setOffline(false);
+	tg.setOffline(false);
 
-		tg.on("raw_update", (upd) => {
-			console.log("RAW_UPDATE", upd);
+	tg.on("raw_update", (upd) => {
+		console.log("RAW_UPDATE", upd);
 
-			switch (upd._) {
-				case "updateChatParticipants": {
-					if (upd.participants._ == "chatParticipants") {
-						const has = dialogsJar.get(upd.participants.chatId);
+		switch (upd._) {
+			case "updateChatParticipants": {
+				if (upd.participants._ == "chatParticipants") {
+					const has = dialogsJar.get(upd.participants.chatId);
 
-						if (has) {
-							has.memberCount.set(upd.participants.participants.length);
-						} else {
-							console.error("chat participant was not found, refreshing dialogs");
-							refreshDialogsByPeer([upd.participants.chatId]);
+					if (has) {
+						has.memberCount.set(upd.participants.participants.length);
+					} else {
+						console.error("chat participant was not found, refreshing dialogs");
+						refreshDialogsByPeer([upd.participants.chatId]);
+					}
+				}
+
+				break;
+			}
+
+			case "updateChannel": {
+				refreshDialogsByPeer([upd.channelId]);
+				break;
+			}
+
+			// this doesn't seem to work well when doing pinned messages stuff?
+			case "updateFolderPeers":
+			case "updatePinnedDialogs": {
+				// tg.getPeerDialogs seems to be cached
+				refreshDialogs();
+				break;
+			}
+		}
+	});
+
+	tg.on("update", function e(update) {
+		switch (update.name) {
+			case "new_message": {
+				const message = update.data;
+
+				const found = dialogsJar.get(message.chat.peer.id);
+
+				if (found) {
+					console.log("UPDATING LAST MESSAGE");
+					found.lastMessage.set(found.messages.add(new UIMessage(message)));
+
+					refreshDialogsByPeer([found.id]);
+				} else {
+					console.error("dialog was not found for message, refreshing");
+					refreshDialogsByPeer([message.chat.peer.id]);
+				}
+
+				break;
+			}
+
+			case "history_read": {
+				const data = update.data;
+				const peerId = data.chatId;
+
+				setDialogs((e) => {
+					const found = e.find((a) => a.$.chat.id == peerId);
+					if (found) {
+						if (data.isOutbox == true) {
+							found.lastReadOutgoing.set(data.maxReadId);
 						}
+
+						if (data.isOutbox == false && data.isDiscussion == false) {
+							found.count.set(data.unreadCount);
+						}
+					} else {
+						console.error("dialog was not found for history read refreshing");
+						refreshDialogsByPeer([peerId]);
 					}
 
-					break;
-				}
-
-				case "updateChannel": {
-					refreshDialogsByPeer([upd.channelId]);
-					break;
-				}
-
-				// this doesn't seem to work well when doing pinned messages stuff?
-				case "updateFolderPeers":
-				case "updatePinnedDialogs": {
-					// tg.getPeerDialogs seems to be cached
-					refreshDialogs();
-					break;
-				}
+					return e;
+				});
+				break;
 			}
-		});
 
-		tg.on("update", function e(update) {
-			switch (update.name) {
-				case "new_message": {
-					const message = update.data;
+			case "delete_message": {
+				const message = update.data;
 
-					const found = dialogsJar.get(message.chat.peer.id);
+				setDialogs((e) => {
+					const found = e.find((a) => {
+						return message.messageIds.find((b) => a.messages.has(b));
+					});
 
 					if (found) {
-						console.log("UPDATING LAST MESSAGE");
-						found.lastMessage.set(found.messages.add(new UIMessage(message)));
+						const messages = found.messages;
+						messages.deleteBulk(message.messageIds);
 
 						refreshDialogsByPeer([found.id]);
 					} else {
-						console.error("dialog was not found for message, refreshing");
-						refreshDialogsByPeer([message.chat.peer.id]);
-					}
-
-					break;
-				}
-
-				case "history_read": {
-					const data = update.data;
-					const peerId = data.chatId;
-
-					setDialogs((e) => {
-						const found = e.find((a) => a.$.chat.id == peerId);
-						if (found) {
-							if (data.isOutbox == true) {
-								found.lastReadOutgoing.set(data.maxReadId);
-							}
-
-							if (data.isOutbox == false && data.isDiscussion == false) {
-								found.count.set(data.unreadCount);
-							}
-						} else {
-							console.error("dialog was not found for history read refreshing");
-							refreshDialogsByPeer([peerId]);
-						}
-
-						return e;
-					});
-					break;
-				}
-
-				case "delete_message": {
-					const message = update.data;
-
-					setDialogs((e) => {
-						const found = e.find((a) => {
-							return message.messageIds.find((b) => a.messages.has(b));
-						});
-
-						if (found) {
-							const messages = found.messages;
-							messages.deleteBulk(message.messageIds);
-
-							refreshDialogsByPeer([found.id]);
-						} else {
-							console.error("dialog was not found for message, refreshing", message);
-							if (message.channelId) {
-								refreshDialogsByPeer([message.channelId]);
-							} else refreshDialogs();
-						}
-
-						return e;
-					});
-					break;
-				}
-
-				case "edit_message": {
-					const message = update.data;
-
-					const _dialogs = dialogs();
-
-					const found = _dialogs.find((a) => a.$.chat.peer.id == message.chat.peer.id);
-
-					if (found) {
-						found.messages.update(message.id, message);
-					} else {
 						console.error("dialog was not found for message, refreshing", message);
-						refreshDialogsByPeer([message.chat.peer.id]);
+						if (message.channelId) {
+							refreshDialogsByPeer([message.channelId]);
+						} else refreshDialogs();
 					}
 
-					break;
-				}
-
-				case "user_status": {
-					const status = update.data;
-					const _ = userStatusJar.get(status.userId).update(status);
-					console.log("STATUS", _);
-					break;
-				}
-
-				case "poll": {
-					const pollUpdate = update.data;
-
-					const id = pollUpdate.pollId.toInt();
-
-					if (pollUpdate.isShort) {
-						const pollCached = pollJar.get(id);
-						if (!pollCached) {
-							console.error("isShort poll update and poll not cached", pollUpdate);
-							break;
-						}
-
-						if (!pollUpdate.poll.results) {
-							console.error("isShort poll does not have results, useless", pollUpdate);
-							break;
-						}
-
-						pollCached.resultsUpdate(pollUpdate.poll.results);
-					} else {
-						const pollCached = pollJar.add(pollUpdate.poll);
-
-						pollCached.update(pollUpdate.poll);
-					}
-					break;
-				}
+					return e;
+				});
+				break;
 			}
 
-			console.log("PARSED UPDATEEEE", update);
-		});
+			case "edit_message": {
+				const message = update.data;
 
-		setView("home");
-	},
+				const _dialogs = dialogs();
+
+				const found = _dialogs.find((a) => a.$.chat.peer.id == message.chat.peer.id);
+
+				if (found) {
+					found.messages.update(message.id, message);
+				} else {
+					console.error("dialog was not found for message, refreshing", message);
+					refreshDialogsByPeer([message.chat.peer.id]);
+				}
+
+				break;
+			}
+
+			case "user_status": {
+				const status = update.data;
+				const _ = userStatusJar.get(status.userId).update(status);
+				console.log("STATUS", _);
+				break;
+			}
+
+			case "poll": {
+				const pollUpdate = update.data;
+
+				const id = pollUpdate.pollId.toInt();
+
+				if (pollUpdate.isShort) {
+					const pollCached = pollJar.get(id);
+					if (!pollCached) {
+						console.error("isShort poll update and poll not cached", pollUpdate);
+						break;
+					}
+
+					if (!pollUpdate.poll.results) {
+						console.error("isShort poll does not have results, useless", pollUpdate);
+						break;
+					}
+
+					pollCached.resultsUpdate(pollUpdate.poll.results);
+				} else {
+					const pollCached = pollJar.add(pollUpdate.poll);
+
+					pollCached.update(pollUpdate.poll);
+				}
+				break;
+			}
+
+			case "user_typing": {
+				const data = update.data;
+
+				// is PM
+				if (data.chatType == "user") {
+					data.status;
+					console.error("TYPING TYPING OMFG", dialogsJar.get(data.chatId));
+				}
+
+				break;
+			}
+		}
+
+		console.log("PARSED UPDATEEEE", update);
+	});
+
+	setView("home");
+}
+
+telegram.startSession(
+	// LOGIN SUCESSFUL
+	telegramReady,
 	// WORKER REQUEST FOR PHONE
 	() => {
 		setView("login");
@@ -1361,6 +1392,7 @@ export async function toaster(text: string, latency?: number) {
 	const conns = await toastConnections;
 
 	if (!conns) {
+		// this might be good enough really...
 		const notif = new Notification(text, {
 			tag: "kaigram",
 			data: {},

@@ -95,6 +95,10 @@ export default defineConfig({
 		minifySyntax: true,
 		minifyWhitespace: false,
 		minifyIdentifiers: false,
+
+		supported: {
+			"object-rest-spread": false,
+		},
 	},
 
 	resolve: {
