@@ -283,24 +283,24 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 			return null;
 		}
 
-		console.time("webp");
+		// console.time("webp");
 
-		console.info("available memory before allocating", getAvailableMemory());
-		const pointer = asm._malloc(buff.length);
-		console.info("available memory after allocating", getAvailableMemory());
+		// console.info("available memory before allocating", getAvailableMemory());
+		const buffPointer = asm._malloc(buff.length);
+		// console.info("available memory after allocating", getAvailableMemory());
 		const mem = getUint8Memory();
-		mem.set(buff, pointer);
+		mem.set(buff, buffPointer);
 
 		// returns zero if failed
-		const decodedPtr = asm._webp_decode(pointer, buff.length);
-		console.info("available memory after decoding", getAvailableMemory());
+		const decodedPtr = asm._webp_decode(buffPointer, buff.length);
+		// console.info("available memory after decoding", getAvailableMemory());
 
 		if (!decodedPtr) {
-			console.error("error occured while decoding webp using asm.js");
-			asm._free(pointer);
-			console.info("available memory after freeing buffer", getAvailableMemory());
+			// console.error("error occured while decoding webp using asm.js");
+			asm._free(buffPointer);
+			// console.info("available memory after freeing buffer", getAvailableMemory());
 
-			console.timeEnd("webp");
+			// console.timeEnd("webp");
 			return null;
 		}
 
@@ -309,13 +309,14 @@ export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProv
 
 		const rgba = new Uint8ClampedArray(mem.slice(decodedPtr, decodedPtr + width * height * 4).buffer);
 
-		// asm._webp_free(decodedPtr);
-		console.info("available memory after freeing decodedBuffer", getAvailableMemory());
+		// this function seems to be allocating more memory than actually freeing it???
+		asm._webp_free(decodedPtr);
+		// console.info("available memory after freeing decodedBuffer", getAvailableMemory());
 
-		asm._free(pointer);
-		console.info("available memory after freeing buffer", getAvailableMemory());
+		asm._free(buffPointer);
+		// console.info("available memory after freeing buffer", getAvailableMemory());
 
-		console.timeEnd("webp");
+		// console.timeEnd("webp");
 
 		return {
 			rgba,

@@ -131,8 +131,8 @@ export default async function processWebpToCanvas(
 	}
 
 	let result = await wrapped.decodeWebP(bufferLike, 1);
-
-	console.error("LIBWEBPJS RESULT", result ? result.rgba.byteLength : null);
+	//
+	// console.error("LIBWEBPJS RESULT", result ? result.rgba.byteLength : null);
 
 	// if (result instanceof Uint8Array) {
 	// 	console.error("libwebpjs doesn't work using ezgif to convert to png");
