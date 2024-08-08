@@ -603,12 +603,17 @@ class MessagesJar extends Map<number, UIMessage> {
 
 		if (this.hasLoadedBefore && !this.lastOffset) {
 			console.log("last offset is undefined, end has reached maybe?");
+			toaster("You have reached the end of chat.");
 			return;
 		}
 
 		const hasLoadedBefore = this.hasLoadedBefore;
 
 		this[hasLoadedBefore ? "isLoadingMore" : "isLoading"].set(true);
+
+		if (hasLoadedBefore) {
+			toaster("Loading more messages...");
+		}
 
 		await sleep(2000);
 
@@ -1286,7 +1291,7 @@ const nekoweb = "https://cyandiscordclient.nekoweb.org/";
 
 handleCombo("7569", () => {
 	localStorage.low_memory = "1";
-	toaster("Please re-launch the app.");
+	toaster("Low memory mode enabled. Please re-launch the app.");
 
 	window.close();
 });
@@ -1333,7 +1338,15 @@ export async function toaster(text: string, latency?: number) {
 	const conns = await toastConnections;
 
 	if (!conns) {
-		alert("pretend this is a toast: " + text);
+		const notif = new Notification(text, {
+			tag: "kaigram",
+			data: {},
+		});
+
+		setTimeout(() => {
+			notif.close();
+		}, latency ?? 2000);
+
 		return;
 	}
 

@@ -1,4 +1,4 @@
-import { Chat, Message, Sticker, Thumbnail, tl, User } from "@mtcute/core";
+import { Chat, Message, tl, User } from "@mtcute/core";
 import styles from "./Room.module.scss";
 import Content from "./components/Content";
 import {
@@ -13,7 +13,6 @@ import {
 	onMount,
 	Match,
 	batch,
-	createRenderEffect,
 } from "solid-js";
 import {
 	EE,
@@ -21,7 +20,6 @@ import {
 	UIMessage,
 	client,
 	currentView,
-	dialogsJar,
 	editingMessage,
 	refreshDialogsByPeer,
 	replyingMessage,
@@ -36,7 +34,6 @@ import {
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
-	clampImageDimension,
 	getColorFromPeer,
 	getTextFromContentEditable,
 	isSelectionAtStart,
@@ -46,7 +43,6 @@ import {
 	useMessageChecks,
 	useStore,
 } from "@/lib/utils";
-import dayjs from "dayjs";
 import Markdown, { ModifyString } from "./components/Markdown";
 import TelegramIcon from "./components/TelegramIcon";
 import AutoResizeTextbox from "./components/AutoResizeTextarea";
@@ -58,30 +54,10 @@ import { Dynamic, Portal } from "solid-js/web";
 import OptionsMenuMaxHeight from "./components/OptionsMenuMaxHeight";
 import { md } from "@mtcute/markdown-parser";
 import { debounce } from "lodash-es";
-import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
 import EmojiPicker from "./components/EmojiPicker";
 import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
-import { downloadFile } from "@/lib/files/download";
-import { PeerPhotoIcon } from "./components/PeerPhoto";
-
-/**
- * Chat type. Can be:
- *  - `private`: PM with other users or yourself (Saved Messages)
- *  - `bot`: PM with a bot
- *  - `group`: Legacy group
- *  - `supergroup`: Supergroup
- *  - `channel`: Broadcast channel
- *  - `gigagroup`: Gigagroup aka Broadcast group
- */
-const enum ChatType {
-	PRIVATE = "private",
-	BOT = "bot",
-	GROUP = "group",
-	SUPERGROUP = "supergroup",
-	CHANNEL = "channel",
-	GIGAGROUP = "gigagroup",
-}
+import { MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
 
 function getMembersCount(chat: Chat) {
 	if ((chat.peer as tl.RawChannel).participantsCount) {
@@ -93,83 +69,6 @@ function getMembersCount(chat: Chat) {
 const isOverflown = ({ clientHeight, scrollHeight }: HTMLElement) => {
 	return scrollHeight - 8 > clientHeight;
 };
-
-function toMidnight(date: dayjs.Dayjs) {
-	return date.set("hour", 0).set("minute", 0).set("second", 0);
-}
-
-function today() {
-	return toMidnight(dayjs());
-}
-
-function decideDateSepatator(dateBefore: Date | undefined, dateAfter: Date) {
-	if (!dateBefore) return true;
-
-	const day1 = toMidnight(dayjs(dateBefore));
-	const day2 = toMidnight(dayjs(dateAfter));
-
-	// console.log(day1.toDate(), day2.toDate());
-	// console.log(dateBefore, dateAfter);
-
-	const diff = Math.abs(day1.diff(day2, "day"));
-
-	if (diff > 0) {
-		const diffToday = today().diff(day2, "day");
-		if (diffToday === 1) return 1;
-		if (diffToday === 0) return 2;
-
-		return true;
-	}
-
-	return false;
-}
-
-function decideTail(before: UIMessage | undefined, after: UIMessage) {
-	if (!before) return true;
-
-	const hasDateSeparator = decideDateSepatator(before.date, after.date);
-
-	if (hasDateSeparator) return true;
-
-	const chat = before.$.chat;
-
-	if (chat.chatType === ChatType.CHANNEL) {
-		// broadcast channels seems to always have tails on them?
-		return true;
-	}
-
-	// if different senders
-	if (before.sender.id !== after.sender.id) {
-		return true;
-	}
-
-	const day1 = dayjs(before.date);
-	const day2 = dayjs(after.date);
-
-	const minuteDiff = Math.abs(day1.diff(day2, "minutes"));
-
-	// if more than 1 minute has passed
-	if (minuteDiff > 0) {
-		return true;
-	}
-
-	return false;
-}
-
-function decideShowUsername(before: UIMessage | undefined, after: UIMessage) {
-	const chat = after.$.chat;
-
-	if (
-		// broadcast groups don't seem to show who sent messages?? idk
-		chat.chatType === ChatType.CHANNEL ||
-		chat.chatType === ChatType.PRIVATE ||
-		after.isOutgoing
-	) {
-		return false;
-	}
-
-	return decideTail(before, after);
-}
 
 function ActionMessage(props: { children: JSXElement; focusable?: boolean }) {
 	return (
@@ -279,12 +178,9 @@ const enum MessageOptionsSelected {
 	JUMP,
 }
 
-function MessageOptions(props: {
-	dialog: UIDialog;
-	message: Message;
-	$: UIMessage;
-	onSelect: (e: MessageOptionsSelected | null) => void;
-}) {
+function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) => void }) {
+	const { dialog, message, rawMessage } = useMessageContext();
+
 	onMount(() => {
 		SpatialNavigation.add(SN_ID_OPTIONS, {
 			selector: ".option",
@@ -324,7 +220,7 @@ function MessageOptions(props: {
 				>
 					Reply
 				</OptionsItem>
-				<Show when={props.$.canEdit()}>
+				<Show when={message().canEdit()}>
 					<OptionsItem
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
@@ -336,7 +232,7 @@ function MessageOptions(props: {
 						Edit
 					</OptionsItem>
 				</Show>
-				<Show when={canDeleteForEverone(props.message, props.dialog) || canDeleteForMe(props.dialog)}>
+				<Show when={canDeleteForEverone(rawMessage(), dialog()) || canDeleteForMe(dialog())}>
 					<OptionsItem
 						classList={{ option: true, [styles.option_item]: true }}
 						on:sn-enter-down={() => {
@@ -392,7 +288,9 @@ function canDeleteForMe(dialog: UIDialog) {
 	return false;
 }
 
-function DeleteOptions(props: { dialog: UIDialog; onSelect: () => void; message: Message }) {
+function DeleteOptions(props: { onSelect: () => void }) {
+	const { dialog, rawMessage } = useMessageContext();
+
 	onMount(() => {
 		SpatialNavigation.add(SN_ID_OPTIONS, {
 			selector: ".option",
@@ -416,30 +314,30 @@ function DeleteOptions(props: { dialog: UIDialog; onSelect: () => void; message:
 			title="Delete"
 		>
 			<OptionsMenuMaxHeight>
-				<Show when={canDeleteForMe(props.dialog)}>
+				<Show when={canDeleteForMe(dialog())}>
 					<OptionsItem
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
 						on:sn-enter-down={() => {
 							sleep(2).then(async () => {
-								const message = props.message;
+								const message = rawMessage();
 								await tg
 									.deleteMessages([message], {
 										revoke: false,
 									})
 									.then(() => {
-										props.dialog.messages.delete(message.id);
-										refreshDialogsByPeer([props.dialog.id]);
+										dialog().messages.delete(message.id);
+										refreshDialogsByPeer([dialog().id]);
 									});
-								// props.dialog.messages.delete(message.id);
+								// dialog().messages.delete(message.id);
 							});
 
 							props.onSelect();
 						}}
 						on:sn-navigatefailed={(e) => {
 							const direction = e.detail.direction;
-							if (direction == "up" && canDeleteForEverone(props.message, props.dialog)) {
+							if (direction == "up" && canDeleteForEverone(rawMessage(), dialog())) {
 								SpatialNavigation.move("down");
 							}
 						}}
@@ -448,30 +346,30 @@ function DeleteOptions(props: { dialog: UIDialog; onSelect: () => void; message:
 					</OptionsItem>
 				</Show>
 
-				<Show when={canDeleteForEverone(props.message, props.dialog)}>
+				<Show when={canDeleteForEverone(rawMessage(), dialog())}>
 					<OptionsItem
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
 						on:sn-enter-down={() => {
 							sleep(2).then(async () => {
-								const message = props.message;
+								const message = rawMessage();
 
 								await tg
 									.deleteMessages([message], {
 										revoke: true,
 									})
 									.then(() => {
-										props.dialog.messages.delete(message.id);
-										refreshDialogsByPeer([props.dialog.id]);
+										dialog().messages.delete(message.id);
+										refreshDialogsByPeer([dialog().id]);
 									});
-								// props.dialog.messages.delete(message.id);
+								// dialog().messages.delete(message.id);
 							});
 							props.onSelect();
 						}}
 						on:sn-navigatefailed={(e) => {
 							const direction = e.detail.direction;
-							if (direction == "down" && canDeleteForMe(props.dialog)) {
+							if (direction == "down" && canDeleteForMe(dialog())) {
 								SpatialNavigation.move("up");
 							}
 						}}
@@ -484,24 +382,23 @@ function DeleteOptions(props: { dialog: UIDialog; onSelect: () => void; message:
 	);
 }
 
-function MessageContainer(props: {
-	last: boolean;
-	actualLast: boolean;
-	children: JSXElement;
-	outgoing: boolean;
-	tail: boolean;
-	dialog: UIDialog;
-	$: UIMessage;
-	message: Message;
-	isSticker: boolean;
-	isReply: boolean;
-	showUsername: boolean;
-	setFocused: (e: boolean) => void;
-}) {
-	const tg = client()!;
+function MessageContainer(props: { children: JSXElement }) {
+	const {
+		dialog,
+		actualLast,
+		setFocused,
+		showContainerTail,
+		last,
+		isOutgoing,
+		isSticker,
+		isReply,
+		showUsername,
+		message,
+		rawMessage,
+	} = useMessageContext();
 
 	onMount(() => {
-		if (props.actualLast) {
+		if (actualLast()) {
 			console.error("last Message mounted!!!");
 
 			const actEl = document.activeElement as HTMLElement;
@@ -509,13 +406,13 @@ function MessageContainer(props: {
 			if (actEl && actEl.classList.contains("roomTextbox")) {
 				refreshFocusables();
 
-				const dialog = props.dialog;
+				const _dialog = dialog();
 
 				setTimeout(() => {
 					// if actEl is no longer the same
 					if (actEl !== document.activeElement) return;
 
-					dialog.readHistory();
+					_dialog.readHistory();
 				}, 500);
 
 				scrollIntoView(actEl, {
@@ -542,7 +439,7 @@ function MessageContainer(props: {
 
 	onMount(() => {
 		const cb = (msgId: number, chatId: number) => {
-			const message = props.message;
+			const message = rawMessage();
 			if (message.id === msgId && chatId === message.chat.id) {
 				divRef.focus();
 			}
@@ -565,8 +462,8 @@ function MessageContainer(props: {
 				ref={divRef}
 				tabIndex={-1}
 				onFocus={(e) => {
-					if (props.actualLast) {
-						props.dialog.readHistory();
+					if (actualLast()) {
+						dialog().readHistory();
 					}
 
 					if (e.currentTarget == e.target) {
@@ -575,19 +472,19 @@ function MessageContainer(props: {
 							block: "center",
 							inline: "center",
 						});
-						props.setFocused(true);
+						setFocused(true);
 					}
 
 					setSoftkeys("tg:arrow_down", "INFO", "tg:more");
 				}}
 				onBlur={() => {
-					props.setFocused(false);
+					setFocused(false);
 				}}
 				on:sn-navigatefailed={async (e) => {
 					const direction = e.detail.direction;
 
 					if (direction == "up") {
-						await props.dialog.messages.loadMore();
+						await dialog().messages.loadMore();
 						scrollIntoView(e.target, {
 							behavior: "instant",
 							block: "center",
@@ -612,19 +509,19 @@ function MessageContainer(props: {
 				}}
 				classList={{
 					[styles.message]: true,
-					[styles.padTop]: props.tail,
+					[styles.padTop]: showContainerTail(),
 					focusable: true,
-					last: props.last,
+					last: last(),
 				}}
 			>
 				<div
 					classList={{
 						[styles.message_inner]: true,
-						[styles.outgoing]: props.outgoing,
-						[styles.tail]: props.tail,
-						[styles.isSticker]: props.isSticker,
-						[styles.isReply]: props.isReply,
-						[styles.showUsername]: props.showUsername,
+						[styles.outgoing]: isOutgoing(),
+						[styles.tail]: showContainerTail(),
+						[styles.isSticker]: isSticker(),
+						[styles.isReply]: isReply(),
+						[styles.showUsername]: showUsername(),
 					}}
 				>
 					{props.children}
@@ -633,9 +530,6 @@ function MessageContainer(props: {
 			<Show when={showOptions()}>
 				<Portal>
 					<MessageOptions
-						$={props.$}
-						message={props.message}
-						dialog={props.dialog}
 						onSelect={(e) => {
 							setShowOptions(false);
 
@@ -657,9 +551,9 @@ function MessageContainer(props: {
 										setReplyingMessage(null);
 
 										if (edit) {
-											setEditingMessage(props.$);
+											setEditingMessage(message());
 										} else {
-											setReplyingMessage(props.$);
+											setReplyingMessage(message());
 										}
 									});
 
@@ -675,8 +569,6 @@ function MessageContainer(props: {
 			<Show when={showDeleteOptions()}>
 				<Portal>
 					<DeleteOptions
-						dialog={props.dialog}
-						message={props.message}
 						onSelect={() => {
 							SpatialNavigation.focus("room");
 							setShowDeleteOptions(false);
@@ -742,15 +634,14 @@ function UsernameContainer(props: { children: JSXElement; peer: RawPeer }) {
 	);
 }
 
-function MessageAdditionalInfo(props: { $: UIMessage; dialog: UIDialog; setWidth: (n: number) => void }) {
-	const edited = useStore(() => props.$.editDate);
+function MessageAdditionalInfo(props: { setWidth: (n: number) => void }) {
+	const { message, dialog, isOutgoing } = useMessageContext();
 
-	const check = useMessageChecks(
-		() => props.$,
-		() => props.dialog
-	);
+	const edited = useStore(() => message().editDate);
 
-	const lastReadOutgoing = useStore(() => props.dialog.lastReadOutgoing);
+	const check = useMessageChecks(message, dialog);
+
+	const lastReadOutgoing = useStore(() => dialog().lastReadOutgoing);
 
 	let divRef!: HTMLDivElement;
 
@@ -764,717 +655,14 @@ function MessageAdditionalInfo(props: { $: UIMessage; dialog: UIDialog; setWidth
 
 	return (
 		<div ref={divRef} class={styles.message_info}>
-			<Show when={edited() && !props.$.$.hideEditMark}>
+			<Show when={edited() && !message().$.hideEditMark}>
 				<div class={styles.edited}>edited</div>
 			</Show>
-			<Show when={props.$.isOutgoing}>
+			<Show when={isOutgoing()}>
 				<div class={styles.info_check}>
 					<TelegramIcon name={check() ? "check" : "checks"} />
 				</div>
 			</Show>
-		</div>
-	);
-}
-
-function StickerThumbnail(props: { $: UIMessage }) {
-	const thumbnail = () => (props.$.$.media as Sticker).getThumbnail(Thumbnail.THUMB_OUTLINE);
-
-	return (
-		<Show when={thumbnail()}>
-			<div>
-				<svg
-					version="1.1"
-					xmlns="http://www.w3.org/2000/svg"
-					xmlns:xlink="http://www.w3.org/1999/xlink"
-					viewBox="0 0 512 512"
-				>
-					<path fill="rgba(0, 0, 0, 0.08)" d={thumbnail()!.path} />
-				</svg>
-			</div>
-		</Show>
-	);
-}
-
-function StickerMedia(props: { $: UIMessage; focused: boolean }) {
-	if (props.$.$.media?.type !== "sticker") throw new Error("NOT STICKER MEDIA");
-
-	let canvasRef!: HTMLCanvasElement;
-
-	// if this is set, use img tag
-	const [src, setSrc] = createSignal("");
-	const [video, setVideo] = createSignal("");
-	const [loading, setLoading] = createSignal(true);
-	const [showUnsupported, setShowUnsupported] = createSignal(false);
-
-	let mounted = true;
-
-	onCleanup(() => {
-		mounted = false;
-	});
-
-	onMount(() => {
-		const media = props.$.$.media;
-		if (!media) return;
-		if (media.type !== "sticker") return;
-
-		if (media.mimeType.includes("webm")) {
-			const download = downloadFile(media);
-
-			let url!: string;
-
-			function stateChange() {
-				if (download.state == "done") {
-					if (mounted) {
-						setVideo((url = URL.createObjectURL(download.result)));
-					}
-				}
-			}
-
-			if (download.state == "done") {
-				stateChange();
-
-				onCleanup(() => {
-					URL.revokeObjectURL(url);
-				});
-
-				return;
-			}
-
-			download.on("state", stateChange);
-
-			onCleanup(() => {
-				download.off("state", stateChange);
-				URL.revokeObjectURL(url);
-			});
-			return;
-		}
-
-		if (media.mimeType.includes("webp")) return;
-
-		if (media.hasStickerSet) {
-			console.error(
-				"non-webp sticker set",
-				media.mimeType,
-				media.emoji,
-				media,
-
-				media.raw.id.toInt(),
-				props.$.$.date
-			);
-
-			getOptimizedSticker(media.uniqueFileId).then((hasPrecompiled) => {
-				if (hasPrecompiled) {
-					setSrc(hasPrecompiled);
-				} else {
-					setShowUnsupported(true);
-				}
-			});
-		}
-	});
-
-	onMount(() => {
-		const media = props.$.$.media;
-		if (!media) return;
-		if (media.type !== "sticker") return;
-		if (!media.mimeType.includes("webp")) return;
-
-		// console.error("STICKEERRRR", media, media.thumbnails);
-
-		// use media preview instead of actual file if available
-		const file = media.getThumbnail("m") || media;
-
-		const isKai3 = import.meta.env.VITE_KAIOS == 3;
-
-		// if kai3 use img tag
-		if (isKai3) {
-			const download = downloadFile(file);
-
-			let url!: string;
-
-			const stateChange = () => {
-				if (download.state == "done") {
-					if (mounted) {
-						setVideo((url = URL.createObjectURL(download.result)));
-					}
-				}
-			};
-
-			if (download.state == "done") {
-				stateChange();
-
-				onCleanup(() => {
-					URL.revokeObjectURL(url);
-				});
-
-				return;
-			}
-
-			download.on("state", stateChange);
-
-			onCleanup(() => {
-				download.off("state", stateChange);
-				URL.revokeObjectURL(url);
-			});
-			return;
-		}
-
-		const download = downloadFile(file);
-
-		let url!: string;
-
-		const stateChange = async () => {
-			if (download.state == "done") {
-				if (mounted) {
-					const buffer = await download.result.arrayBuffer();
-
-					processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((res) => {
-						if (res != null) {
-							setSrc((url = URL.createObjectURL(res)));
-						} else {
-							setLoading(false);
-						}
-					});
-				}
-			}
-		};
-
-		if (download.state == "done") {
-			stateChange();
-
-			onCleanup(() => {
-				URL.revokeObjectURL(url);
-			});
-
-			return;
-		}
-
-		download.on("state", stateChange);
-
-		onCleanup(() => {
-			download.off("state", stateChange);
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	return (
-		<div class={styles.sticker}>
-			<Show
-				when={showUnsupported()}
-				fallback={
-					<Show
-						when={video()}
-						fallback={
-							<>
-								<Show when={loading()}>
-									<StickerThumbnail $={props.$}></StickerThumbnail>
-								</Show>
-								<Show when={src()} fallback={<canvas ref={canvasRef} width={128} height={128}></canvas>}>
-									{(src) => (
-										<img
-											onLoad={() => {
-												setLoading(false);
-											}}
-											onError={(e) => {
-												console.error("ERROR OCCURED STICKER", e.currentTarget);
-											}}
-											width={128}
-											src={src() + "#-moz-samplesize=2"}
-										/>
-									)}
-								</Show>
-							</>
-						}
-					>
-						<video
-							onError={(e) => {
-								const err = [
-									"Unknown",
-									"MEDIA_ERR_ABORTED",
-									"MEDIA_ERR_NETWORK",
-									"MEDIA_ERR_DECODE",
-									"MEDIA_ERR_SRC_NOT_SUPPORTED",
-								][e.currentTarget.error?.code || 0];
-								console.error("VIDEO ERROR", err, e.target);
-							}}
-							autoplay
-							loop
-							src={video()}
-						></video>
-					</Show>
-				}
-			>
-				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=1"}></img>
-			</Show>
-		</div>
-	);
-}
-
-function PhotoMedia(props: { $: UIMessage; dialog: UIDialog; showChecks: boolean }) {
-	if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
-
-	const [src, setSrc] = createSignal("");
-	const [loading, setLoading] = createSignal(true);
-	const [showUnsupported, setShowUnsupported] = createSignal(false);
-	const [thumb, setThumb] = createSignal("");
-
-	let mounted = true;
-
-	onCleanup(() => {
-		mounted = false;
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
-
-		const media = props.$.$.media;
-		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
-
-		let url!: string;
-
-		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
-		}
-
-		onCleanup(() => {
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "photo") throw new Error("NOT PHOTO MEDIA");
-
-		const media = props.$.$.media;
-
-		// this is good enough?
-		const thumb = media.getThumbnail(Thumbnail.THUMB_320x320_BOX);
-
-		if (!thumb) {
-			console.error("THUMB M IS NOT PRESENT, SKIPPING");
-			return;
-		}
-
-		const download = downloadFile(thumb);
-
-		let url!: string;
-
-		const stateChange = () => {
-			if (download.state == "done") {
-				if (mounted) {
-					setLoading(false);
-					setSrc((url = URL.createObjectURL(download.result)));
-				}
-			}
-		};
-
-		if (download.state == "done") {
-			stateChange();
-
-			onCleanup(() => {
-				URL.revokeObjectURL(url);
-			});
-
-			return;
-		}
-
-		download.on("state", stateChange);
-
-		onCleanup(() => {
-			download.off("state", stateChange);
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	return (
-		<div class={styles.photo}>
-			<Show when={thumb() && (loading() || !src() || showUnsupported())}>
-				<img class={styles.thumb} src={thumb()}></img>
-			</Show>
-			<Show when={src()}>
-				<img src={src() + "#-moz-samplesize=1"}></img>
-			</Show>
-			<Show when={props.showChecks}>
-				<MediaChecks $={props.$} dialog={props.dialog} />
-			</Show>
-		</div>
-	);
-}
-
-function MediaChecks(props: { $: UIMessage; dialog: UIDialog }) {
-	const check = useMessageChecks(
-		() => props.$,
-		() => props.dialog
-	);
-
-	return (
-		<div class={styles.media_checks}>
-			<div class={styles.info_check}>
-				<TelegramIcon name={check() ? "check" : "checks"} />
-			</div>
-		</div>
-	);
-}
-
-function VideoMedia(props: { $: UIMessage; focused: boolean; dialog: UIDialog; showChecks: boolean }) {
-	if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
-
-	const round = () => (props.$.$.media as any).isRound as boolean;
-
-	const [src, setSrc] = createSignal("");
-	const [loading, setLoading] = createSignal(true);
-	const [showUnsupported, setShowUnsupported] = createSignal(false);
-	const [thumb, setThumb] = createSignal("");
-	const [preview, setPreview] = createSignal("");
-
-	// if legacy use 1
-	const [isGif, setIsGif] = createSignal<boolean | 1>(false);
-
-	let mounted = true;
-
-	onCleanup(() => {
-		mounted = false;
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
-
-		const media = props.$.$.media;
-
-		setIsGif(media.isLegacyGif ? 1 : media.isAnimation);
-
-		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
-
-		let url!: string;
-
-		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
-		}
-
-		onCleanup(() => {
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
-
-		const media = props.$.$.media;
-		const thumb = media.getThumbnail("m");
-
-		if (thumb) {
-			const download = downloadFile(thumb);
-
-			let url!: string;
-
-			const stateChange = () => {
-				if (download.state == "done") {
-					if (mounted) {
-						setPreview((url = URL.createObjectURL(download.result)));
-					}
-				}
-			};
-
-			if (download.state == "done") {
-				stateChange();
-
-				onCleanup(() => {
-					URL.revokeObjectURL(url);
-				});
-
-				return;
-			}
-
-			download.on("state", stateChange);
-
-			onCleanup(() => {
-				download.off("state", stateChange);
-				URL.revokeObjectURL(url);
-			});
-		}
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "video") throw new Error("NOT VIDEO MEDIA");
-
-		const media = props.$.$.media;
-
-		const fileSize = media.fileSize;
-
-		if (!media.fileSize) {
-			// found memory issue with this lmao
-			return;
-		}
-
-		if (media.fileSize > 5242880) {
-			console.error("SKIPPING DOWNLOAD BECAUSE FILE SIZE TOO BIG", fileSize);
-			// todo do to something about this
-			return;
-		}
-
-		const isGif = media.isLegacyGif ? 1 : media.isAnimation;
-
-		if (!isGif) {
-			console.error("SKIPPING DOWNLOAD BECAUSE IT IS NOT A GIF???");
-			return;
-		}
-
-		const download = downloadFile(media);
-
-		let url!: string;
-
-		const stateChange = () => {
-			if (download.state == "done") {
-				if (mounted) {
-					setLoading(false);
-					setSrc((url = URL.createObjectURL(download.result)));
-				}
-			}
-		};
-
-		if (download.state == "done") {
-			stateChange();
-
-			onCleanup(() => {
-				URL.revokeObjectURL(url);
-			});
-
-			return;
-		}
-
-		download.on("state", stateChange);
-
-		onCleanup(() => {
-			download.off("state", stateChange);
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	const [width, setWidth] = createSignal(0);
-
-	return (
-		<div
-			class={styles.video}
-			style={
-				preview() && isGif()
-					? {
-							"background-image": `url(${preview()})`,
-					  }
-					: undefined
-			}
-		>
-			<Show
-				when={isGif()}
-				fallback={
-					<>
-						<Show
-							when={preview()}
-							fallback={
-								<img
-									onLoad={(e) => {
-										setWidth(e.currentTarget.clientWidth);
-									}}
-									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=1"}
-								></img>
-							}
-						>
-							<img
-								style={
-									round()
-										? {
-												"border-radius": "50%",
-										  }
-										: undefined
-								}
-								onLoad={(e) => {
-									setWidth(e.currentTarget.clientWidth);
-								}}
-								src={preview() + "#-moz-samplesize=1"}
-							></img>
-						</Show>
-						<div class={styles.play}>
-							<svg viewBox="0 0 20 20" class="MX">
-								<path d="M4 3.1v13.8c0 .9 1 1.5 1.8 1 3.1-1.7 9.4-5.2 12.5-6.9.8-.5.8-1.6 0-2.1L5.8 2C5 1.6 4 2.2 4 3.1z"></path>
-							</svg>
-						</div>
-						<div class={styles.time}>
-							<svg viewBox="0 0 18 18" class="PL">
-								<path
-									d="M13.518 7.626v-2.82a.72.72 0 00-.247-.583.905.905 0 00-.65-.222H1.9a.905.905 0 00-.651.222.72.72 0 00-.247.584v8.386a.72.72 0 00.247.584.905.905 0 00.651.222h10.72a.905.905 0 00.65-.222.72.72 0 00.247-.584v-2.82l.1.09 2.613 2.44a.49.49 0 00.49.088.408.408 0 00.28-.372V5.382a.407.407 0 00-.279-.374.49.49 0 00-.492.089l-2.591 2.421-.122.109h.002z"
-									fill-rule="evenodd"
-								></path>
-							</svg>
-							0:05
-						</div>
-					</>
-				}
-			>
-				<Show
-					when={props.focused && src()}
-					fallback={
-						<Show
-							when={preview()}
-							fallback={
-								<img
-									onLoad={(e) => {
-										setWidth(e.currentTarget.clientWidth);
-									}}
-									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=1"}
-								></img>
-							}
-						>
-							<img
-								onLoad={(e) => {
-									setWidth(e.currentTarget.clientWidth);
-								}}
-								src={preview() + "#-moz-samplesize=8"}
-							></img>
-						</Show>
-					}
-				>
-					<Show
-						when={isGif() === 1}
-						fallback={
-							<video
-								style={
-									width()
-										? {
-												width: width() + "px",
-										  }
-										: undefined
-								}
-								onLoadedMetadata={(e) => {
-									setWidth(e.currentTarget.clientWidth);
-								}}
-								autoplay
-								loop
-								src={src()}
-							></video>
-						}
-					>
-						<img
-							style={
-								width()
-									? {
-											width: width() + "px",
-									  }
-									: undefined
-							}
-							onLoad={(e) => {
-								setWidth(e.currentTarget.clientWidth);
-							}}
-							src={src()}
-						></img>
-					</Show>
-				</Show>
-				<Show when={!props.focused}>
-					<div class={styles.gif}>GIF</div>
-				</Show>
-			</Show>
-			<Show when={props.showChecks}>
-				<MediaChecks $={props.$} dialog={props.dialog} />
-			</Show>
-		</div>
-	);
-}
-
-function VoiceAvatar(props: { $: UIMessage }) {
-	return <div></div>;
-}
-
-interface AudioMediaProps {
-	$: UIMessage;
-	focused: boolean;
-	dialog: UIDialog;
-	showChecks: boolean;
-}
-
-function VoiceMedia(props: AudioMediaProps) {
-	// console.error("SENDER", props.$.sender);
-	return (
-		<>
-			<div class={styles.voice}>
-				<div class={styles.photo}>
-					<PeerPhotoIcon showSavedIcon={false} peer={props.$.sender} />
-				</div>
-			</div>
-			<Show when={props.showChecks}>
-				<MediaChecks $={props.$} dialog={props.dialog} />
-			</Show>
-		</>
-	);
-}
-
-function MusicMedia(props: AudioMediaProps) {
-	return null;
-}
-
-function AudioMedia(props: AudioMediaProps) {
-	if (!(props.$.$.media?.type == "audio" || props.$.$.media?.type == "voice")) throw new Error("NOT AUDIO MEDIA");
-
-	return <Dynamic component={props.$.$.media.type == "voice" ? VoiceMedia : MusicMedia} {...props} />;
-}
-
-function LocationMedia(props: { $: UIMessage }) {
-	if (props.$.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
-
-	const [src, setSrc] = createSignal("");
-	const [loading, setLoading] = createSignal(true);
-
-	let mounted = true;
-	onCleanup(() => {
-		mounted = false;
-	});
-
-	onMount(() => {
-		if (props.$.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
-
-		const media = props.$.$.media;
-
-		const download = downloadFile(
-			media.preview({
-				width: 192,
-				height: 160,
-			})
-		);
-
-		let url!: string;
-
-		const stateChange = () => {
-			if (download.state == "done") {
-				if (mounted) {
-					setLoading(false);
-					setSrc((url = URL.createObjectURL(download.result)));
-				}
-			}
-		};
-
-		if (download.state == "done") {
-			stateChange();
-
-			onCleanup(() => {
-				URL.revokeObjectURL(url);
-			});
-
-			return;
-		}
-
-		download.on("state", stateChange);
-
-		onCleanup(() => {
-			download.off("state", stateChange);
-			URL.revokeObjectURL(url);
-		});
-	});
-
-	return (
-		<div
-			class={styles.location}
-			style={{
-				"background-image": `url(${src()})`,
-			}}
-		>
-			<div class={styles.pin}></div>
 		</div>
 	);
 }
@@ -1497,16 +685,7 @@ function MessageAction(props: {
 }
 
 function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog; last: boolean }) {
-	const tg = client();
-
-	if (!tg) {
-		throw new Error("CLIENT NOT READY !!!!");
-	}
-
-	const [focused, setFocused] = createSignal(false);
-
-	const text = useStore(() => props.$.text);
-	const entities = useStore(() => props.$.entities);
+	const { text, entities, reply, mediaType, showUsername, showDateSeparator } = useMessageContext();
 
 	const [isOverflowing, setOverflowing] = createSignal(false);
 
@@ -1514,37 +693,14 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 
 	createEffect(() => {
 		text();
-
 		textWrapRef && setOverflowing(isOverflown(textWrapRef));
-	});
-
-	// 0 when deleted message
-	const [reply, setReply] = createSignal(null as UIMessage | null | 0);
-
-	createRenderEffect(() => {
-		const _ = props.$.isReply();
-
-		if (_) {
-			props.$.getReply(props.dialog).then((msg) => {
-				setReply(msg ?? 0);
-			});
-		} else {
-			setReply(null);
-		}
 	});
 
 	const [infoWidth, setInfoWidth] = createSignal(0);
 
-	const mediaType = createMemo(() => props.$.$.media?.type);
-
-	const showChecks = createMemo(() => props.$.isOutgoing && !(entities().entities || entities().text));
-
-	const tail = createMemo(() => decideTail(props.before, props.$));
-	const username = createMemo(() => decideShowUsername(props.before, props.$));
-
 	return (
 		<>
-			<Show when={decideDateSepatator(props.before?.date, props.$.date)}>
+			<Show when={showDateSeparator()}>
 				{(res) => (
 					<ActionMessage>
 						{res() === 1
@@ -1564,20 +720,8 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 			<Show
 				when={props.$.$.action}
 				fallback={
-					<MessageContainer
-						setFocused={setFocused}
-						actualLast={props.last}
-						last={props.last && chat()?.chatType == "channel"}
-						outgoing={props.$.isOutgoing}
-						tail={props.$.isSticker ? (props.$.isReply() ? tail() : false) : tail()}
-						dialog={props.dialog}
-						message={props.$.$}
-						$={props.$}
-						isSticker={props.$.isSticker}
-						isReply={props.$.isReply()}
-						showUsername={username()}
-					>
-						<Show when={username()}>
+					<MessageContainer>
+						<Show when={showUsername()}>
 							<UsernameContainer peer={(props.$.sender as User).raw}>{props.$.sender.displayName}</UsernameContainer>
 						</Show>
 						<Switch>
@@ -1591,23 +735,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 								<ReplyMessage $={reply() as UIMessage} />
 							</Match>
 						</Switch>
-						<Switch>
-							<Match when={mediaType() == "sticker"}>
-								<StickerMedia $={props.$} focused={focused()} />
-							</Match>
-							<Match when={mediaType() == "photo"}>
-								<PhotoMedia $={props.$} dialog={props.dialog} showChecks={showChecks()} />
-							</Match>
-							<Match when={mediaType() == "video"}>
-								<VideoMedia focused={focused()} $={props.$} dialog={props.dialog} showChecks={showChecks()} />
-							</Match>
-							<Match when={mediaType() == "location"}>
-								<LocationMedia $={props.$} />
-							</Match>
-							<Match when={mediaType() == "audio" || mediaType() == "voice"}>
-								<AudioMedia $={props.$} focused={focused()} dialog={props.dialog} showChecks={showChecks()} />
-							</Match>
-						</Switch>
+						<Dynamic component={switchMessageMedia(mediaType())} />
 						<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
 							<div class={styles.text_container}>
 								<div ref={textWrapRef} class={styles.text_wrap}>
@@ -1626,13 +754,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 									</Show>
 								</div>
 							</div>
-							<MessageAdditionalInfo
-								$={props.$}
-								dialog={props.dialog}
-								setWidth={(n) => {
-									setInfoWidth(n);
-								}}
-							/>
+							<MessageAdditionalInfo setWidth={setInfoWidth} />
 						</Show>
 					</MessageContainer>
 				}
@@ -1810,8 +932,6 @@ function TextBox(props: { dialog: UIDialog }) {
 		tg.sendTyping(props.dialog.$.chat);
 	}, 2000);
 
-	let keyup = false;
-
 	const interacting = createMemo(() => {
 		const editing = editingMessage();
 		const replying = replyingMessage();
@@ -1858,11 +978,7 @@ function TextBox(props: { dialog: UIDialog }) {
 					}}
 					classList={{ focusable: true, last: true, roomTextbox: true }}
 					placeholder="Message"
-					onKeyUp={() => {
-						keyup = true;
-					}}
 					onKeyDown={(e) => {
-						keyup = false;
 						const canUseKeyboard = !getTextFromContentEditable(e.currentTarget) || isSelectionAtStart();
 
 						if (e.key == "Backspace" && canUseKeyboard) {
@@ -1976,12 +1092,19 @@ function Messages(props: { dialog: UIDialog }) {
 				>
 					<For each={messages()}>
 						{(e, index) => (
-							<MessageItem
+							<MessageProvider
 								last={index() == messages().length - 1}
 								dialog={props.dialog}
 								$={e}
 								before={messages()[index() - 1]}
-							/>
+							>
+								<MessageItem
+									last={index() == messages().length - 1}
+									dialog={props.dialog}
+									$={e}
+									before={messages()[index() - 1]}
+								/>
+							</MessageProvider>
 						)}
 					</For>
 				</WhenMounted>

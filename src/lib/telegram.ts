@@ -185,13 +185,13 @@ class App {
 
 		tg.onConnectionState(console.error.bind(console));
 
-		console.log(tg);
+		// console.log(tg);
 
 		await tg.connect();
 
 		client_not_ready = tg;
 
-		console.error("HIIIIIII");
+		// console.error("HIIIIIII");
 
 		// abortQr = new AbortController();
 		// const signal = abortQr.signal;

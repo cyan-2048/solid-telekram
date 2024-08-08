@@ -43,12 +43,12 @@ const version = appVersion;
 
 class KaiPlatform extends WebPlatform {
 	onNetworkChanged(fn: (connected: boolean) => void): () => void {
-		console.error("onNetwork change handler omfg");
+		// console.error("onNetwork change handler omfg");
 		return () => {};
 	}
 
 	isOnline() {
-		console.error("isONline WAA");
+		// console.error("isONline WAA");
 		return true;
 	}
 }
@@ -65,10 +65,10 @@ const tg = new BaseTelegramClient({
 		appVersion: version,
 	},
 
-	reconnectionStrategy: (params, lastError, consequentFails, previousWait) => {
-		console.error("RECONNECTION STRATEGYYYY", params, lastError, consequentFails, previousWait);
-		return defaultReconnectionStrategy(params, lastError, consequentFails, previousWait);
-	},
+	// reconnectionStrategy: (params, lastError, consequentFails, previousWait) => {
+	// 	// console.error("RECONNECTION STRATEGYYYY", params, lastError, consequentFails, previousWait);
+	// 	return defaultReconnectionStrategy(params, lastError, consequentFails, previousWait);
+	// },
 
 	testMode: false,
 

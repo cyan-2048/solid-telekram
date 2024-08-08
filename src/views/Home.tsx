@@ -195,7 +195,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 		);
 	};
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		// we won't index searchResults
 		if (props.isSearchResult) return;
 

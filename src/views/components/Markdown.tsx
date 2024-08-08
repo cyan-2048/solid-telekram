@@ -1,16 +1,6 @@
-import { MessageEntity, TextWithEntities } from "@mtcute/core";
+import { TextWithEntities } from "@mtcute/core";
 import styles from "./Markdown.module.scss";
-import {
-	For,
-	Match,
-	Switch,
-	Show,
-	createRenderEffect,
-	JSXElement,
-	Component,
-	createMemo,
-	createSignal,
-} from "solid-js";
+import { For, Match, Switch, Show, createRenderEffect, Component, createSignal } from "solid-js";
 import { Node, ObjectNode, unparse } from "@/lib/unparse";
 import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
@@ -36,9 +26,7 @@ function EntityNode(props: { $: ObjectNode; customRenderer?: CustomRenderer }) {
 				</Dynamic>
 			}
 		>
-			<Match when={props.customRenderer?.(props.$)}>
-				{(e) => <Dynamic {...props.$} component={e()!} />}
-			</Match>
+			<Match when={props.customRenderer?.(props.$)}>{(e) => <Dynamic {...props.$} component={e()!} />}</Match>
 			<Match when={props.$.tag == "spoiler"}>
 				<span class={styles.spoiler}>
 					<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
@@ -117,9 +105,7 @@ export const toCodePoint = memoize(function toCodePoint(unicodeSurrogates: strin
 });
 
 function emojiFromCodePoints(codePoints: string) {
-	return codePoints
-		.split("-")
-		.reduce((prev, curr) => prev + String.fromCodePoint(parseInt(curr, 16)), "");
+	return codePoints.split("-").reduce((prev, curr) => prev + String.fromCodePoint(parseInt(curr, 16)), "");
 }
 
 export function unifiedString(str: string) {
@@ -158,10 +144,7 @@ export function ModifyString(props: { text: string }) {
 	return (
 		<For each={parsed()}>
 			{(match) => (
-				<Show
-					when={typeof match == "string"}
-					fallback={<Twemoji text={(match as EmojiMatch).match} />}
-				>
+				<Show when={typeof match == "string"} fallback={<Twemoji text={(match as EmojiMatch).match} />}>
 					{match as string}
 				</Show>
 			)}
@@ -180,10 +163,7 @@ function Entity(props: { $: Node; customRenderer?: CustomRenderer }) {
 	);
 }
 
-export default function Markdown(props: {
-	entities: TextWithEntities;
-	customRenderer?: CustomRenderer;
-}) {
+export default function Markdown(props: { entities: TextWithEntities; customRenderer?: CustomRenderer }) {
 	const [ast, setAst] = createStore([] as Node[]);
 
 	createRenderEffect(() => {

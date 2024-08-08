@@ -3,6 +3,9 @@ if (import.meta.env.DEV) {
 	await import("./system");
 }
 
+import KaiAdsUrl from "./lib/kaiads/kaiads.v5.min.js?url";
+console.error("KAIADS", KaiAdsUrl);
+
 /* @refresh reload */
 import { render } from "solid-js/web";
 

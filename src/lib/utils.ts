@@ -1,6 +1,6 @@
 import { tl } from "@mtcute/tl";
 import scrollIntoViewNPM from "scroll-into-view";
-import { Accessor, createEffect, createSignal, onCleanup } from "solid-js";
+import { Accessor, createEffect, createRenderEffect, createSignal, onCleanup } from "solid-js";
 import { Readable, get } from "./stores";
 import { UIDialog, UIMessage } from "@signals";
 
@@ -53,7 +53,7 @@ export function useStore<T, R extends keyof T>(
 		}
 	);
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		const unsub = readable()?.subscribe((val) => {
 			setState(() => (key != undefined ? val[key] : val));
 		});

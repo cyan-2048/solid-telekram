@@ -1,0 +1,574 @@
+
+                        KaiOS SDK Agreement
+                          March 19, 2019
+              https://www.kaiostech.com/sdk-agreement/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Scope.
+
+      This KaiOS SDK Agreement ("Agreement") apply to all developers wishing to
+      develop applications for the KaiOS. The Agreement forms a valid contract
+      between you ("you" or "Licensee"), and KAI OS TECHNOLOGIES (HONG KONG) LIMITED,
+      a corporation duly organized and existing under the laws of Hong Kong,
+      having its principle place of business at 12/F, 133 Wai Yip Street, Kwun Tong,
+      Kowloon, Hong Kong, Hong Kong ("we" or "KAI").
+
+      Do note that we may change the Agreement from time to time at our discretion.
+      Whenever the Agreement is modified, we will ask you to accept the new terms
+      before downloading the KAI software.
+
+      You accept these terms by clicking on the applicable "I accept" button (or similar)
+      shown to you in connection with these Agreement. If you are accepting this
+      Agreement on behalf of your employer or another organisation, by clicking on
+      accept you represent and warrant that you are authorized to accept this
+      Agreement on behalf of that organisation.
+
+      Do note that we may change the Agreement from time to time at our discretion.
+      Whenever the Agreement is modified, we will ask you to accept the new terms
+      before downloading the KAI software.
+
+      You accept these terms by clicking on the applicable "I accept" button (or similar)
+      shown to you in connection with these Agreement. If you are accepting this
+      Agreement on behalf of your employer or another organisation, by clicking on
+      accept you represent and warrant that you are authorized to accept this
+      Agreement on behalf of that organisation.
+
+   2. Definitions.
+
+      In this Agreement:
+
+      "Application" means one or more software programs developed by Licensee in
+      compliance with the Documentation and Developer Requirements, under Licensee’s
+      own trademark or brand, and for specific use with the KaiOS Devices, including
+      bug fixes, updates, upgrades, modifications, enhancements, supplements to,
+      revisions, new releases and new versions of such software programs.
+
+      "Documentation" means any technical or other specifications or documentation
+      that KAI may provide to Licensee for use in connection with SDK.
+
+      "Documented API(s)" means the application programming interface(s) documented
+      by KAI in the Documentation and which are contained in SDK.
+
+      "FOSS" means any software that is subject to terms that, as a condition of use,
+      copying, modification or redistribution, require such software and/or derivative
+      works thereof to be disclosed or distributed in source code form, to be licensed
+      for the purpose of making derivative works, or to be redistributed free of charge,
+      including without limitation software distributed under the GNU General Public
+      License or GNU Lesser/Library GPL, Mozilla Public License (MPL), or Apache License.
+
+      "Developer Requirements" mean the technical, human interface, design,
+      product category, security, performance, and other criteria and requirements
+      set forth in Exhibit A.
+
+      "KaiOS" means the KaiOS mobile operating system owned by KAI.
+
+      "KaiOS Devices" means mobile devices that run KaiOS.
+
+      "KaiOS Store" means the service portal application KAI has created which allows
+      registered end users to download services and applications on KaiOS Devices.
+
+      "Security Solution" means the proprietary content protection system of KAI
+      to be applied to Applications distributed on the KaiOS Store to administer
+      KAI’s standard usage rules for Applications, as such system and rules may be
+      modified by KAI from time to time.
+
+      "SDK" means the Documentation, software (source code and object code),
+      applications, sample code, simulator, tools, libraries, APIs, data, files,
+      and materials provided by KAI for use by Licensee in connection with the
+      Application development, and includes any Updates that may be provided by
+      KAI to Licensee pursuant to this Agreement.
+
+      "Term" means the period described in Section 10.
+
+      "Updates" means bug fixes, updates, upgrades, modifications, enhancements,
+      supplements, and new releases or versions of the SDK, or to any part of SDK.
+
+   3. License and Restrictions.
+
+      3.1 Permitted Uses and Restrictions.
+
+          Subject to the terms and conditions of this Agreement, KAI hereby grants
+          Licensee a limited, non-exclusive, personal, revocable, non-sublicensable
+          and non-transferable license, during the Term, to:
+
+            (a) install a reasonable number of copies of the SDK for the sole purpose
+                of developing or testing Applications;
+
+            (b) distribute the SDK solely as integrated part of the Application in
+                accordance with this Agreement, and
+
+            (c) use and copy the Documentation for internal use only and for the sole
+                purpose of developing or testing Applications.
+
+          Licensee will be solely responsible for all costs, expenses, losses and
+          liabilities incurred, and activities undertaken by Licensee in connection
+          with the foregoing license.
+
+      3.2 Copyright Notices.
+
+          Licensee agrees to retain the KAI copyright, disclaimers and other proprietary
+          notices (as they appear in SDK and related services and Documentation provided)
+          in all copies of SDK and Documentation.
+
+      3.3 Ownership.
+
+          KAI retains all rights, title, and interest in and to SDK it may make
+          available to Licensee under this Agreement.
+
+      3.4 No Other Permitted Uses.
+
+          Except as otherwise set forth in this Agreement, Licensee shall
+          not (or enable others):
+
+            (a) rent, lease, lend, sell, redistribute, or sublicense SDK,
+                in whole or in part,
+
+            (b) use SDK for any purpose not expressly permitted by this Agreement,
+
+            (c) install, use or run the SDK on any non-KaiOS Devices,
+
+            (d) copy (except as expressly permitted under this Agreement),
+                decompile, reverse engineer, disassemble, attempt to derive the
+                source code of, modify, decrypt, or create derivative works of
+                SDK or any services provided by SDK, or any part thereof (except
+                as and only to the extent any foregoing restriction is prohibited
+                by applicable law),
+
+            (e) exploit any services provided hereunder in any unauthorized way
+                whatsoever, including but not limited to, by trespass or burdening
+                network capacity.
+
+          All licenses not expressly granted in this Agreement are reserved and
+          no other licenses, immunity or rights, express or implied are granted
+          by KAI, by implication, estoppel, or otherwise.
+
+          This Agreement does not grant Licensee any rights to use any trademarks,
+          logos or service marks belonging to KAI. If Licensee makes reference to
+          any KAI’s products or technology, Licensee agrees to comply with the
+          guidelines furnished by KAI as modified by KAI from time to time.
+
+      3.5 Updates.
+
+          If Updates are made available by KAI, the terms of this Agreement will
+          govern such Updates.
+
+   4. Licensee Obligations.
+
+      4.1 General.
+
+          Licensee hereby warrants to KAI that all information provided to KAI by
+          Licensee will be current, true, accurate and complete.
+
+      4.2 Use of SDK.
+
+          Licensee agrees that:
+
+          (a) It will only use SDK for the purposes and in the manner expressly
+              permitted by this Agreement and in accordance with all applicable
+              laws and regulations;
+
+          (b) It will not use SDK or any services for any unlawful or illegal activity,
+              nor to develop any Application which would commit or facilitate the
+              commission of a crime, or other tortious, unlawful or illegal act;
+
+          (c) The Application will be developed in compliance with the Documentation
+              and the Developer Requirements; and
+
+          (d) It will not create any Application that would disable, hack or otherwise
+              interfere with the Security Solution, or any security, digital signing,
+              digital rights management, verification or authentication mechanisms
+              in the SDK or KaiOS.
+
+   5. Digital Signing of Applications.
+
+      All Applications must be signed with an KAI-issued certificate in order to
+      be installed on KaiOS Devices in accordance with the process set forth
+      in Exhibit B.
+
+   6. Indemnification.
+
+      To the extent permitted by law, Licensee agrees to indemnify, defend and
+      hold harmless KAI, its directors, officers, employees, independent contractors
+      and agents (each a “KAI Indemnified Party”) from any and all claims, losses,
+      liabilities, damages, expenses and costs (including without limitation
+      attorney’s fees and court costs) (collectively “Losses”) incurred by a KAI
+      Indemnified Party as a result of any claims that the Applications or the
+      distribution, use or importation of the Applications or metadata violate
+      or infringe any third party intellectual property or proprietary rights,
+      data collection or privacy any claims arising out of KAI’s permitted use,
+      promotion or distribution of the Application(s), related trademarks and
+      logos, or images and other materials that Licensee provides to KAI.
+
+   7. Term and Termination.
+
+      7.1 Term.
+
+          This Agreement shall become effective when accepted by Licensee and
+          shall remain in force unless terminated by either party upon one (1)
+          month written notice, or as set out below.
+
+      7.2 Termination.
+
+          This Agreement will terminate, effective immediately upon notice from
+          the non-breaching party, if the other party:
+
+            (a) fails to comply with any term of this Agreement;
+
+            (b) commences an action for patent infringement against non-breaching party;
+
+            (c) becomes insolvent, fails to pay debts when due, dissolves or ceases
+                to do business, file for bankruptcy; or
+
+            (d) engages, or encourage others to engage, in any fraudulent, improper,
+                unlawful or dishonest act relating to this Agreement, including,
+                but not limited to, embezzlement, alteration or falsification of
+                documents, theft, inappropriate use of computer systems, bribery,
+                or other misrepresentation of facts.
+
+      7.3 Effect of Termination.
+
+          Upon the termination of this Agreement for any reason, Licensee shall
+          immediately cease all use of SDK and services and erase and destroy all
+          copies of SDK, excluding any archival copies maintained in accordance
+          with Licensee’s standard business practices required to be maintained
+          by applicable law, rule or regulation.
+
+          The provisions which by their nature are intended to survive termination
+          or expiration of this Agreement shall survive.
+
+   8. No Warranty.
+
+      SDK and any services are provided “as is” and “as available”, with all
+      faults and without warranty of any kind, and KAI hereby disclaims all
+      warranties and conditions with respect to SDK and services, either express,
+      implied or statutory, fitness for a particular purpose, and noninfringement
+      of third party rights.
+
+   9. Limitation of Liability.
+
+      In no event will KAI be liable for any incidental, special, indirect, consequential
+      or punitive damages whatsoever, including, without limitation, damages for loss
+      of profits, loss of data, business interruption or any other commercial damages
+      or losses, arising out of or related to this agreement, however caused,
+      whether under a theory of contract, warranty, tort (including negligence),
+      products liability, or otherwise.
+
+   10. General Legal Terms.
+
+       10.1 Consent to Collection and Use of Data.
+
+            Licensee agrees that KAI may collect and use technical and related
+            information, including but not limited to information about Applications,
+            computer, system software, other software and peripherals, that is
+            gathered periodically to facilitate the provision of software updates
+            and other services to Licensee (if any) related to SDK, and to verify
+            compliance with the terms of this Agreement. KAI may use this information,
+            as long as it is in a form that does not personally identify Licensee,
+            to improve SDK, KAI products or to provide services or technologies to
+            Licensee and other customers.
+
+       10.2 Assignment.
+
+            Licensee may not assign or transfer this Agreement by operation of law,
+            merger, or any other means without KAI’s express prior written consent.
+
+       10.3 Relationship of the Parties.
+
+            This Agreement will not be construed as creating any other agency
+            relationship, or a partnership, joint venture, fiduciary duty, or any
+            other form of legal association between Licensee and KAI.
+
+       10.4 Notices.
+
+            Any notices relating to this Agreement shall be in writing. Notices
+            will be deemed given by when sent to the party’s address provided in
+            connection with this Agreement (e-mail suffices when sending notices
+            to Licensee).
+
+       10.5 Severability.
+
+            If a court of competent jurisdiction finds any clause of this Agreement
+            to be unenforceable for any reason, that clause of this Agreement
+            shall be enforced to the maximum extent permissible so as to affect
+            the intent of the parties, and the remainder of this Agreement shall
+            continue in full force and effect.
+
+       10.6 Waiver and Construction.
+
+            Failure by a party to enforce any provision of this Agreement shall
+            not be deemed a waiver of future enforcement of that or any other
+            provision. Section headings are for convenience only and are not to
+            be considered in construing or interpreting this Agreement.
+
+       10.7 Export Control.
+
+            SDK may not be exported or re-exported (a) into any U.S. embargoed
+            countries or (b) to anyone on the U.S. Treasury Department’s list of
+            Specially Designated Nationals or the U.S. Department of Commerce
+            Denied Person’s List or Entity List. By using SDK, Licensee represents
+            and warrants that Licensee is not located in any such country or on
+            any such list. Licensee also agree that Licensee will not use SDK for
+            any purposes prohibited by United States law, including, without limitation,
+            the development, design, manufacture or production of nuclear, missiles,
+            or chemical or biological weapons.
+
+       10.8 Dispute Resolution; Governing Law.
+
+            This Agreement shall be governed by and construed in accordance with
+            the laws of Hong Kong. In the event that any dispute, claim or controversy
+            arises between the parties in connection with or relating to this Agreement,
+            including any question concerning the existence, validity, breach,
+            termination or interpretation thereof (collectively, “Dispute”), the
+            aggrieved party shall give the other party a written notice of Dispute
+            (“Notice of Dispute”) with a description of the Dispute in reasonable detail.
+
+            The parties shall negotiate in good faith and exercise reasonable efforts
+            to settle any notified Dispute within a period of thirty (30) days
+            following the delivery of the Notice of Dispute. If the parties fail
+            to resolve the Dispute within such period, the Dispute shall be finally
+            settled by arbitration by a single arbitrator in accordance with the
+            UNCITRAL Arbitration Rules (“Rules”) in force when the notice of
+            arbitration is submitted in accordance with such Rules, as modified by
+            the HKIAC Procedures for the Administration of International Arbitration.
+            The place of arbitration shall be in Hong Kong at the HKIAC. The appointing
+            authority of the arbitrator shall be the HKIAC. The language of the
+            arbitral proceedings shall be English. The arbitral award shall be final,
+            binding on the parties and non-appealable to such extent permissible by law.
+
+       10.9 Entire Agreement; Governing Language.
+
+            This Agreement constitutes the entire agreement between the parties
+            with respect to SDK licensed hereunder and supersedes all prior understandings
+            and agreements regarding its subject matter. This Agreement may be modified
+            only: (a) by a written amendment signed by both parties, or (b) to the
+            extent expressly permitted by this Agreement. Any translation of this
+            Agreement is done for local requirements and in the event of a dispute
+            between the English and any non-English version, the English version of
+            this Agreement shall govern.
+
+                              Exhibit A
+                        Application Requirements
+
+   1. APIs and Functionality.
+
+      (a) Applications may only use Documented APIs in the manner prescribed by KAI
+          and must not use or call any private APIs.
+
+      (b) An Application may not itself install or launch other executable code by
+          any means, including without limitation through the use of a plug-in architecture,
+          calling other frameworks, other APIs or otherwise. No interpreted code may
+          be downloaded or used in an Application except for code that is interpreted
+          and run by KAI’s Documented APIs and built-in interpreter(s).
+
+      (c) Without KAI’s prior written approval, an Application may not provide, unlock
+          or enable additional features or functionality through distribution mechanisms
+          other than KaiOS Store.
+
+      (d) An Application may only read data from or write data to an Application’s
+          designated container area on the device, except as otherwise specified by KAI.
+
+      (e) Required API implementations. All Applications must implement the following
+          APIs as soon as they are made available to Licensee by KAI and in any
+          event within three (3) months from the date when KAI has notified the
+          Licensee by email.
+
+          (i)   Payment/Billing API. All payment processing functionalities in the
+                Application (in-app purchases, subscriptions, purchase of goods/services
+                and alike) must be implemented solely using the payment API provided
+                by KAI, and must use KAI’s branding and UI elements as specified in
+                the applicable Documentation. Use of other payment APIs in the Application
+                is prohibited.
+
+          (ii)  Advertisement API. Advertisement API enables Applications to display
+                advertisements to the user. Use of other advertisement APIs in the
+                Application is prohibited.
+
+          (iii) Analytics API. Analytics API is used to collect metrics from the
+                Applications (e.g. which applications have been downloaded, which
+                applications are used, how often, how long). Use of other analytics
+                APIs in the Application is prohibited.
+
+          (iv)  Kai Account API. Kai Account API is used to identify the user
+                account. Use of other accounts in the Application is prohibited.
+
+   2. User Interfaces and Data.
+
+      (a) Applications must comply with the Documentation provided by KAI.
+
+      (b) Any form of user or device data collection, or image, picture or voice
+          capture or recording performed by the Application (collectively “Recordings”),
+          and any form of user data, content or information processing, maintenance,
+          uploading, syncing, or transmission performed by the Application
+          (collectively “Transmissions”) must declare to KAI and comply with all
+          applicable privacy laws and regulations as well as any requirements from
+          KAI’s privacy terms related to such aspects, including but not limited to
+          any notice or consent requirements. In particular, a reasonably conspicuous
+          audio, visual or other indicator must be displayed to the user as part of
+          the Application to indicate that a Recording is taking place.
+
+   3. Local Laws, User Privacy, Location services, Mapping and Payments.
+
+      (a) Applications must comply with all applicable criminal, civil and statutory
+          laws and regulations, including those in any jurisdictions in which
+          Applications may be delivered.
+
+          In addition, for Applications that use location-based APIs or that collect,
+          transmit, maintain, process, share, disclose or otherwise use a user’s
+          personal information or data:
+
+          (i)   Applications must comply with all applicable privacy and data
+                collection laws and regulations with respect to any collection,
+                transmission, maintenance, processing, use, etc. of the user’s
+                location data or personal information by the Application.
+
+          (ii)  Applications may not be designed or marketed for the purpose of
+                harassing, abusing, stalking, threatening or otherwise violating
+                the legal rights (such as the rights of privacy and publicity)
+                of others.
+
+          (iii) Applications may not perform any functions or link to any content
+                or use any robot, spider, site search or other retrieval application
+                or device to scrape, retrieve or index services provided by KAI or
+                its licensors, or to collect, disseminate or use information about
+                users for any unauthorized purpose.
+
+      (b) For Applications that use location-based APIs, such Applications may not
+          be designed or marketed for automatic or autonomous control of vehicles,
+          aircraft, or other mechanical devices; dispatch or fleet management; or
+          emergency or life-saving purposes. In addition, Applications that offer
+          location-based services or functionality must notify and obtain consent
+          from an individual before his or her location data is being collected,
+          transmitted or otherwise used by the Application.
+
+      (c) For Applications that use location-based APIs for real-time route guidance
+          (including, but not limited to, turn-by-turn route guidance and other
+          routing that is enabled through the use of a sensor), Licensee must place
+          the following notice (or substantially similar) in the end user license
+          agreement: LICENSEE USE OF THIS REAL TIME ROUTE GUIDANCE APPLICATION IS
+          AT LICENSEE SOLE RISK. LOCATION DATA MAY NOT BE ACCURATE.
+
+      (d) Applications must not disable, override or otherwise interfere with any
+          KAI-implemented system alerts, warnings, display panels, consent panels
+          and the like, including, but not limited to, those that are intended to
+          notify the user that the user’s location data is being collected, transmitted,
+          maintained, processed or used, or intended to obtain consent for such use.
+          If consent is denied or withdrawn, Applications may not collect, transmit,
+          maintain, process or utilize the user’s location data or perform any other
+          actions for which the user’s consent has been denied or withdrawn.
+
+      (e) If an Application accesses the Google Mobile Maps (GMM) service through
+          the maps API, use of the GMM Service is subject to Google’s Terms of
+          Service. If Licensee does not accept such Google Terms of Service, including,
+          but not limited to all limitations and restrictions therein Licensee may
+          not use the GMM service in the Application. Licensee acknowledges and
+          agrees that use of the GMM Service in Applications will constitute the
+          Licensee’s acceptance ofsuch Terms of Service.
+
+   4. Content and Materials.
+
+      (a) Any master recordings and musical compositions embodied in Applications
+          must be wholly-owned by Licensee or licensed to Licensee on a fully paid-up
+          basis and in a manner that will not require the payment of any fees,
+          royalties and/or sums by KAI to Licensee or any third party.
+
+      (b) If the Application includes or will include any other content, Licensee
+          must either own all such content or have permission from the content
+          owner to use it in the Application.
+
+      (c) Applications must not contain any obscene, drugs, gambling, violence,
+          alcohol, pornographic, offensive or defamatory content or materials of
+          any kind (text, graphics, images, photographs, features, etc.), or other
+          content or materials that in KAI’s reasonable judgment may be found
+          objectionable.
+
+      (d) Applications must not contain any malware, malicious or harmful code,
+          program, or other internal component (e.g. computer viruses, trojan horses,
+          “backdoors”) which could damage, destroy, or adversely affect other software,
+          firmware, hardware, data, systems, services, or networks.
+
+      (e) If the Application includes any FOSS, Licensee agrees to comply with all
+          applicable FOSS licensing terms. Licensee also agrees not to use any FOSS
+          or take any action in the development of the Application in such a way
+          that would cause the non-FOSS portions of SDK to be subject to any FOSS
+          licensing terms or obligations.
+
+   5. Cellular Network.
+
+      If an Application requires or will have access to the cellular network, then
+      additionally such Application:
+
+        (a) Must comply with KAI’s best practices and other guidelines on how
+            Applications should access and use the cellular network;
+
+        (b) Must not in KAI’s reasonable judgment excessively use or unduly burden
+            network capacity or bandwidth;
+
+        (c) May not have Voice over Internet Protocol (VoIP) functionality using
+            the cellular network.
+
+   6. Additional Services.
+
+      From time to time, KAI may provide access to additional services for Licensee
+      to use in connection with Applications. Some of these additional services may
+      be subject to separate terms and conditions in addition to this Agreement.
+      If Licensee elects to use such services, the usage will also be subject to
+      those separate terms and conditions.
+
+      KAI may change these Developer Requirements at any time. New or modified
+      Developer Requirements will not retroactively apply to Applications already
+      in distribution.
+
+      In order to continue using SDK or any services, Licensee must accept and
+      agree to the new Developer Requirements. If Licensee does not agree to new
+      Developer Requirements, Licensee’s use of SDK and any services can be suspended
+      or terminated by KAI.
+
+                              Exhibit B
+                        Signing of Application
+
+   Licensee may obtain one or more production digital certificates from KAI, subject
+   to a maximum number as reasonably determined by KAI, to be used for the sole
+   purpose of signing Application(s) prior to submission of the Application to KAI
+   or limited distribution of Application for use on KaiOS Devices.
+
+   In relation to this, Licensee represents and warrants that it:
+
+      (a) will not take any action to interfere with the normal operation of any
+          KAI-issued digital certificates or schematics;
+
+      (b) is solely responsible for preventing any unauthorized person from having
+          access to digital certificates and corresponding private keys given by
+          KAI and it will use the best efforts to safeguard digital certificates
+          and corresponding private keys from compromise;
+
+      (c) immediately notify KAI in writing if Licensee has any reason to believe
+          there has been a compromise of any of digital certificates or corresponding
+          private keys;
+
+      (d) will not provide or transfer KAI-issued digital certificates to any third
+          party, nor use digital certificate to sign a third party’s application; and
+
+      (e) will use KAI-issued certificates exclusively for the purpose of signing
+          Applications for testing, submission to KAI and/or limited distribution
+          for use on KaiOS Devices as contemplated under this Agreement, and only
+          in accordance with this Agreement.
+
+   Licensee further represents and warrants to KAI that the licensing terms governing
+   the Application, or governing any third party code or FOSS included in the Application,
+   will be consistent with and not conflict with the digital signing or content
+   protection aspects of the Agreement or any of the terms, conditions or requirements
+   of this Agreement.
+
+   In particular, such licensing terms will not purport to require KAI to disclose
+   or make available any of the keys, authorization codes, methods, procedures,
+   data or other information related to the Security Solution, digital signing or
+   digital rights management mechanisms utilized as part of the Agreement.
+
+   If Licensee discovers any such inconsistency or conflict, it shall immediately
+   notify KAI of it and will cooperate with KAI to resolve such matter. KAI may
+   cease distribution of any affected Applications and refuse to accept any subsequent
+   Application submissions from Licensee until such matter is resolved to KAI’s
+   reasonable satisfaction.
+
+   END OF TERMS AND CONDITIONS

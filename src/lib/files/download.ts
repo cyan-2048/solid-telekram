@@ -64,7 +64,7 @@ const EE = new EventEmitter<{
 function tick() {
 	setTimeout(() => {
 		EE.emit("tick");
-		console.log("DOWNLOAD QUEUE", cacheMap.size, pending.size, queue.size);
+		// console.info("DOWNLOAD QUEUE", cacheMap.size, pending.size, queue.size);
 	}, 0);
 }
 
@@ -105,6 +105,7 @@ type DownloadState = "idle" | "started" | "downloading" | "aborting" | "aborted"
 
 class Download extends EventEmitter<{
 	state: (e: DownloadState) => void;
+	progress: (num: number) => void;
 }> {
 	downloader?: Downloader;
 
@@ -121,6 +122,11 @@ class Download extends EventEmitter<{
 	private emitStateChange() {
 		this.emit("state", this.state);
 	}
+
+	/**
+	 * Number 0 - 1
+	 */
+	progress = 0;
 
 	private set _state(val: DownloadState) {
 		this.state = val;
@@ -163,9 +169,13 @@ class Download extends EventEmitter<{
 
 		for await (const chunk of this.tg.downloadAsIterable(this.location, {
 			abortSignal: this.abortController.signal,
-			progressCallback: (downloaded) => {
-				const total = this.location.fileSize || 0;
-				console.error("progress", downloaded, total, Math.floor((downloaded / total) * 100));
+			progressCallback: (downloaded, _total) => {
+				const total = (Number.isFinite(_total) ? _total : this.location.fileSize) || 0;
+				if (total) {
+					this.emit("progress", (this.progress = Math.floor((downloaded / total) * 100)));
+				}
+
+				// console.error("progress", downloaded, total, Math.floor((downloaded / total) * 100));
 			},
 		})) {
 			this._state = "downloading";
@@ -178,6 +188,7 @@ class Download extends EventEmitter<{
 		}
 
 		this.result = await download.finalize();
+		this.emit("progress", (this.progress = 100));
 
 		await sleep(50);
 

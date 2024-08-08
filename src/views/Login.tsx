@@ -4,21 +4,14 @@ import {
 	Switch,
 	batch,
 	createEffect,
+	createRenderEffect,
 	createSignal,
 	onCleanup,
 	onMount,
 	untrack,
 } from "solid-js";
 import styles from "./Login.module.scss";
-import {
-	EE,
-	LoginState,
-	loginState,
-	qrLink,
-	setSoftkeys,
-	setStatusbarColor,
-	telegram,
-} from "@signals";
+import { EE, LoginState, loginState, qrLink, setSoftkeys, setStatusbarColor, telegram } from "@signals";
 import CountryCodePicker, { Country } from "./components/CountryCodePicker";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { sleep, useKeypress } from "@/lib/utils";
@@ -31,9 +24,7 @@ let countryCache: null | Country = null;
 const SN_ID = "login";
 const SN_ID_OPTIONS = "options";
 
-const LoadingThing = () => (
-	<div style={{ padding: "1rem" }}>Please wait this may take a while...</div>
-);
+const LoadingThing = () => <div style={{ padding: "1rem" }}>Please wait this may take a while...</div>;
 
 function QRCode(props: { onCancel: () => void }) {
 	onMount(() => {
@@ -41,7 +32,7 @@ function QRCode(props: { onCancel: () => void }) {
 		blur();
 	});
 
-	createEffect(() => {
+	createRenderEffect(() => {
 		const link = qrLink();
 		if (link === null) {
 			telegram.requestQR();
