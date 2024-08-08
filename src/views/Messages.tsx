@@ -475,7 +475,7 @@ function StickerMedia() {
 					</Show>
 				}
 			>
-				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=1"}></img>
+				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=2"}></img>
 			</Show>
 		</div>
 	);
@@ -558,7 +558,7 @@ function PhotoMedia() {
 				<img class={styles.thumb} src={thumb()}></img>
 			</Show>
 			<Show when={src()}>
-				<img src={src() + "#-moz-samplesize=1"}></img>
+				<img src={src() + "#-moz-samplesize=2"}></img>
 			</Show>
 			<Show when={showChecks()}>
 				<MediaChecks />
@@ -734,7 +734,7 @@ function VideoMedia() {
 										setWidth(e.currentTarget.clientWidth);
 									}}
 									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=1"}
+									src={thumb() + "#-moz-samplesize=2"}
 								></img>
 							}
 						>
@@ -749,7 +749,7 @@ function VideoMedia() {
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
-								src={preview() + "#-moz-samplesize=1"}
+								src={preview() + "#-moz-samplesize=2"}
 							></img>
 						</Show>
 						<div class={styles.play}>
@@ -780,7 +780,7 @@ function VideoMedia() {
 										setWidth(e.currentTarget.clientWidth);
 									}}
 									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=1"}
+									src={thumb() + "#-moz-samplesize=2"}
 								></img>
 							}
 						>
@@ -788,7 +788,7 @@ function VideoMedia() {
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
-								src={preview() + "#-moz-samplesize=8"}
+								src={preview() + "#-moz-samplesize=2"}
 							></img>
 						</Show>
 					}

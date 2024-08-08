@@ -670,7 +670,7 @@ class MessagesJar extends Map<number, UIMessage> {
 
 			this.addBulk(e);
 		} catch (e: any) {
-			alert((e?.name || "Unknown Error") + ": " + (e?.message || "???"));
+			toaster((e?.name || "Unknown Error") + ": " + (e?.message || "???"));
 		}
 
 		this[hasLoadedBefore ? "isLoadingMore" : "isLoading"].set(false);

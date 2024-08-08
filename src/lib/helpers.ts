@@ -53,3 +53,9 @@ export function clampImageDimension(imageHeight: number, imageWidth: number, max
 		h: imageHeight * smallestPercent,
 	};
 }
+
+export function calculateSampleSize(origWidth: number, origHeight: number, newWidth: number, newHeight: number) {
+	const widthDivisor = origWidth / newWidth;
+	const heightDivisor = origHeight / newHeight;
+	return "#-moz-samplesize=" + Math.ceil(Math.max(widthDivisor, heightDivisor));
+}

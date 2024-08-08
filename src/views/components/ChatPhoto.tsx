@@ -2,7 +2,7 @@ import { Chat, ChatPhoto } from "@mtcute/core";
 import { createSignal, createEffect, onCleanup, onMount, Show, JSXElement } from "solid-js";
 import styles from "./ChatPhoto.module.scss";
 import TelegramIcon from "./TelegramIcon";
-import { getColorFromPeer } from "@/lib/utils";
+import { calculateSampleSize, getColorFromPeer } from "@/lib/utils";
 import { downloadFile } from "@/lib/files/download";
 
 function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
@@ -24,6 +24,10 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
 
 	const [src, setSrc] = createSignal<string | null>(null);
 
+	const [sampleSize, setSampleSize] = createSignal("");
+
+	let divRef!: HTMLDivElement;
+
 	let mounted = true;
 
 	onMount(() => {
@@ -38,6 +42,8 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
 		const file = props.src.small;
 
 		const download = downloadFile(file);
+
+		setSampleSize(calculateSampleSize(160, 160, divRef.offsetWidth, divRef.offsetHeight));
 
 		let url!: string;
 
@@ -69,14 +75,12 @@ function ChatPhotoWithIcon(props: { src: ChatPhoto; chat: Chat }) {
 	});
 
 	return (
-		<div class={styles.photo}>
+		<div ref={divRef} class={styles.photo}>
 			<Show when={placeholder()}>
-				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=8"} />}
+				{(src) => <img classList={{ [styles.thumb]: true, [styles.photo]: true }} src={src()} />}
 			</Show>
-			<Show when={src()}>
-				{(src) => (
-					<img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src() + "#-moz-samplesize=8"} />
-				)}
+			<Show when={sampleSize() && src()}>
+				{(src) => <img classList={{ [styles.animate]: true, [styles.photo]: true }} src={src() + sampleSize()} />}
 			</Show>
 		</div>
 	);
