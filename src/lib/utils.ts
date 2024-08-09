@@ -88,11 +88,11 @@ export function resumeKeypress() {
 
 export { isKeypressPaused };
 
-export function useMessageChecks(message: () => UIMessage, dialog: () => UIDialog) {
+export function useMessageChecks(message: () => UIMessage | null, dialog: () => UIDialog) {
 	const lastReadOutgoing = useStore(() => dialog().lastReadOutgoing);
 
 	// returns false if double check
-	const check = () => lastReadOutgoing() < message().id;
+	const check = () => (message() ? (dialog().$.chat.isSelf ? false : lastReadOutgoing() < message()!.id) : true);
 	return check;
 }
 

@@ -13,6 +13,7 @@ import {
 	onMount,
 	Match,
 	batch,
+	Suspense,
 } from "solid-js";
 import {
 	EE,
@@ -395,6 +396,11 @@ function MessageContainer(props: { children: JSXElement }) {
 		showUsername,
 		message,
 		rawMessage,
+		mediaType,
+		audioPlaying,
+		setAudioPlaying,
+		setAudioSpeed,
+		audioSpeed,
 	} = useMessageContext();
 
 	onMount(() => {
@@ -475,10 +481,21 @@ function MessageContainer(props: { children: JSXElement }) {
 						setFocused(true);
 					}
 
+					if (mediaType() == "voice" || mediaType() == "audio") {
+						setSoftkeys("tg:arrow_down", "PLAY", "tg:more");
+						return;
+					}
+
 					setSoftkeys("tg:arrow_down", "INFO", "tg:more");
 				}}
 				onBlur={() => {
 					setFocused(false);
+				}}
+				on:sn-enter-down={() => {
+					if (mediaType() == "audio" || mediaType() == "voice") {
+						setAudioPlaying(true);
+						SpatialNavigation.pause();
+					}
 				}}
 				on:sn-navigatefailed={async (e) => {
 					const direction = e.detail.direction;
@@ -493,6 +510,37 @@ function MessageContainer(props: { children: JSXElement }) {
 					}
 				}}
 				onKeyDown={(e) => {
+					if (audioPlaying()) {
+						if (e.key == "Enter") {
+							sleep(10).then(() => {
+								setAudioPlaying(false);
+							});
+						}
+
+						if (e.key == "Backspace") {
+							e.preventDefault();
+							setAudioPlaying(false);
+						}
+
+						if (e.key == "SoftLeft") {
+							EE.emit("audio_rewind");
+						}
+
+						if (e.key == "SoftRight") {
+							if (mediaType() == "voice") {
+								setAudioSpeed((prev) => {
+									if (prev == 2) return 1;
+									return prev + 0.5;
+								});
+								setSoftkeys(null, null, (audioSpeed() == 2 ? "1" : audioSpeed() + 0.5) + "x");
+							} else {
+								EE.emit("audio_stop");
+							}
+						}
+
+						return;
+					}
+
 					if (e.key == "Backspace") {
 						setView("home");
 						e.preventDefault();
@@ -641,14 +689,11 @@ function MessageAdditionalInfo(props: { setWidth: (n: number) => void }) {
 
 	const check = useMessageChecks(message, dialog);
 
-	const lastReadOutgoing = useStore(() => dialog().lastReadOutgoing);
-
 	let divRef!: HTMLDivElement;
 
 	createEffect(() => {
 		edited();
 		check();
-		lastReadOutgoing();
 
 		props.setWidth(divRef.offsetWidth);
 	});
@@ -719,7 +764,7 @@ function MessageItem(props: { $: UIMessage; before?: UIMessage; dialog: UIDialog
 							<UsernameContainer peer={(props.$.sender as User).raw}>{props.$.sender.displayName}</UsernameContainer>
 						</Show>
 						<Switch>
-							<Match when={props.$.isReply() && reply() === null}>
+							<Match when={props.$.isReply() && reply() === undefined}>
 								<LoadingReplyMessage />
 							</Match>
 							<Match when={reply() === 0}>

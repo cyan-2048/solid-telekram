@@ -13,6 +13,33 @@
 	padding: 4px;
 	position: relative;
 	display: flex;
+	align-items: center;
+
+	.waveform {
+		margin-right: auto;
+		margin-left: -10px;
+
+		.wavy {
+			height: 17px;
+			width: 102px;
+			display: flex;
+			align-items: center;
+		}
+
+		.wave {
+			width: 2px;
+			margin-right: 1.5px;
+			background-color: #8c8c8c;
+			overflow: hidden;
+		}
+
+		.time {
+			position: absolute;
+			bottom: 1px;
+			font-size: 12px;
+			color: #8c8c8c;
+		}
+	}
 
 	.photo {
 		width: 40px;
@@ -21,6 +48,36 @@
 		position: relative;
 		min-height: unset;
 		border-radius: 40px;
+		margin-right: 8px;
+	}
+
+	.icon {
+		width: 32px;
+		height: 32px;
+		flex-grow: 0;
+		flex-shrink: 0;
+		margin-right: 12px;
+		display: flex;
+		position: relative;
+		justify-content: center;
+		align-items: center;
+		fill: #8c8c8c;
+	}
+
+	.speed {
+		position: absolute;
+		height: 24px;
+		width: 100%;
+		color: white;
+		font-weight: 600;
+		font-size: 12px;
+		text-align: center;
+		background-color: #8c8c8c;
+		line-height: 24px;
+		border-radius: 20px;
+		top: 0;
+		bottom: 0;
+		margin: auto;
 	}
 }
 
@@ -301,8 +358,8 @@
 	overflow: hidden;
 
 	span {
-		white-space: nowrap;
-		text-overflow: ellipsis;
+		// white-space: nowrap;
+		// text-overflow: ellipsis;
 		width: 100%;
 		overflow: hidden;
 		float: left;

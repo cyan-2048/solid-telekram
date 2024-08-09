@@ -11,11 +11,12 @@ import {
 	setStatusbarColor,
 	setUIDialog,
 	setView,
+	toaster,
 } from "@signals";
 import Search from "./components/Search";
 import Content from "./components/Content";
 import Tabs, { Tab } from "./components/Tabs";
-import { resumeKeypress, sleep, useStore } from "@/lib/utils";
+import { resumeKeypress, sleep, useMessageChecks, useStore } from "@/lib/utils";
 import MarqueeOrNot from "./components/MarqueeOrNot";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -119,13 +120,14 @@ function DialogDate(props: { $: Date }) {
 function DialogSender(props: { $: UIDialog }) {
 	const chat = () => props.$.$.chat;
 	const lastMessage = useStore(() => props.$.lastMessage);
-	const lastReadOutgoing = useStore(() => props.$.lastReadOutgoing);
+
+	const check = useMessageChecks(lastMessage, () => props.$);
 
 	return (
 		<Show when={lastMessage() && !lastMessage()!.$.action}>
 			<Show when={lastMessage()?.isOutgoing}>
 				<div class={styles.check}>
-					<TelegramIcon name={lastReadOutgoing() < lastMessage()!.id ? "check" : "checks"} />
+					<TelegramIcon name={check() ? "check" : "checks"} />
 				</div>
 			</Show>
 			<Show when={lastMessage() && !lastMessage()!.isOutgoing && (chat().isGroup || chat().isForum)}>
@@ -232,6 +234,11 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 					setRoom(props.$.$.chat);
 					setView("room");
 				});
+
+				if (props.$.$.chat.isForum) {
+					// currently this one is so confusing
+					toaster("Forum supergroups are currently unstable!");
+				}
 			}}
 			tabIndex={-1}
 			classList={{ [styles.dialog]: true, focusable }}

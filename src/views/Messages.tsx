@@ -1,13 +1,18 @@
 import {
 	createContext,
+	createEffect,
 	createMemo,
 	createRenderEffect,
+	createResource,
 	createSignal,
+	For,
+	Index,
 	JSXElement,
 	onCleanup,
 	onMount,
 	Setter,
 	Show,
+	untrack,
 	useContext,
 } from "solid-js";
 import styles from "./Room.module.scss";
@@ -21,15 +26,18 @@ import {
 	Thumbnail,
 	Video,
 	MessageMedia,
+	Location,
+	Voice,
 } from "@mtcute/core";
 import { TelegramClient } from "@mtcute/web";
-import { UIMessage, UIDialog, client, chat } from "@signals";
+import { UIMessage, UIDialog, client, chat, setSoftkeys } from "@signals";
 import dayjs from "dayjs";
 import { downloadFile } from "@/lib/files/download";
 import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
-import { Dynamic } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 import { PeerPhotoIcon } from "./components/PeerPhoto";
 import TelegramIcon from "./components/TelegramIcon";
+import SpatialNavigation from "@/lib/spatial_navigation";
 
 /**
  * Chat type. Can be:
@@ -130,6 +138,17 @@ export const MessageContext = createContext<{
 	focused: () => boolean;
 	setFocused: Setter<boolean>;
 
+	audioPlaying: () => boolean;
+	setAudioPlaying: Setter<boolean>;
+	/**
+	 * should be 1, 1.5, 2
+	 */
+	audioSpeed: () => number;
+	/**
+	 * should be 1, 1.5, 2
+	 */
+	setAudioSpeed: Setter<number>;
+
 	text: () => string;
 	entities: () => TextWithEntities;
 	mediaType: () => MessageMediaType | undefined;
@@ -137,7 +156,7 @@ export const MessageContext = createContext<{
 	action: () => Message["action"];
 	actionType: () => MessageActionTypes;
 
-	reply: () => UIMessage | null | 0;
+	reply: () => UIMessage | undefined | 0;
 	dialog: () => UIDialog;
 	message: () => UIMessage;
 	rawMessage: () => Message;
@@ -172,17 +191,13 @@ export function MessageProvider(props: {
 
 	const [focused, setFocused] = createSignal(false);
 
-	const [reply, setReply] = createSignal(null as UIMessage | null | 0);
-
-	createRenderEffect(() => {
+	const [reply] = createResource(async () => {
 		const _ = props.$.isReply();
-
 		if (_) {
-			props.$.getReply(props.dialog).then((msg) => {
-				setReply(msg ?? 0);
-			});
+			const msg = await props.$.getReply(props.dialog);
+			return msg ?? 0;
 		} else {
-			setReply(null);
+			return undefined;
 		}
 	});
 
@@ -204,10 +219,19 @@ export function MessageProvider(props: {
 
 	const showDateSeparator = createMemo(() => decideDateSepatator(props.before?.date, props.$.date));
 
+	const [audioPlaying, setAudioPlaying] = createSignal(false);
+	const [audioSpeed, setAudioSpeed] = createSignal(1);
+
 	return (
 		<MessageContext.Provider
 			value={{
 				tg,
+
+				audioSpeed,
+				setAudioSpeed,
+
+				audioPlaying,
+				setAudioPlaying,
 
 				actionType,
 				media: () => props.$.$.media,
@@ -839,20 +863,133 @@ function VideoMedia() {
 	);
 }
 
+function downsampleWaveform(waveform: number[], targetLength: number = 32): number[] {
+	const originalLength = waveform.length;
+	const result: number[] = [];
+	const factor = originalLength / targetLength;
+
+	for (let i = 0; i < targetLength; i++) {
+		const start = Math.floor(i * factor);
+		const end = Math.floor((i + 1) * factor);
+		const segment = waveform.slice(start, end);
+
+		// Average the segment
+		const average = segment.reduce((sum, value) => sum + value, 0) / segment.length;
+		result.push(average);
+	}
+
+	return result;
+}
+
+function formatTime(seconds: number) {
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	const s = Math.round(seconds % 60);
+	const t = [h, m > 9 ? m : h ? "0" + m : m || "0", s > 9 ? s : "0" + s].filter(Boolean).join(":");
+	return seconds < 0 && seconds ? `-${t}` : t;
+}
+
 function VoiceMedia() {
-	const { showChecks, message } = useMessageContext();
+	const { showChecks, message, media, isOutgoing, audioPlaying, audioSpeed } = useMessageContext();
+
+	const [src, setSrc] = createSignal("");
+
+	const [waveform, setWaveform] = createSignal<number[] | null>(null);
+
+	const [playing, setPlaying] = createSignal(false);
+
+	let audioRef!: HTMLAudioElement;
+
+	const [duration, setDuration] = createSignal(0);
+
+	createRenderEffect(() =>
+		untrack(() => {
+			const voice = media() as Voice;
+			setWaveform(downsampleWaveform(voice.waveform));
+
+			setDuration(voice.duration);
+		})
+	);
+
+	onMount(() => {
+		const voice = media() as Voice;
+
+		console.log(voice);
+	});
+
+	createEffect(() => {
+		const audioIsPlaying = audioPlaying();
+
+		if (audioIsPlaying) {
+			setSoftkeys("Rewind", "PAUSE", untrack(audioSpeed) + 0.5 + "x");
+
+			onCleanup(() => {
+				SpatialNavigation.resume();
+				setSoftkeys("tg:arrow_down", "PLAY", "tg:more");
+			});
+		}
+	});
 
 	// console.error("SENDER", props.$.sender);
+
+	const pausePath =
+		"M6.7 2.1H4.4c-.7 0-1.2.5-1.2 1.2v13.5c0 .7.5 1.2 1.2 1.2h2.3c.7 0 1.2-.5 1.2-1.2V3.3c0-.7-.5-1.2-1.2-1.2zm8.9 0h-2.3c-.7 0-1.2.5-1.2 1.2v13.5c0 .7.5 1.2 1.2 1.2h2.3c.7 0 1.2-.5 1.2-1.2V3.3c0-.7-.5-1.2-1.2-1.2z";
+	const playPath = "M4 3.1v13.8c0 .9 1 1.5 1.8 1 3.1-1.7 9.4-5.2 12.5-6.9.8-.5.8-1.6 0-2.1L5.8 2C5 1.6 4 2.2 4 3.1z";
+
 	return (
 		<>
 			<div class={styles.voice}>
-				<div class={styles.photo}>
-					<PeerPhotoIcon showSavedIcon={false} peer={message().sender} />
+				<div
+					onClick={() => {
+						setPlaying((a) => !a);
+					}}
+					class={styles.icon}
+				>
+					<svg height={18} width={18} viewBox="0 0 20 20">
+						<path d={playing() ? pausePath : playPath}></path>
+					</svg>
+				</div>
+				<div class={styles.waveform}>
+					<div class={styles.wavy}>
+						<Index each={waveform()}>
+							{(num) => (
+								<div
+									style={{
+										height: Math.min(100, Math.max(12, (num() / 30) * 100)) + "%",
+									}}
+									class={styles.wave}
+								></div>
+							)}
+						</Index>
+					</div>
+					<div class={styles.time}>{formatTime(duration())}</div>
+				</div>
+
+				<div
+					style={{
+						order: isOutgoing() ? -1 : undefined,
+						"border-radius": audioPlaying() ? 0 : undefined,
+					}}
+					class={styles.photo}
+				>
+					<Show when={audioPlaying()} fallback={<PeerPhotoIcon showSavedIcon={false} peer={message().sender} />}>
+						<div class={styles.speed}>{audioSpeed()}x</div>
+					</Show>
 				</div>
 			</div>
 			<Show when={showChecks()}>
 				<MediaChecks />
 			</Show>
+			<Portal>
+				<Show when={src()}>
+					<audio
+						// @ts-ignore
+						prop:playbackRate={audioSpeed()}
+						ref={audioRef}
+						src={src()}
+					></audio>
+				</Show>
+			</Portal>
 		</>
 	);
 }
@@ -874,9 +1011,8 @@ function LocationMedia() {
 
 	onMount(() => {
 		const _message = message();
-		if (_message.$.media?.type !== "location") throw new Error("NOT LOCATION MEDIA");
 
-		const media = _message.$.media;
+		const media = _message.$.media as Location;
 
 		const download = downloadFile(
 			media.preview({

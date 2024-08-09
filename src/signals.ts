@@ -89,6 +89,8 @@ export const EE = new EventEmitter<{
 	password: StringCallback;
 	loginError: (e: { code: number; message: string }) => void;
 	requestJump: (msgId: number, chatId: number) => void;
+	audio_rewind: () => void;
+	audio_stop: () => void;
 }>();
 
 export const enum LoginState {
@@ -453,8 +455,16 @@ export class UIMessage {
 
 	// decide whether the reply thing should show up idk
 	isReply() {
+		const replyToMessage = this.$.replyToMessage;
+
+		if (!replyToMessage) return false;
+
+		if (replyToMessage.threadId === replyToMessage.id) return false;
+
 		const isForum = this.$.chat.isForum;
 		const raw = this.$.replyToMessage?.raw;
+
+		this.$.replyToMessage?.origin;
 
 		if (raw && isForum && raw.forumTopic && !raw.replyToTopId) {
 			return false;
@@ -655,8 +665,6 @@ class MessagesJar extends Map<number, UIMessage> {
 			toaster("Loading more messages...");
 		}
 
-		await sleep(2000);
-
 		try {
 			const e = await tg.getHistory(this.dialog.$.chat, {
 				limit: localStorage.getItem("low_memory") ? 10 : 40,
@@ -848,7 +856,7 @@ export class UIDialog {
 	}
 
 	refreshByPeer() {
-		return refreshDialogsByPeer([this.id]);
+		return refreshDialogsByPeer([this.$.chat]);
 	}
 
 	readHistory() {
@@ -966,34 +974,16 @@ export async function refreshDialogsByPeer(peers: InputPeerLike[]) {
 		throw new Error("CLIENT IS NOT READY!");
 	}
 
-	const _peers_not_found = new Set(
-		peers.map((a) => {
-			const found = getIdByInputPeer(a);
-			if (!found) {
-				console.error("input peer id was not found", a);
-			}
-			return found || 0;
-		})
-	);
-
 	await tg.getPeerDialogs(peers).then((a) => {
 		a.forEach((dialog) => {
-			const id = dialog.chat.peer.id;
 			if ("left" in dialog.chat.peer && dialog.chat.peer.left) {
 				return;
 			}
 
-			console.log(a);
+			// console.log(a);
 			dialogsJar.add(dialog);
-			_peers_not_found.delete(id);
 		});
 	});
-
-	_peers_not_found.forEach((a) => {
-		dialogsJar.delete(a);
-	});
-
-	console.log("refresh dialogs by peers", _peers_not_found);
 
 	setDialogs(sortDialogs(dialogsJar.list()));
 }
@@ -1137,10 +1127,10 @@ async function telegramReady(tg: TelegramClient) {
 					console.log("UPDATING LAST MESSAGE");
 					found.lastMessage.set(found.messages.add(new UIMessage(message)));
 
-					refreshDialogsByPeer([found.id]);
+					refreshDialogsByPeer([found.$.chat]);
 				} else {
 					console.error("dialog was not found for message, refreshing");
-					refreshDialogsByPeer([message.chat.peer.id]);
+					refreshDialogsByPeer([message.chat]);
 				}
 
 				break;
@@ -1150,48 +1140,45 @@ async function telegramReady(tg: TelegramClient) {
 				const data = update.data;
 				const peerId = data.chatId;
 
-				setDialogs((e) => {
-					const found = e.find((a) => a.$.chat.id == peerId);
-					if (found) {
-						if (data.isOutbox == true) {
-							found.lastReadOutgoing.set(data.maxReadId);
-						}
+				const found = dialogsJar.get(peerId);
 
-						if (data.isOutbox == false && data.isDiscussion == false) {
-							found.count.set(data.unreadCount);
-						}
-					} else {
-						console.error("dialog was not found for history read refreshing");
-						refreshDialogsByPeer([peerId]);
+				if (found) {
+					if (data.isOutbox == true) {
+						found.lastReadOutgoing.set(data.maxReadId);
 					}
 
-					return e;
-				});
+					if (data.isOutbox == false && data.isDiscussion == false) {
+						found.count.set(data.unreadCount);
+					}
+				} else {
+					console.error("dialog was not found for history read refreshing");
+					refreshDialogsByPeer([peerId]);
+				}
+
 				break;
 			}
 
 			case "delete_message": {
 				const message = update.data;
 
-				setDialogs((e) => {
-					const found = e.find((a) => {
-						return message.messageIds.find((b) => a.messages.has(b));
-					});
+				const _dialogs = dialogs();
 
-					if (found) {
-						const messages = found.messages;
-						messages.deleteBulk(message.messageIds);
-
-						refreshDialogsByPeer([found.id]);
-					} else {
-						console.error("dialog was not found for message, refreshing", message);
-						if (message.channelId) {
-							refreshDialogsByPeer([message.channelId]);
-						} else refreshDialogs();
-					}
-
-					return e;
+				const found = _dialogs.find((a) => {
+					return message.messageIds.find((b) => a.messages.has(b));
 				});
+
+				if (found) {
+					const messages = found.messages;
+					messages.deleteBulk(message.messageIds);
+
+					refreshDialogsByPeer([found.$.chat]);
+				} else {
+					console.error("dialog was not found for message, refreshing", message);
+					if (message.channelId) {
+						refreshDialogsByPeer([message.channelId]);
+					} else refreshDialogs();
+				}
+
 				break;
 			}
 
@@ -1206,7 +1193,7 @@ async function telegramReady(tg: TelegramClient) {
 					found.messages.update(message.id, message);
 				} else {
 					console.error("dialog was not found for message, refreshing", message);
-					refreshDialogsByPeer([message.chat.peer.id]);
+					refreshDialogsByPeer([message.chat]);
 				}
 
 				break;
