@@ -16,7 +16,7 @@ import {
 	useContext,
 } from "solid-js";
 import styles from "./Room.module.scss";
-import { useMessageChecks, useStore } from "@/lib/utils";
+import { sleep, useMessageChecks, useStore } from "@/lib/utils";
 import {
 	TextWithEntities,
 	MessageMediaType,
@@ -890,7 +890,7 @@ function formatTime(seconds: number) {
 }
 
 function VoiceMedia() {
-	const { showChecks, message, media, isOutgoing, audioPlaying, audioSpeed } = useMessageContext();
+	const { showChecks, message, media, isOutgoing, audioPlaying, audioSpeed, setAudioPlaying } = useMessageContext();
 
 	const [src, setSrc] = createSignal("");
 
@@ -901,6 +901,59 @@ function VoiceMedia() {
 	let audioRef!: HTMLAudioElement;
 
 	const [duration, setDuration] = createSignal(0);
+
+	const [downloadState, setDownloadState] = createSignal(0);
+
+	const [currentTime, setCurrentTime] = createSignal(0);
+
+	let download: ReturnType<typeof downloadFile> | undefined;
+
+	function downloadProgress(num: number) {
+		setDownloadState(num);
+	}
+
+	onCleanup(() => {
+		if (src()) {
+			URL.revokeObjectURL(src());
+		}
+
+		if (download?.state == "downloading") {
+			download.abort();
+		}
+	});
+
+	async function startDownload() {
+		const voice = media() as Voice;
+
+		download = downloadFile(voice);
+
+		if (download.state == "done") {
+			setSrc(URL.createObjectURL(download.result));
+			setDownloadState(100);
+			await sleep(2);
+			if (audioPlaying()) {
+				audioRef.play();
+			}
+			return;
+		}
+
+		download.on("progress", downloadProgress);
+		download.once("done", async (result) => {
+			setDownloadState(100);
+			download?.off("progress", downloadProgress);
+			if (!result && download) {
+				download = undefined;
+			}
+
+			if (result) {
+				setSrc(URL.createObjectURL(result));
+				await sleep(2);
+				if (audioPlaying()) {
+					audioRef.play();
+				}
+			}
+		});
+	}
 
 	createRenderEffect(() =>
 		untrack(() => {
@@ -923,9 +976,19 @@ function VoiceMedia() {
 		if (audioIsPlaying) {
 			setSoftkeys("Rewind", "PAUSE", untrack(audioSpeed) + 0.5 + "x");
 
+			if (!download) {
+				untrack(startDownload);
+			}
+
+			if (untrack(src)) {
+				audioRef.play();
+			}
+
 			onCleanup(() => {
 				SpatialNavigation.resume();
+				setPlaying(false);
 				setSoftkeys("tg:arrow_down", "PLAY", "tg:more");
+				audioRef?.pause();
 			});
 		}
 	});
@@ -962,13 +1025,20 @@ function VoiceMedia() {
 							)}
 						</Index>
 					</div>
-					<div class={styles.time}>{formatTime(duration())}</div>
+					<div class={styles.time}>
+						{audioPlaying()
+							? downloadState() != 100
+								? "Loading..."
+								: formatTime(currentTime())
+							: formatTime(duration())}
+					</div>
 				</div>
 
 				<div
 					style={{
 						order: isOutgoing() ? -1 : undefined,
 						"border-radius": audioPlaying() ? 0 : undefined,
+						"margin-right": isOutgoing() ? "8px" : undefined,
 					}}
 					class={styles.photo}
 				>
@@ -986,6 +1056,14 @@ function VoiceMedia() {
 						// @ts-ignore
 						prop:playbackRate={audioSpeed()}
 						ref={audioRef}
+						onCanPlay={() => {}}
+						onTimeUpdate={(e) => {
+							setCurrentTime(Math.floor(e.currentTarget.currentTime));
+							if (audioPlaying()) setPlaying(true);
+						}}
+						onEnded={() => {
+							setAudioPlaying(false);
+						}}
 						src={src()}
 					></audio>
 				</Show>

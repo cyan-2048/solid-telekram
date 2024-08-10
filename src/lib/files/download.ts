@@ -106,6 +106,7 @@ type DownloadState = "idle" | "started" | "downloading" | "aborting" | "aborted"
 class Download extends EventEmitter<{
 	state: (e: DownloadState) => void;
 	progress: (num: number) => void;
+	done: (blob: Blob | null) => void;
 }> {
 	downloader?: Downloader;
 
@@ -134,8 +135,13 @@ class Download extends EventEmitter<{
 			this.abortController.abort();
 		}
 
+		if (val == "aborted") {
+			this.emit("done", null);
+		}
+
 		if (val == "done") {
 			cacheMap.set(this.hash, this);
+			this.emit("done", this.result);
 			tick();
 		}
 
