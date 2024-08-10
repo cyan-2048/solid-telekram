@@ -99,6 +99,8 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 
 ## Developing
 
+Install NodeJS (v18 or latest LTS) and [bun](https://bun.sh/).
+
 Please create a `.env.local` file and add the values in `.env` replacing the APP_ID and APP_HASH with your own.
 
 Dev Mode:
