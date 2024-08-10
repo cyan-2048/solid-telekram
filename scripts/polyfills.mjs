@@ -69,6 +69,27 @@ if (import.meta.env.VITE_KAIOS != 3) {
 				return new Response(this).arrayBuffer();
 			};
 		}
+
+		if (!blob.stream) {
+			blob.stream = function stream() {
+				const blob = this;
+				let position = 0;
+
+				return new ReadableStream({
+					pull: function (controller) {
+						var chunk = blob.slice(position, position + 524288);
+
+						return chunk.arrayBuffer().then(function (buffer) {
+							position += buffer.byteLength;
+							var uint8array = new Uint8Array(buffer);
+							controller.enqueue(uint8array);
+
+							if (position == blob.size) controller.close();
+						});
+					},
+				});
+			};
+		}
 	}
 
 	const origPostMessage = self.postMessage;

@@ -866,7 +866,7 @@ function TextBoxOptionsWrap(props: {
 							const dialog = props.dialog;
 							tg.sendMedia(
 								props.dialog.$.chat,
-								InputMedia.voice(new Uint8Array(await audioBlob.arrayBuffer()), {
+								InputMedia.voice(audioBlob, {
 									duration: audioDuration,
 									waveform: audioWaveform,
 								})
