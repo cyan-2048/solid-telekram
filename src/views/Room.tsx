@@ -1,4 +1,4 @@
-import { Chat, Message, tl, User } from "@mtcute/core";
+import { Chat, InputMedia, Message, tl, User } from "@mtcute/core";
 import styles from "./Room.module.scss";
 import Content from "./components/Content";
 import {
@@ -59,6 +59,7 @@ import EmojiPicker from "./components/EmojiPicker";
 import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
 import { MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
+import { VoiceRecorderWeb } from "./components/VoiceRecorder";
 
 function getMembersCount(chat: Chat) {
 	if ((chat.peer as tl.RawChannel).participantsCount) {
@@ -522,6 +523,10 @@ function MessageContainer(props: { children: JSXElement }) {
 							setAudioPlaying(false);
 						}
 
+						if (e.key.includes("Arrow")) {
+							e.preventDefault();
+						}
+
 						if (e.key == "SoftLeft") {
 							EE.emit("audio_rewind");
 						}
@@ -837,118 +842,153 @@ function TextBoxOptionsWrap(props: {
 		return editing || replying;
 	});
 
+	const [showVoiceRecorder, setShowVoiceRecorder] = createSignal(false);
+
+	let audioBlob: Blob;
+	let audioWaveform: number[];
+	let audioDuration: number;
+
 	return (
-		<>
-			<Show when={showOptions()}>
-				<Portal>
-					<TextboxOptions
-						canSend={!!text()}
-						onSelect={async (e) => {
-							await sleep(2);
+		<Portal>
+			<Show when={showVoiceRecorder()}>
+				<VoiceRecorderWeb
+					setAudioBlob={(blob, waveform, duration) => {
+						audioBlob = blob;
+						audioWaveform = waveform;
+						audioDuration = duration;
+					}}
+					onComplete={async (send) => {
+						setShowVoiceRecorder(false);
+						await sleep(5);
 
-							props.setShowOptions(false);
-
-							if (!interacting()) {
-								// TODO: don't focus if show info
-								SpatialNavigation.focus("room");
-							}
-
-							if (e === null) {
-								props.textboxRef.focus();
-								return;
-							}
-
+						props.textboxRef.focus();
+						if (send) {
 							const dialog = props.dialog;
-							switch (e) {
-								case TextboxOptionsSelected.SEND:
-									if (!interacting()) {
-										tg.sendText(props.dialog.$.chat, md(text())).then((msg) => {
-											dialog.messages.add(msg);
-										});
-									} else {
-										const editing = editingMessage();
-										const replying = replyingMessage();
+							tg.sendMedia(
+								props.dialog.$.chat,
+								InputMedia.voice(new Uint8Array(await audioBlob.arrayBuffer()), {
+									duration: audioDuration,
+									waveform: audioWaveform,
+								})
+							).then((msg) => {
+								dialog.messages.add(msg);
+							});
+						}
+					}}
+				/>
+			</Show>
+			<Show when={showOptions()}>
+				<TextboxOptions
+					canSend={!!text()}
+					onSelect={async (e) => {
+						await sleep(2);
 
-										batch(() => {
-											setEditingMessage(null);
-											setReplyingMessage(null);
-										});
+						props.setShowOptions(false);
 
-										if (editing) {
-											tg.editMessage({
-												message: editing.$,
-												text: md(text()),
-											}).then((msg) => {
-												dialog.messages.update(msg.id, msg);
-											});
-										} else if (replying) {
-											tg.replyText(replying.$, md(text())).then((msg) => {
-												dialog.messages.add(msg);
-											});
+						if (!interacting()) {
+							// TODO: don't focus if show info
+							SpatialNavigation.focus("room");
+						}
 
-											sleep(0).then(() => {
-												document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
-											});
-										}
-									}
+						if (e === null) {
+							props.textboxRef.focus();
+							return;
+						}
 
-									props.textboxRef.textContent = "";
-									// ignore please
-									props.textboxRef.appendChild((<br></br>) as Node);
-									props.textboxRef.dispatchEvent(new Event("input", { bubbles: true }));
+						const dialog = props.dialog;
+						switch (e) {
+							case TextboxOptionsSelected.SEND:
+								if (!interacting()) {
+									tg.sendText(props.dialog.$.chat, md(text())).then((msg) => {
+										dialog.messages.add(msg);
+									});
+								} else {
+									const editing = editingMessage();
+									const replying = replyingMessage();
 
-									SpatialNavigation.focus("room");
-
-									break;
-
-								case TextboxOptionsSelected.CANCEL:
 									batch(() => {
 										setEditingMessage(null);
 										setReplyingMessage(null);
 									});
 
-									SpatialNavigation.focus("room");
+									if (editing) {
+										tg.editMessage({
+											message: editing.$,
+											text: md(text()),
+										}).then((msg) => {
+											dialog.messages.update(msg.id, msg);
+										});
+									} else if (replying) {
+										tg.replyText(replying.$, md(text())).then((msg) => {
+											dialog.messages.add(msg);
+										});
 
-									break;
-							}
-						}}
-					/>
-				</Portal>
+										sleep(0).then(() => {
+											document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
+										});
+									}
+								}
+
+								props.textboxRef.textContent = "";
+								// ignore please
+								props.textboxRef.appendChild((<br></br>) as Node);
+								props.textboxRef.dispatchEvent(new Event("input", { bubbles: true }));
+
+								SpatialNavigation.focus("room");
+
+								break;
+
+							case TextboxOptionsSelected.CANCEL:
+								batch(() => {
+									setEditingMessage(null);
+									setReplyingMessage(null);
+								});
+
+								SpatialNavigation.focus("room");
+
+								break;
+						}
+					}}
+				/>
 			</Show>
 			<Show when={showEmojiPicker()}>
-				<Portal>
-					<EmojiPicker
-						onSelect={async (e) => {
-							await sleep(2);
-							props.setShowEmojiPicker(false);
-							props.textboxRef.focus();
-							await sleep(1);
-							if (e) {
-								typeInTextbox(e, props.textboxRef);
-							}
-						}}
-					/>
-				</Portal>
+				<EmojiPicker
+					onSelect={async (e) => {
+						await sleep(2);
+						props.setShowEmojiPicker(false);
+						props.textboxRef.focus();
+						await sleep(1);
+						if (e) {
+							typeInTextbox(e, props.textboxRef);
+						}
+					}}
+				/>
 			</Show>
 			<Show when={showInsertMenu()}>
-				<Portal>
-					<InsertMenu
-						onSelect={async (e) => {
-							await sleep(2);
-							props.setShowInsertMenu(false);
+				<InsertMenu
+					onSelect={async (e) => {
+						await sleep(2);
+						props.setShowInsertMenu(false);
 
-							switch (e) {
-								case InsertMenuSelected.EMOJI:
-									props.setShowEmojiPicker(true);
-									return;
-							}
+						switch (e) {
+							case InsertMenuSelected.EMOJI:
+								props.setShowEmojiPicker(true);
+								return;
+							case InsertMenuSelected.VOICE:
+								props.textboxRef.textContent = "";
+								// ignore please
+								props.textboxRef.appendChild((<br></br>) as Node);
+								props.textboxRef.dispatchEvent(new Event("input", { bubbles: true }));
 
-							props.textboxRef.focus();
-						}}
-					/>
-				</Portal>
+								setShowVoiceRecorder(true);
+								return;
+						}
+
+						props.textboxRef.focus();
+					}}
+				/>
 			</Show>
-		</>
+		</Portal>
 	);
 }
 

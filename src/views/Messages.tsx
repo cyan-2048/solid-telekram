@@ -16,7 +16,7 @@ import {
 	useContext,
 } from "solid-js";
 import styles from "./Room.module.scss";
-import { sleep, useMessageChecks, useStore } from "@/lib/utils";
+import { formatTime, sleep, useMessageChecks, useStore } from "@/lib/utils";
 import {
 	TextWithEntities,
 	MessageMediaType,
@@ -30,7 +30,7 @@ import {
 	Voice,
 } from "@mtcute/core";
 import { TelegramClient } from "@mtcute/web";
-import { UIMessage, UIDialog, client, chat, setSoftkeys } from "@signals";
+import { UIMessage, UIDialog, client, chat, setSoftkeys, EE } from "@signals";
 import dayjs from "dayjs";
 import { downloadFile } from "@/lib/files/download";
 import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
@@ -881,14 +881,6 @@ function downsampleWaveform(waveform: number[], targetLength: number = 32): numb
 	return result;
 }
 
-function formatTime(seconds: number) {
-	const h = Math.floor(seconds / 3600);
-	const m = Math.floor((seconds % 3600) / 60);
-	const s = Math.round(seconds % 60);
-	const t = [h, m > 9 ? m : h ? "0" + m : m || "0", s > 9 ? s : "0" + s].filter(Boolean).join(":");
-	return seconds < 0 && seconds ? `-${t}` : t;
-}
-
 function VoiceMedia() {
 	const { showChecks, message, media, isOutgoing, audioPlaying, audioSpeed, setAudioPlaying } = useMessageContext();
 
@@ -905,6 +897,8 @@ function VoiceMedia() {
 	const [downloadState, setDownloadState] = createSignal(0);
 
 	const [currentTime, setCurrentTime] = createSignal(0);
+
+	const [waveformIndex, setWaveformIndex] = createSignal(0);
 
 	let download: ReturnType<typeof downloadFile> | undefined;
 
@@ -955,6 +949,10 @@ function VoiceMedia() {
 		});
 	}
 
+	function onRewind() {
+		audioRef && (audioRef.currentTime = 0);
+	}
+
 	createRenderEffect(() =>
 		untrack(() => {
 			const voice = media() as Voice;
@@ -974,21 +972,26 @@ function VoiceMedia() {
 		const audioIsPlaying = audioPlaying();
 
 		if (audioIsPlaying) {
-			setSoftkeys("Rewind", "PAUSE", untrack(audioSpeed) + 0.5 + "x");
+			setSoftkeys("Rewind", "PAUSE", (untrack(audioSpeed) == 2 ? 1 : untrack(audioSpeed) + 0.5) + "x");
 
 			if (!download) {
 				untrack(startDownload);
 			}
 
 			if (untrack(src)) {
-				audioRef.play();
+				sleep(2).then(() => {
+					audioRef.play();
+				});
 			}
+
+			EE.on("audio_rewind", onRewind);
 
 			onCleanup(() => {
 				SpatialNavigation.resume();
 				setPlaying(false);
 				setSoftkeys("tg:arrow_down", "PLAY", "tg:more");
 				audioRef?.pause();
+				EE.off("audio_rewind", onRewind);
 			});
 		}
 	});
@@ -1015,10 +1018,11 @@ function VoiceMedia() {
 				<div class={styles.waveform}>
 					<div class={styles.wavy}>
 						<Index each={waveform()}>
-							{(num) => (
+							{(num, index) => (
 								<div
 									style={{
 										height: Math.min(100, Math.max(12, (num() / 30) * 100)) + "%",
+										background: waveformIndex() != 0 && index <= waveformIndex() ? "var(--accent)" : undefined,
 									}}
 									class={styles.wave}
 								></div>
@@ -1060,8 +1064,10 @@ function VoiceMedia() {
 						onTimeUpdate={(e) => {
 							setCurrentTime(Math.floor(e.currentTarget.currentTime));
 							if (audioPlaying()) setPlaying(true);
+							setWaveformIndex(Math.floor((e.currentTarget.currentTime / e.currentTarget.duration) * 31));
 						}}
 						onEnded={() => {
+							setWaveformIndex(0);
 							setAudioPlaying(false);
 						}}
 						src={src()}

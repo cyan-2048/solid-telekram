@@ -22,7 +22,7 @@ import { get, writable, Writable } from "./lib/stores";
 // import localforage from "localforage";
 // import { QRCode } from "./lib/qrCode";
 import { GetHistoryOffset } from "@mtcute/core/methods";
-import { capitalizeFirstLetter, sleep } from "./lib/utils";
+import { capitalizeFirstLetter, formatTime, sleep } from "./lib/utils";
 import Deferred from "./lib/Deffered";
 import dayjs from "dayjs";
 import Queue from "queue";
@@ -383,6 +383,10 @@ export class UIMessage {
 
 					break;
 				}
+
+				case "voice":
+					newText = `Voice (${formatTime($.media.duration)})`;
+					break;
 
 				default: {
 					console.log("unsupported media type:", $.media.type, $);

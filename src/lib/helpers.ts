@@ -59,3 +59,11 @@ export function calculateSampleSize(origWidth: number, origHeight: number, newWi
 	const heightDivisor = origHeight / newHeight;
 	return "#-moz-samplesize=" + Math.ceil(Math.max(widthDivisor, heightDivisor));
 }
+
+export function formatTime(seconds: number) {
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	const s = Math.round(seconds % 60);
+	const t = [h, m > 9 ? m : h ? "0" + m : m || "0", s > 9 ? s : "0" + s].filter(Boolean).join(":");
+	return seconds < 0 && seconds ? `-${t}` : t;
+}

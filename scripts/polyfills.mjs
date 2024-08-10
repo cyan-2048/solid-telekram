@@ -1,3 +1,5 @@
+import { ReadableStream } from "web-streams-polyfill";
+
 /**
  * this file contains the polyfills that will be loaded before anything else
  * - WARNING: the code will also be executed in workers, be cautious in adding polyfills
@@ -53,6 +55,10 @@ if (import.meta.env.VITE_KAIOS != 3) {
 					})
 				);
 		};
+	}
+
+	if (!self.ReadableStream) {
+		self.ReadableStream = ReadableStream;
 	}
 
 	if (self.Blob) {

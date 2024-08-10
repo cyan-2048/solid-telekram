@@ -1,0 +1,102 @@
+.recorder {
+	background-color: var(--accent);
+
+	width: 100vw;
+	position: fixed;
+	bottom: 30px;
+
+	.recording {
+		color: white;
+
+		padding: 6px;
+		font-size: 17px;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+.animateMicrophone {
+	animation: microphoneAnim 0.6s 0s infinite alternate;
+}
+
+@keyframes microphoneAnim {
+	0% {
+		opacity: 1;
+	}
+	40% {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+.preview {
+	padding: 6px 10px;
+	background-color: white;
+	margin: 4px 5px;
+	border-radius: 2px;
+	display: flex;
+	align-items: center;
+
+	.microphone {
+		fill: rgb(229, 57, 53);
+		height: 20px;
+	}
+	.icon {
+		height: 16px;
+		opacity: 0.45;
+		margin: 0px 16px;
+	}
+
+	.progress {
+		display: flex;
+		flex: 1 1 auto;
+		flex-direction: row;
+		justify-content: right;
+
+		.bar {
+			flex: 1 1 0%;
+			display: flex;
+			align-items: center;
+
+			.drinks {
+				position: relative;
+				height: 4px;
+				border-radius: 3px;
+				background-color: rgba(0, 0, 0, 0.1);
+				width: 100%;
+				margin-right: 10px;
+
+				.meat {
+					height: 10px;
+					width: 10px;
+					border-radius: 50%;
+					top: -3px;
+					transform: translateX(-5px);
+					position: absolute;
+					background-color: rgb(179, 179, 179);
+				}
+
+				.balls {
+					position: absolute;
+					background-color: rgb(179, 179, 179);
+					left: 0px;
+					top: 0px;
+					height: 4px;
+					border-radius: 3px;
+				}
+			}
+		}
+	}
+
+	.time {
+		font-size: 14px;
+		color: rgb(140, 140, 140);
+		margin-right: 4px;
+		display: flex;
+		justify-content: space-between;
+	}
+}

@@ -49,7 +49,7 @@ export function decodeWaveform(wf: Uint8Array): number[] {
 export function encodeWaveform(wf: number[]): Uint8Array {
     const bitsCount = wf.length * 5
     const bytesCount = ~~(bitsCount + 7) / 8
-    const result = new Uint8Array(bytesCount + 1)
+    const result = new Uint8Array(Math.floor(bytesCount + 1))
     const dv = dataViewFromBuffer(result)
 
     // Write each 0-31 unsigned char as 5 bit to result.

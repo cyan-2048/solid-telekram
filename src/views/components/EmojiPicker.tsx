@@ -1,5 +1,5 @@
 import { EmojiCategory, getEmojiPage, getLastEmojiPage } from "@/lib/heavy-tasks";
-import { createEffect, createSignal, JSXElement, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createSignal, For, Index, JSXElement, onCleanup, onMount, Show } from "solid-js";
 import Options from "./Options";
 import styles from "./EmojiPicker.module.scss";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -301,51 +301,15 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 					}}
 				>
 					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={null} />
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Smileys}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.People}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Animals}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Food}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Activities}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Travel}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Objects}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Symbols}
-					/>
-					<EmojiCategoryItem
-						setSelected={setSelected}
-						selected={selected()}
-						category={EmojiCategory.Flags}
-					/>
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Smileys} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.People} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Animals} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Food} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Activities} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Travel} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Objects} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Symbols} />
+					<EmojiCategoryItem setSelected={setSelected} selected={selected()} category={EmojiCategory.Flags} />
 				</div>
 				<div
 					class={styles.emojis}
@@ -372,18 +336,9 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 						}
 					}}
 				>
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[0]} num="1" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[1]} num="2" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[2]} num="3" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[3]} num="4" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[4]} num="5" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[5]} num="6" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[6]} num="7" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[7]} num="8" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[8]} num="9" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[9]} num="*" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[10]} num="0" />
-					<EmojiItem onSelect={props.onSelect} emoji={emojis()[11]} num="#" />
+					<Index each={["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"]}>
+						{(num, index) => <EmojiItem onSelect={props.onSelect} emoji={emojis()[index]} num={num()} />}
+					</Index>
 				</div>
 				<Show when={lastPage() != 0}>
 					<div class={styles.scrollbar_container}>
