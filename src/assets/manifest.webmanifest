@@ -35,7 +35,7 @@
 
 	"b2g_features": {
 		"display": "KGram",
-		"version": "3.0.4",
+		"version": "3.0.5",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {
