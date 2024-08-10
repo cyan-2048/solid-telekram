@@ -54,6 +54,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
   - [ ] Telegram System Actions (not complete)
   - [ ] Message Attachments
     - [ ] Uploading Files
+      - [x] Uploading Voice Messages
     - [ ] Stickers
       - [ ] Sticker Picker
       - [x] webp
@@ -68,7 +69,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
       - [x] Gif previews
     - [ ] Photos
       - [x] Photo previews
-    - [ ] Voice Messages
+    - [x] Voice Messages
     - [ ] Music
     - [ ] Videos
     - [ ] Location
