@@ -41,6 +41,8 @@ if (!Object.hasOwnProperty("getOwnPropertyDescriptors")) {
 }
 
 if (import.meta.env.VITE_KAIOS != 3) {
+	String.prototype.trimEnd ||= String.prototype.trimRight;
+
 	if (typeof s.queueMicrotask !== "function") {
 		s.queueMicrotask = function (callback) {
 			Promise.resolve()
