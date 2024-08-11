@@ -1079,7 +1079,7 @@ export function resetLocalStorage() {
 async function telegramReady(tg: TelegramClient) {
 	setClient(tg);
 
-	// await initDialogs(tg);
+	await initDialogs(tg);
 
 	tg.setOffline(false);
 
