@@ -147,6 +147,8 @@ export default async function processWebpToCanvas(
 	// }
 
 	if (!result) {
+		// we only use this if it is really necessary!
+		// we don't want to have OOMs in the backbone of this app lmao
 		console.error("libwebpjs didn't work, using libwebp asm.js");
 
 		result = await webp(bufferLike, width, height);

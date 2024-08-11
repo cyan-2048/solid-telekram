@@ -65,10 +65,7 @@ export function setSoftkeys(
 
 export const [currentView, setView] = createSignal("loading" as "login" | "loading" | "home" | "room" | "info");
 
-export const [messageInfo, setMessageInfo] = createSignal<null | {
-	dialog: UIDialog | null;
-	message: UIMessage;
-}>(null);
+export const [messageInfo, setMessageInfo] = createSignal<null | UIMessage>(null);
 
 export const [replyingMessage, setReplyingMessage] = createSignal<null | UIMessage>(null);
 export const [editingMessage, setEditingMessage] = createSignal<null | UIMessage>(null);
@@ -1082,7 +1079,7 @@ export function resetLocalStorage() {
 async function telegramReady(tg: TelegramClient) {
 	setClient(tg);
 
-	await initDialogs(tg);
+	// await initDialogs(tg);
 
 	tg.setOffline(false);
 

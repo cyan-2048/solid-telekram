@@ -1,8 +1,15 @@
-import { BaseCryptoProvider, IAesCtr, ICryptoProvider, IEncryptionScheme } from "@mtcute/core/utils.js";
+import {
+	BaseCryptoProvider,
+	factorizePQSync,
+	IAesCtr,
+	ICryptoProvider,
+	IEncryptionScheme,
+} from "@mtcute/core/utils.js";
 
 import MtcuteAsmURL from "./mtcute.asm.js?url";
 import MtcuteMemURL from "./mtcute.asm.js.mem?url";
 import { gunzipSync, gzipSync } from "@/lib/fflate";
+import { webogramFactorizePQSync } from "./factorizePQ-webogram";
 
 let asm: any = null;
 
@@ -272,6 +279,11 @@ interface WebpDecoded {
 
 export class AsmCryptoProvider extends BaseCryptoProvider implements ICryptoProvider {
 	readonly crypto: Crypto;
+
+	factorizePQ(pq: Uint8Array): [Uint8Array, Uint8Array] {
+		// return factorizePQSync(this, pq);
+		return webogramFactorizePQSync(this, pq);
+	}
 
 	/**
 	 * convert webp to rgba
