@@ -290,7 +290,7 @@ Object.entries(categoryPlusEmojis).forEach((e) => {
 	if (typeof categories[e[0]] != "undefined") categoryPlusEmojis[categories[e[0]]] = e[1];
 });
 
-console.log(categoryPlusEmojis);
+// console.log(categoryPlusEmojis);
 
 async function _decodeWebP(buffer: Uint8Array, scaleCount: number) {
 	const result = await decodeWebP(buffer, scaleCount).catch(() => null);

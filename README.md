@@ -97,6 +97,12 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 - pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets)
 - using this app on a 256MB RAM KaiOS device is kinda unstable.
 
+### Experimental Low Memory mode
+
+- the app already attempts to use as less memory as possible, however some users still encounter crashing
+- hover on anything non-text-input, and click on 7-5-6-9-Call, this will enable an experimental low memory mode, in this mode, only 10 HTML elements are rendered instead of 40 (messages), as well as only showing 10 chats.
+- if this mode fixes your problems please contact the dev.
+
 ## Developing
 
 Install NodeJS (v18 or latest LTS) and [bun](https://bun.sh/).

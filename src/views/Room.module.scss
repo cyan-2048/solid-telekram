@@ -2,6 +2,45 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.view_message_info {
+	height: calc(100vh - 30px);
+	width: 100vw;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: white;
+	overflow: auto;
+
+	.container {
+		background-color: #97beeb;
+		padding-top: 4px;
+		padding-bottom: 4px;
+
+		.message_inner {
+			> .photo,
+			> .video {
+				height: unset !important;
+
+				max-height: unset !important;
+				min-height: unset !important;
+
+				img,
+				video {
+					height: unset !important;
+				}
+
+				& + .text_container {
+					margin-top: 0 !important;
+				}
+			}
+		}
+
+		:global(.focusable):focus {
+			outline: solid 3px var(--accent) !important;
+		}
+	}
+}
+
 .media_checks {
 	position: absolute;
 	bottom: 0;

@@ -3,7 +3,7 @@
 	"description": "Telegram Client for KaiOS.",
 	"display": "Telegram",
 	"short_name": "Telegram",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"launch_path": "/index.html",
 	"theme": "#fff",
 	"theme_color": "#fff",
@@ -31,7 +31,8 @@
 		},
 		"desktop-notification": {},
 		"tcp-socket": { "description": "Required to do any TCP" },
-		"device-storage:sdcard": { "access": "readwrite" }
+		"device-storage:sdcard": { "access": "readwrite" },
+		"volumemanager": {}
 	},
 	"locales": {
 		"en-US": {

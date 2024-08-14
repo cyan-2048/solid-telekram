@@ -32,6 +32,7 @@ import {
 	setView,
 	userStatusJar,
 	uiDialog,
+	setMessageInfo,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -60,6 +61,7 @@ import { timeStamp } from "./Home";
 import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
 import { MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
 import { VoiceRecorderWeb } from "./components/VoiceRecorder";
+import { volumeUp, volumeDown } from "@/lib/volumeManager";
 
 function getMembersCount(chat: Chat) {
 	if ((chat.peer as tl.RawChannel).participantsCount) {
@@ -96,6 +98,7 @@ const enum TextboxOptionsSelected {
 	SEND,
 	CANCEL,
 	VIEW,
+	PASTE,
 }
 
 function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsSelected | null) => void }) {
@@ -154,6 +157,18 @@ function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsS
 						Cancel {isEditing() ? "Edit" : "Reply"}
 					</OptionsItem>
 				</Show>
+				<Show when={sessionStorage.getItem("copy")}>
+					<OptionsItem
+						on:sn-willfocus={willFocusScrollIfNeeded}
+						classList={{ option: true, [styles.option_item]: true }}
+						tabIndex={-1}
+						on:sn-enter-down={() => {
+							props.onSelect(TextboxOptionsSelected.PASTE);
+						}}
+					>
+						Paste
+					</OptionsItem>
+				</Show>
 				<OptionsItem
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
@@ -181,7 +196,7 @@ const enum MessageOptionsSelected {
 }
 
 function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) => void }) {
-	const { dialog, message, rawMessage } = useMessageContext();
+	const { dialog, message, rawMessage, entities } = useMessageContext();
 
 	onMount(() => {
 		SpatialNavigation.add(SN_ID_OPTIONS, {
@@ -209,6 +224,9 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
+					on:sn-enter-down={() => {
+						props.onSelect(MessageOptionsSelected.INFO);
+					}}
 				>
 					Message info
 				</OptionsItem>
@@ -247,13 +265,18 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 						Delete
 					</OptionsItem>
 				</Show>
-				<OptionsItem
-					on:sn-willfocus={willFocusScrollIfNeeded}
-					classList={{ option: true, [styles.option_item]: true }}
-					tabIndex={-1}
-				>
-					Copy
-				</OptionsItem>
+				<Show when={entities().entities || entities().text}>
+					<OptionsItem
+						on:sn-willfocus={willFocusScrollIfNeeded}
+						classList={{ option: true, [styles.option_item]: true }}
+						tabIndex={-1}
+						on:sn-enter-down={() => {
+							props.onSelect(MessageOptionsSelected.COPY);
+						}}
+					>
+						Copy
+					</OptionsItem>
+				</Show>
 				<OptionsItem
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
@@ -402,6 +425,7 @@ function MessageContainer(props: { children: JSXElement }) {
 		setAudioPlaying,
 		setAudioSpeed,
 		audioSpeed,
+		entities,
 	} = useMessageContext();
 
 	onMount(() => {
@@ -496,6 +520,8 @@ function MessageContainer(props: { children: JSXElement }) {
 					if (mediaType() == "audio" || mediaType() == "voice") {
 						setAudioPlaying(true);
 						SpatialNavigation.pause();
+					} else {
+						setMessageInfo(message());
 					}
 				}}
 				on:sn-navigatefailed={async (e) => {
@@ -525,6 +551,15 @@ function MessageContainer(props: { children: JSXElement }) {
 
 						if (e.key.includes("Arrow")) {
 							e.preventDefault();
+
+							switch (e.key) {
+								case "ArrowUp":
+									volumeUp();
+									break;
+								case "ArrowDown":
+									volumeDown();
+									break;
+							}
 						}
 
 						if (e.key == "SoftLeft") {
@@ -594,6 +629,13 @@ function MessageContainer(props: { children: JSXElement }) {
 							switch (e) {
 								case MessageOptionsSelected.JUMP:
 									jumpToBottom();
+									break;
+								case MessageOptionsSelected.INFO:
+									SpatialNavigation.focus("room");
+									setMessageInfo(message());
+									return;
+								case MessageOptionsSelected.COPY:
+									sessionStorage.setItem("copy", md.unparse(entities()));
 									break;
 								case MessageOptionsSelected.EDIT:
 								case MessageOptionsSelected.REPLY:
@@ -677,7 +719,7 @@ function LoadingReplyMessage() {
 	return <ReplyBase title="Loading...">???</ReplyBase>;
 }
 
-function UsernameContainer(props: { children: JSXElement; peer: RawPeer }) {
+export function UsernameContainer(props: { children: JSXElement; peer: RawPeer }) {
 	return (
 		<div class={styles.username}>
 			<div class={styles.username_inner}>
@@ -897,6 +939,13 @@ function TextBoxOptionsWrap(props: {
 
 						const dialog = props.dialog;
 						switch (e) {
+							case TextboxOptionsSelected.PASTE: {
+								const text = sessionStorage.getItem("copy");
+								sessionStorage.removeItem("copy");
+								if (text) typeInTextbox(text, props.textboxRef);
+								break;
+							}
+
 							case TextboxOptionsSelected.SEND:
 								if (!interacting()) {
 									tg.sendText(props.dialog.$.chat, md(text())).then((msg) => {

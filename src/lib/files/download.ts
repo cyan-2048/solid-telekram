@@ -103,7 +103,7 @@ EE.on("tick", () => {
 
 type DownloadState = "idle" | "started" | "downloading" | "aborting" | "aborted" | "done";
 
-class Download extends EventEmitter<{
+export class Download extends EventEmitter<{
 	state: (e: DownloadState) => void;
 	progress: (num: number) => void;
 	done: (blob: Blob | null) => void;
@@ -125,7 +125,7 @@ class Download extends EventEmitter<{
 	}
 
 	/**
-	 * Number 0 - 1
+	 * Number 0 - 100
 	 */
 	progress = 0;
 

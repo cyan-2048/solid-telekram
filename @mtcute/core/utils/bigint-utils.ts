@@ -1,5 +1,7 @@
 import { ICryptoProvider } from './crypto/abstract.js'
 import bigInt, { BigInteger } from 'big-integer'
+// @ts-ignore
+import * as jsbn from 'jsbn'
 
 /**
  * Get the minimum number of bits required to represent a number
@@ -124,7 +126,29 @@ export function bigIntGcd(a: BigInteger, b: BigInteger): BigInteger {
 }
 
 export function bigIntModPow(base: BigInteger, exp: BigInteger, mod: BigInteger): BigInteger {
-    return base.modPow(exp, mod)
+    // use jsbn if Native BigInt is unavailable
+    if (typeof BigInt == 'undefined') {
+        const bi_base = new jsbn.BigInteger(base.toString())
+        const bi_exp = new jsbn.BigInteger(exp.toString())
+        const bi_mod = new jsbn.BigInteger(mod.toString())
+
+        return bigInt(bi_base.modPow(bi_exp, bi_mod).toString())
+    }
+
+    base = base.mod(mod)
+
+    let result = bigInt.one
+
+    while (exp.gt(bigInt.zero)) {
+        if (exp.mod(bigInt[2]).eq(bigInt.one)) {
+            result = result.times(base).mod(mod)
+        }
+
+        exp = exp.shiftRight(bigInt.one)
+        base = base.pow(bigInt[2]).mod(mod)
+    }
+
+    return result
 }
 
 // below code is based on https://github.com/juanelas/bigint-mod-arith, MIT license

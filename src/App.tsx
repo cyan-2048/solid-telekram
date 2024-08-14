@@ -3,6 +3,7 @@ import Softkeys from "./views/components/Softkeys";
 import {
 	client,
 	currentView,
+	messageInfo,
 	room,
 	softcenter,
 	softkeysBlack,
@@ -15,6 +16,7 @@ import Login from "./views/Login";
 import Loading from "./views/Loading";
 import Home from "./views/Home";
 import Room from "./views/Room";
+import MessageInfo from "./views/MessageInfo";
 
 function App() {
 	document.querySelector(".LOADING")?.remove();
@@ -43,6 +45,7 @@ function App() {
 			<Show when={client()}>
 				<Room hidden={currentView() != "room"} />
 			</Show>
+			<Show when={messageInfo()}>{(e) => <MessageInfo $={e()} />}</Show>
 			<Softkeys
 				left={softleft()}
 				center={softcenter()}

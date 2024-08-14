@@ -1,5 +1,6 @@
 import Long from 'long'
 
+// @ts-ignore
 import { mtp } from '@mtcute/tl'
 import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
@@ -236,7 +237,7 @@ export async function doAuthorization(
         throw new MtSecurityError('Step 1: invalid nonce from server')
     }
 
-    const serverKeys = resPq.serverPublicKeyFingerprints.map((it) => it.toUnsigned().toString(16))
+    const serverKeys = resPq.serverPublicKeyFingerprints.map((it: Long) => it.toUnsigned().toString(16))
     log.debug('received PQ, keys: %j', serverKeys)
 
     // Step 2: DH exchange
@@ -249,8 +250,10 @@ export async function doAuthorization(
     }
     log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
 
-    if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
-        throw new MtSecurityError('Step 2: pq is prime')
+    if (import.meta.env.DEV) {
+        if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
+            throw new MtSecurityError('Step 2: pq is prime')
+        }
     }
 
     const [p, q] = await crypto.factorizePQ(resPq.pq)
@@ -336,7 +339,9 @@ export async function doAuthorization(
     const g = bigInt(serverDhInner.g)
     const gA = bufferToBigInt(serverDhInner.gA)
 
-    checkDhPrime(crypto, log, dhPrime, serverDhInner.g)
+    if (import.meta.env.DEV) {
+        checkDhPrime(crypto, log, dhPrime, serverDhInner.g)
+    }
 
     let retryId = Long.ZERO
     const serverSalt = xorBuffer(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
@@ -348,22 +353,24 @@ export async function doAuthorization(
         const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))
         const authKeyAuxHash = crypto.sha1(authKey).subarray(0, 8)
 
-        // validate DH params
-        if (g.leq(1) || g.geq(dhPrime.minus(bigInt.one))) {
-            throw new MtSecurityError('g is not within (1, dh_prime - 1)')
-        }
-        if (gA.leq(1) || gA.geq(dhPrime.minus(bigInt.one))) {
-            throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
-        }
-        if (gB.leq(1) || gB.geq(dhPrime.minus(bigInt.one))) {
-            throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
-        }
+        if (import.meta.env.DEV) {
+            // validate DH params
+            if (g.leq(1) || g.geq(dhPrime.minus(bigInt.one))) {
+                throw new MtSecurityError('g is not within (1, dh_prime - 1)')
+            }
+            if (gA.leq(1) || gA.geq(dhPrime.minus(bigInt.one))) {
+                throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
+            }
+            if (gB.leq(1) || gB.geq(dhPrime.minus(bigInt.one))) {
+                throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
+            }
 
-        if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new MtSecurityError('g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
-        }
-        if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-            throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
+            if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
+                throw new MtSecurityError('g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
+            }
+            if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
+                throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
+            }
         }
 
         const gB_ = bigIntToBuffer(gB, 0, false)

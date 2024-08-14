@@ -1077,6 +1077,7 @@ export function resetLocalStorage() {
 }
 
 async function telegramReady(tg: TelegramClient) {
+	sessionStorage.loggedIn = 1;
 	setClient(tg);
 
 	await initDialogs(tg);
@@ -1335,6 +1336,13 @@ handleCombo("7569", () => {
 	localStorage.low_memory = "1";
 	toaster("Low memory mode enabled. Please re-launch the app.");
 
+	window.close();
+});
+
+handleCombo("0000", async () => {
+	localStorage.localforage_cache = 1;
+	await toaster("localforage is now being used as cache storage!");
+	await sleep(10);
 	window.close();
 });
 

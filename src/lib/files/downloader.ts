@@ -1,8 +1,9 @@
 import localforage from "localforage";
 import { sleep } from "../helpers";
 
-const systemStorage: DeviceStorage =
-	navigator.b2g?.getDeviceStorage("sdcard") || navigator.getDeviceStorage?.("sdcard");
+const systemStorage: DeviceStorage = localStorage.localforage_cache
+	? (undefined as any)
+	: navigator.b2g?.getDeviceStorage("sdcard") || navigator.getDeviceStorage?.("sdcard");
 
 const resolveRoot = new Promise<Directory | null>((res) => {
 	res(systemStorage?.getRoot().catch(() => null) || null);

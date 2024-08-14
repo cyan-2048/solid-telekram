@@ -10,6 +10,10 @@ import { BaseTelegramClient, defaultReconnectionStrategy, TelegramWorker, WebPla
 import parseUserAgent from "./parseUserAgent.js";
 import { setPlatform } from "@mtcute/core/platform.js";
 import type { AsmCryptoProvider } from "@mtcute/web/asmjs/crypto.js";
+import { isTlRpcError } from "@mtcute/core/utils.js";
+import { getMe } from "@mtcute/core/methods.js";
+
+let onLogoutCallback: () => void;
 
 const isKai3 = import.meta.env.VITE_KAIOS == 3;
 
@@ -72,6 +76,24 @@ const tg = new BaseTelegramClient({
 
 	testMode: false,
 
+	network: {
+		middlewares: [
+			async (ctx, next) => {
+				const res = await next(ctx);
+
+				if (isTlRpcError(res) && res.errorMessage == "AUTH_KEY_UNREGISTERED") {
+					setTimeout(() => {
+						getMe(tg).catch(() => {
+							onLogoutCallback();
+						});
+					}, 3000);
+				}
+
+				return res;
+			},
+		],
+	},
+
 	logLevel: 3,
 });
 
@@ -82,6 +104,10 @@ new TelegramWorker({
 });
 
 const exposed = {
+	setLogoutCallback(cb: () => void) {
+		onLogoutCallback = cb;
+	},
+
 	gzip(data: Uint8Array, maxSize?: number) {
 		return tg.crypto.gzip(data, maxSize ?? Math.floor(data.length * 0.9));
 	},

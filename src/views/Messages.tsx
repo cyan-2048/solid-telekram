@@ -32,7 +32,7 @@ import {
 import { TelegramClient } from "@mtcute/web";
 import { UIMessage, UIDialog, client, chat, setSoftkeys, EE } from "@signals";
 import dayjs from "dayjs";
-import { downloadFile } from "@/lib/files/download";
+import { Download, downloadFile } from "@/lib/files/download";
 import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
 import { Dynamic, Portal } from "solid-js/web";
 import { PeerPhotoIcon } from "./components/PeerPhoto";
@@ -119,7 +119,7 @@ function decideTail(before: UIMessage | undefined, after: UIMessage) {
 	return false;
 }
 
-function decideShowUsername(before: UIMessage | undefined, after: UIMessage) {
+export function decideShowUsername(before: UIMessage | undefined, after: UIMessage) {
 	const chat = after.$.chat;
 
 	if (
@@ -291,7 +291,7 @@ function StickerThumbnail() {
 	);
 }
 
-function StickerMedia() {
+function StickerMedia(props: FocusableMediaProps) {
 	// TODO: only play video sticker when focused to lessen memory usage
 	const { message, focused } = useMessageContext();
 
@@ -505,7 +505,13 @@ function StickerMedia() {
 	);
 }
 
-function PhotoMedia() {
+interface FocusableMediaProps {
+	focusable?: boolean;
+	downloadRef?: (e: Download) => void;
+	onSelect?: (m: NonNullable<UIMessage["$"]["media"]>) => void;
+}
+
+function PhotoMedia(props: FocusableMediaProps) {
 	const { message, showChecks } = useMessageContext();
 
 	const [src, setSrc] = createSignal("");
@@ -547,6 +553,8 @@ function PhotoMedia() {
 
 		const download = downloadFile(thumb);
 
+		props.downloadRef?.(download);
+
 		let url!: string;
 
 		const stateChange = () => {
@@ -577,7 +585,14 @@ function PhotoMedia() {
 	});
 
 	return (
-		<div class={styles.photo}>
+		<div
+			on:sn-enter-down={() => {
+				const media = message().$.media;
+				props.onSelect?.(media!);
+			}}
+			tabIndex={props.focusable ? -1 : undefined}
+			classList={{ [styles.photo]: true, focusable: !!props.focusable }}
+		>
 			<Show when={thumb() && (loading() || !src() || showUnsupported())}>
 				<img class={styles.thumb} src={thumb()}></img>
 			</Show>
@@ -605,8 +620,8 @@ function MediaChecks() {
 	);
 }
 
-function VideoMedia() {
-	const { message, focused, showChecks } = useMessageContext();
+function VideoMedia(props: FocusableMediaProps) {
+	const { message, focused, showChecks, media } = useMessageContext();
 
 	const round = () => (message().$.media as Video).isRound;
 
@@ -704,6 +719,8 @@ function VideoMedia() {
 
 		const download = downloadFile(media);
 
+		props.downloadRef?.(download);
+
 		let url!: string;
 
 		const stateChange = () => {
@@ -737,7 +754,12 @@ function VideoMedia() {
 
 	return (
 		<div
-			class={styles.video}
+			on:sn-enter-down={() => {
+				const media = message().$.media;
+				props.onSelect?.(media!);
+			}}
+			tabIndex={props.focusable ? -1 : undefined}
+			classList={{ [styles.video]: true, focusable: !!props.focusable }}
 			style={
 				preview() && isGif()
 					? {
@@ -788,7 +810,7 @@ function VideoMedia() {
 									fill-rule="evenodd"
 								></path>
 							</svg>
-							0:05
+							{formatTime((media() as Video).duration)}
 						</div>
 					</>
 				}
@@ -881,7 +903,7 @@ function downsampleWaveform(waveform: number[], targetLength: number = 32): numb
 	return result;
 }
 
-function VoiceMedia() {
+function VoiceMedia(props: FocusableMediaProps) {
 	const { showChecks, message, media, isOutgoing, audioPlaying, audioSpeed, setAudioPlaying } = useMessageContext();
 
 	const [src, setSrc] = createSignal("");
@@ -1078,11 +1100,11 @@ function VoiceMedia() {
 	);
 }
 
-function MusicMedia() {
+function MusicMedia(props: FocusableMediaProps) {
 	return null;
 }
 
-function LocationMedia() {
+function LocationMedia(props: FocusableMediaProps) {
 	const { message } = useMessageContext();
 
 	const [src, setSrc] = createSignal("");

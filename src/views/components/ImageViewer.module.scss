@@ -1,0 +1,22 @@
+.viewer {
+	position: relative;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	display: grid;
+	overflow: hidden;
+	justify-content: center;
+	align-items: center;
+
+	&.pixelated img {
+		image-rendering: optimizeSpeed;
+		image-rendering: pixelated;
+	}
+
+	img {
+		position: absolute;
+	}
+
+	background-color: black;
+}

@@ -13,6 +13,8 @@ import * as Comlink from "comlink";
 
 import TelegramWorkerURL from "./worker.js?worker&url";
 import type { Exposed } from "./worker.js";
+import { toaster } from "@signals";
+import { sleep } from "./helpers.js";
 
 type Country = (typeof countries)[number];
 
@@ -42,6 +44,16 @@ export const gunzip = wrapped.gunzip;
 export const gzip = wrapped.gzip;
 export const webp = wrapped.webp;
 export const getAvailableMemory = wrapped.getAvailableMemory;
+
+async function onLogout() {
+	if (!sessionStorage.loggedIn) return;
+	sessionStorage.removeItem("loggedIn");
+
+	await toaster("You got logged out!");
+	await sleep(10);
+}
+
+wrapped.setLogoutCallback(Comlink.proxy(onLogout));
 
 let abortQr: null | AbortController = null;
 
