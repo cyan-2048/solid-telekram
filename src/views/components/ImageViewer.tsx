@@ -128,7 +128,8 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 
 	useKeypress(
 		"Backspace",
-		() => {
+		(e) => {
+			e.preventDefault();
 			if (!backspacePaused) props.onClose?.();
 		},
 		true
