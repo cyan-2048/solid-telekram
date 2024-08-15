@@ -2,6 +2,17 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.spinner {
+	height: 40px;
+	width: 40px;
+	position: absolute;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
 .view_message_info {
 	height: calc(100vh - 30px);
 	width: 100vw;

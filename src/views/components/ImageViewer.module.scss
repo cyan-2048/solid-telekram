@@ -20,3 +20,10 @@
 
 	background-color: black;
 }
+
+.thumb {
+	width: calc(100% + 15px);
+	height: calc(100% + 15px);
+	object-fit: cover;
+	filter: blur(12px);
+}

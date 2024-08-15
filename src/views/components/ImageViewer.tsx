@@ -5,6 +5,7 @@ import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { Photo, Thumbnail } from "@mtcute/core";
 import { downloadFile } from "@/lib/files/download";
+import ProgressSpinner from "./ProgressSpinner";
 
 export default function ImageViewer(props: { photo: Photo; onClose?: () => void }) {
 	let divRef!: HTMLDivElement;
@@ -12,8 +13,24 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 	const [progress, setProgress] = createSignal(0);
 
 	const [src, setSrc] = createSignal("");
+	const [thumb, setThumb] = createSignal("");
 
 	let mounted = true;
+
+	onMount(() => {
+		const media = props.photo as Photo;
+		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
+
+		let url!: string;
+
+		if (thumb && "byteLength" in thumb.location) {
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+		}
+
+		onCleanup(() => {
+			URL.revokeObjectURL(url);
+		});
+	});
 
 	onCleanup(() => {
 		mounted = false;
@@ -44,6 +61,7 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 		}
 
 		function progressChange() {
+			console.error("DOWNLOAD PRESS", download.progress);
 			setProgress(download.progress);
 		}
 
@@ -78,7 +96,7 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 	const [pixelated, setPixelated] = createSignal(false);
 
 	useKeypress(
-		"3",
+		"SoftRight",
 		() => {
 			if (zoomRef) {
 				if (zoomRef.scaleValue >= 3) setPixelated(true);
@@ -88,7 +106,7 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 		true
 	);
 	useKeypress(
-		"1",
+		"SoftLeft",
 		() => {
 			if (zoomRef) {
 				if (zoomRef.scaleValue <= 3) setPixelated(false);
@@ -137,6 +155,11 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 
 	return (
 		<div ref={divRef} tabIndex={-1} classList={{ [styles.viewer]: true, [styles.pixelated]: pixelated() }}>
+			<Show when={!src()}>
+				<Show when={thumb()}>
+					<img class={styles.thumb} src={thumb()}></img>
+				</Show>
+			</Show>
 			<Show when={src()}>
 				<Zoom
 					ref={(e) => {
@@ -144,6 +167,9 @@ export default function ImageViewer(props: { photo: Photo; onClose?: () => void 
 					}}
 					src={src()}
 				/>
+			</Show>
+			<Show when={!src()}>
+				<ProgressSpinner size={50} progress={progress() || 1}></ProgressSpinner>
 			</Show>
 		</div>
 	);

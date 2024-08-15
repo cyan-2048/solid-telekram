@@ -1,13 +1,13 @@
 import { TextWithEntities } from "@mtcute/core";
 import styles from "./Markdown.module.scss";
-import { For, Match, Switch, Show, createRenderEffect, Component, createSignal } from "solid-js";
+import { For, Match, Switch, Show, createRenderEffect, Component, createSignal, JSXElement } from "solid-js";
 import { Node, ObjectNode, unparse } from "@/lib/unparse";
 import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
 import { reconcile } from "solid-js/store";
 import { memoize } from "lodash-es";
 
-type CustomRenderer = (e: ObjectNode) => Component<ObjectNode> | null | void;
+type CustomRenderer = (e: ObjectNode, _default: () => JSXElement) => Component<ObjectNode> | null | void;
 
 function EntityChildren(props: { $: Node[]; customRenderer?: CustomRenderer }) {
 	return <For each={props.$}>{(e) => <Entity $={e} customRenderer={props.customRenderer} />}</For>;
@@ -26,7 +26,19 @@ function EntityNode(props: { $: ObjectNode; customRenderer?: CustomRenderer }) {
 				</Dynamic>
 			}
 		>
-			<Match when={props.customRenderer?.(props.$)}>{(e) => <Dynamic {...props.$} component={e()!} />}</Match>
+			<Match
+				when={props.customRenderer?.(props.$, () => (
+					<Dynamic
+						component={props.$.tag}
+						class={props.$.entity._ == "messageEntityMention" ? styles.mention : undefined}
+						{...props.$.props}
+					>
+						<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
+					</Dynamic>
+				))}
+			>
+				{(e) => <Dynamic {...props.$} component={e()!} />}
+			</Match>
 			<Match when={props.$.tag == "spoiler"}>
 				<span class={styles.spoiler}>
 					<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
@@ -65,14 +77,14 @@ function extractMatchesAndUnmatched(input: string, globalRegex: RegExp): (string
 	return result;
 }
 
-const vs16RegExp = /\uFE0F/g;
+// const vs16RegExp = /\uFE0F/g;
 // avoid using a string literal like '\u200D' here because minifiers expand it inline
-const zeroWidthJoiner = String.fromCharCode(0x200d);
+// const zeroWidthJoiner = String.fromCharCode(0x200d);
 
-const removeVS16s = (rawEmoji: string) => rawEmoji.replace(vs16RegExp, "");
+// const removeVS16s = (rawEmoji: string) => rawEmoji.replace(vs16RegExp, "");
 
 function encodeEmoji(emojiText: string) {
-	const codepoints = toCodePoints(removeVS16s(emojiText)).join("-");
+	const codepoints = toCodePoints(emojiText).join("-");
 	return codepoints;
 }
 
@@ -130,7 +142,7 @@ function Twemoji(props: { text: string }) {
 					setShow(true);
 				}}
 				class={styles.emoji}
-				src={"https://cyan-2048.github.io/kaigram-assets/emoji/" + toCodePoint(props.text) + ".png"}
+				src={"https://cyan-2048.github.io/kaigram-assets/emoji2/" + toCodePoint(props.text) + ".png"}
 				alt={props.text}
 			/>
 		</span>

@@ -382,7 +382,7 @@ export class UIMessage {
 				}
 
 				case "voice":
-					newText = `Voice (${formatTime($.media.duration)})`;
+					newText = `🎤 Voice (${formatTime($.media.duration)})`;
 					break;
 
 				default: {

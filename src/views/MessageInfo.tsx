@@ -101,18 +101,29 @@ function MessageAdditionalInfo(props: { $: UIMessage; setWidth: (n: number) => v
 	);
 }
 
-function FocusableLink(props: ComponentProps<"a">) {
+function formatHref(str: string) {
+	if (str.startsWith("http")) {
+		return str;
+	}
+	return "https://" + str;
+}
+
+function FocusableLink(props: { children: JSXElement }) {
+	let spanRef!: HTMLSpanElement;
+
 	return (
-		<a
-			class="focusable"
-			onKeyDown={(e) => {
-				if (e.key == "Enter") {
-					e.preventDefault();
-					console.error("not yet implemented open links in new tab");
-				}
+		<span
+			ref={spanRef}
+			on:sn-enter-down={() => {
+				const href = spanRef.querySelector("a")?.getAttribute("href");
+
+				href && window.open(formatHref(href), "_blank");
 			}}
-			{...props}
-		></a>
+			tabIndex={-1}
+			class="focusable"
+		>
+			{props.children}
+		</span>
 	);
 }
 
@@ -166,6 +177,7 @@ export default function MessageInfo(props: { $: UIMessage }) {
 	});
 
 	let downloadRef!: Download;
+	let mediaRef!: MessageMedia;
 
 	return (
 		<>
@@ -256,6 +268,9 @@ export default function MessageInfo(props: { $: UIMessage }) {
 									downloadRef={(e: Download) => {
 										downloadRef = e;
 									}}
+									mediaRef={(e: MessageMedia) => {
+										mediaRef = e;
+									}}
 									onSelect={(e: NonNullable<MessageMedia>) => {
 										console.error("MESSAGE INFO ONSELECT");
 										if (e.type == "photo") {
@@ -272,11 +287,14 @@ export default function MessageInfo(props: { $: UIMessage }) {
 										<div class={styles.text}>
 											{
 												<Markdown
-													customRenderer={(e) => {
+													customRenderer={(e, _default) => {
 														// console.error("MESSAGE INFO CUSTOM RENDERER", e);
 														if (e.tag == "a" && e.entity._.includes("Url")) {
-															if (typeof e.props.href != "string") return;
-															return () => <FocusableLink {...e.props}>{e.children[0] as string}</FocusableLink>;
+															return () => (
+																<FocusableLink>
+																	<Dynamic component={_default}></Dynamic>
+																</FocusableLink>
+															);
 														}
 													}}
 													entities={entities()}

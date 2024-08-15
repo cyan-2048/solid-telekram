@@ -38,6 +38,7 @@ import { Dynamic, Portal } from "solid-js/web";
 import { PeerPhotoIcon } from "./components/PeerPhoto";
 import TelegramIcon from "./components/TelegramIcon";
 import SpatialNavigation from "@/lib/spatial_navigation";
+import ProgressSpinner from "./components/ProgressSpinner";
 
 /**
  * Chat type. Can be:
@@ -377,7 +378,7 @@ function StickerMedia(props: FocusableMediaProps) {
 		// console.error("STICKEERRRR", media, media.thumbnails);
 
 		// use media preview instead of actual file if available
-		const file = media.getThumbnail("m") || media;
+		const file = media.getThumbnail("x") || media;
 
 		const isKai3 = import.meta.env.VITE_KAIOS == 3;
 
@@ -509,6 +510,7 @@ interface FocusableMediaProps {
 	focusable?: boolean;
 	downloadRef?: (e: Download) => void;
 	onSelect?: (m: NonNullable<UIMessage["$"]["media"]>) => void;
+	mediaRef?: (m: NonNullable<UIMessage["$"]["media"]>) => void;
 }
 
 function PhotoMedia(props: FocusableMediaProps) {
@@ -518,6 +520,8 @@ function PhotoMedia(props: FocusableMediaProps) {
 	const [loading, setLoading] = createSignal(true);
 	const [showUnsupported, setShowUnsupported] = createSignal(false);
 	const [thumb, setThumb] = createSignal("");
+
+	const [progress, setProgress] = createSignal(0);
 
 	let mounted = true;
 
@@ -542,6 +546,8 @@ function PhotoMedia(props: FocusableMediaProps) {
 
 	onMount(() => {
 		const media = message().$.media as Photo;
+
+		props.mediaRef?.(media);
 
 		// this is good enough?
 		const thumb = media.getThumbnail(Thumbnail.THUMB_320x320_BOX);
@@ -568,6 +574,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 
 		if (download.state == "done") {
 			stateChange();
+			setProgress(100);
 
 			onCleanup(() => {
 				URL.revokeObjectURL(url);
@@ -578,8 +585,16 @@ function PhotoMedia(props: FocusableMediaProps) {
 
 		download.on("state", stateChange);
 
+		function progressChange() {
+			console.error("DOWNLOAD PRESS", download.progress);
+			setProgress(download.progress);
+		}
+
+		download.on("progress", progressChange);
+
 		onCleanup(() => {
 			download.off("state", stateChange);
+			download.off("progress", progressChange);
 			URL.revokeObjectURL(url);
 		});
 	});
@@ -595,6 +610,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 		>
 			<Show when={thumb() && (loading() || !src() || showUnsupported())}>
 				<img class={styles.thumb} src={thumb()}></img>
+				<ProgressSpinner class={styles.spinner} size={40} progress={progress()} showClose></ProgressSpinner>
 			</Show>
 			<Show when={src()}>
 				<img src={src() + "#-moz-samplesize=2"}></img>
@@ -660,6 +676,9 @@ function VideoMedia(props: FocusableMediaProps) {
 
 	onMount(() => {
 		const media = message().$.media as Video;
+
+		props.mediaRef?.(media);
+
 		const thumb = media.getThumbnail("m");
 
 		if (thumb) {

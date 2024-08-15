@@ -1,0 +1,49 @@
+@keyframes rotate {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.you_spin_me_right_round_baby_right_round {
+	animation: rotate 2s linear infinite;
+	width: 100%;
+	height: 100%;
+
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	.path {
+		transition: stroke-dasharray 0.2s ease-in-out, stroke-width 0.2s ease-in-out;
+
+		stroke-dashoffset: 0;
+		stroke-linecap: round;
+		stroke: currentColor;
+		stroke-width: 2;
+	}
+}
+
+.spinner_container {
+	overflow: hidden;
+	border-radius: 50%;
+
+	color: white;
+
+	background-color: rgba(0, 0, 0, 0.3);
+	position: relative;
+	width: 100%;
+	height: 100%;
+
+	> svg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+
+		width: 56%;
+		height: 56%;
+
+		right: 0;
+		left: 0;
+		margin: auto;
+	}
+}
