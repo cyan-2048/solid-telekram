@@ -1095,26 +1095,22 @@ function VoiceMedia(props: FocusableMediaProps) {
 			<Show when={showChecks()}>
 				<MediaChecks />
 			</Show>
-			<Portal>
-				<Show when={src()}>
-					<audio
-						// @ts-ignore
-						prop:playbackRate={audioSpeed()}
-						ref={audioRef}
-						onCanPlay={() => {}}
-						onTimeUpdate={(e) => {
-							setCurrentTime(Math.floor(e.currentTarget.currentTime));
-							if (audioPlaying()) setPlaying(true);
-							setWaveformIndex(Math.floor((e.currentTarget.currentTime / e.currentTarget.duration) * 31));
-						}}
-						onEnded={() => {
-							setWaveformIndex(0);
-							setAudioPlaying(false);
-						}}
-						src={src()}
-					></audio>
-				</Show>
-			</Portal>
+			<audio
+				// @ts-ignore
+				prop:playbackRate={audioSpeed()}
+				ref={audioRef}
+				onCanPlay={() => {}}
+				onTimeUpdate={(e) => {
+					setCurrentTime(Math.floor(e.currentTarget.currentTime));
+					if (audioPlaying()) setPlaying(true);
+					setWaveformIndex(Math.floor((e.currentTarget.currentTime / e.currentTarget.duration) * 31));
+				}}
+				onEnded={() => {
+					setWaveformIndex(0);
+					setAudioPlaying(false);
+				}}
+				src={src()}
+			></audio>
 		</>
 	);
 }
