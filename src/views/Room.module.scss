@@ -2,6 +2,97 @@
 	--bubbles-background: #e2f7ff;
 }
 
+.room_wrap {
+	display: flex;
+	align-items: end;
+	background-color: #97beeb;
+}
+
+.upload_image {
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	top: 0;
+	left: 0;
+
+	display: flex;
+	flex-direction: column;
+
+	> :first-child {
+		margin-top: auto;
+	}
+}
+
+.caption_softkeys {
+	color: white;
+	background-color: rgba(0, 0, 0, 0.36);
+	border-top: none;
+
+	padding: 0 5px;
+	flex-shrink: 0;
+
+	height: 30px;
+
+	display: flex;
+
+	align-items: center;
+
+	white-space: nowrap;
+
+	font-size: 14px;
+
+	.emoji {
+		height: 18px;
+		width: 18px;
+		fill: white;
+	}
+
+	.options {
+		height: 20px;
+		width: 20px;
+	}
+
+	> div {
+		display: flex;
+
+		align-items: center;
+
+		width: 100%;
+
+		font-weight: 600;
+
+		&:nth-child(2) {
+			text-transform: uppercase;
+
+			justify-content: center;
+
+			letter-spacing: -0.4px;
+
+			font-weight: 700;
+		}
+
+		&:last-child {
+			justify-content: flex-end;
+		}
+	}
+}
+
+.caption_textbox {
+	color: white;
+
+	min-width: 0;
+	width: 100%;
+
+	font-size: 1rem;
+	line-height: 1.34em;
+	background-color: rgba(0, 0, 0, 0.36);
+
+	border: none;
+
+	border-radius: 0;
+	padding: 8px 10px;
+}
+
 .spinner {
 	height: 40px;
 	width: 40px;
@@ -352,12 +443,10 @@
 }
 
 .room {
-	height: 100%;
+	max-height: 100%;
 	width: 100%;
 	overflow: hidden;
 	background-color: #97beeb;
-
-	align-content: end;
 
 	scrollbar-width: none;
 

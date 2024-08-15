@@ -4,7 +4,6 @@ import {
 	client,
 	currentView,
 	messageInfo,
-	room,
 	softcenter,
 	softkeysBlack,
 	softkeysLoading,

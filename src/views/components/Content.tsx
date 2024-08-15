@@ -6,6 +6,7 @@ export default function Content(props: {
 	after?: JSXElement;
 	children: JSXElement;
 	hidden?: boolean;
+	mainClass?: string;
 }) {
 	return (
 		<div
@@ -15,7 +16,7 @@ export default function Content(props: {
 			class={styles.content}
 		>
 			{props.before}
-			<div class={styles.main}>{props.children}</div>
+			<div class={styles.main + (props.mainClass ? " " + props.mainClass : "")}>{props.children}</div>
 			{props.after}
 		</div>
 	);

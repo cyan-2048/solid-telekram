@@ -887,6 +887,8 @@ function TextBoxOptionsWrap(props: {
 
 	const [showVoiceRecorder, setShowVoiceRecorder] = createSignal(false);
 
+	const [showImageUpload, setShowImageUpload] = createSignal(false);
+
 	let audioBlob: Blob;
 	let audioWaveform: number[];
 	let audioDuration: number;
@@ -1460,6 +1462,7 @@ export default function Room(props: { hidden: boolean }) {
 							)}
 						</Show>
 					}
+					mainClass={styles.room_wrap}
 				>
 					<Show when={uiDialog()}>{(dialog) => <Messages dialog={dialog()} />}</Show>
 				</Content>
