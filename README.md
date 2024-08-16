@@ -59,7 +59,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
       - [ ] Sticker Picker
       - [x] webp
       - [x] webm
-      - [ ] lottie (partial support)
+      - [x] lottie
     - [ ] Emojis
       - [x] Emoji Picker
       - [x] Apple Emojis
@@ -92,8 +92,8 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 
 ## Additional Info
 
-- First launch of the app will take a while (idk why), the next app launches will not take so long.
-- Currently Forum Groups will act as "View as Messages" as in the Telegram Web K client.
+- First launch of the app might take a while, the next app launches will not take so long.
+- Currently Forum Groups will act in a unstable "View as Messages" view as in the Telegram Web K client.
 - pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets)
 - using this app on a 256MB RAM KaiOS device is kinda unstable.
 
@@ -109,6 +109,8 @@ Install NodeJS (v18 or latest LTS) and [bun](https://bun.sh/).
 
 Please create a `.env.local` file and add the values in `.env` replacing the APP_ID and APP_HASH with your own.
 
+You **must** use bun!
+
 Dev Mode:
 
 ```
@@ -121,6 +123,8 @@ Build:
 bun run build
 ```
 
+After building, you can now sideload the dist folder using WebIDE.
+
 add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 
 ## Technical Info
@@ -131,7 +135,7 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 - there are 3 Web Workers
   - mtcute web worker proxy
   - heavy tasks worker for blocking operations (webp to png, md5, etc.)
-  - (not yet implemented) rlottie
+  - rlottie
 - SystemJS is used to simulate esm modules on KaiOS 2.5, it is also used to import asm.js files in order for it to preserve asm.js syntax.
 
 ## Dependencies
