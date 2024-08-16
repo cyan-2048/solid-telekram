@@ -3,6 +3,7 @@ import * as utils from "./lib/utils";
 import * as files from "./lib/files/download";
 import * as stores from "./lib/stores";
 import * as solid from "solid-js";
+import * as heavyTasks from "./lib/heavy-tasks";
 import { md } from "@mtcute/markdown-parser";
 import dayjs from "dayjs";
 import * as mtcuteWeb from "@mtcute/web";
@@ -36,6 +37,7 @@ Object.assign(window, {
 	utils,
 	stores,
 	md,
+	heavyTasks,
 	dayjs,
 	mtcute: { ...mtcuteWeb, ...mtcuteUtils },
 });

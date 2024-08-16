@@ -98,6 +98,7 @@ export const md5 = wrapped.md5;
 export const getEmojiPage = wrapped.getEmojiPage;
 export const getLastEmojiPage = wrapped.getLastEmojiPage;
 export const getOptimizedSticker = wrapped.getOptimizedSticker;
+export { gzip, gunzip } from "./telegram";
 
 const taskQueue = new Queue({
 	concurrency: 1,
@@ -167,12 +168,16 @@ export default async function processWebpToCanvas(
 
 	canvas.getContext("2d")!.putImageData(imageData, 0, 0);
 
-	canvas.toBlob(async (blob) => {
-		if (blob) {
-			await addToCache(filename, blob);
-			deferred.resolve();
-		}
-	}, "image/png");
+	canvas.toBlob(
+		async (blob) => {
+			if (blob) {
+				await addToCache(filename, blob);
+				deferred.resolve();
+			}
+		},
+		"image/png",
+		1
+	);
 
 	return null;
 }

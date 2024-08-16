@@ -33,12 +33,14 @@ import { TelegramClient } from "@mtcute/web";
 import { UIMessage, UIDialog, client, chat, setSoftkeys, EE } from "@signals";
 import dayjs from "dayjs";
 import { Download, downloadFile } from "@/lib/files/download";
-import processWebpToCanvas, { getOptimizedSticker } from "@/lib/heavy-tasks";
+import processWebpToCanvas, { getOptimizedSticker, gunzip } from "@/lib/heavy-tasks";
 import { Dynamic, Portal } from "solid-js/web";
 import { PeerPhotoIcon } from "./components/PeerPhoto";
 import TelegramIcon from "./components/TelegramIcon";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import ProgressSpinner from "./components/ProgressSpinner";
+import { isCached, loadAnimation, loadRlottie, requestFrame } from "@/lib/rlottie";
+import { media } from "@mtcute/core/highlevel/types/bots/inline-message/factories";
 
 /**
  * Chat type. Can be:
@@ -292,9 +294,138 @@ function StickerThumbnail() {
 	);
 }
 
+function StickerRlottieFirstFrame(props: { data: ImageData }) {
+	let canvasRef!: HTMLCanvasElement;
+
+	onMount(() => {
+		const context = canvasRef.getContext("2d")!;
+		// console.error("FIRST FRAMERLOTTIE");
+		context.putImageData(props.data, 0, 0);
+	});
+
+	return <canvas ref={canvasRef} width={128} height={128}></canvas>;
+}
+
+function StickerRlottieFirstFrameWebp() {
+	let canvasRef!: HTMLCanvasElement;
+
+	const { message, focused, media } = useMessageContext();
+
+	let mounted = true;
+
+	const [src, setSrc] = createSignal("");
+	const [loading, setLoading] = createSignal(true);
+
+	onCleanup(() => {
+		mounted = false;
+	});
+
+	onMount(() => {
+		const media = message().$.media as Sticker;
+		if (!media) return;
+		if (media.mimeType != "application/x-tgsticker") return;
+
+		// console.error("STICKEERRRR", media, media.thumbnails);
+
+		// use media preview instead of actual file if available
+		const file = media.getThumbnail("m");
+
+		if (!file) return;
+
+		const isKai3 = import.meta.env.VITE_KAIOS == 3;
+
+		// if kai3 use img tag
+		if (isKai3) {
+			const download = downloadFile(file);
+
+			let url!: string;
+
+			const stateChange = () => {
+				if (download.state == "done") {
+					if (mounted) {
+						setSrc((url = URL.createObjectURL(download.result)));
+					}
+				}
+			};
+
+			if (download.state == "done") {
+				stateChange();
+
+				onCleanup(() => {
+					URL.revokeObjectURL(url);
+				});
+
+				return;
+			}
+
+			download.on("state", stateChange);
+
+			onCleanup(() => {
+				download.off("state", stateChange);
+				URL.revokeObjectURL(url);
+			});
+			return;
+		}
+
+		const download = downloadFile(file);
+
+		let url!: string;
+
+		const stateChange = async () => {
+			if (download.state == "done") {
+				if (mounted) {
+					const buffer = await download.result.arrayBuffer();
+
+					processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((res) => {
+						if (res != null) {
+							setSrc((url = URL.createObjectURL(res)));
+						} else {
+							setLoading(false);
+						}
+					});
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	return (
+		<>
+			<canvas ref={canvasRef} width={128} height={128}></canvas>
+			<Show when={src()}>
+				<img src={src()} alt=" " />
+			</Show>
+			<Show when={loading()}>
+				<StickerThumbnail />
+			</Show>
+		</>
+	);
+}
+
+const decoder = new TextDecoder();
+
+const fps = 60; // target frames per second
+const frameDuration = 1000 / fps;
+
 function StickerMedia(props: FocusableMediaProps) {
 	// TODO: only play video sticker when focused to lessen memory usage
-	const { message, focused } = useMessageContext();
+	const { message, focused, media } = useMessageContext();
 
 	let canvasRef!: HTMLCanvasElement;
 
@@ -302,11 +433,161 @@ function StickerMedia(props: FocusableMediaProps) {
 	const [src, setSrc] = createSignal("");
 	const [video, setVideo] = createSignal("");
 	const [loading, setLoading] = createSignal(true);
-	const [showUnsupported, setShowUnsupported] = createSignal(false);
+	const [rlottie, setRlottie] = createSignal(false);
+
+	const [rlottieCanvasRef, setRlottieCanvasRef] = createSignal<null | HTMLCanvasElement>(null);
+
+	const [videoRef, setVideoRef] = createSignal<null | HTMLVideoElement>(null);
+
+	const [rLottieData, setRlottieData] = createSignal("");
+	const [rLottieReady, setRlottieReady] = createSignal(false);
+	const [rLottieFirstFrame, setRlottieFirstFrame] = createSignal<null | ImageData>(null);
+
+	createEffect(() => {
+		const videoEl = videoRef();
+		const _focused = focused();
+
+		if (!videoEl) return;
+
+		if (_focused) {
+			videoEl.play();
+		} else {
+			videoEl.pause();
+			videoEl.currentTime = 0;
+		}
+	});
+
+	let frames = 0;
+	let currentFrame = 0;
+
+	createEffect(() => {
+		const ready = rLottieReady();
+		const isFocused = focused();
+		const canvas = rlottieCanvasRef();
+		const id = (media() as Sticker).uniqueFileId;
+
+		if (!ready) return;
+		if (!isFocused) return;
+		if (!canvas) return;
+
+		const context = canvas.getContext("2d")!;
+
+		let destroyed = false;
+		let animFrame: any;
+		let timeout: any;
+
+		let startTime: any;
+
+		async function tick_cb(timestamp: number) {
+			if (destroyed) return;
+			if (!startTime) startTime = timestamp;
+
+			const elapsed = timestamp - startTime;
+			const frameIndex = Math.floor(elapsed / frameDuration);
+
+			if (frameIndex !== currentFrame) {
+				currentFrame = frameIndex % frames; // Loop back to the beginning if needed
+
+				if (currentFrame >= frames) currentFrame = 0;
+
+				const clampedBuffer = await requestFrame(id, currentFrame, 128, 128);
+				// console.timeEnd("TEST");
+				const imageData = new ImageData(clampedBuffer, 128, 128);
+				context.putImageData(imageData, 0, 0);
+			}
+
+			animFrame = requestAnimationFrame((e) => {
+				tick_cb(e);
+			});
+		}
+
+		animFrame = requestAnimationFrame((e) => {
+			tick_cb(e);
+		});
+
+		onCleanup(() => {
+			destroyed = true;
+			clearTimeout(timeout);
+			cancelAnimationFrame(animFrame);
+			currentFrame = 0;
+		});
+	});
+
+	createEffect(async () => {
+		const isRlottie = rlottie();
+		const canvas = rlottieCanvasRef();
+		const data = rLottieData();
+		const sticker = media() as Sticker;
+
+		if (!isRlottie) return;
+		if (!canvas) return;
+		if (!data) return;
+
+		await loadRlottie();
+
+		const cached = await isCached(sticker.uniqueFileId);
+
+		if (cached === false) {
+			frames = await loadAnimation(sticker.uniqueFileId, data);
+		} else {
+			frames = cached;
+		}
+
+		const clampedBuffer = await requestFrame(sticker.uniqueFileId, 0, 128, 128);
+		// console.timeEnd("TEST");
+		const imageData = new ImageData(clampedBuffer, 128, 128);
+
+		setRlottieFirstFrame(imageData);
+		// console.error(imageData);
+
+		setRlottieReady(true);
+	});
+
+	createEffect(() => {
+		const isRlottie = rlottie();
+
+		if (!isRlottie) return;
+
+		const media = message().$.media as Sticker;
+
+		if (media.mimeType != "application/x-tgsticker") return;
+
+		const download = downloadFile(media);
+
+		let url!: string;
+
+		async function stateChange() {
+			if (download.state == "done") {
+				if (mounted) {
+					const data = await gunzip(new Uint8Array(await download.result.arrayBuffer()));
+					if (!mounted) return;
+					setRlottieData(decoder.decode(data));
+				}
+			}
+		}
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			URL.revokeObjectURL(url);
+		});
+	});
 
 	let mounted = true;
 
 	onCleanup(() => {
+		setVideoRef(null);
 		mounted = false;
 	});
 
@@ -350,20 +631,13 @@ function StickerMedia(props: FocusableMediaProps) {
 		if (media.mimeType.includes("webp")) return;
 
 		if (media.hasStickerSet) {
-			console.error(
-				"non-webp sticker set",
-				media.mimeType,
-				media.emoji,
-				media,
-
-				media.raw.id.toInt()
-			);
+			console.error("non-webp sticker set", media.mimeType, media.emoji, media.uniqueFileId);
 
 			getOptimizedSticker(media.uniqueFileId).then((hasPrecompiled) => {
 				if (hasPrecompiled) {
 					setSrc(hasPrecompiled);
 				} else {
-					setShowUnsupported(true);
+					setRlottie(true);
 				}
 			});
 		}
@@ -391,7 +665,7 @@ function StickerMedia(props: FocusableMediaProps) {
 			const stateChange = () => {
 				if (download.state == "done") {
 					if (mounted) {
-						setVideo((url = URL.createObjectURL(download.result)));
+						setSrc((url = URL.createObjectURL(download.result)));
 					}
 				}
 			};
@@ -456,7 +730,7 @@ function StickerMedia(props: FocusableMediaProps) {
 	return (
 		<div class={styles.sticker}>
 			<Show
-				when={showUnsupported()}
+				when={rlottie()}
 				fallback={
 					<Show
 						when={video()}
@@ -483,6 +757,7 @@ function StickerMedia(props: FocusableMediaProps) {
 						}
 					>
 						<video
+							ref={setVideoRef}
 							onError={(e) => {
 								const err = [
 									"Unknown",
@@ -493,14 +768,20 @@ function StickerMedia(props: FocusableMediaProps) {
 								][e.currentTarget.error?.code || 0];
 								console.error("VIDEO ERROR", err, e.target);
 							}}
-							autoplay
 							loop
 							src={video()}
 						></video>
 					</Show>
 				}
 			>
-				<img src={new URL("../assets/unsupported sticker.jpg", import.meta.url).href + "#-moz-samplesize=2"}></img>
+				<Show when={!focused()}>
+					<Show when={rLottieFirstFrame()} fallback={<StickerRlottieFirstFrameWebp />}>
+						{(d) => <StickerRlottieFirstFrame data={d()} />}
+					</Show>
+				</Show>
+				<Show when={focused()}>
+					<canvas class="EEE" ref={setRlottieCanvasRef} width={128} height={128}></canvas>
+				</Show>
 			</Show>
 		</div>
 	);

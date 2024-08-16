@@ -129,6 +129,7 @@
 				img,
 				video {
 					height: unset !important;
+					max-width: 80vw;
 				}
 
 				& + .text_container {
