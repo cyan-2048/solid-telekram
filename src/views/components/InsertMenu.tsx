@@ -4,6 +4,7 @@ import Options from "./Options";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import TelegramIcon from "./TelegramIcon";
 import { setSoftkeys } from "@signals";
+import { sleep } from "@/lib/helpers";
 
 export const enum InsertMenuSelected {
 	EMOJI,
@@ -27,7 +28,7 @@ function GridItem(props: {
 		<div
 			tabIndex={-1}
 			on:sn-enter-down={() => {
-				props.onSelect(props.value);
+				sleep(10).then(() => props.onSelect(props.value));
 			}}
 			onFocus={() => {
 				setSoftkeys("Cancel", props.name, "");
@@ -64,14 +65,14 @@ export default function InsertMenu(props: { onSelect: (e: InsertMenuSelected | n
 	return (
 		<Options
 			onClose={() => {
-				props.onSelect(null);
+				sleep(10).then(() => props.onSelect(null));
 			}}
 			maxHeight={null}
 		>
 			<div
 				onKeyDown={(e) => {
 					if (e.key == "SoftLeft") {
-						props.onSelect(null);
+						sleep(10).then(() => props.onSelect(null));
 					}
 				}}
 				class={styles.grid}
