@@ -1,15 +1,39 @@
 // yes i'm sorry, starting to get tired of making scss files bruh
-import { createSignal } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 import styles from "./Room.module.scss";
+import { sleep } from "@/lib/helpers";
 
-export default function ImageUpload(props: {
-	textBoxRef: (e: HTMLTextAreaElement | null) => void;
-	image: Blob;
-	onSend: (bool: false | string) => void;
-}) {
+export default function ImageUpload(props: { image: Blob; onSend: (bool: false | string) => void }) {
+	let inputRef!: HTMLInputElement;
+
+	const [src, setSrc] = createSignal("");
+
+	onMount(() => {
+		inputRef.focus();
+
+		let url!: string;
+
+		setSrc((url = URL.createObjectURL(props.image)));
+
+		onCleanup(() => {
+			URL.revokeObjectURL(url);
+		});
+	});
+
 	return (
 		<div class={styles.upload_image}>
-			<input class={styles.caption_textbox} placeholder="Add a caption..." onKeyDown={(e) => {}} contentEditable />
+			<img src={src()}></img>
+			<input
+				ref={inputRef}
+				class={styles.caption_textbox}
+				placeholder="Add a caption..."
+				onKeyDown={(e) => {
+					const value = e.currentTarget.value;
+					if (e.key == "Enter") {
+						sleep(10).then(() => props.onSend(value));
+					}
+				}}
+			/>
 			<div class={styles.caption_softkeys}>
 				<div>
 					<svg viewBox="0 0 24 24" class={styles.emoji}>

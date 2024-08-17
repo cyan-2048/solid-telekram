@@ -63,6 +63,7 @@ import InsertMenu, { InsertMenuSelected } from "./components/InsertMenu";
 import { MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
 import { VoiceRecorderWeb } from "./components/VoiceRecorder";
 import { volumeUp, volumeDown } from "@/lib/volumeManager";
+import ImageUpload from "./ImageUpload";
 
 function getMembersCount(chat: Chat) {
 	if ((chat.peer as tl.RawChannel).participantsCount) {
@@ -870,6 +871,8 @@ function TextBoxOptionsWrap(props: {
 	setShowEmojiPicker: (e: boolean) => void;
 	setShowInsertMenu: (e: boolean) => void;
 
+	onPhotoSelect: (e: Blob) => void;
+
 	dialog: UIDialog;
 	textboxRef: HTMLPreElement;
 }) {
@@ -886,8 +889,6 @@ function TextBoxOptionsWrap(props: {
 	});
 
 	const [showVoiceRecorder, setShowVoiceRecorder] = createSignal(false);
-
-	const [showImageUpload, setShowImageUpload] = createSignal(false);
 
 	let audioBlob: Blob;
 	let audioWaveform: number[];
@@ -1040,7 +1041,7 @@ function TextBoxOptionsWrap(props: {
 									input.accept = "image/*";
 
 									input.onchange = () => {
-										console.error(input.files);
+										props.onPhotoSelect(input.files![0]);
 									};
 
 									input.click();
@@ -1089,6 +1090,8 @@ function TextBox(props: { dialog: UIDialog }) {
 	const [showEmojiPicker, setShowEmojiPicker] = createSignal(false);
 	const [showInsertMenu, setShowInsertMenu] = createSignal(false);
 
+	const [photoBlob, setPhotoBlob] = createSignal<null | Blob>(null);
+
 	const tg = client()!;
 
 	const [text, setText] = createSignal("");
@@ -1108,6 +1111,40 @@ function TextBox(props: { dialog: UIDialog }) {
 
 	return (
 		<>
+			<Show when={photoBlob()}>
+				<Portal>
+					<ImageUpload
+						image={photoBlob()!}
+						onSend={async (e) => {
+							const blob = photoBlob()!;
+							setPhotoBlob(null);
+							sleep(0);
+							textboxRef.focus();
+
+							if (e === false) return;
+
+							const dialog = props.dialog;
+
+							console.error(e);
+
+							tg.sendMedia(
+								dialog.$.chat,
+								InputMedia.photo(
+									blob,
+									e
+										? {
+												caption: e,
+										  }
+										: {}
+								)
+							).then((msg) => {
+								dialog.messages.add(msg);
+							});
+						}}
+					></ImageUpload>
+				</Portal>
+			</Show>
+
 			<div
 				style={
 					interacting()
@@ -1173,6 +1210,7 @@ function TextBox(props: { dialog: UIDialog }) {
 			</div>
 			<TextBoxOptionsWrap
 				text={text()}
+				onPhotoSelect={setPhotoBlob}
 				showOptions={showOptions()}
 				setShowOptions={setShowOptions}
 				showEmojiPicker={showEmojiPicker()}
@@ -1309,6 +1347,8 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 
 	const [text, setText] = createSignal("");
 
+	const [photoBlob, setPhotoBlob] = createSignal<null | Blob>(null);
+
 	const debounced_sendTyping = debounce(
 		() => {
 			console.log("SENDING TYPING STATE");
@@ -1386,6 +1426,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 
 			<TextBoxOptionsWrap
 				text={text()}
+				onPhotoSelect={setPhotoBlob}
 				showOptions={showOptions()}
 				setShowOptions={setShowOptions}
 				showEmojiPicker={showEmojiPicker()}

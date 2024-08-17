@@ -18,9 +18,17 @@
 	display: flex;
 	flex-direction: column;
 
-	> :first-child {
-		margin-top: auto;
+	> img {
+		position: fixed;
+		height: 100vh;
+		width: 100vw;
+		top: 0;
+		left: 0;
+		object-fit: cover;
+		z-index: -1;
 	}
+
+	background-color: black;
 }
 
 .caption_softkeys {
@@ -79,6 +87,8 @@
 
 .caption_textbox {
 	color: white;
+
+	margin-top: auto;
 
 	min-width: 0;
 	width: 100%;
