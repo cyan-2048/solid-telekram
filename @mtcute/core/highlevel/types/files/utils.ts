@@ -1,10 +1,9 @@
-import type { tdFileId } from '@mtcute/file-id'
-import type { tl } from '@mtcute/tl'
+import { tdFileId } from '@mtcute/file-id'
+import { tl } from '@mtcute/tl'
 
-import type { AnyToNever } from '../../../types/utils.js'
-
-import type { FileLocation } from './file-location.js'
-import type { UploadedFile } from './uploaded-file.js'
+import { AnyToNever } from '../../../types/utils.js'
+import { FileLocation } from './file-location.js'
+import { UploadedFile } from './uploaded-file.js'
 
 /**
  * Describes types that can be used in {@link TelegramClient.uploadFile}
@@ -21,16 +20,16 @@ import type { UploadedFile } from './uploaded-file.js'
  *  - `Response` (from `window.fetch`)
  */
 export type UploadFileLike =
-  | URL
-  | Uint8Array
-  | File
-  | Blob
-  | string
-  | AnyToNever<import('node:fs').ReadStream>
-  | AnyToNever<ReadableStream<Uint8Array>>
-  | AnyToNever<NodeJS.ReadableStream>
-  | AnyToNever<Response>
-  | AnyToNever<Deno.FsFile>
+    | URL
+    | Uint8Array
+    | File
+    | Blob
+    | string
+    | AnyToNever<import('node:fs').ReadStream>
+    | AnyToNever<ReadableStream<Uint8Array>>
+    | AnyToNever<NodeJS.ReadableStream>
+    | AnyToNever<Response>
+    | AnyToNever<Deno.FsFile>
 
 // AnyToNever in the above type ensures we don't make the entire type `any`
 // if some of the types are not available in the current environment
@@ -56,11 +55,11 @@ export type UploadFileLike =
  *  - `td.RawFullRemoteFileLocation` (parsed File ID)
  */
 export type InputFileLike =
-  | UploadFileLike
-  | UploadedFile
-  | tl.TypeInputFile
-  | tl.TypeInputMedia
-  | tdFileId.RawFullRemoteFileLocation
+    | UploadFileLike
+    | UploadedFile
+    | tl.TypeInputFile
+    | tl.TypeInputMedia
+    | tdFileId.RawFullRemoteFileLocation
 
 /**
  * File location which should be downloaded.

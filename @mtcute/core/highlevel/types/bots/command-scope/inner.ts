@@ -1,6 +1,6 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { InputPeerLike } from '../../peers/index.js'
+import { InputPeerLike } from '../../peers/index.js'
 
 /**
  * Intermediate bot scope, that is converted to
@@ -9,15 +9,15 @@ import type { InputPeerLike } from '../../peers/index.js'
  * Used to avoid manually resolving peers.
  */
 export type IntermediateScope =
-  | {
-      type: 'peer' | 'peer_admins'
-      peer: InputPeerLike
-  }
-  | {
-      type: 'member'
-      chat: InputPeerLike
-      user: InputPeerLike
-  }
+    | {
+          type: 'peer' | 'peer_admins'
+          peer: InputPeerLike
+      }
+    | {
+          type: 'member'
+          chat: InputPeerLike
+          user: InputPeerLike
+      }
 
 /**
  * Default commands scope.

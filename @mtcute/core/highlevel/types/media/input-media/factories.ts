@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { InputFileLike } from '../../files/utils.js'
-
-import type {
+import { InputFileLike } from '../../files/utils.js'
+import {
     CaptionMixin,
     InputMediaAudio,
     InputMediaAuto,

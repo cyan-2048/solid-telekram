@@ -1,12 +1,12 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { Logger } from './logger.js'
+import { Logger } from './logger.js'
 
 export function reportUnknownError(log: Logger, error: tl.RpcError, method: string): void {
     if (typeof fetch !== 'function') return
 
     fetch(`https://rpc.pwrtelegram.xyz/?code=${error.code}&method=${method}&error=${error.text}`)
-        .then(r => r.json())
+        .then((r) => r.json())
         .then((r) => {
             if (r.ok) {
                 log.info('telerpc responded with error info for %s: %s', error.text, r.result)

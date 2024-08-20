@@ -1,8 +1,9 @@
 import Long from 'long'
-import type { tl } from '@mtcute/tl'
 
-import type { PartialOnly } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { tl } from '@mtcute/tl'
+
+import { PartialOnly } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
 
 /**
  * Import contacts to your Telegram contacts list.
@@ -15,13 +16,13 @@ export async function importContacts(
 ): Promise<tl.contacts.RawImportedContacts> {
     let seq = Long.ZERO
 
-    const contactsNorm: tl.RawInputPhoneContact[] = contacts.map(input => ({
+    const contactsNorm: tl.RawInputPhoneContact[] = contacts.map((input) => ({
         _: 'inputPhoneContact',
         clientId: (seq = seq.add(1)),
         ...input,
     }))
 
-    return client.call({
+    return await client.call({
         _: 'contacts.importContacts',
         contacts: contactsNorm,
     })

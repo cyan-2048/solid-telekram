@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 
@@ -8,7 +8,7 @@ import { makeInspectable } from '../../utils/inspectable.js'
 export class ChatColors {
     constructor(
         private readonly _peerId: number,
-        readonly raw?: tl.RawPeerColor | undefined,
+        readonly raw?: tl.RawPeerColor,
     ) {}
 
     /**

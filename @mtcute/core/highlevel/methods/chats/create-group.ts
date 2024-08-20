@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { MaybeArray } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { Chat } from '../../types/index.js'
+import { MaybeArray } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
+import { Chat, InputPeerLike } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { toInputUser } from '../../utils/peer-utils.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'

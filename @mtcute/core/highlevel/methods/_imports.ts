@@ -1,4 +1,4 @@
-/* eslint-disable unused-imports/no-unused-imports */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 // @copy
 import { tdFileId } from '@mtcute/file-id'
@@ -37,10 +37,10 @@ import {
     ChatInviteLink,
     ChatInviteLinkMember,
     ChatJoinRequestUpdate,
+    ChatlistPreview,
     ChatMember,
     ChatMemberUpdate,
     ChatPreview,
-    ChatlistPreview,
     ChosenInlineResult,
     CollectibleInfo,
     DeleteBusinessMessageUpdate,
@@ -77,8 +77,8 @@ import {
     ParametersSkip2,
     ParsedUpdate,
     PeerReaction,
-    PeerStories,
     PeersIndex,
+    PeerStories,
     Photo,
     Poll,
     PollUpdate,
@@ -100,8 +100,8 @@ import {
     TakeoutSession,
     TextWithEntities,
     TypingStatus,
-    UploadFileLike,
     UploadedFile,
+    UploadFileLike,
     User,
     UserStatusUpdate,
     UserTypingUpdate,

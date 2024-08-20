@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { createStub } from '@mtcute/test'
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { ConfigManager } from './config-manager.js'
 

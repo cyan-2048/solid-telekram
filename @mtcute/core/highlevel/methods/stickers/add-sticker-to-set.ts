@@ -1,13 +1,11 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type {
+import { ITelegramClient } from '../../client.types.js'
+import {
     InputStickerSet,
     InputStickerSetItem,
-} from '../../types/index.js'
-import {
-    StickerSet,
     normalizeInputStickerSet,
+    StickerSet,
 } from '../../types/index.js'
-
+import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { _normalizeInputStickerSetItem } from './_utils.js'
 
 /**

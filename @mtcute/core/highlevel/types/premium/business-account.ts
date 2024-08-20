@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/inspectable.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-
 import { BusinessIntro } from './business-intro.js'
 import { BusinessLocation } from './business-location.js'
 import { BusinessWorkHours } from './business-work-hours.js'

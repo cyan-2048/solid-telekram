@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { MaybeArray } from '../../../../types/utils.js'
-import type { InputPeerLike } from '../../peers/peer.js'
-
-import type { InputPrivacyRuleChatParticipants, InputPrivacyRuleUsers } from './types.js'
+import { MaybeArray } from '../../../../types/utils.js'
+import { InputPeerLike } from '../../peers/peer.js'
+import { InputPrivacyRuleChatParticipants, InputPrivacyRuleUsers } from './types.js'
 
 /** Allow all users */
 export const all: tl.RawInputPrivacyValueAllowAll = { _: 'inputPrivacyValueAllowAll' }

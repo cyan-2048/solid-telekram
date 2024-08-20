@@ -1,7 +1,6 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { MtInvalidPeerTypeError } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChat } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 

@@ -1,12 +1,9 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import type { CallDiscardReason } from '../calls/index.js'
-import { _callDiscardReasonFromTl } from '../calls/index.js'
+import { _callDiscardReasonFromTl, CallDiscardReason } from '../calls/index.js'
 import { Photo } from '../media/photo.js'
-import type { Peer } from '../peers/peer.js'
-import { parsePeer } from '../peers/peer.js'
-
+import { parsePeer, Peer } from '../peers/peer.js'
 import type { Message } from './message.js'
 
 /** Group was created */
@@ -498,51 +495,51 @@ export interface ActionStarsGifted {
 }
 
 export type MessageAction =
-  | ActionChatCreated
-  | ActionChannelCreated
-  | ActionChatMigrateTo
-  | ActionChannelMigrateFrom
-  | ActionMessagePinned
-  | ActionHistoryCleared
-  | ActionGameScore
-  | ActionContactJoined
-  | ActionTitleChanged
-  | ActionPhotoChanged
-  | ActionPhotoDeleted
-  | ActionUsersAdded
-  | ActionUserLeft
-  | ActionUserRemoved
-  | ActionUserJoinedLink
-  | ActionPaymentReceived
-  | ActionPaymentSent
-  | ActionCall
-  | ActionScreenshotTaken
-  | ActionBotAllowed
-  | ActionGeoProximity
-  | ActionGroupCallStarted
-  | ActionGroupCallEnded
-  | ActionGroupCallScheduled
-  | ActionGroupInvite
-  | ActionTtlChanged
-  | ActionTopicCreated
-  | ActionTopicEdited
-  | ActionCustom
-  | ActionThemeChanged
-  | ActionUserJoinedApproved
-  | ActionWebviewDataSent
-  | ActionWebviewDataReceived
-  | ActionPremiumGifted
-  | ActionPhotoSuggested
-  | ActionPeerSent
-  | ActionPeerChosen
-  | ActionWallpaperChanged
-  | ActionGiftCode
-  | ActionGiveawayStarted
-  | ActionGiveawayEnded
-  | ActionBoostApply
-  | ActionPaymentRefunded
-  | ActionStarsGifted
-  | null
+    | ActionChatCreated
+    | ActionChannelCreated
+    | ActionChatMigrateTo
+    | ActionChannelMigrateFrom
+    | ActionMessagePinned
+    | ActionHistoryCleared
+    | ActionGameScore
+    | ActionContactJoined
+    | ActionTitleChanged
+    | ActionPhotoChanged
+    | ActionPhotoDeleted
+    | ActionUsersAdded
+    | ActionUserLeft
+    | ActionUserRemoved
+    | ActionUserJoinedLink
+    | ActionPaymentReceived
+    | ActionPaymentSent
+    | ActionCall
+    | ActionScreenshotTaken
+    | ActionBotAllowed
+    | ActionGeoProximity
+    | ActionGroupCallStarted
+    | ActionGroupCallEnded
+    | ActionGroupCallScheduled
+    | ActionGroupInvite
+    | ActionTtlChanged
+    | ActionTopicCreated
+    | ActionTopicEdited
+    | ActionCustom
+    | ActionThemeChanged
+    | ActionUserJoinedApproved
+    | ActionWebviewDataSent
+    | ActionWebviewDataReceived
+    | ActionPremiumGifted
+    | ActionPhotoSuggested
+    | ActionPeerSent
+    | ActionPeerChosen
+    | ActionWallpaperChanged
+    | ActionGiftCode
+    | ActionGiveawayStarted
+    | ActionGiveawayEnded
+    | ActionBoostApply
+    | ActionPaymentRefunded
+    | ActionStarsGifted
+    | null
 
 /** @internal */
 export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): MessageAction {
@@ -748,12 +745,12 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
                 currency: act.currency,
                 amount: act.amount.toNumber(),
                 months: act.months,
-                crypto: act.cryptoAmount
-                    ? {
+                crypto: act.cryptoAmount ?
+                    {
                         currency: act.cryptoCurrency!,
                         amount: act.cryptoAmount.toNumber(),
-                    }
-                    : undefined,
+                    } :
+                    undefined,
             }
         case 'messageActionSuggestProfilePhoto':
             return {
@@ -770,7 +767,7 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
             return {
                 type: 'peer_chosen',
                 buttonId: act.buttonId,
-                peers: act.peers.map(it => parsePeer(it, this._peers)),
+                peers: act.peers.map((it) => parsePeer(it, this._peers)),
             }
         case 'messageActionSetChatWallPaper':
             return {

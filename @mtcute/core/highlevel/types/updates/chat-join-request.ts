@@ -1,10 +1,9 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { getBarePeerId } from '../../../utils/peer-utils.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { PeersIndex } from '../peers/index.js'
-import { User } from '../peers/index.js'
+import { PeersIndex, User } from '../peers/index.js'
 
 /**
  * This update is sent when a user requests to join a chat
@@ -40,7 +39,7 @@ export class ChatJoinRequestUpdate {
      * Users who recently requested to join the chat
      */
     get recentRequesters(): User[] {
-        return this.raw.recentRequesters.map(id => new User(this._peers.user(id)))
+        return this.raw.recentRequesters.map((id) => new User(this._peers.user(id)))
     }
 
     /**

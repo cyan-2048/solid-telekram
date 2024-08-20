@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+
 import { StubTelegramClient } from '@mtcute/test'
 
 describe('BaseTelegramClient', () => {

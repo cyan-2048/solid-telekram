@@ -1,36 +1,32 @@
-import EventEmitter from 'node:events'
+import EventEmitter from 'events'
 
-import type {
-    IPacketCodec,
-    ITelegramTransport,
-} from '@mtcute/core'
 import {
     IntermediatePacketCodec,
-    MtUnsupportedError,
+    IPacketCodec,
+    ITelegramTransport,
     MtcuteError,
+    MtUnsupportedError,
     ObfuscatedPacketCodec,
     TransportState,
 } from '@mtcute/core'
-import type {
+import {
     BasicDcOption,
     ControllablePromise,
+    createControllablePromise,
     ICryptoProvider,
     Logger,
 } from '@mtcute/core/utils.js'
-import {
-    createControllablePromise,
-} from '@mtcute/core/utils.js'
 
-export interface WebSocketConstructor {
+export type WebSocketConstructor = {
     new (address: string, protocol?: string): WebSocket
 }
 
 const subdomainsMap: Record<string, string> = {
-    1: 'pluto',
-    2: 'venus',
-    3: 'aurora',
-    4: 'vesta',
-    5: 'flora',
+    '1': 'pluto',
+    '2': 'venus',
+    '3': 'aurora',
+    '4': 'vesta',
+    '5': 'flora',
 }
 
 /**
@@ -62,9 +58,12 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         baseDomain?: string
         /** Map of sub-domains (key is DC ID, value is string) */
         subdomains?: Record<string, string>
-        } = {}) {
-        
-        subdomains = subdomains ?? subdomainsMap;
+    } = {}) {
+        // weird bug with esbuild maybe? or kaios?
+        ws = ws ?? WebSocket
+        baseDomain = baseDomain ?? 'web.telegram.org'
+        subdomains = subdomainsMap ?? subdomainsMap
+
         super()
 
         if (!ws) {
@@ -111,8 +110,8 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
         if (!this.packetCodecInitialized) {
             this._packetCodec.setup?.(this._crypto, this.log)
-            this._packetCodec.on('error', err => this.emit('error', err))
-            this._packetCodec.on('packet', buf => this.emit('message', buf))
+            this._packetCodec.on('error', (err) => this.emit('error', err))
+            this._packetCodec.on('packet', (buf) => this.emit('message', buf))
             this.packetCodecInitialized = true
         }
 
@@ -128,8 +127,9 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 
         this._socket.binaryType = 'arraybuffer'
 
-        this._socket.addEventListener('message', evt =>
-            this._packetCodec.feed(new Uint8Array(evt.data as ArrayBuffer)))
+        this._socket.addEventListener('message', (evt) =>
+            this._packetCodec.feed(new Uint8Array(evt.data as ArrayBuffer)),
+        )
         this._socket.addEventListener('open', this.handleConnect.bind(this))
         this._socket.addEventListener('error', this.handleError.bind(this))
         this._socket.addEventListener('close', this.handleClosed.bind(this))
@@ -177,7 +177,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
                 this._state = TransportState.Ready
                 this.emit('ready')
             })
-            .catch(err => this.emit('error', err))
+            .catch((err) => this.emit('error', err))
     }
 
     async send(bytes: Uint8Array): Promise<void> {
@@ -192,5 +192,5 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
 }
 
 export class WebSocketTransport extends BaseWebSocketTransport {
-    _packetCodec: ObfuscatedPacketCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
+    _packetCodec = new ObfuscatedPacketCodec(new IntermediatePacketCodec())
 }

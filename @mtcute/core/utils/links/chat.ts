@@ -1,4 +1,4 @@
-import type { Deeplink } from './common.js'
+/* eslint-disable indent,func-call-spacing */
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -6,7 +6,7 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to invite users to private groups and channels
  */
-export const chatInvite: Deeplink<{ hash: string }> = /* #__PURE__ */ deeplinkBuilder({
+export const chatInvite = deeplinkBuilder<{ hash: string }>({
     internalBuild: ({ hash }) => ['join', { invite: hash }],
     internalParse: (path, query) => {
         if (path !== 'join') return null
@@ -18,10 +18,10 @@ export const chatInvite: Deeplink<{ hash: string }> = /* #__PURE__ */ deeplinkBu
     },
     externalBuild: ({ hash }) => [`+${hash}`, null],
     externalParse: (path) => {
-        const m = path.match(/^(?:\+|joinchat\/)([\w-]+)$/)
+        const m = path.match(/^(?:\+|joinchat\/)([a-zA-Z0-9_-]+)$/)
         if (!m) return null
 
-        if (m[1].match(/^\d+$/)) {
+        if (m[1].match(/^[0-9]+$/)) {
             // phone number
             return null
         }
@@ -33,7 +33,7 @@ export const chatInvite: Deeplink<{ hash: string }> = /* #__PURE__ */ deeplinkBu
 /**
  * Chat folder links
  */
-export const chatFolder: Deeplink<{ slug: string }> = /* #__PURE__ */ deeplinkBuilder({
+export const chatFolder = deeplinkBuilder<{ slug: string }>({
     internalBuild: ({ slug }) => ['addlist', { slug }],
     internalParse: (path, query) => {
         if (path !== 'addlist') return null
@@ -63,7 +63,7 @@ function parseMediaTimestamp(timestamp: string) {
         return Number(m[1]) * 60 + Number(m[2])
     }
 
-    if ((m = timestamp.match(/^(?:(\d+)h)?(?:(\d{1,2})m)?(\d{1,2})s$/))) {
+    if ((m = timestamp.match(/^(?:(\d+)h)?(?:(\d{1,2})m)?(?:(\d{1,2})s)$/))) {
         return (Number(m[1]) || 0) * 3600 + (Number(m[2]) || 0) * 60 + (Number(m[3]) || 0)
     }
 
@@ -77,31 +77,32 @@ function parseMediaTimestamp(timestamp: string) {
  *
  * Note: `channelId` is a non-marked channel ID
  */
-export const message: Deeplink<({ username: string } | { channelId: number }) & {
-    /** Message ID */
-    id: number
-    /** Thread ID */
-    threadId?: number
+export const message = deeplinkBuilder<
+    ({ username: string } | { channelId: number }) & {
+        /** Message ID */
+        id: number
+        /** Thread ID */
+        threadId?: number
 
-    /**
-     * For comments, `id` will contain the message ID of the channel message that started
-     * the comment section and this field will contain the message ID of the comment in
-     * the discussion group.
-     */
-    commentId?: number
+        /**
+         * For comments, `id` will contain the message ID of the channel message that started
+         * the comment section and this field will contain the message ID of the comment in
+         * the discussion group.
+         */
+        commentId?: number
 
-    /**
-     * Timestamp at which to start playing the media file present
-     * in the body or in the webpage preview of the message
-     */
-    mediaTimestamp?: number
+        /**
+         * Timestamp at which to start playing the media file present
+         * in the body or in the webpage preview of the message
+         */
+        mediaTimestamp?: number
 
-    /**
-     * Whether this is a link to a specific message in the album or to the entire album
-     */
-    single?: boolean
-}
-> = /* #__PURE__ */ deeplinkBuilder({
+        /**
+         * Whether this is a link to a specific message in the album or to the entire album
+         */
+        single?: boolean
+    }
+>({
     internalBuild: (params) => {
         const common = {
             post: params.id,
@@ -170,7 +171,7 @@ export const message: Deeplink<({ username: string } | { channelId: number }) & 
         if (chunks.length < 2) return null
 
         const id = Number(chunks[chunks.length - 1])
-        if (Number.isNaN(id)) return null
+        if (isNaN(id)) return null
 
         const common = {
             id,
@@ -181,7 +182,7 @@ export const message: Deeplink<({ username: string } | { channelId: number }) & 
 
         if (chunks[0] === 'c') {
             const channelId = Number(chunks[1])
-            if (Number.isNaN(channelId)) return null
+            if (isNaN(channelId)) return null
 
             return {
                 channelId,

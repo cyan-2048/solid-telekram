@@ -1,16 +1,15 @@
-import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
  * MTProxy links
  */
-export const mtproxy: Deeplink<{
+export const mtproxy = deeplinkBuilder<{
     server: string
     port: number
     secret: string
-}> = /* #__PURE__ */ deeplinkBuilder({
-    internalBuild: params => ['proxy', params],
-    externalBuild: params => ['proxy', params],
+}>({
+    internalBuild: (params) => ['proxy', params],
+    externalBuild: (params) => ['proxy', params],
     internalParse: (path, query) => {
         if (path !== 'proxy') return null
 
@@ -18,7 +17,7 @@ export const mtproxy: Deeplink<{
         const port = Number(query.get('port'))
         const secret = query.get('secret')
 
-        if (!server || Number.isNaN(port) || !secret) return null
+        if (!server || isNaN(port) || !secret) return null
 
         return { server, port, secret }
     },
@@ -29,7 +28,7 @@ export const mtproxy: Deeplink<{
         const port = Number(query.get('port'))
         const secret = query.get('secret')
 
-        if (!server || Number.isNaN(port) || !secret) return null
+        if (!server || isNaN(port) || !secret) return null
 
         return { server, port, secret }
     },
@@ -38,14 +37,14 @@ export const mtproxy: Deeplink<{
 /**
  * Socks5 proxy links
  */
-export const socks5: Deeplink<{
+export const socks5 = deeplinkBuilder<{
     server: string
     port: number
     user?: string
     pass?: string
-}> = /* #__PURE__ */ deeplinkBuilder({
-    internalBuild: params => ['socks', params],
-    externalBuild: params => ['socks', params],
+}>({
+    internalBuild: (params) => ['socks', params],
+    externalBuild: (params) => ['socks', params],
     internalParse: (path, query) => {
         if (path !== 'socks') return null
 
@@ -54,7 +53,7 @@ export const socks5: Deeplink<{
         const user = query.get('user')
         const pass = query.get('pass')
 
-        if (!server || Number.isNaN(port)) return null
+        if (!server || isNaN(port)) return null
 
         return { server, port, user: user || undefined, pass: pass || undefined }
     },
@@ -66,7 +65,7 @@ export const socks5: Deeplink<{
         const user = query.get('user')
         const pass = query.get('pass')
 
-        if (!server || Number.isNaN(port)) return null
+        if (!server || isNaN(port)) return null
 
         return { server, port, user: user || undefined, pass: pass || undefined }
     },

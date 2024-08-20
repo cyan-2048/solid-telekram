@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { BotCommands } from '../../types/index.js'
-
+import { ITelegramClient } from '../../client.types.js'
+import { BotCommands } from '../../types/index.js'
 import { _normalizeCommandScope } from './normalize-command-scope.js'
 
 /**
@@ -29,9 +28,9 @@ export async function getMyCommands(
 ): Promise<tl.RawBotCommand[]> {
     return client.call({
         _: 'bots.getBotCommands',
-        scope: params?.scope
-            ? await _normalizeCommandScope(client, params.scope)
-            : {
+        scope: params?.scope ?
+            await _normalizeCommandScope(client, params.scope) :
+            {
                 _: 'botCommandScopeDefault',
             },
         langCode: params?.langCode ?? '',

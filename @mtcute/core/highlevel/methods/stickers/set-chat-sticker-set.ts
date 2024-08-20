@@ -1,7 +1,6 @@
 import { assertTrue } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike, InputStickerSet } from '../../types/index.js'
-import { normalizeInputStickerSet } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, InputStickerSet, normalizeInputStickerSet } from '../../types/index.js'
 import { resolveChannel } from '../users/resolve-peer.js'
 
 /**

@@ -1,7 +1,6 @@
 import { MtArgumentError } from '../../../types/errors.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { User } from '../../types/index.js'
-
+import { ITelegramClient } from '../../client.types.js'
+import { User } from '../../types/index.js'
 import { logOut } from './log-out.js'
 import { start } from './start.js'
 
@@ -43,14 +42,14 @@ export async function startTest(
     if (params.logout) {
         try {
             await logOut(client)
-        } catch {}
+        } catch (e) {}
     }
 
     const availableDcs = await client
         .call({
             _: 'help.getConfig',
         })
-        .then(res => res.dcOptions)
+        .then((res) => res.dcOptions)
 
     let phone = params.phone
 
@@ -58,16 +57,16 @@ export async function startTest(
         if (!phone.match(/^99966\d{5}/)) {
             throw new MtArgumentError(`${phone} is an invalid test phone number`)
         }
-        const id = Number.parseInt(phone[5])
+        const id = parseInt(phone[5])
 
-        if (!availableDcs.find(dc => dc.id === id)) {
+        if (!availableDcs.find((dc) => dc.id === id)) {
             throw new MtArgumentError(`${phone} has invalid DC ID (${id})`)
         }
     } else {
         let dcId = await client.getPrimaryDcId()
 
         if (params.dcId) {
-            if (!availableDcs.find(dc => dc.id === params.dcId)) {
+            if (!availableDcs.find((dc) => dc.id === params.dcId)) {
                 throw new MtArgumentError(`DC ID is invalid (${dcId})`)
             }
             dcId = params.dcId

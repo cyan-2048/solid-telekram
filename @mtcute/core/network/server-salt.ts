@@ -1,10 +1,11 @@
 import Long from 'long'
-import type { mtp } from '@mtcute/tl'
+
+import { mtp } from '@mtcute/tl'
 
 export class ServerSaltManager {
     private _futureSalts: mtp.RawMt_future_salt[] = []
 
-    currentSalt: Long = Long.ZERO
+    currentSalt = Long.ZERO
 
     isFetching = false
 

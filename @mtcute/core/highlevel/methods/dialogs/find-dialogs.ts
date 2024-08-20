@@ -1,11 +1,10 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { MaybeArray } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { MaybeArray } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
-import type { Dialog } from '../../types/messages/dialog.js'
+import { Dialog } from '../../types/messages/dialog.js'
 import { resolvePeerMany } from '../users/resolve-peer-many.js'
-
 import { getPeerDialogs } from './get-peer-dialogs.js'
 import { iterDialogs } from './iter-dialogs.js'
 
@@ -66,7 +65,7 @@ export async function findDialogs(client: ITelegramClient, peers: MaybeArray<str
         return dialogs
     }
 
-    const ret: Dialog[] = Array.from({ length: peers.length })
+    const ret = new Array<Dialog>(peers.length)
 
     // populate found dialogs
     for (const [idx, origIdx] of foundIdxToOriginalIdx) {

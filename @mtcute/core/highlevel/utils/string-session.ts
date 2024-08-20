@@ -2,9 +2,8 @@ import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../../platform.js'
 import { MtArgumentError } from '../../types/index.js'
-import type { BasicDcOption, DcOptions } from '../../utils/dcs.js'
-import { parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
-import type { CurrentUserInfo } from '../storage/service/current-user.js'
+import { BasicDcOption, DcOptions, parseBasicDcOption, serializeBasicDcOption } from '../../utils/dcs.js'
+import { CurrentUserInfo } from '../storage/service/current-user.js'
 
 export interface StringSessionData {
     version: number
@@ -132,7 +131,7 @@ export function readStringSession(data: string): StringSessionData {
         primaryDc = primaryDc_
         primaryMediaDc = primaryMediaDc_
     } else {
-        throw new Error('unreachable')
+        throw new Error() // unreachable
     }
 
     let self: CurrentUserInfo | null = null

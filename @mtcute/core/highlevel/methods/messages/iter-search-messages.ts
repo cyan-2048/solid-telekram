@@ -1,9 +1,7 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { Message } from '../../types/index.js'
-import { SearchFilters } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { Message, SearchFilters } from '../../types/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-
 import { searchMessages } from './search-messages.js'
 
 /**

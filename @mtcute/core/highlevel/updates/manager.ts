@@ -1,28 +1,24 @@
+/* eslint-disable max-depth,max-params */
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../types/errors.js'
-import type { MaybePromise } from '../../types/utils.js'
-import { assertNever } from '../../types/utils.js'
-import type {
-    Logger,
-} from '../../utils/index.js'
+import { assertNever, MaybePromise } from '../../types/utils.js'
 import {
     AsyncLock,
     ConditionVariable,
     Deque,
     EarlyTimer,
-    SortedLinkedList,
     getBarePeerId,
     getMarkedPeerId,
     parseMarkedPeerId,
-    toInputChannel,
+    SortedLinkedList,
     toggleChannelIdMark,
+    toInputChannel,
 } from '../../utils/index.js'
-import type { BaseTelegramClient } from '../base.js'
-import type { CurrentUserInfo } from '../storage/service/current-user.js'
+import { BaseTelegramClient } from '../base.js'
+import { CurrentUserInfo } from '../storage/service/current-user.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
-
-import type { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'
+import { PendingUpdate, PendingUpdateContainer, RawUpdateHandler, UpdatesManagerParams } from './types.js'
 import {
     createDummyUpdatesContainer,
     extractChannelIdFromUpdate,
@@ -92,32 +88,26 @@ const UPDATES_TOO_LONG = { _: 'updatesTooLong' } as const
 // todo: fix docs
 export class UpdatesManager {
     updatesLoopActive = false
-    updatesLoopCv: ConditionVariable = new ConditionVariable()
+    updatesLoopCv = new ConditionVariable()
 
-    postponedTimer: EarlyTimer = new EarlyTimer()
+    postponedTimer = new EarlyTimer()
     hasTimedoutPostponed = false
 
-    pendingUpdateContainers: SortedLinkedList<PendingUpdateContainer>
-        = new SortedLinkedList((a, b) => a.seqStart - b.seqStart)
+    pendingUpdateContainers = new SortedLinkedList<PendingUpdateContainer>((a, b) => a.seqStart - b.seqStart)
+    pendingPtsUpdates = new SortedLinkedList<PendingUpdate>((a, b) => a.ptsBefore! - b.ptsBefore!)
+    pendingPtsUpdatesPostponed = new SortedLinkedList<PendingUpdate>((a, b) => a.ptsBefore! - b.ptsBefore!)
+    pendingQtsUpdates = new SortedLinkedList<PendingUpdate>((a, b) => a.qtsBefore! - b.qtsBefore!)
+    pendingQtsUpdatesPostponed = new SortedLinkedList<PendingUpdate>((a, b) => a.qtsBefore! - b.qtsBefore!)
+    pendingUnorderedUpdates = new Deque<PendingUpdate>()
 
-    pendingPtsUpdates: SortedLinkedList<PendingUpdate> = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-    pendingPtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-        = new SortedLinkedList((a, b) => a.ptsBefore! - b.ptsBefore!)
-
-    pendingQtsUpdates: SortedLinkedList<PendingUpdate> = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-    pendingQtsUpdatesPostponed: SortedLinkedList<PendingUpdate>
-        = new SortedLinkedList((a, b) => a.qtsBefore! - b.qtsBefore!)
-
-    pendingUnorderedUpdates: Deque<PendingUpdate> = new Deque()
-
-    noDispatchEnabled: boolean
+    noDispatchEnabled
     // channel id or 0 => msg id
-    noDispatchMsg: Map<number, Set<number>> = new Map()
+    noDispatchMsg = new Map<number, Set<number>>()
     // channel id or 0 => pts
-    noDispatchPts: Map<number, Set<number>> = new Map()
-    noDispatchQts: Set<number> = new Set()
+    noDispatchPts = new Map<number, Set<number>>()
+    noDispatchQts = new Set<number>()
 
-    lock: AsyncLock = new AsyncLock()
+    lock = new AsyncLock()
     // rpsIncoming?: RpsMeter
     // rpsProcessing?: RpsMeter
 
@@ -138,19 +128,19 @@ export class UpdatesManager {
 
     // whether to catch up channels from the locally stored pts
     catchingUp = false
-    catchUpOnStart: boolean
+    catchUpOnStart
 
-    cpts: Map<number, number> = new Map()
-    cptsMod: Map<number, number> = new Map()
-    channelDiffTimeouts: Map<number, NodeJS.Timeout> = new Map()
-    channelsOpened: Map<number, number> = new Map()
+    cpts = new Map<number, number>()
+    cptsMod = new Map<number, number>()
+    channelDiffTimeouts = new Map<number, NodeJS.Timeout>()
+    channelsOpened = new Map<number, number>()
 
-    log: Logger
+    log
     private _handler: RawUpdateHandler = () => {}
 
     private _onCatchingUp: (catchingUp: boolean) => void = () => {}
 
-    // eslint-disable-next-line ts/no-unsafe-function-type
+    // eslint-disable-next-line @typescript-eslint/ban-types
     private _channelPtsLimit: Extract<UpdatesManagerParams['channelPtsLimit'], Function>
 
     auth?: CurrentUserInfo | null // todo: do we need a local copy?
@@ -198,13 +188,13 @@ export class UpdatesManager {
         this._onCatchingUp = handler
     }
 
-    destroy(): void {
+    destroy() {
         this.stopLoop()
     }
 
     notifyLoggedIn(self: CurrentUserInfo): void {
         this.auth = self
-        this.startLoop().catch(err => this.client.emitError(err))
+        this.startLoop().catch((err) => this.client.emitError(err))
     }
 
     notifyLoggedOut(): void {
@@ -247,7 +237,7 @@ export class UpdatesManager {
         this.updatesLoopActive = true
         clearInterval(this.keepAliveInterval)
         this.keepAliveInterval = setInterval(this._onKeepAlive, KEEP_ALIVE_INTERVAL)
-        this._loop().catch(err => this.client.emitError(err))
+        this._loop().catch((err) => this.client.emitError(err))
 
         if (this.catchUpOnStart) {
             this.catchUp()
@@ -408,7 +398,7 @@ export class UpdatesManager {
         return true
     }
 
-    /// /////////////////////////////////////////// IMPLEMENTATION //////////////////////////////////////////////
+    ////////////////////////////////////////////// IMPLEMENTATION //////////////////////////////////////////////
 
     async _fetchUpdatesState(): Promise<void> {
         const { client, lock, log } = this
@@ -654,8 +644,8 @@ export class UpdatesManager {
 
                 if (msg._ !== 'messageService') {
                     if (
-                        msg.fwdFrom
-                        && (!(await fetchPeer(msg.fwdFrom.fromId)) || !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
+                        msg.fwdFrom &&
+                        (!(await fetchPeer(msg.fwdFrom.fromId)) || !(await fetchPeer(msg.fwdFrom.savedFromPeer)))
                     ) {
                         return missing
                     }
@@ -863,9 +853,9 @@ export class UpdatesManager {
             })
 
             if (diff.timeout) {
-                lastTimeout = this.params.overrideOpenChatTimeout
-                    ? this.params.overrideOpenChatTimeout(diff)
-                    : diff.timeout
+                lastTimeout = this.params.overrideOpenChatTimeout ?
+                    this.params.overrideOpenChatTimeout(diff) :
+                    diff.timeout
             }
 
             if (diff._ === 'updates.channelDifferenceEmpty') {
@@ -1125,7 +1115,7 @@ export class UpdatesManager {
         const { client, log } = this
         const upd = pending.update
 
-        let missing: Set<number> | undefined
+        let missing: Set<number> | undefined = undefined
 
         // it is important to do this before updating pts
         if (pending.peers.hasMin || pending.peers.empty) {
@@ -1234,12 +1224,12 @@ export class UpdatesManager {
                         dcOptions: upd.dcOptions,
                     })
                 } else {
-                    client.mt.network.config.update(true).catch(err => client.emitError(err))
+                    client.mt.network.config.update(true).catch((err) => client.emitError(err))
                 }
                 break
             }
             case 'updateConfig':
-                client.mt.network.config.update(true).catch(err => client.emitError(err))
+                client.mt.network.config.update(true).catch((err) => client.emitError(err))
                 break
             case 'updateUserName':
                 // todo
@@ -1304,12 +1294,12 @@ export class UpdatesManager {
         // dispatch the update
         if (this.noDispatchEnabled) {
             const channelId = pending.channelId ?? 0
-            const msgId
-                = upd._ === 'updateNewMessage'
-                || upd._ === 'updateNewChannelMessage'
-                || upd._ === 'updateBotNewBusinessMessage'
-                    ? upd.message.id
-                    : undefined
+            const msgId =
+                upd._ === 'updateNewMessage' ||
+                upd._ === 'updateNewChannelMessage' ||
+                upd._ === 'updateBotNewBusinessMessage' ?
+                    upd.message.id :
+                    undefined
 
             // we first need to remove it from each index, and then check if it was there
             const foundByMsgId = msgId && this.noDispatchMsg.get(channelId)?.delete(msgId)
@@ -1353,11 +1343,11 @@ export class UpdatesManager {
             while (this.updatesLoopActive) {
                 if (
                     !(
-                        pendingUpdateContainers.length
-                        || pendingPtsUpdates.length
-                        || pendingQtsUpdates.length
-                        || pendingUnorderedUpdates.length
-                        || this.hasTimedoutPostponed
+                        pendingUpdateContainers.length ||
+                        pendingPtsUpdates.length ||
+                        pendingQtsUpdates.length ||
+                        pendingUnorderedUpdates.length ||
+                        this.hasTimedoutPostponed
                     )
                 ) {
                     if (this.catchingUp) {
@@ -1600,9 +1590,8 @@ export class UpdatesManager {
 
                     let localPts: number | null = null
 
-                    if (!pending.channelId) {
-                        localPts = this.pts!
-                    } else if (cpts.has(pending.channelId)) {
+                    if (!pending.channelId) localPts = this.pts!
+                    else if (cpts.has(pending.channelId)) {
                         localPts = cpts.get(pending.channelId)!
                     } else if (this.catchingUp) {
                         // only load stored channel pts in case
@@ -1703,9 +1692,8 @@ export class UpdatesManager {
 
                     let localPts
 
-                    if (!pending.channelId) {
-                        localPts = this.pts!
-                    } else if (cpts.has(pending.channelId)) {
+                    if (!pending.channelId) localPts = this.pts!
+                    else if (cpts.has(pending.channelId)) {
                         localPts = cpts.get(pending.channelId)
                     }
 

@@ -1,6 +1,5 @@
 import { MtcuteError } from '../../types/errors.js'
-
-import type { InputPeerLike } from './peers/index.js'
+import { InputPeerLike } from './peers/index.js'
 
 /**
  * Could not find a peer by the provided information
@@ -16,7 +15,7 @@ export class MtMessageNotFoundError extends MtcuteError {
         readonly messageId: number,
         readonly context?: string,
     ) {
-        super(`Message${context ? ` ${context}` : ''} ${messageId} not found in ${peerId}`)
+        super(`Message${context ? ' ' + context : ''} ${messageId} not found in ${peerId}`)
     }
 }
 

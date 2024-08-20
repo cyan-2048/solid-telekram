@@ -1,7 +1,6 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { ForumTopic, InputPeerLike } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { ForumTopic, InputPeerLike } from '../../types/index.js'
 import { resolveChannel } from '../users/resolve-peer.js'
-
 import { getForumTopics } from './get-forum-topics.js'
 
 /**

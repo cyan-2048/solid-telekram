@@ -1,16 +1,16 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import { MtMessageNotFoundError } from '../../types/errors.js'
-import type { Message } from '../../types/messages/message.js'
-import type { TextWithEntities } from '../../types/misc/entities.js'
-import type { InputPeerLike } from '../../types/peers/index.js'
+import { Message } from '../../types/messages/message.js'
+import { TextWithEntities } from '../../types/misc/entities.js'
+import { InputPeerLike } from '../../types/peers/index.js'
 import { normalizeDate, normalizeMessageId } from '../../utils/index.js'
 import { _getPeerChainId } from '../misc/chain-id.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-
 import { _getDiscussionMessage } from './get-discussion-message.js'
 import { getMessages } from './get-messages.js'
 
@@ -156,13 +156,7 @@ export async function _processCommonSendParameters(
     client: ITelegramClient,
     chatId: InputPeerLike,
     params: CommonSendParams,
-): Promise<{
-        peer: tl.TypeInputPeer
-        replyTo: tl.TypeInputReplyTo | undefined
-        scheduleDate: number | undefined
-        quickReplyShortcut: tl.TypeInputQuickReplyShortcut | undefined
-        chainId: string
-    }> {
+) {
     let peer = await resolvePeer(client, chatId)
 
     let replyTo = normalizeMessageId(params.replyTo)
@@ -188,7 +182,7 @@ export async function _processCommonSendParameters(
         throw new MtArgumentError('replyTo/commentTo and replyToStory cannot be used together')
     }
 
-    let tlReplyTo: tl.TypeInputReplyTo | undefined
+    let tlReplyTo: tl.TypeInputReplyTo | undefined = undefined
 
     if (replyTo) {
         tlReplyTo = {
@@ -207,10 +201,10 @@ export async function _processCommonSendParameters(
         }
     }
 
-    let scheduleDate: number | undefined
+    let scheduleDate: number | undefined = undefined
 
     if (params.schedule === 'online') {
-        scheduleDate = 0x7FFFFFFE
+        scheduleDate = 0x7ffffffe
     } else if (params.schedule) {
         scheduleDate = normalizeDate(params.schedule)
     }

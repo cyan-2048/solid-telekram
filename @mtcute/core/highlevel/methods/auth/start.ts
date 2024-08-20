@@ -2,15 +2,14 @@
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError, MtcuteError } from '../../../types/errors.js'
-import type { MaybePromise } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { SentCode } from '../../types/auth/sent-code.js'
-import type { User } from '../../types/peers/user.js'
-import type { MaybeDynamic } from '../../types/utils.js'
+import { MaybePromise } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
+import { SentCode } from '../../types/auth/sent-code.js'
+import { User } from '../../types/peers/user.js'
+import { MaybeDynamic } from '../../types/utils.js'
 import { normalizePhoneNumber, resolveMaybeDynamic } from '../../utils/misc-utils.js'
-import type { StringSessionData } from '../../utils/string-session.js'
+import { StringSessionData } from '../../utils/string-session.js'
 import { getMe } from '../users/get-me.js'
-
 import { checkPassword } from './check-password.js'
 import { resendCode } from './resend-code.js'
 import { sendCode } from './send-code.js'
@@ -164,7 +163,7 @@ export async function start(
                 throw new MtArgumentError('Either bot token or phone number must be provided')
             }
 
-            return signInBot(client, botToken)
+            return await signInBot(client, botToken)
         }
 
         try {
@@ -220,10 +219,10 @@ export async function start(
                     has2fa = true
                     break
                 } else if (
-                    e.is('PHONE_CODE_EMPTY')
-                    || e.is('PHONE_CODE_EXPIRED')
-                    || e.is('PHONE_CODE_INVALID')
-                    || e.is('PHONE_CODE_HASH_EMPTY')
+                    e.is('PHONE_CODE_EMPTY') ||
+                    e.is('PHONE_CODE_EXPIRED') ||
+                    e.is('PHONE_CODE_INVALID') ||
+                    e.is('PHONE_CODE_HASH_EMPTY')
                 ) {
                     if (typeof params.code !== 'function') {
                         throw new MtArgumentError('Provided code was invalid')
@@ -236,9 +235,7 @@ export async function start(
                     }
 
                     continue
-                } else {
-                    throw e
-                }
+                } else throw e
             }
 
             // if there was no error, code was valid, so it's either 2fa or signup
@@ -268,20 +265,18 @@ export async function start(
                         console.log('Invalid password. Please try again')
                     }
                     continue
-                } else {
-                    throw e
-                }
+                } else throw e
             }
         }
     }
 
     if (params.qrCodeHandler) {
-        return signInQr(client, {
+        return await signInQr(client, {
             onUrlUpdated: params.qrCodeHandler,
             password: params.password,
-            invalidPasswordCallback: params.invalidCodeCallback
-                ? () => params.invalidCodeCallback!('password')
-                : undefined,
+            invalidPasswordCallback: params.invalidCodeCallback ?
+                () => params.invalidCodeCallback!('password') :
+                undefined,
             abortSignal,
         })
     }

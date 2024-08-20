@@ -3,9 +3,8 @@ import { tl } from '@mtcute/tl'
 import { getPlatform } from '../../../../platform.js'
 import { assertNever } from '../../../../types/utils.js'
 import { toInputUser } from '../../../utils/peer-utils.js'
-
 import { BotKeyboardBuilder } from './builder.js'
-import type {
+import {
     InlineKeyboardMarkup,
     ReplyKeyboardForceReply,
     ReplyKeyboardHide,
@@ -364,7 +363,7 @@ export function findButton(
 
 /** @internal */
 export function _rowsTo2d(rows: tl.RawKeyboardButtonRow[]): tl.TypeKeyboardButton[][] {
-    return rows.map(it => it.buttons)
+    return rows.map((it) => it.buttons)
 }
 
 /** @internal */
@@ -372,13 +371,13 @@ export function _2dToRows(arr: tl.TypeKeyboardButton[][], inline: boolean): tl.R
     return arr.map((row) => {
         if (!inline) {
             // le cringe
-            row = row.map(btn =>
-                btn._ === 'keyboardButtonWebView'
-                    ? {
+            row = row.map((btn) =>
+                btn._ === 'keyboardButtonWebView' ?
+                    {
                         ...btn,
                         _: 'keyboardButtonSimpleWebView',
-                    }
-                    : btn,
+                    } :
+                    btn,
             )
         }
 

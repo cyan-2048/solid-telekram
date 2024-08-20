@@ -1,4 +1,3 @@
-import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -6,7 +5,7 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to link to public users, groups and channels
  */
-export const publicUsername: Deeplink<{ username: string }> = /* #__PURE__ */ deeplinkBuilder({
+export const publicUsername = deeplinkBuilder<{ username: string }>({
     internalBuild: ({ username }) => ['resolve', { domain: username }],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null
@@ -37,7 +36,7 @@ export const publicUsername: Deeplink<{ username: string }> = /* #__PURE__ */ de
  * and they have an expiration date, specified by the expires field of the exportedContactToken
  * constructor returned by contacts.exportContactToken.
  */
-export const temporaryProfile: Deeplink<{ token: string }> = /* #__PURE__ */ deeplinkBuilder({
+export const temporaryProfile = deeplinkBuilder<{ token: string }>({
     internalBuild: ({ token }) => ['contact', { token }],
     internalParse: (path, query) => {
         if (path !== 'contact') return null
@@ -61,7 +60,7 @@ export const temporaryProfile: Deeplink<{ token: string }> = /* #__PURE__ */ dee
  *
  * Used to link to public and private users by their phone number.
  */
-export const phoneNumber: Deeplink<{ phone: string }> = /* #__PURE__ */ deeplinkBuilder({
+export const phoneNumber = deeplinkBuilder<{ phone: string }>({
     internalBuild: ({ phone }) => ['resolve', { phone }],
     internalParse: (path, query) => {
         if (path !== 'resolve') return null

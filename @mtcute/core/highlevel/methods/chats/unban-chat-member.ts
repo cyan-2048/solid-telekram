@@ -1,6 +1,5 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { MtInvalidPeerTypeError } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, MtInvalidPeerTypeError } from '../../types/index.js'
 import { isInputPeerChannel, isInputPeerChat, toInputChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -41,7 +40,5 @@ export async function unbanChatMember(
         client.handleClientUpdate(res)
     } else if (isInputPeerChat(chat)) {
         // no-op //
-    } else {
-        throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
-    }
+    } else throw new MtInvalidPeerTypeError(chatId, 'chat or channel')
 }

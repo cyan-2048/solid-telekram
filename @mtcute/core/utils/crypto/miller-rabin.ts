@@ -1,44 +1,42 @@
-import { bigIntBitLength, bigIntModPow, randomBigIntBits, twoMultiplicity } from '../bigint-utils.js'
+import { randomBigIntBits, twoMultiplicity } from '../bigint-utils.js'
+import { ICryptoProvider } from './abstract.js'
+import bigInt, { BigInteger } from 'big-integer'
 
-import type { ICryptoProvider } from './abstract.js'
-
-export function millerRabin(crypto: ICryptoProvider, n: bigint, rounds = 20): boolean {
+export function millerRabin(crypto: ICryptoProvider, n: BigInteger, rounds = 20): boolean {
     // small numbers: 0, 1 are not prime, 2, 3 are prime
-    if (n < 4n) return n > 1n
-    if (n % 2n === 0n || n < 0n) return false
+    if (n.lt(bigInt[4])) return n.gt(bigInt[1])
+    if (n.isEven() || n.isNegative()) return false
 
-    const nBits = bigIntBitLength(n)
-    const nSub = n - 1n
+    const nBits = n.bitLength().toJSNumber()
+    const nSub = n.minus(1)
 
     const r = twoMultiplicity(nSub)
-    const d = nSub >> r
+    const d = nSub.shiftRight(r)
 
     for (let i = 0; i < rounds; i++) {
         let base
 
         do {
             base = randomBigIntBits(crypto, nBits)
-        } while (base <= 1n || base >= nSub)
+        } while (base.leq(bigInt.one) || base.geq(nSub))
 
-        let x = bigIntModPow(base, d, n)
-        // if (x.eq(bigInt.one) || x.eq(nSub)) continue
-        if (x === 1n || x === nSub) continue
+        let x = base.modPow(d, n)
+        if (x.eq(bigInt.one) || x.eq(nSub)) continue
 
-        let i = 0n
-        let y: bigint
+        let i = bigInt.zero
+        let y: BigInteger
 
-        while (i < r) {
-            // y = x.modPow(bigInt[2], n)
-            y = bigIntModPow(x, 2n, n)
+        while (i.lt(r)) {
+            y = x.modPow(bigInt[2], n)
 
-            if (x === 1n) return false
-            if (x === nSub) break
-            i += 1n
+            if (x.eq(bigInt.one)) return false
+            if (x.eq(nSub)) break
+            i = i.plus(bigInt.one)
 
             x = y
         }
 
-        if (i === r) return false
+        if (i.eq(r)) return false
     }
 
     return true

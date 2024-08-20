@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { StoryInteractiveArea } from './base.js'
 

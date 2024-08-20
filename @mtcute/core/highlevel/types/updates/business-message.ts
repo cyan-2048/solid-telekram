@@ -1,7 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { Message } from '../messages/message.js'
-import type { PeersIndex } from '../peers/peers-index.js'
+import { PeersIndex } from '../peers/peers-index.js'
 
 /**
  * Update about a new or edited business message.

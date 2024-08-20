@@ -1,10 +1,8 @@
-import type { mtp } from '@mtcute/tl'
+import { mtp } from '@mtcute/tl'
 import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
 
-import type { IKeyValueRepository } from '../repository/key-value.js'
-
-import type { ServiceOptions } from './base.js'
-import { BaseService } from './base.js'
+import { IKeyValueRepository } from '../repository/key-value.js'
+import { BaseService, ServiceOptions } from './base.js'
 
 const KV_PREFIX = 'salts:'
 

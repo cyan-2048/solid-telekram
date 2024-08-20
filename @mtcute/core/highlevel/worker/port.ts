@@ -1,16 +1,14 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { RpcCallOptions } from '../../network/network-manager.js'
-import type { MustEqual } from '../../types/utils.js'
+import { RpcCallOptions } from '../../network/network-manager.js'
+import { MustEqual } from '../../types/utils.js'
 import { LogManager } from '../../utils/logger.js'
-import type { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
+import { ConnectionState, ITelegramClient, ServerUpdateHandler } from '../client.types.js'
 import { PeersIndex } from '../types/peers/peers-index.js'
-import type { RawUpdateHandler } from '../updates/types.js'
-
+import { RawUpdateHandler } from '../updates/types.js'
 import { AppConfigManagerProxy } from './app-config.js'
 import { WorkerInvoker } from './invoker.js'
-import type { ClientMessageHandler, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
-import { deserializeResult } from './protocol.js'
+import { ClientMessageHandler, deserializeResult, SendFn, SomeWorker, WorkerCustomMethods } from './protocol.js'
 import { TelegramStorageProxy } from './storage.js'
 
 export interface TelegramWorkerPortOptions {
@@ -18,36 +16,36 @@ export interface TelegramWorkerPortOptions {
 }
 
 export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> implements ITelegramClient {
-    readonly log: LogManager
+    readonly log
 
     private _connection
     private _invoker
 
-    readonly storage: TelegramStorageProxy
-    readonly appConfig: AppConfigManagerProxy
+    readonly storage
+    readonly appConfig
 
     // bound methods
-    readonly prepare: ITelegramClient['prepare']
+    readonly prepare
     private _connect
-    readonly close: ITelegramClient['close']
-    readonly notifyLoggedIn: ITelegramClient['notifyLoggedIn']
-    readonly notifyLoggedOut: ITelegramClient['notifyLoggedOut']
-    readonly notifyChannelOpened: ITelegramClient['notifyChannelOpened']
-    readonly notifyChannelClosed: ITelegramClient['notifyChannelClosed']
-    readonly importSession: ITelegramClient['importSession']
-    readonly exportSession: ITelegramClient['exportSession']
-    readonly handleClientUpdate: ITelegramClient['handleClientUpdate']
-    readonly getApiCrenetials: ITelegramClient['getApiCrenetials']
-    readonly getPoolSize: ITelegramClient['getPoolSize']
-    readonly getPrimaryDcId: ITelegramClient['getPrimaryDcId']
-    readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
-    readonly computeSrpParams: ITelegramClient['computeSrpParams']
-    readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
-    readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
-    readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
+    readonly close
+    readonly notifyLoggedIn
+    readonly notifyLoggedOut
+    readonly notifyChannelOpened
+    readonly notifyChannelClosed
+    readonly importSession
+    readonly exportSession
+    readonly handleClientUpdate
+    readonly getApiCrenetials
+    readonly getPoolSize
+    readonly getPrimaryDcId
+    readonly changePrimaryDc
+    readonly computeSrpParams
+    readonly computeNewPasswordHash
+    readonly startUpdatesLoop
+    readonly stopUpdatesLoop
 
     private _abortController = new AbortController()
-    readonly stopSignal: AbortSignal = this._abortController.signal
+    readonly stopSignal = this._abortController.signal
 
     constructor(readonly options: TelegramWorkerPortOptions) {
         this.log = new LogManager('worker')
@@ -111,7 +109,6 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     onError(handler: (err: unknown) => void): void {
         this._errorHandler = handler
     }
-
     emitError(err: unknown): void {
         this._errorHandler(err)
     }

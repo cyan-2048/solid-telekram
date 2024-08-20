@@ -1,6 +1,5 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike, Photo } from '../../types/index.js'
-
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, Photo } from '../../types/index.js'
 import { getProfilePhotos } from './get-profile-photos.js'
 import { resolveUser } from './resolve-peer.js'
 

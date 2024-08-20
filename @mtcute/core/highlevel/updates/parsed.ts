@@ -1,8 +1,7 @@
-import type { Message } from '../types/messages/index.js'
-import type { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
+import { Message } from '../types/messages/index.js'
+import { BusinessMessage, ParsedUpdate } from '../types/updates/index.js'
 import { _parseUpdate } from '../types/updates/parse-update.js'
-
-import type { RawUpdateHandler } from './types.js'
+import { RawUpdateHandler } from './types.js'
 
 export interface ParsedUpdateHandlerParams {
     /**

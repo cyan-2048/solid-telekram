@@ -1,4 +1,3 @@
-import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -7,7 +6,7 @@ import { deeplinkBuilder } from './common.js'
  * Used to join video/voice chats in groups, and livestreams in channels.
  * Such links are generated using phone.exportGroupCallInvite.
  */
-export const videoChat: Deeplink<{
+export const videoChat = deeplinkBuilder<{
     username: string
     /**
      * Invite hash exported if the `can_self_unmute` flag is set when calling `phone.exportGroupCallInvite`:
@@ -16,7 +15,7 @@ export const videoChat: Deeplink<{
      */
     inviteHash?: string
     isLivestream?: boolean
-}> = /* #__PURE__ */ deeplinkBuilder({
+}>({
     internalBuild: ({ username, inviteHash, isLivestream }) => [
         'resolve',
         {

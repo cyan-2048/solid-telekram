@@ -1,7 +1,7 @@
-/* eslint-disable unused-imports/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
 
 // @available=both
 /**

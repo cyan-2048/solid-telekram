@@ -1,4 +1,4 @@
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import { ChatlistPreview } from '../../types/index.js'
 
 /**

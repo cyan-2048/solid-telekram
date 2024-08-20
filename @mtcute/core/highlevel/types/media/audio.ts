@@ -1,9 +1,8 @@
 import { tdFileId } from '@mtcute/file-id'
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-
 import { RawDocument } from './document.js'
 
 /**

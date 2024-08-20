@@ -1,13 +1,12 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { assertNever } from '../../../../types/utils.js'
-import type { ITelegramClient } from '../../../client.types.js'
+import { ITelegramClient } from '../../../client.types.js'
 import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
-import type { InputText } from '../../../types/misc/entities.js'
-import type { InputMediaGeoLive } from '../../media/index.js'
+import { InputText } from '../../../types/misc/entities.js'
+import { InputMediaGeoLive } from '../../media/index.js'
 import { BotKeyboard } from '../keyboards/index.js'
-
-import type {
+import {
     InputInlineMessage,
     InputInlineMessageContact,
     InputInlineMessageGame,

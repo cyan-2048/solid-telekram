@@ -1,4 +1,3 @@
-import type { Deeplink } from './common.js'
 import { deeplinkBuilder } from './common.js'
 
 /**
@@ -6,10 +5,10 @@ import { deeplinkBuilder } from './common.js'
  *
  * Used to import stickersets or custom emoji stickersets
  */
-export const stickerset: Deeplink<{
+export const stickerset = deeplinkBuilder<{
     slug: string
     emoji?: boolean
-}> = /* #__PURE__ */ deeplinkBuilder({
+}>({
     internalBuild: ({ slug, emoji }) => [emoji ? 'addemoji' : 'addstickers', { set: slug }],
     internalParse: (path, query) => {
         if (path !== 'addstickers' && path !== 'addemoji') return null

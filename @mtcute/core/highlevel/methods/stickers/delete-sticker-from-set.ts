@@ -1,7 +1,7 @@
 import { tdFileId } from '@mtcute/file-id'
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import { StickerSet } from '../../types/index.js'
 import { fileIdToInputDocument } from '../../utils/convert-file-id.js'
 

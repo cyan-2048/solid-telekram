@@ -1,8 +1,8 @@
-import type { mtp } from '@mtcute/tl'
+import { mtp } from '@mtcute/tl'
 
-import type { MaybePromise } from '../../types/utils.js'
+import { MaybePromise } from '../../types/utils.js'
 import { isTlRpcError } from '../../utils/type-assertions.js'
-import type { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
+import { RpcCallMiddleware, RpcCallMiddlewareContext } from '../network-manager.js'
 
 /**
  * Middleware that will call `handler` whenever an RPC error happens,

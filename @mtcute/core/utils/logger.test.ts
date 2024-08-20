@@ -1,5 +1,6 @@
 import Long from 'long'
 import { describe, expect, it, vi } from 'vitest'
+
 import { tl } from '@mtcute/tl'
 
 import { LogManager } from './logger.js'
@@ -9,7 +10,7 @@ describe('logger', () => {
         const mgr = new LogManager()
         mgr.level = LogManager.INFO
 
-        const spy = vi.fn<typeof mgr.handler>()
+        const spy = vi.fn<Parameters<typeof mgr.handler>>()
         mgr.handler = spy
 
         return [mgr, spy] as const
@@ -45,7 +46,7 @@ describe('logger', () => {
         const test1 = mgr.create('test1')
         const test2 = mgr.create('test2')
 
-        mgr.filter(tag => tag === 'test1')
+        mgr.filter((tag) => tag === 'test1')
 
         test1.info('test1 info')
         test2.info('test2 info')

@@ -1,19 +1,16 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type {
+import { ITelegramClient } from '../../client.types.js'
+import {
     InputFileLike,
     InputPeerLike,
     InputStickerSetItem,
+    StickerSet,
     StickerSourceType,
     StickerType,
 } from '../../types/index.js'
-import {
-    StickerSet,
-} from '../../types/index.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 import { resolveUser } from '../users/resolve-peer.js'
-
 import { _normalizeInputStickerSetItem } from './_utils.js'
 
 /**

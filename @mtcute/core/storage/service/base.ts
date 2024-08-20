@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
-import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
-import { TlBinaryReader, TlBinaryWriter } from '@mtcute/tl-runtime'
+import { tl } from '@mtcute/tl'
+import { TlBinaryReader, TlBinaryWriter, TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
-import type { Logger } from '../../utils/logger.js'
-import type { IStorageDriver } from '../driver.js'
+import { Logger } from '../../utils/logger.js'
+import { IStorageDriver } from '../driver.js'
 
 export interface ServiceOptions {
     driver: IStorageDriver
@@ -32,7 +31,7 @@ export class BaseService {
     protected _deserializeTl(data: Uint8Array): tl.TlObject | null {
         try {
             return TlBinaryReader.deserializeObject<tl.TlObject>(this._readerMap, data)
-        } catch {
+        } catch (e) {
             return null
         }
     }

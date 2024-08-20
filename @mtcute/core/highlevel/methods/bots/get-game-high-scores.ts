@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputMessageId, InputPeerLike } from '../../types/index.js'
-import { GameHighScore, PeersIndex, normalizeInputMessageId } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { GameHighScore, InputMessageId, InputPeerLike, normalizeInputMessageId, PeersIndex } from '../../types/index.js'
 import { normalizeInlineId } from '../../utils/inline-utils.js'
 import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 
@@ -38,7 +37,7 @@ export async function getGameHighScores(
 
     const peers = PeersIndex.from(res)
 
-    return res.scores.map(score => new GameHighScore(score, peers))
+    return res.scores.map((score) => new GameHighScore(score, peers))
 }
 
 /**
@@ -73,5 +72,5 @@ export async function getInlineGameHighScores(
 
     const peers = PeersIndex.from(res)
 
-    return res.scores.map(score => new GameHighScore(score, peers))
+    return res.scores.map((score) => new GameHighScore(score, peers))
 }

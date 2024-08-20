@@ -1,4 +1,4 @@
-import type { ICorePlatform } from '@mtcute/core/platform.js'
+import { ICorePlatform } from '@mtcute/core/platform.js'
 
 import { base64Decode, base64Encode } from './common-internals-web/base64.js'
 import { hexDecode, hexEncode } from './common-internals-web/hex.js'
@@ -19,9 +19,9 @@ export class WebPlatform implements ICorePlatform {
 
     getDefaultLogLevel(): number | null {
         if (typeof localStorage !== 'undefined') {
-            const localLogLevel = Number.parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
+            const localLogLevel = parseInt(localStorage.MTCUTE_LOG_LEVEL as string)
 
-            if (!Number.isNaN(localLogLevel)) {
+            if (!isNaN(localLogLevel)) {
                 return localLogLevel
             }
         }
@@ -29,16 +29,16 @@ export class WebPlatform implements ICorePlatform {
         return null
     }
 
-    onNetworkChanged(fn: (connected: boolean) => void): () => void {
+    onNetworkChanged(fn: (connected: boolean) => void) {
         if (!('onLine' in navigator)) return () => {}
 
         const onlineHandler = () => fn(navigator.onLine)
-        window.addEventListener('online', onlineHandler)
-        window.addEventListener('offline', onlineHandler)
+        globalThis.addEventListener('online', onlineHandler)
+        globalThis.addEventListener('offline', onlineHandler)
 
         return () => {
-            window.removeEventListener('online', onlineHandler)
-            window.removeEventListener('offline', onlineHandler)
+            globalThis.removeEventListener('online', onlineHandler)
+            globalThis.removeEventListener('offline', onlineHandler)
         }
     }
 

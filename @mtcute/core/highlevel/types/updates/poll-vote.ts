@@ -1,10 +1,9 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { MtUnsupportedError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-import type { Peer, PeersIndex } from '../peers/index.js'
-import { parsePeer } from '../peers/index.js'
+import { parsePeer, Peer, PeersIndex } from '../peers/index.js'
 
 /**
  * Some user has voted in a public poll.

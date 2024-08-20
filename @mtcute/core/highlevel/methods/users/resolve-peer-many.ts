@@ -1,10 +1,9 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { ConditionVariable } from '../../../utils/condition-variable.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import { MtPeerNotFoundError } from '../../types/errors.js'
-import type { InputPeerLike } from '../../types/peers/index.js'
-
+import { InputPeerLike } from '../../types/peers/index.js'
 import { resolvePeer } from './resolve-peer.js'
 
 /**
@@ -54,7 +53,7 @@ export async function resolvePeerMany(
     if (peerIds.length < limit) {
         // no point in using async pool for <limit peers
         const res = await Promise.all(
-            peerIds.map(it =>
+            peerIds.map((it) =>
                 resolvePeer(client, it).catch((e) => {
                     if (e instanceof MtPeerNotFoundError) {
                         return null
@@ -91,9 +90,7 @@ export async function resolvePeerMany(
         } catch (e) {
             if (e instanceof MtPeerNotFoundError) {
                 buffer[idx] = null
-            } else {
-                throw e
-            }
+            } else throw e
         }
 
         if (nextIdx === idx) {
@@ -105,7 +102,7 @@ export async function resolvePeerMany(
         }
     }
 
-    let error: unknown
+    let error: unknown = undefined
     void Promise.all(Array.from({ length: limit }, (_, i) => fetchNext(i))).catch((e) => {
         client.log.debug('resolvePeerMany errored: %e', e)
         error = e
@@ -115,6 +112,7 @@ export async function resolvePeerMany(
     while (nextIdx < peerIds.length) {
         await cv.wait()
 
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         if (error) throw error
 
         while (nextIdx in buffer) {

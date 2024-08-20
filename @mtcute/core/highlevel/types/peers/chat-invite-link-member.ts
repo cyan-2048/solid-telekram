@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-
-import type { PeersIndex } from './peers-index.js'
+import { PeersIndex } from './peers-index.js'
 import { User } from './user.js'
 
 export class ChatInviteLinkMember {

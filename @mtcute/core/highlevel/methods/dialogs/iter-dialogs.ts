@@ -1,12 +1,11 @@
 import Long from 'long'
-import type { tl } from '@mtcute/tl'
+
+import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputDialogFolder } from '../../types/index.js'
-import { Dialog } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { Dialog, InputDialogFolder } from '../../types/index.js'
 import { normalizeDate } from '../../utils/misc-utils.js'
-
 import { _normalizeInputFolder } from './get-folders.js'
 
 /**
@@ -98,7 +97,7 @@ export async function* iterDialogs(
          * a wrong folder if you have multiple with the same title.
          *
          * Also note that fetching dialogs in a folder is
-         * orders of magnitudes* slower than normal because
+         * *orders of magnitudes* slower than normal because
          * of Telegram API limitations - we have to fetch all dialogs
          * and filter the ones we need manually. If possible,
          * use {@link Dialog.filterFolder} instead.
@@ -191,7 +190,7 @@ export async function* iterDialogs(
 
             res.dialogs.forEach((dialog: tl.Mutable<tl.TypeDialog>) => (dialog.pinned = true))
 
-            yield * Dialog.parseTlDialogs(res)
+            yield* Dialog.parseTlDialogs(res)
         }
 
         if (pinned === 'only' || remaining <= 0) {
@@ -221,7 +220,7 @@ export async function* iterDialogs(
                 peers,
             })
 
-            yield * Dialog.parseTlDialogs(res)
+            yield* Dialog.parseTlDialogs(res)
         }
 
         return
@@ -237,7 +236,7 @@ export async function* iterDialogs(
         }
         const res = await client.call({
             _: 'messages.getPeerDialogs',
-            peers: localFilters.pinnedPeers.map(peer => ({
+            peers: localFilters.pinnedPeers.map((peer) => ({
                 _: 'inputDialogPeer' as const,
                 peer,
             })),
@@ -259,7 +258,7 @@ export async function* iterDialogs(
                 folderId: archived === 'exclude' ? 0 : 1,
             })
         }
-        if (res) yield * Dialog.parseTlDialogs(res, limit)
+        if (res) yield* Dialog.parseTlDialogs(res, limit)
 
         return
     }
@@ -267,11 +266,11 @@ export async function* iterDialogs(
     let current = 0
 
     if (
-        localFilters?.pinnedPeers.length
-        && pinned === 'include'
-        && offsetId === 0
-        && offsetDate === 0
-        && offsetPeer._ === 'inputPeerEmpty'
+        localFilters?.pinnedPeers.length &&
+        pinned === 'include' &&
+        offsetId === 0 &&
+        offsetDate === 0 &&
+        offsetPeer._ === 'inputPeerEmpty'
     ) {
         const res = await fetchPinnedDialogsFromFolder()
 

@@ -24,17 +24,14 @@ export async function streamToBuffer(stream: ReadableStream<Uint8Array>): Promis
     return concatBuffers(chunks)
 }
 
-export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSize: number): {
-    ended: () => boolean
-    read: () => Promise<Uint8Array | null>
-} {
+export function createChunkedReader(stream: ReadableStream<Uint8Array>, chunkSize: number) {
     const reader = stream.getReader()
     const lock = new AsyncLock()
 
     const buffer: Uint8Array[] = []
     let bufferLength = 0
 
-    let next: Uint8Array | undefined
+    let next: Uint8Array | undefined = undefined
     let first = true
 
     async function readInner(): Promise<Uint8Array | undefined> {

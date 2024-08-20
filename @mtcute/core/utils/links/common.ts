@@ -28,7 +28,7 @@ interface BuildDeeplinkOptions<T> {
     externalParse?: (path: string, query: URLSearchParams) => T | null
 }
 
-export interface Deeplink<T> {
+export type Deeplink<T> = {
     (options: T & CommonDeeplinkOptions): string
     parse: (url: string) => T | null
 }

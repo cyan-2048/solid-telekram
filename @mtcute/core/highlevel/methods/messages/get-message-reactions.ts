@@ -1,8 +1,7 @@
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike, Message } from '../../types/index.js'
-import { MessageReactions, PeersIndex } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, Message, MessageReactions, PeersIndex } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -47,7 +46,7 @@ export async function getMessageReactionsById(
         index[update.msgId] = new MessageReactions(update.msgId, getMarkedPeerId(update.peer), update.reactions, peers)
     }
 
-    return messages.map(messageId => index[messageId] ?? null)
+    return messages.map((messageId) => index[messageId] ?? null)
 }
 
 /**
@@ -70,6 +69,6 @@ export async function getMessageReactions(
     return getMessageReactionsById(
         client,
         messages[0].chat.inputPeer,
-        messages.map(it => it.id),
+        messages.map((it) => it.id),
     )
 }

@@ -1,16 +1,13 @@
-import type { BaseTelegramClient } from '../base.js'
-
+import { BaseTelegramClient } from '../base.js'
 import { serializeError } from './errors.js'
-import type {
+import {
+    deserializeResult,
     RespondFn,
     SerializedResult,
+    serializeResult,
     WorkerCustomMethods,
     WorkerInboundMessage,
     WorkerMessageHandler,
-} from './protocol.js'
-import {
-    deserializeResult,
-    serializeResult,
 } from './protocol.js'
 
 export interface TelegramWorkerOptions<T extends WorkerCustomMethods> {
@@ -24,7 +21,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
     abstract registerWorker(handler: WorkerMessageHandler): RespondFn
 
-    readonly pendingAborts: Map<number, AbortController> = new Map()
+    readonly pendingAborts = new Map<number, AbortController>()
 
     constructor(readonly params: TelegramWorkerOptions<T>) {
         this.broadcast = this.registerWorker((message, respond) => {
@@ -55,13 +52,13 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 fmt,
                 args,
             })
-        client.onError(err =>
+        client.onError((err) =>
             this.broadcast({
                 type: 'error',
                 error: err,
             }),
         )
-        client.onConnectionState(state =>
+        client.onConnectionState((state) =>
             this.broadcast({
                 type: 'conn_state',
                 state,
@@ -80,7 +77,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
                 }),
             )
         } else {
-            client.onServerUpdate(update =>
+            client.onServerUpdate((update) =>
                 this.broadcast({
                     type: 'server_update',
                     update: serializeResult(update),
@@ -90,6 +87,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
     }
 
     private onInvoke(msg: Extract<WorkerInboundMessage, { type: 'invoke' }>, respond: RespondFn) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let target: any
 
         switch (msg.target) {
@@ -123,7 +121,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             }
         }
 
-        // eslint-disable-next-line ts/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const method = target[msg.method]
 
         if (!method) {
@@ -153,7 +151,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
             args = deserializeResult(msg.args)
         }
 
-        // eslint-disable-next-line ts/no-unsafe-call
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         Promise.resolve(method.apply(target, args))
             .then((res) => {
                 if (msg.withAbort) {

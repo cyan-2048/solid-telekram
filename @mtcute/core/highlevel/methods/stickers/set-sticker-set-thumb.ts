@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputFileLike, InputStickerSet } from '../../types/index.js'
-import { StickerSet, normalizeInputStickerSet } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputFileLike, InputStickerSet, normalizeInputStickerSet, StickerSet } from '../../types/index.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 
 /**

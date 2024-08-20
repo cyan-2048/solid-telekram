@@ -1,7 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike } from '../../types/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { resolveChannel, resolvePeer } from '../users/resolve-peer.js'
 

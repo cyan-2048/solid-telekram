@@ -2,9 +2,8 @@ import { tdFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputFileLike } from '../../types/index.js'
-import { Photo } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputFileLike, Photo } from '../../types/index.js'
 import { fileIdToInputPhoto } from '../../utils/convert-file-id.js'
 import { _normalizeInputFile } from '../files/normalize-input-file.js'
 

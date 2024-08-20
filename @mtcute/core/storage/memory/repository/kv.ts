@@ -1,8 +1,8 @@
-import type { IKeyValueRepository } from '../../repository/key-value.js'
-import type { MemoryStorageDriver } from '../driver.js'
+import { IKeyValueRepository } from '../../repository/key-value.js'
+import { MemoryStorageDriver } from '../driver.js'
 
 export class MemoryKeyValueRepository implements IKeyValueRepository {
-    readonly state: Map<string, Uint8Array>
+    readonly state
     constructor(readonly _driver: MemoryStorageDriver) {
         this.state = this._driver.getState<Map<string, Uint8Array>>('kv', () => new Map())
     }

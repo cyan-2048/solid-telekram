@@ -1,8 +1,6 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
-import { FileLocation } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { bufferToStream } from '../../utils/stream-utils.js'
-
 import { downloadAsIterable } from './download-iterable.js'
 
 /**
@@ -36,7 +34,7 @@ export function downloadAsStream(
                 }
 
                 controller.close()
-            })().catch(e => controller.error(e))
+            })().catch((e) => controller.error(e))
         },
         cancel() {
             cancel.abort()

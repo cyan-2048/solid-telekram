@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputStickerSetItem } from '../../types/index.js'
-import { MASK_POSITION_POINT_TO_TL } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputStickerSetItem, MASK_POSITION_POINT_TO_TL } from '../../types/index.js'
 import { _normalizeFileToDocument } from '../files/normalize-file-to-document.js'
 
 /**
@@ -20,14 +19,14 @@ export async function _normalizeInputStickerSetItem(
         _: 'inputStickerSetItem',
         document: await _normalizeFileToDocument(client, sticker.file, params ?? {}),
         emoji: sticker.emojis,
-        maskCoords: sticker.maskPosition
-            ? {
+        maskCoords: sticker.maskPosition ?
+            {
                 _: 'maskCoords',
                 n: MASK_POSITION_POINT_TO_TL[sticker.maskPosition.point],
                 x: sticker.maskPosition.x,
                 y: sticker.maskPosition.y,
                 zoom: sticker.maskPosition.scale,
-            }
-            : undefined,
+            } :
+            undefined,
     }
 }

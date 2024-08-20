@@ -1,11 +1,10 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { WebDocument } from '../files/web-document.js'
 import type { MessageMedia } from '../messages/message-media.js'
-
 import { ExtendedMediaPreview } from './extended-media.js'
 
 /**
@@ -24,7 +23,7 @@ export class Invoice {
 
     constructor(
         readonly raw: tl.RawMessageMediaInvoice,
-        private readonly _extendedMedia?: MessageMedia | undefined,
+        private readonly _extendedMedia?: MessageMedia,
     ) {}
 
     /**

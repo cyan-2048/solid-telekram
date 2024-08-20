@@ -1,13 +1,12 @@
 import { parseFileId } from '@mtcute/file-id'
 import { tl } from '@mtcute/tl'
 
-import type { ConnectionKind } from '../../../network/network-manager.js'
+import { ConnectionKind } from '../../../network/network-manager.js'
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError, MtUnsupportedError } from '../../../types/errors.js'
 import { ConditionVariable } from '../../../utils/condition-variable.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
-import { FileLocation } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { fileIdToInputFileLocation, fileIdToInputWebFileLocation } from '../../utils/convert-file-id.js'
 import { determinePartSize } from '../../utils/file-utils.js'
 
@@ -65,9 +64,7 @@ export async function* downloadAsIterable(
         } else {
             location = fileIdToInputFileLocation(parsed)
         }
-    } else {
-        location = input
-    }
+    } else location = input
 
     const isWeb = tl.isAnyInputWebFileLocation(location)
 
@@ -146,9 +143,7 @@ export async function* downloadAsIterable(
                 // todo: implement someday
                 // see: https://github.com/LonamiWebs/Telethon/blob/0e8bd8248cc649637b7c392616887c50986427a0/telethon/client/downloads.py#L99
                 throw new MtUnsupportedError('File ref expired!')
-            } else {
-                throw e
-            }
+            } else throw e
         }
 
         if (result._ === 'upload.fileCdnRedirect') {
@@ -178,7 +173,7 @@ export async function* downloadAsIterable(
         }
     }
 
-    let error: unknown
+    let error: unknown = undefined
     void Promise.all(Array.from({ length: Math.min(poolSize * REQUESTS_PER_CONNECTION, numChunks) }, downloadChunk))
         .catch((e) => {
             client.log.debug('download workers errored: %e', e)
@@ -204,6 +199,7 @@ export async function* downloadAsIterable(
     while (position < limitBytes) {
         await nextChunkCv.wait()
 
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
         if (error) throw error
 
         while (nextChunkIdx in buffer) {

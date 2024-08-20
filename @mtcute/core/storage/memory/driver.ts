@@ -1,4 +1,4 @@
-import type { IStorageDriver } from '../driver.js'
+import { IStorageDriver } from '../driver.js'
 
 export class MemoryStorageDriver implements IStorageDriver {
     readonly states: Map<string, object> = new Map()
@@ -11,5 +11,5 @@ export class MemoryStorageDriver implements IStorageDriver {
         return this.states.get(repo) as T
     }
 
-    load(): void {}
+    load() {}
 }

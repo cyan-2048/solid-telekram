@@ -1,13 +1,11 @@
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
-import type { MaybeArray } from '../../../types/utils.js'
+import { MaybeArray } from '../../../types/utils.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputMessageId } from '../../types/index.js'
-import { MtMessageNotFoundError, PeersIndex, Poll, normalizeInputMessageId } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputMessageId, MtMessageNotFoundError, normalizeInputMessageId, PeersIndex, Poll } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-
 import { getMessages } from './get-messages.js'
 
 /**
@@ -33,9 +31,9 @@ export async function sendVote(
 
     const peer = await resolvePeer(client, chatId)
 
-    let poll: Poll | undefined
+    let poll: Poll | undefined = undefined
 
-    if (options.some(it => typeof it === 'number')) {
+    if (options.some((it) => typeof it === 'number')) {
         const [msg] = await getMessages(client, peer, message)
 
         if (!msg) {

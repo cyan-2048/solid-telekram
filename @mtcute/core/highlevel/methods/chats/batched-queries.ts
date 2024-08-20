@@ -1,7 +1,7 @@
 import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import {
     isInputPeerChannel,
     isInputPeerChat,
@@ -9,11 +9,10 @@ import {
     toInputChannel,
     toInputUser,
 } from '../../utils/peer-utils.js'
-import type { BatchedQuery } from '../../utils/query-batcher.js'
 import { batchedQuery } from '../../utils/query-batcher.js'
 
 /** @internal */
-export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = batchedQuery({
+export const _getUsersBatched = batchedQuery<tl.TypeInputUser, tl.TypeUser, number>({
     fetch: (client, items) =>
         client
             .call({
@@ -22,7 +21,7 @@ export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = bat
                 // there's actually not much point in filtering, since telegram currently simply omits the missing users
                 // but maybe it will change in the future and i don't want to think about it
             })
-            .then(res => res.filter(it => it._ !== 'userEmpty')),
+            .then((res) => res.filter((it) => it._ !== 'userEmpty')),
     inputKey: (item, client) => {
         switch (item._) {
             case 'inputUser':
@@ -34,7 +33,7 @@ export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = bat
                 throw new MtArgumentError('Invalid input user')
         }
     },
-    outputKey: item => item.id,
+    outputKey: (item) => item.id,
     maxBatchSize: 50,
     maxConcurrent: 3,
     retrySingleOnError: (items, err) => {
@@ -64,32 +63,29 @@ export const _getUsersBatched: BatchedQuery<tl.TypeInputUser, tl.TypeUser> = bat
 })
 
 /** @internal */
-export const _getChatsBatched: BatchedQuery<number, tl.RawChat> = batchedQuery({
+export const _getChatsBatched = batchedQuery<number, tl.RawChat, number>({
     fetch: (client, items) =>
         client
             .call({
                 _: 'messages.getChats',
                 id: items,
             })
-            .then(res => res.chats.filter((it): it is tl.RawChat => it._ === 'chat')),
-    inputKey: id => id,
-    outputKey: item => item.id,
+            .then((res) => res.chats.filter((it): it is tl.RawChat => it._ === 'chat')),
+    inputKey: (id) => id,
+    outputKey: (item) => item.id,
     maxBatchSize: 50,
     maxConcurrent: 3,
 })
 
 /** @internal */
-export const _getChannelsBatched: BatchedQuery<
-    tl.TypeInputChannel,
-    tl.RawChannel | tl.RawChannelForbidden
-> = batchedQuery({
+export const _getChannelsBatched = batchedQuery<tl.TypeInputChannel, tl.RawChannel | tl.RawChannelForbidden, number>({
     fetch: (client, items) =>
         client
             .call({
                 _: 'channels.getChannels',
                 id: items,
             })
-            .then(res =>
+            .then((res) =>
                 res.chats.filter(
                     (it): it is tl.RawChannel | tl.RawChannelForbidden =>
                         it._ === 'channel' || it._ === 'channelForbidden',
@@ -104,7 +100,7 @@ export const _getChannelsBatched: BatchedQuery<
                 throw new MtArgumentError('Invalid input channel')
         }
     },
-    outputKey: item => item.id,
+    outputKey: (item) => item.id,
     maxBatchSize: 50,
     maxConcurrent: 3,
     retrySingleOnError: (items, err) => {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { defaultProductionDc } from '../../utils/dcs.js'
+import { __tlWriterMap } from '@mtcute/tl/binary/writer.js'
 
+import { defaultProductionDc } from '../../utils/dcs.js'
 import { readStringSession, writeStringSession } from './string-session.js'
 
 const stubAuthKey = new Uint8Array(32)

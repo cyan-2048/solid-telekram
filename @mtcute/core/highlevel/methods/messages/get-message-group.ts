@@ -1,11 +1,9 @@
 import { MtArgumentError } from '../../../types/errors.js'
 import { isPresent } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputMessageId, Message } from '../../types/index.js'
-import { normalizeInputMessageId } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputMessageId, Message, normalizeInputMessageId } from '../../types/index.js'
 import { isInputPeerChannel } from '../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-
 import { getMessages } from './get-messages.js'
 
 /**
@@ -34,9 +32,9 @@ export async function getMessageGroup(client: ITelegramClient, params: InputMess
     }
 
     const messages = await getMessages(client, chatId, ids)
-    const groupedId = messages.find(it => it?.id === message)!.groupedId
+    const groupedId = messages.find((it) => it?.id === message)!.groupedId
 
     if (!groupedId) throw new MtArgumentError('This message is not grouped')
 
-    return messages.filter(isPresent).filter(it => it.groupedId?.eq(groupedId))
+    return messages.filter(isPresent).filter((it) => it.groupedId?.eq(groupedId))
 }

@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { assertTypeIsNot, hasValueAtKey } from '../../../utils/type-assertions.js'
@@ -6,7 +6,6 @@ import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { Chat } from '../peers/chat.js'
 import { PeersIndex } from '../peers/peers-index.js'
-
 import { DraftMessage } from './draft-message.js'
 import { Message } from './message.js'
 
@@ -49,7 +48,7 @@ export class Dialog {
             messages.set(getMarkedPeerId(msg.peerId), msg)
         })
 
-        const arr = dialogs.dialogs.filter(hasValueAtKey('_', 'dialog')).map(it => new Dialog(it, peers, messages))
+        const arr = dialogs.dialogs.filter(hasValueAtKey('_', 'dialog')).map((it) => new Dialog(it, peers, messages))
 
         if (limit) {
             return arr.slice(0, limit)
@@ -71,10 +70,10 @@ export class Dialog {
                 index[getMarkedPeerId(peer)] = true
             })
 
-            return dialogs.filter(i => index[i.chat.id])
+            return dialogs.filter((i) => index[i.chat.id])
         }
 
-        return dialogs.filter(i => i.isPinned)
+        return dialogs.filter((i) => i.isPinned)
     }
 
     /**

@@ -1,7 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { RpcCallOptions } from '../../../network/index.js'
-import type { ITelegramClient } from '../../client.types.js'
+import { RpcCallOptions } from '../../../network/index.js'
+import { ITelegramClient } from '../../client.types.js'
 
 // @skip
 /**

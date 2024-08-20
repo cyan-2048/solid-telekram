@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { describe, expect, it } from 'vitest'
 
 import { links } from './index.js'
 
-describe('Deep links', () => {
+describe('Deep links', function () {
     describe('MTProxy links', () => {
         it('should generate t.me/proxy links', () => {
             expect(

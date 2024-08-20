@@ -1,4 +1,4 @@
-import type { ITelegramClient } from '../../client.types.js'
+import { ITelegramClient } from '../../client.types.js'
 import { Chat } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 

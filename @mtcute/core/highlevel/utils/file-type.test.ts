@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { getPlatform } from '../../platform.js'
-
-import { MIME_TO_EXTENSION, guessFileMime } from './file-type.js'
+import { guessFileMime, MIME_TO_EXTENSION } from './file-type.js'
 
 const p = getPlatform()
 

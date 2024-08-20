@@ -1,6 +1,7 @@
 import Long from 'long'
+
 import { tdFileId as td, toFileId, toUniqueFileId } from '@mtcute/file-id'
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
 import { MtArgumentError, MtTypeAssertionError } from '../../../types/errors.js'
@@ -76,14 +77,14 @@ export class Thumbnail extends FileLocation {
         switch (sz._) {
             case 'photoStrippedSize':
                 location = strippedPhotoToJpg(sz.bytes)
-                width = height = Number.NaN
+                width = height = NaN
                 size = location.length
                 break
             case 'photoPathSize': {
                 // try to find documentAttributeImageSize
-                const imageSize = media._ === 'document'
-                    ? media.attributes.find(it => it._ === 'documentAttributeImageSize') as tl.RawDocumentAttributeImageSize
-                    : undefined
+                const imageSize = media._ === 'document' ?
+                    media.attributes.find((it) => it._ === 'documentAttributeImageSize') as tl.RawDocumentAttributeImageSize :
+                    undefined
                 // lazily
                 location = () => svgPathToFile(this._path!, imageSize)
 
@@ -101,7 +102,7 @@ export class Thumbnail extends FileLocation {
                 location = () => {
                     throw new MtArgumentError('Cannot download thumbnail with emoji/sticker markup, try other size')
                 }
-                width = height = Number.NaN
+                width = height = NaN
                 size = Infinity
                 break
             default:
@@ -197,8 +198,8 @@ export class Thumbnail extends FileLocation {
      */
     get fileId(): string {
         if (
-            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize')
-            || this._media._ === 'messageExtendedMediaPreview' // just for type safety
+            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
+            this._media._ === 'messageExtendedMediaPreview' // just for type safety
         ) {
             throw new MtArgumentError(`Cannot generate a file ID for "${this.type}"`)
         }
@@ -244,8 +245,8 @@ export class Thumbnail extends FileLocation {
      */
     get uniqueFileId(): string {
         if (
-            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize')
-            || this._media._ === 'messageExtendedMediaPreview' // just for type safety
+            (this.raw._ !== 'photoSize' && this.raw._ !== 'photoSizeProgressive' && this.raw._ !== 'videoSize') ||
+            this._media._ === 'messageExtendedMediaPreview' // just for type safety
         ) {
             throw new MtArgumentError(`Cannot generate a unique file ID for "${this.type}"`)
         }

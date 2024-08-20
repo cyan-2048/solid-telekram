@@ -1,5 +1,5 @@
-import type { IAuthKeysRepository } from '../../repository/auth-keys.js'
-import type { MemoryStorageDriver } from '../driver.js'
+import { IAuthKeysRepository } from '../../repository/auth-keys.js'
+import { MemoryStorageDriver } from '../driver.js'
 
 interface AuthKeysState {
     authKeys: Map<number, Uint8Array>
@@ -8,9 +8,9 @@ interface AuthKeysState {
 }
 
 export class MemoryAuthKeysRepository implements IAuthKeysRepository {
-    readonly state: AuthKeysState
+    readonly state
     constructor(readonly _driver: MemoryStorageDriver) {
-        this.state = this._driver.getState('authKeys', () => ({
+        this.state = this._driver.getState<AuthKeysState>('authKeys', () => ({
             authKeys: new Map(),
             authKeysTemp: new Map(),
             authKeysTempExpiry: new Map(),

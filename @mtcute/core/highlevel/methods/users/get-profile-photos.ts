@@ -1,12 +1,11 @@
 import Long from 'long'
-import type { tl } from '@mtcute/tl'
+
+import { tl } from '@mtcute/tl'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
-import { Photo } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { ArrayPaginated, InputPeerLike, Photo } from '../../types/index.js'
 import { makeArrayPaginated } from '../../utils/index.js'
-
 import { resolveUser } from './resolve-peer.js'
 
 /**

@@ -1,7 +1,6 @@
-import type { MaybeArray } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { PeersIndex, StoryInteractions } from '../../types/index.js'
+import { MaybeArray } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, PeersIndex, StoryInteractions } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -24,7 +23,7 @@ export async function getStoriesInteractions(
 
     const peers = PeersIndex.from(res)
 
-    const infos = res.views.map(it => new StoryInteractions(it, peers))
+    const infos = res.views.map((it) => new StoryInteractions(it, peers))
 
     return infos
 }

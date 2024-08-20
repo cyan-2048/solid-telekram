@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { describe, expect, it } from 'vitest'
 
-import type { Middleware } from './composer.js'
-import { composeMiddlewares } from './composer.js'
+import { composeMiddlewares, Middleware } from './composer.js'
 
 describe('composeMiddlewares', () => {
     it('should compose middlewares', async () => {
@@ -28,7 +28,6 @@ describe('composeMiddlewares', () => {
         ]
 
         const composed = composeMiddlewares(middlewares, async (res) => {
-            // eslint-disable-next-line ts/no-use-before-define
             result = res
         })
 
@@ -148,7 +147,7 @@ describe('composeMiddlewares', () => {
 
                 try {
                     await next(2)
-                } catch {
+                } catch (e) {
                     trace.push('caught error')
                 }
 

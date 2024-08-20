@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-
+import { ITelegramClient } from '../../client.types.js'
 import { getFolders } from './get-folders.js'
 
 /**
@@ -34,7 +33,7 @@ export async function editFolder(
     }
     if (typeof folder === 'number' || typeof folder === 'string') {
         const old = await getFolders(client)
-        const found = old.filters.find(it => it._ === 'dialogFilter' && (it.id === folder || it.title === folder))
+        const found = old.filters.find((it) => it._ === 'dialogFilter' && (it.id === folder || it.title === folder))
 
         if (!found) {
             throw new MtArgumentError(`Could not find a folder ${folder}`)

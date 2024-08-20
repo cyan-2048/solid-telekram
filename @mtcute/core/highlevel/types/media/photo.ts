@@ -1,10 +1,9 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { MtArgumentError } from '../../../types/errors.js'
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
 import { FileLocation } from '../files/index.js'
-
 import { Thumbnail } from './thumbnail.js'
 
 /**
@@ -23,7 +22,7 @@ export class Photo extends FileLocation {
 
     constructor(
         readonly raw: tl.RawPhoto,
-        readonly media?: tl.RawMessageMediaPhoto | undefined,
+        readonly media?: tl.RawMessageMediaPhoto,
     ) {
         const location = {
             _: 'inputPhotoFileLocation',
@@ -38,7 +37,9 @@ export class Photo extends FileLocation {
 
         let bestSize: tl.RawPhotoSize | tl.RawPhotoSizeProgressive
 
-        const progressive = raw.sizes.find(it => it._ === 'photoSizeProgressive')
+        const progressive = raw.sizes.find((it) => it._ === 'photoSizeProgressive') as
+            | tl.RawPhotoSizeProgressive
+            | undefined
 
         if (progressive) {
             location.thumbSize = progressive.type
@@ -92,7 +93,7 @@ export class Photo extends FileLocation {
      * Whether this photo is an animated profile picture
      */
     get isAnimatedAvatar(): boolean {
-        return Boolean(this.raw.videoSizes?.some(s => s._ === 'videoSize' && s.type === 'u'))
+        return Boolean(this.raw.videoSizes?.some((s) => s._ === 'videoSize' && s.type === 'u'))
     }
 
     /**
@@ -100,7 +101,7 @@ export class Photo extends FileLocation {
      */
     get isMarkupAvatar(): boolean {
         return Boolean(
-            this.raw.videoSizes?.some(s => s._ === 'videoSizeEmojiMarkup' || s._ === 'videoSizeStickerMarkup'),
+            this.raw.videoSizes?.some((s) => s._ === 'videoSizeEmojiMarkup' || s._ === 'videoSizeStickerMarkup'),
         )
     }
 
@@ -121,8 +122,8 @@ export class Photo extends FileLocation {
      * represented by the current object.
      */
     get thumbnails(): ReadonlyArray<Thumbnail> {
-        const res = this.raw.sizes.map(sz => new Thumbnail(this.raw, sz))
-        this.raw.videoSizes?.forEach(sz => res.push(new Thumbnail(this.raw, sz)))
+        const res = this.raw.sizes.map((sz) => new Thumbnail(this.raw, sz))
+        this.raw.videoSizes?.forEach((sz) => res.push(new Thumbnail(this.raw, sz)))
 
         return res
     }
@@ -137,7 +138,7 @@ export class Photo extends FileLocation {
      * @param type  Thumbnail type
      */
     getThumbnail(type: string): Thumbnail | null {
-        return this.thumbnails.find(it => it.type === type) ?? null
+        return this.thumbnails.find((it) => it.type === type) ?? null
     }
 
     /**

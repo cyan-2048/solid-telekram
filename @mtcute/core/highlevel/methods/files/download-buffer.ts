@@ -1,8 +1,6 @@
 import { concatBuffers } from '../../../utils/buffer-utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { FileDownloadLocation, FileDownloadParameters } from '../../types/index.js'
-import { FileLocation } from '../../types/index.js'
-
+import { ITelegramClient } from '../../client.types.js'
+import { FileDownloadLocation, FileDownloadParameters, FileLocation } from '../../types/index.js'
 import { downloadAsIterable } from './download-iterable.js'
 
 /**

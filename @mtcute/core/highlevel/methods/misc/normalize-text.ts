@@ -1,7 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputText } from '../../types/misc/entities.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputText } from '../../types/misc/entities.js'
 import { resolveUser } from '../users/resolve-peer.js'
 
 const empty: [string, undefined] = ['', undefined]

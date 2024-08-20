@@ -1,10 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike } from '../../types/index.js'
-import { Photo } from '../../types/index.js'
-
+import { ITelegramClient } from '../../client.types.js'
+import { InputPeerLike, Photo } from '../../types/index.js'
 import { resolveUser } from './resolve-peer.js'
 
 /**

@@ -1,24 +1,20 @@
-import type { mtp, tl } from '@mtcute/tl'
-import type { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
+import { mtp, tl } from '@mtcute/tl'
+import { TlReaderMap, TlWriterMap } from '@mtcute/tl-runtime'
 
 import { getPlatform } from '../platform.js'
-import type { StorageManager } from '../storage/storage.js'
-import { MtArgumentError, MtUnsupportedError, MtcuteError } from '../types/index.js'
-import type { ComposedMiddleware, Middleware } from '../utils/composer.js'
-import { composeMiddlewares } from '../utils/composer.js'
-import type { ControllablePromise, DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
-import { createControllablePromise } from '../utils/index.js'
+import { StorageManager } from '../storage/storage.js'
+import { MtArgumentError, MtcuteError, MtUnsupportedError } from '../types/index.js'
+import { ComposedMiddleware, composeMiddlewares, Middleware } from '../utils/composer.js'
+import { ControllablePromise, createControllablePromise, DcOptions, ICryptoProvider, Logger } from '../utils/index.js'
 import { assertTypeIs, isTlRpcError } from '../utils/type-assertions.js'
-
-import type { ConfigManager } from './config-manager.js'
+import { ConfigManager } from './config-manager.js'
 import { basic as defaultMiddlewares } from './middlewares/default.js'
 import { MultiSessionConnection } from './multi-session-connection.js'
-import type { PersistentConnectionParams } from './persistent-connection.js'
-import type { ReconnectionStrategy } from './reconnection.js'
-import { defaultReconnectionStrategy } from './reconnection.js'
+import { PersistentConnectionParams } from './persistent-connection.js'
+import { defaultReconnectionStrategy, ReconnectionStrategy } from './reconnection.js'
 import { ServerSaltManager } from './server-salt.js'
-import type { SessionConnection, SessionConnectionParams } from './session-connection.js'
-import type { TransportFactory } from './transports/index.js'
+import { SessionConnection, SessionConnectionParams } from './session-connection.js'
+import { TransportFactory } from './transports/index.js'
 
 export type ConnectionKind = 'main' | 'upload' | 'download' | 'downloadSmall'
 
@@ -456,7 +452,7 @@ export class DcConnectionManager {
         this.main.setCount(count)
     }
 
-    async destroy(): Promise<void> {
+    async destroy() {
         await this.main.destroy()
         await this.upload.destroy()
         await this.download.destroy()
@@ -469,15 +465,15 @@ export class DcConnectionManager {
  * Class that manages all connections to Telegram servers.
  */
 export class NetworkManager {
-    readonly _log: Logger
-    readonly _storage: StorageManager
+    readonly _log
+    readonly _storage
 
     readonly _initConnectionParams: tl.RawInitConnectionRequest
     readonly _transportFactory: TransportFactory
     readonly _reconnectionStrategy: ReconnectionStrategy<PersistentConnectionParams>
     readonly _connectionCount: ConnectionCountDelegate
 
-    protected readonly _dcConnections: Map<number, DcConnectionManager> = new Map()
+    protected readonly _dcConnections = new Map<number, DcConnectionManager>()
     protected _primaryDc?: DcConnectionManager
 
     private _updateHandler: (upd: tl.TypeUpdates, fromClient: boolean) => void
@@ -811,7 +807,7 @@ export class NetworkManager {
         let res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
 
         if (!isTlRpcError(res)) {
-            // eslint-disable-next-line ts/no-unsafe-return
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return res
         }
 
@@ -819,9 +815,9 @@ export class NetworkManager {
 
         if (manager === this._primaryDc) {
             if (
-                err.startsWith('PHONE_MIGRATE_')
-                || err.startsWith('NETWORK_MIGRATE_')
-                || err.startsWith('USER_MIGRATE_')
+                err.startsWith('PHONE_MIGRATE_') ||
+                err.startsWith('NETWORK_MIGRATE_') ||
+                err.startsWith('USER_MIGRATE_')
             ) {
                 const newDc = Number(err.slice(err.lastIndexOf('_') + 1))
 
@@ -853,7 +849,7 @@ export class NetworkManager {
             res = await multi.sendRpc(message, params?.timeout, params?.abortSignal, params?.chainId)
         }
 
-        // eslint-disable-next-line ts/no-unsafe-return
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return res
     }
 
@@ -866,7 +862,7 @@ export class NetworkManager {
         }
     }
 
-    getPoolSize(kind: ConnectionKind, dcId?: number): number {
+    getPoolSize(kind: ConnectionKind, dcId?: number) {
         const dc = dcId ? this._dcConnections.get(dcId) : this._primaryDc
 
         if (!dc) {
@@ -882,7 +878,7 @@ export class NetworkManager {
         return dc[kind].getPoolSize()
     }
 
-    getPrimaryDcId(): number {
+    getPrimaryDcId() {
         if (!this._primaryDc) throw new MtcuteError('Not connected to any DC')
 
         return this._primaryDc.dcId

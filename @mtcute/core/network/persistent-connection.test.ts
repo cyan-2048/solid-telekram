@@ -1,10 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { StubTelegramTransport, createStub, defaultTestCryptoProvider } from '@mtcute/test'
+
+import { createStub, defaultTestCryptoProvider, StubTelegramTransport } from '@mtcute/test'
 
 import { LogManager } from '../utils/index.js'
-
-import type { PersistentConnectionParams } from './persistent-connection.js'
-import { PersistentConnection } from './persistent-connection.js'
+import { PersistentConnection, PersistentConnectionParams } from './persistent-connection.js'
 import { defaultReconnectionStrategy } from './reconnection.js'
 
 class FakePersistentConnection extends PersistentConnection {
@@ -17,7 +16,6 @@ class FakePersistentConnection extends PersistentConnection {
     onConnected() {
         this.onConnectionUsable()
     }
-
     onError() {}
     onMessage() {}
 }

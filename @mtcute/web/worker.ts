@@ -1,17 +1,15 @@
 import { setPlatform } from '@mtcute/core/platform.js'
-import type {
+import {
     ClientMessageHandler,
     RespondFn,
     SendFn,
     SomeWorker,
+    TelegramWorker as TelegramWorkerBase,
     TelegramWorkerOptions,
+    TelegramWorkerPort as TelegramWorkerPortBase,
     TelegramWorkerPortOptions,
     WorkerCustomMethods,
     WorkerMessageHandler,
-} from '@mtcute/core/worker.js'
-import {
-    TelegramWorker as TelegramWorkerBase,
-    TelegramWorkerPort as TelegramWorkerPortBase,
 } from '@mtcute/core/worker.js'
 
 import { WebPlatform } from './platform.js'
@@ -80,7 +78,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
                         return
                     }
 
-                    // eslint-disable-next-line ts/no-unsafe-argument
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                     handler(message.data, respond)
                 })
                 port.start()
@@ -92,7 +90,7 @@ export class TelegramWorker<T extends WorkerCustomMethods> extends TelegramWorke
         if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
             const respond: RespondFn = self.postMessage.bind(self)
 
-            // eslint-disable-next-line ts/no-unsafe-argument
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             self.addEventListener('message', (message: MessageEvent) => handler(message.data, respond))
 
             return respond
@@ -115,7 +113,7 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
             const send: SendFn = worker.postMessage.bind(worker)
 
             const messageHandler = (ev: MessageEvent) => {
-                // eslint-disable-next-line ts/no-unsafe-argument
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 handler(ev.data)
             }
 
@@ -147,13 +145,14 @@ export class TelegramWorkerPort<T extends WorkerCustomMethods> extends TelegramW
                     return
                 }
 
-                // eslint-disable-next-line ts/no-unsafe-argument
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
                 handler(ev.data)
             }
 
             worker.port.addEventListener('message', messageHandler)
             worker.port.start()
 
+            // eslint-disable-next-line prefer-const
             let cancelBeforeExit: () => void
 
             const close = () => {

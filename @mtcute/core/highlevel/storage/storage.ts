@@ -1,13 +1,10 @@
-import type { ServiceOptions } from '../../storage/service/base.js'
-import type { StorageManager } from '../../storage/storage.js'
-import type { PublicPart } from '../../types/utils.js'
-
-import type { ITelegramStorageProvider } from './provider.js'
+import { ServiceOptions } from '../../storage/service/base.js'
+import { StorageManager } from '../../storage/storage.js'
+import { PublicPart } from '../../types/utils.js'
+import { ITelegramStorageProvider } from './provider.js'
 import { CurrentUserService } from './service/current-user.js'
-import type { PeersServiceOptions } from './service/peers.js'
-import { PeersService } from './service/peers.js'
-import type { RefMessagesServiceOptions } from './service/ref-messages.js'
-import { RefMessagesService } from './service/ref-messages.js'
+import { PeersService, PeersServiceOptions } from './service/peers.js'
+import { RefMessagesService, RefMessagesServiceOptions } from './service/ref-messages.js'
 import { UpdatesStateService } from './service/updates.js'
 
 interface TelegramStorageManagerOptions {
@@ -23,9 +20,9 @@ export interface TelegramStorageManagerExtraOptions {
 export class TelegramStorageManager {
     private provider
 
-    readonly updates: UpdatesStateService
+    readonly updates
     readonly self: PublicPart<CurrentUserService>
-    readonly refMsgs: RefMessagesService
+    readonly refMsgs
     readonly peers: PublicPart<PeersService>
 
     constructor(
@@ -56,7 +53,7 @@ export class TelegramStorageManager {
         )
     }
 
-    async clear(withAuthKeys = false): Promise<void> {
+    async clear(withAuthKeys = false) {
         await this.provider.peers.deleteAll()
         await this.provider.refMessages.deleteAll()
         await this.mt.clear(withAuthKeys)

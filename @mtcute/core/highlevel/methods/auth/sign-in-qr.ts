@@ -1,16 +1,13 @@
 import { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
-import type { MaybePromise } from '../../../types/utils.js'
-import type { ControllablePromise } from '../../../utils/controllable-promise.js'
-import { createControllablePromise } from '../../../utils/controllable-promise.js'
+import { MaybePromise } from '../../../types/utils.js'
+import { ControllablePromise, createControllablePromise } from '../../../utils/controllable-promise.js'
 import { sleepWithAbort } from '../../../utils/misc-utils.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
-import type { ITelegramClient, ServerUpdateHandler } from '../../client.types.js'
-import type { MaybeDynamic } from '../../types/index.js'
-import { User } from '../../types/index.js'
+import { ITelegramClient, ServerUpdateHandler } from '../../client.types.js'
+import { MaybeDynamic, User } from '../../types/index.js'
 import { resolveMaybeDynamic } from '../../utils/misc-utils.js'
-
 import { checkPassword } from './check-password.js'
 
 // @available=user
@@ -125,7 +122,7 @@ export async function signInQr(
                 )
             } catch (e) {
                 if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') && params.password) {
-                    return await handle2fa(params.password)
+                    return handle2fa(params.password)
                 }
 
                 throw e
@@ -156,7 +153,7 @@ export async function signInQr(
                         )
                     } catch (e) {
                         if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') && params.password) {
-                            return await handle2fa(params.password)
+                            return handle2fa(params.password)
                         }
 
                         throw e

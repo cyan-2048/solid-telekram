@@ -1,6 +1,5 @@
-import type { ITelegramClient } from '../../client.types.js'
-import type { ArrayPaginated, InputPeerLike } from '../../types/index.js'
-import { PeersIndex } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { ArrayPaginated, InputPeerLike, PeersIndex } from '../../types/index.js'
 import { Boost } from '../../types/premium/boost.js'
 import { makeArrayPaginated } from '../../utils/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -37,7 +36,7 @@ export async function getBoosts(
     const peers = PeersIndex.from(res)
 
     return makeArrayPaginated(
-        res.boosts.map(it => new Boost(it, peers)),
+        res.boosts.map((it) => new Boost(it, peers)),
         res.count,
         res.nextOffset,
     )

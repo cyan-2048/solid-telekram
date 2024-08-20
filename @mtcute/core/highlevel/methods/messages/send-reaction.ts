@@ -1,17 +1,14 @@
-import type { MaybeArray } from '../../../types/utils.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type {
+import { MaybeArray } from '../../../types/utils.js'
+import { ITelegramClient } from '../../client.types.js'
+import {
     InputMessageId,
     InputReaction,
     Message,
-} from '../../types/index.js'
-import {
     normalizeInputMessageId,
     normalizeInputReaction,
 } from '../../types/index.js'
 import { assertIsUpdatesGroup } from '../../updates/utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
-
 import { _findMessageInUpdate } from './find-in-update.js'
 
 /**

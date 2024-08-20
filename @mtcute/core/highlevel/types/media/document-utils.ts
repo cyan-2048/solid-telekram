@@ -1,4 +1,4 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { Audio } from './audio.js'
 import { Document } from './document.js'
@@ -9,17 +9,17 @@ import { Voice } from './voice.js'
 export type ParsedDocument = Sticker | Voice | Audio | Video | Document
 
 /** @internal */
-export function parseSticker(doc: tl.RawDocument): Sticker | undefined {
+export function parseSticker(doc: tl.RawDocument) {
     const stickerAttr = doc.attributes.find(
-        a => a._ === 'documentAttributeSticker' || a._ === 'documentAttributeCustomEmoji',
+        (a) => a._ === 'documentAttributeSticker' || a._ === 'documentAttributeCustomEmoji',
     )
 
     if (stickerAttr) {
         const sz = doc.attributes.find(
-            it => it._ === 'documentAttributeImageSize' || it._ === 'documentAttributeVideo',
-        )!
+            (it) => it._ === 'documentAttributeImageSize' || it._ === 'documentAttributeVideo',
+        )! as tl.RawDocumentAttributeImageSize | tl.RawDocumentAttributeVideo
 
-        return new Sticker(doc, stickerAttr, sz)
+        return new Sticker(doc, stickerAttr as tl.RawDocumentAttributeSticker | tl.RawDocumentAttributeCustomEmoji, sz)
     }
 }
 

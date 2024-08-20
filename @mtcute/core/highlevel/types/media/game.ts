@@ -1,8 +1,7 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { makeInspectable } from '../../utils/index.js'
 import { memoizeGetters } from '../../utils/memoize.js'
-
 import { Photo } from './photo.js'
 import { Video } from './video.js'
 
@@ -54,7 +53,9 @@ export class Game {
     get animation(): Video | null {
         if (this.game.document?._ !== 'document') return null
 
-        const attr = this.game.document.attributes.find(it => it._ === 'documentAttributeVideo')
+        const attr = this.game.document.attributes.find((it) => it._ === 'documentAttributeVideo') as
+            | tl.RawDocumentAttributeVideo
+            | undefined
 
         if (!attr) {
             return null

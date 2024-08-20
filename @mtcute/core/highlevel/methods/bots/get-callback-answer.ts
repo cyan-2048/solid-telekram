@@ -1,9 +1,8 @@
-import type { tl } from '@mtcute/tl'
+import { tl } from '@mtcute/tl'
 
 import { getPlatform } from '../../../platform.js'
-import type { ITelegramClient } from '../../client.types.js'
-import type { InputMessageId } from '../../types/index.js'
-import { normalizeInputMessageId } from '../../types/index.js'
+import { ITelegramClient } from '../../client.types.js'
+import { InputMessageId, normalizeInputMessageId } from '../../types/index.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 /**
@@ -54,7 +53,7 @@ export async function getCallbackAnswer(
     const { chatId, message } = normalizeInputMessageId(params)
     const { data, game, timeout = 10000, fireAndForget } = params
 
-    let password: tl.TypeInputCheckPasswordSRP | undefined
+    let password: tl.TypeInputCheckPasswordSRP | undefined = undefined
 
     if (params?.password) {
         const pwd = await client.call({ _: 'account.getPassword' })
@@ -68,7 +67,7 @@ export async function getCallbackAnswer(
             msgId: message,
             data: typeof data === 'string' ? getPlatform().utf8Encode(data) : data,
             password,
-            game,
+            game: game,
         },
         { timeout, throw503: true },
     )
