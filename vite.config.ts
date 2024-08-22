@@ -118,6 +118,10 @@ export default defineConfig({
 				replacement: "eventemitter3",
 			},
 			{
+				find: "node:events",
+				replacement: "eventemitter3",
+			},
+			{
 				find: "safe-buffer",
 				replacement: "buffer",
 			},

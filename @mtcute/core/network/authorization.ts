@@ -1,133 +1,207 @@
 import Long from 'long'
-
-// @ts-ignore
 import { mtp } from '@mtcute/tl'
-import { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
+import type { TlPublicKey } from '@mtcute/tl/binary/rsa-keys.js'
 import { TlBinaryReader, TlBinaryWriter, TlSerializationCounter } from '@mtcute/tl-runtime'
 
 import { MtArgumentError, MtSecurityError, MtTypeAssertionError } from '../types/index.js'
 import { buffersEqual, concatBuffers, dataViewFromBuffer } from '../utils/buffer-utils.js'
 import { findKeyByFingerprints } from '../utils/crypto/keys.js'
-import { millerRabin } from '../utils/crypto/miller-rabin.js'
+// import { millerRabin } from "../utils/crypto/miller-rabin.js";
 import { generateKeyAndIvFromNonce } from '../utils/crypto/mtproto.js'
 import { xorBuffer, xorBufferInPlace } from '../utils/crypto/utils.js'
-import { bigIntModPow, bigIntToBuffer, bufferToBigInt, ICryptoProvider, Logger } from '../utils/index.js'
+import type { ICryptoProvider, Logger } from '../utils/index.js'
+import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../utils/index.js'
 import { mtpAssertTypeIs } from '../utils/type-assertions.js'
-import { SessionConnection } from './session-connection.js'
-import bigInt, { BigInteger } from 'big-integer'
+import { BigInteger } from 'jsbn'
+import type { SessionConnection } from './session-connection.js'
+
+const native = typeof BigInt !== 'undefined'
 
 // Heavily based on code from https://github.com/LonamiWebs/Telethon/blob/master/telethon/network/authenticator.py
 
+// const knownPrime =
+//     "0xC71CAEB9C6B1C9048E6C522F70F13F73980D40238E3E21C14934D037563D930F48198A0AA7C14058229493D22530F4DBFA336F6E0AC925139543AED44CCE7C3720FD51F69458705AC68CD4FE6B6B13ABDC9746512969328454F18FAF8C595F642477FE96BB2A941D5BCD1D4AC8CC49880708FA9B378E3C4F3A9060BEE67CF9A4A4A695811051907E162753B56B0F6B410DBA74D8A84B2A14B3144E0EF1284754FD17ED950D5965B4B9DD46582DB1178D169C6BC465B0D6FF9CA3928FEF5B9AE4E418FC15E83EBEA0F87FA9FF5EED70050DED2849F47BF959D956850CE929851F0D8115F635B105EE2E4E15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5B";
+
 // see https://core.telegram.org/mtproto/security_guidelines
-const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
-// const DH_SAFETY_RANGE = 2n ** (2048n - 64n)
-const KNOWN_DH_PRIME = bigInt(
-    'C71CAEB9C6B1C9048E6C522F70F13F73980D40238E3E21C14934D037563D930F48198A0AA7C14058229493D22530F4DBFA336F6E0AC925139543AED44CCE7C3720FD51F69458705AC68CD4FE6B6B13ABDC9746512969328454F18FAF8C595F642477FE96BB2A941D5BCD1D4AC8CC49880708FA9B378E3C4F3A9060BEE67CF9A4A4A695811051907E162753B56B0F6B410DBA74D8A84B2A14B3144E0EF1284754FD17ED950D5965B4B9DD46582DB1178D169C6BC465B0D6FF9CA3928FEF5B9AE4E418FC15E83EBEA0F87FA9FF5EED70050DED2849F47BF959D956850CE929851F0D8115F635B105EE2E4E15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5B',
-    16,
-)
-const TWO_POW_2047 = bigInt[2].pow(2047)
-const TWO_POW_2048 = bigInt[2].pow(2048)
+// const DH_SAFETY_RANGE = bigInt[2].pow(2048 - 64)
+// const DH_SAFETY_RANGE = native ? BigInt(2) ** (BigInt(2048) - BigInt(64)) : new BigInteger("2").pow(2048 - 64);
+// eslint-disable-next-line style/max-len
+// const KNOWN_DH_PRIME = native ? BigInt(knownPrime) : new BigInteger(knownPrime);
+// const TWO_POW_2047 = native ? BigInt(2) ** BigInt(2047) : new BigInteger("2").pow(2047);
+// const TWO_POW_2048 = native ? BigInt(2) ** BigInt(2048) : new BigInteger("2").pow(2048);
 
 interface CheckedPrime {
-    prime: BigInteger
+    prime: bigint | BigInteger
     generators: number[]
 }
 
-const checkedPrimesCache: CheckedPrime[] = []
+// const checkedPrimesCache: CheckedPrime[] = [];
 
-function checkDhPrime(crypto: ICryptoProvider, log: Logger, dhPrime: BigInteger, g: number) {
-    if (KNOWN_DH_PRIME.eq(dhPrime)) {
-        log.debug('server is using known dh prime, skipping validation')
+// function checkDhPrime(crypto: ICryptoProvider, log: Logger, dhPrime: bigint | BigInteger, g: number) {
+//     if (KNOWN_DH_PRIME === dhPrime) {
+//         log.debug("server is using known dh prime, skipping validation");
 
-        return
-    }
+//         return;
+//     }
 
-    let checkedPrime = checkedPrimesCache.find((x) => x.prime.eq(dhPrime))
+//     let checkedPrime = checkedPrimesCache.find((x) => x.prime === dhPrime);
 
-    if (!checkedPrime) {
-        if (dhPrime.leq(TWO_POW_2047) || dhPrime.geq(TWO_POW_2048)) {
-            throw new MtSecurityError('Step 3: dh_prime is not in the 2048-bit range')
-        }
+//     if (!checkedPrime) {
+//         if (typeof dhPrime == "bigint") {
+//             if (dhPrime <= (TWO_POW_2047 as bigint) || dhPrime >= (TWO_POW_2048 as bigint)) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not in the 2048-bit range");
+//             }
 
-        if (!millerRabin(crypto, dhPrime)) {
-            throw new MtSecurityError('Step 3: dh_prime is not prime')
-        }
-        if (!millerRabin(crypto, dhPrime.minus(1).divide(2))) {
-            throw new MtSecurityError('Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime')
-        }
+//             if (!millerRabin(crypto, dhPrime)) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not prime");
+//             }
+//             if (!millerRabin(crypto, (dhPrime - BigInt(1)) / BigInt(2))) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime");
+//             }
 
-        log.debug('dh_prime is probably prime')
+//             log.debug("dh_prime is probably prime");
 
-        checkedPrime = {
-            prime: dhPrime,
-            generators: [],
-        }
-        checkedPrimesCache.push(checkedPrime)
-    } else {
-        log.debug('dh_prime is probably prime (cached)')
-    }
+//             checkedPrime = {
+//                 prime: dhPrime,
+//                 generators: [],
+//             };
+//         } else {
+//             if (
+//                 dhPrime.compareTo(TWO_POW_2047 as BigInteger) <= 0 ||
+//                 dhPrime.compareTo(TWO_POW_2048 as BigInteger) >= 0
+//             ) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not in the 2048-bit range");
+//             }
 
-    const generatorChecked = checkedPrime.generators.includes(g)
+//             if (!millerRabin(crypto, dhPrime)) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not prime");
+//             }
+//             if (!millerRabin(crypto, dhPrime.subtract(BigInteger.ONE).divide(new BigInteger("2")))) {
+//                 throw new MtSecurityError("Step 3: dh_prime is not a safe prime - (dh_prime-1)/2 is not prime");
+//             }
 
-    if (generatorChecked) {
-        log.debug('g = %d is already checked for dh_prime', g)
+//             log.debug("dh_prime is probably prime");
 
-        return
-    }
+//             checkedPrime = {
+//                 prime: dhPrime,
+//                 generators: [],
+//             };
+//         }
 
-    switch (g) {
-        case 2:
-            if (dhPrime.mod(8).neq(7)) {
-                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 8 != 7')
-            }
-            break
-        case 3:
-            if (dhPrime.mod(2).neq(2)) {
-                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 3 != 2')
-            }
-            break
-        case 4:
-            break
-        case 5: {
-            const mod = dhPrime.mod(5)
+//         checkedPrimesCache.push(checkedPrime);
+//     } else {
+//         log.debug("dh_prime is probably prime (cached)");
+//     }
 
-            if (mod.neq(bigInt.one) && mod.neq(4)) {
-                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4')
-            }
-            break
-        }
-        case 6: {
-            const mod = dhPrime.mod(24)
+//     const generatorChecked = checkedPrime.generators.includes(g);
 
-            if (mod.neq(19) && mod.neq(23)) {
-                throw new MtSecurityError('Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23')
-            }
-            break
-        }
-        case 7: {
-            const mod = dhPrime.mod(7)
+//     if (generatorChecked) {
+//         log.debug("g = %d is already checked for dh_prime", g);
 
-            if (mod.neq(3) && mod.neq(5) && mod.neq(6)) {
-                throw new MtSecurityError(
-                    'Step 3: ivalid g - dh_prime mod 7 != 3 && dh_prime mod 7 != 5 && dh_prime mod 7 != 6',
-                )
-            }
-            break
-        }
-        default:
-            throw new MtSecurityError(`Step 3: ivalid g - unknown g = ${g}`)
-    }
+//         return;
+//     }
 
-    checkedPrime.generators.push(g)
+//     if (typeof dhPrime == "bigint")
+//         switch (g) {
+//             case 2:
+//                 if (dhPrime % BigInt(8) !== BigInt(7)) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 8 != 7");
+//                 }
+//                 break;
+//             case 3:
+//                 if (dhPrime % BigInt(3) !== BigInt(2)) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 3 != 2");
+//                 }
+//                 break;
+//             case 4:
+//                 break;
+//             case 5: {
+//                 const mod = dhPrime % BigInt(5);
 
-    log.debug('g = %d is safe to use with dh_prime', g)
-}
+//                 if (mod !== BigInt(1) && mod !== BigInt(4)) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4");
+//                 }
+//                 break;
+//             }
+//             case 6: {
+//                 const mod = dhPrime % BigInt(24);
+
+//                 if (mod !== BigInt(19) && mod !== BigInt(23)) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23");
+//                 }
+//                 break;
+//             }
+//             case 7: {
+//                 const mod = dhPrime % BigInt(7);
+
+//                 if (mod !== BigInt(3) && mod !== BigInt(5) && mod !== BigInt(6)) {
+//                     throw new MtSecurityError(
+//                         "Step 3: ivalid g - dh_prime mod 7 != 3 && dh_prime mod 7 != 5 && dh_prime mod 7 != 6"
+//                     );
+//                 }
+//                 break;
+//             }
+//             default:
+//                 throw new MtSecurityError(`Step 3: ivalid g - unknown g = ${g}`);
+//         }
+//     else
+//         switch (g) {
+//             case 2:
+//                 if (!dhPrime.mod(new BigInteger("8")).equals(new BigInteger("7"))) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 8 != 7");
+//                 }
+//                 break;
+//             case 3:
+//                 if (!dhPrime.mod(new BigInteger("3")).equals(new BigInteger("2"))) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 3 != 2");
+//                 }
+//                 break;
+//             case 4:
+//                 break;
+//             case 5: {
+//                 const mod = dhPrime.mod(new BigInteger("5"));
+
+//                 if (!mod.equals(BigInteger.ONE) && !mod.equals(new BigInteger("4"))) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 5 != 1 && dh_prime mod 5 != 4");
+//                 }
+//                 break;
+//             }
+//             case 6: {
+//                 const mod = dhPrime.mod(new BigInteger("24"));
+
+//                 if (!mod.equals(new BigInteger("19")) && !mod.equals(new BigInteger("23"))) {
+//                     throw new MtSecurityError("Step 3: ivalid g - dh_prime mod 24 != 19 && dh_prime mod 24 != 23");
+//                 }
+//                 break;
+//             }
+//             case 7: {
+//                 const mod = dhPrime.mod(new BigInteger("7"));
+
+//                 if (
+//                     !mod.equals(new BigInteger("3")) &&
+//                     !mod.equals(new BigInteger("5")) &&
+//                     !mod.equals(new BigInteger("6"))
+//                 ) {
+//                     throw new MtSecurityError(
+//                         "Step 3: ivalid g - dh_prime mod 7 != 3 && dh_prime mod 7 != 5 && dh_prime mod 7 != 6"
+//                     );
+//                 }
+//                 break;
+//             }
+//             default:
+//                 throw new MtSecurityError(`Step 3: ivalid g - unknown g = ${g}`);
+//         }
+
+//     checkedPrime.generators.push(g);
+
+//     log.debug("g = %d is safe to use with dh_prime", g);
+// }
 
 function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Uint8Array {
     // since Summer 2021, they use "version of RSA with a variant of OAEP+ padding explained below"
 
-    const keyModulus = bigInt(key.modulus, 16)
-    const keyExponent = bigInt(key.exponent, 16)
+    const keyModulus = native ? BigInt(`0x${key.modulus}`) : new BigInteger(`0x${key.modulus}`)
+    const keyExponent = native ? BigInt(`0x${key.exponent}`) : new BigInteger(`0x${key.modulus}`)
 
     if (data.length > 144) {
         throw new MtArgumentError('Failed to pad: too big data')
@@ -156,8 +230,14 @@ function rsaPad(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey): Ui
 
         const decryptedDataBigint = bufferToBigInt(decryptedData)
 
-        if (decryptedDataBigint.geq(keyModulus)) {
-            continue
+        if (native) {
+            if (decryptedDataBigint >= keyModulus) {
+                continue
+            }
+        } else {
+            if ((decryptedDataBigint as BigInteger).compareTo(keyModulus as BigInteger) >= 0) {
+                continue
+            }
         }
 
         const encryptedBigint = bigIntModPow(decryptedDataBigint, keyExponent, keyModulus)
@@ -174,7 +254,11 @@ function rsaEncrypt(data: Uint8Array, crypto: ICryptoProvider, key: TlPublicKey)
         crypto.randomBytes(235 - data.length),
     ])
 
-    const encryptedBigInt = bufferToBigInt(toEncrypt).modPow(bigInt(key.exponent, 16), bigInt(key.modulus, 16))
+    const encryptedBigInt = bigIntModPow(
+        bufferToBigInt(toEncrypt),
+        native ? BigInt(`0x${key.exponent}`) : new BigInteger(`0x${key.exponent}`),
+        native ? BigInt(`0x${key.modulus}`) : new BigInteger(`0x${key.modulus}`),
+    )
 
     return bigIntToBuffer(encryptedBigInt)
 }
@@ -189,7 +273,6 @@ export async function doAuthorization(
     crypto: ICryptoProvider,
     expiresIn?: number,
 ): Promise<[Uint8Array, Long, number]> {
-    // eslint-disable-next-line dot-notation
     const session = connection['_session']
     const readerMap = session._readerMap
     const writerMap = session._writerMap
@@ -245,16 +328,14 @@ export async function doAuthorization(
 
     if (!publicKey) {
         throw new MtSecurityError(
-            'Step 2: Could not find server public key with any of these fingerprints: ' + serverKeys.join(', '),
+            `Step 2: Could not find server public key with any of these fingerprints: ${serverKeys.join(', ')}`,
         )
     }
     log.debug('found server key, fp = %s, old = %s', publicKey.fingerprint, publicKey.old)
 
-    if (import.meta.env.DEV) {
-        if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
-            throw new MtSecurityError('Step 2: pq is prime')
-        }
-    }
+    // if (millerRabin(crypto, bufferToBigInt(resPq.pq))) {
+    //     throw new MtSecurityError("Step 2: pq is prime");
+    // }
 
     const [p, q] = await crypto.factorizePQ(resPq.pq)
     log.debug('factorized PQ: PQ = %h, P = %h, Q = %h', resPq.pq, p, q)
@@ -326,22 +407,20 @@ export async function doAuthorization(
     mtpAssertTypeIs('auth step 3', serverDhInner, 'mt_server_DH_inner_data')
 
     if (!buffersEqual(serverDhInner.nonce, nonce)) {
-        throw Error('Step 3: invalid nonce from server')
+        throw new Error('Step 3: invalid nonce from server')
     }
     if (!buffersEqual(serverDhInner.serverNonce, resPq.serverNonce)) {
-        throw Error('Step 3: invalid server nonce from server')
+        throw new Error('Step 3: invalid server nonce from server')
     }
 
     const dhPrime = bufferToBigInt(serverDhInner.dhPrime)
     const timeOffset = Math.floor(Date.now() / 1000) - serverDhInner.serverTime
     session.updateTimeOffset(timeOffset)
 
-    const g = bigInt(serverDhInner.g)
+    const g = native ? BigInt(serverDhInner.g) : new BigInteger(String(serverDhInner.g))
     const gA = bufferToBigInt(serverDhInner.gA)
 
-    if (import.meta.env.DEV) {
-        checkDhPrime(crypto, log, dhPrime, serverDhInner.g)
-    }
+    // checkDhPrime(crypto, log, dhPrime, serverDhInner.g);
 
     let retryId = Long.ZERO
     const serverSalt = xorBuffer(newNonce.subarray(0, 8), resPq.serverNonce.subarray(0, 8))
@@ -353,25 +432,64 @@ export async function doAuthorization(
         const authKey = bigIntToBuffer(bigIntModPow(gA, b, dhPrime))
         const authKeyAuxHash = crypto.sha1(authKey).subarray(0, 8)
 
-        if (import.meta.env.DEV) {
-            // validate DH params
-            if (g.leq(1) || g.geq(dhPrime.minus(bigInt.one))) {
-                throw new MtSecurityError('g is not within (1, dh_prime - 1)')
-            }
-            if (gA.leq(1) || gA.geq(dhPrime.minus(bigInt.one))) {
-                throw new MtSecurityError('g_a is not within (1, dh_prime - 1)')
-            }
-            if (gB.leq(1) || gB.geq(dhPrime.minus(bigInt.one))) {
-                throw new MtSecurityError('g_b is not within (1, dh_prime - 1)')
-            }
+        // if (
+        //     typeof g == "bigint" &&
+        //     typeof dhPrime == "bigint" &&
+        //     typeof gA == "bigint" &&
+        //     typeof gB == "bigint" &&
+        //     typeof DH_SAFETY_RANGE == "bigint"
+        // ) {
+        //     // validate DH params
+        //     if (g <= 1 || g >= dhPrime - BigInt(1)) {
+        //         throw new MtSecurityError("g is not within (1, dh_prime - 1)");
+        //     }
+        //     if (gA <= 1 || gA >= dhPrime - BigInt(1)) {
+        //         throw new MtSecurityError("g_a is not within (1, dh_prime - 1)");
+        //     }
+        //     if (gB <= 1 || gB >= dhPrime - BigInt(1)) {
+        //         throw new MtSecurityError("g_b is not within (1, dh_prime - 1)");
+        //     }
 
-            if (gA.lt(DH_SAFETY_RANGE) || gA.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-                throw new MtSecurityError('g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
-            }
-            if (gB.lt(DH_SAFETY_RANGE) || gB.gt(dhPrime.minus(DH_SAFETY_RANGE))) {
-                throw new MtSecurityError('g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})')
-            }
-        }
+        //     if (gA <= DH_SAFETY_RANGE || gA >= dhPrime - DH_SAFETY_RANGE) {
+        //         throw new MtSecurityError("g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})");
+        //     }
+        //     if (gB <= DH_SAFETY_RANGE || gB >= dhPrime - DH_SAFETY_RANGE) {
+        //         throw new MtSecurityError("g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})");
+        //     }
+        // } else {
+        //     // validate DH params
+        //     if (
+        //         (g as BigInteger).compareTo(BigInteger.ONE) <= 0 ||
+        //         (g as BigInteger).compareTo((dhPrime as BigInteger).subtract(BigInteger.ONE)) >= 0
+        //     ) {
+        //         throw new MtSecurityError("g is not within (1, dh_prime - 1)");
+        //     }
+        //     if (
+        //         (gA as BigInteger).compareTo(BigInteger.ONE) <= 0 ||
+        //         (gA as BigInteger).compareTo((dhPrime as BigInteger).subtract(BigInteger.ONE)) >= 0
+        //     ) {
+        //         throw new MtSecurityError("g_a is not within (1, dh_prime - 1)");
+        //     }
+        //     if (
+        //         (gB as BigInteger).compareTo(BigInteger.ONE) <= 0 ||
+        //         (gB as BigInteger).compareTo((dhPrime as BigInteger).subtract(BigInteger.ONE)) >= 0
+        //     ) {
+        //         throw new MtSecurityError("g_b is not within (1, dh_prime - 1)");
+        //     }
+
+        //     if (
+        //         (gA as BigInteger).compareTo(DH_SAFETY_RANGE as BigInteger) <= 0 ||
+        //         (gA as BigInteger).compareTo((dhPrime as BigInteger).subtract(DH_SAFETY_RANGE as BigInteger)) >= 0
+        //     ) {
+        //         throw new MtSecurityError("g_a is not within (2^{2048-64}, dh_prime - 2^{2048-64})");
+        //     }
+        //     if (
+        //         (gB as BigInteger).compareTo(DH_SAFETY_RANGE as BigInteger) <= 0 ||
+        //         (gB as BigInteger).compareTo((dhPrime as BigInteger).subtract(DH_SAFETY_RANGE as BigInteger)) >= 0
+        //     ) {
+        //         throw new MtSecurityError("g_b is not within (2^{2048-64}, dh_prime - 2^{2048-64})");
+        //     }
+        // }
 
         const gB_ = bigIntToBuffer(gB, 0, false)
 
@@ -434,7 +552,7 @@ export async function doAuthorization(
             continue
         }
 
-        if (dhGen._ !== 'mt_dh_gen_ok') throw new Error() // unreachable
+        if (dhGen._ !== 'mt_dh_gen_ok') throw new Error('unreachable')
 
         const expectedHash = crypto.sha1(concatBuffers([newNonce, new Uint8Array([1]), authKeyAuxHash]))
 

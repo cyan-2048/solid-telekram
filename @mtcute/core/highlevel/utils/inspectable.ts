@@ -15,9 +15,9 @@ function getAllGettersNames<T>(obj: T): (keyof T)[] {
     do {
         Object.getOwnPropertyNames(obj).forEach((prop) => {
             if (
-                prop !== '__proto__' &&
-                Object.getOwnPropertyDescriptor(obj, prop)?.get &&
-                !getters.includes(prop as any)
+                prop !== '__proto__'
+                && Object.getOwnPropertyDescriptor(obj, prop)?.get
+                && !getters.includes(prop as any)
             ) {
                 getters.push(prop as any)
             }
