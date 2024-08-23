@@ -92,13 +92,6 @@ export default defineConfig({
 
 	esbuild: {
 		treeShaking: true,
-		minifySyntax: true,
-		minifyWhitespace: false,
-		minifyIdentifiers: false,
-
-		supported: {
-			"object-rest-spread": false,
-		},
 	},
 
 	resolve: {
@@ -135,7 +128,7 @@ export default defineConfig({
 		cssCodeSplit: false,
 		modulePreload: false,
 		assetsInlineLimit: 0,
-		minify: "esbuild",
+		minify: "terser",
 		ssr: false,
 		sourcemap: false,
 		rollupOptions: {
