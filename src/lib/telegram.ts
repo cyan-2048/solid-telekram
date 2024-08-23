@@ -180,6 +180,7 @@ class App {
 						onLoginError(3, e.code || 0, e.text || e.message);
 					} else {
 						onLoginError(3, (e && e.code) || 0, e && (e.text || e.message));
+						console.error(e);
 						phoneNumber();
 					}
 				});

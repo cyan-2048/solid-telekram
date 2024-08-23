@@ -13,7 +13,7 @@ import { MtUnsupportedError } from '../types/index.js'
 import type { BaseTelegramClientOptions } from './base.js'
 import { BaseTelegramClient } from './base.js'
 import type { ITelegramClient } from './client.types.js'
-import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, PeersIndex, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, Sticker, StickerSet, StickerSourceType, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStatusUpdate, UserTypingUpdate } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayWithTotal, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatMember, ChatMemberUpdate, ChatPreview, ChatlistPreview, ChosenInlineResult, CollectibleInfo, DeleteBusinessMessageUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputFileLike, InputInlineResult, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputStickerSet, InputStickerSetItem, InputText, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, PeerReaction, PeerStories, PeersIndex, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, SentCode, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerSourceType, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadFileLike, UploadedFile, User, UserStatusUpdate, UserTypingUpdate } from './types/index.js'
 import type { StringSessionData } from './utils/string-session.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
 import { Conversation } from './types/conversation.js'
@@ -186,6 +186,7 @@ import type { SendCopyParams } from './methods/messages/send-copy.js'
 import { sendCopy } from './methods/messages/send-copy.js'
 import { sendMediaGroup } from './methods/messages/send-media-group.js'
 import { sendMedia } from './methods/messages/send-media.js'
+import { sendPaidReaction } from './methods/messages/send-paid-reaction.js'
 import type { QuoteParamsFrom } from './methods/messages/send-quote.js'
 import { quoteWithMedia, quoteWithMediaGroup, quoteWithText } from './methods/messages/send-quote.js'
 import { sendReaction } from './methods/messages/send-reaction.js'
@@ -215,7 +216,9 @@ import { getBoosts } from './methods/premium/get-boosts.js'
 import { getBusinessChatLinks } from './methods/premium/get-business-chat-links.js'
 import { getBusinessConnection } from './methods/premium/get-business-connection.js'
 import { getMyBoostSlots } from './methods/premium/get-my-boost-slots.js'
+import { getStarsTransactions } from './methods/premium/get-stars-transactions.js'
 import { iterBoosters } from './methods/premium/iter-boosters.js'
+import { iterStarsTransactions } from './methods/premium/iter-stars-transactions.js'
 import { setBusinessIntro } from './methods/premium/set-business-intro.js'
 import { setBusinessWorkHours } from './methods/premium/set-business-work-hours.js'
 import { addStickerToSet } from './methods/stickers/add-sticker-to-set.js'
@@ -519,6 +522,7 @@ export interface TelegramClient extends ITelegramClient {
      */
     on(name: 'delete_business_message', handler: ((upd: DeleteBusinessMessageUpdate) => void)): this
 
+    // eslint-disable-next-line ts/no-explicit-any
     on(name: string, handler: (...args: any[]) => void): this
 
     /**
@@ -4153,6 +4157,34 @@ export interface TelegramClient extends ITelegramClient {
              */
             progressCallback?: (uploaded: number, total: number) => void
         }): Promise<Message>
+
+    /**
+     * Send a paid reaction using Telegram Stars.
+     *
+     * **Available**: 👤 users only
+     *
+     * @returns
+     *   Message to which the reaction was sent, if available.
+     *   The message is normally available for users, but may not be available for bots in PMs.
+     */
+    sendPaidReaction(
+        params: InputMessageId & {
+        /** Whether to send the reaction anonymously */
+            anonymous?: boolean
+
+            /**
+             * Number of reactions to send
+             *
+             * @default  1
+             */
+            count?: number
+
+            /**
+             * Whether to dispatch the returned edit message event
+             * to the client's update handler.
+             */
+            shouldDispatch?: true
+        }): Promise<MessageReactions>
     /** Send a text in reply to a given quote */
     quoteWithText(
         message: Message,
@@ -4563,13 +4595,46 @@ export interface TelegramClient extends ITelegramClient {
      */
     getMyBoostSlots(): Promise<BoostSlot[]>
     /**
-     * Iterate over boosters of a channel.
+     * Get Telegram Stars transactions for a given peer.
      *
-     * Wrapper over {@link getBoosters}
+     * You can either pass `self` to get your own transactions,
+     * or a chat/bot ID to get transactions of that peer.
      *
      * **Available**: ✅ both users and bots
      *
-     * @returns  IDs of stories that were removed
+     * @param peerId  Peer ID
+     * @param params  Additional parameters
+     */
+    getStarsTransactions(
+        peerId: InputPeerLike,
+        params?: {
+        /**
+         * If passed, only transactions of this direction will be returned
+         */
+            direction?: 'incoming' | 'outgoing'
+            /**
+             * Direction to sort transactions date by (default: desc)
+             */
+            sort?: 'asc' | 'desc'
+            /**
+             * If passed, will only return transactions related to  this subscription ID
+             */
+            subscriptionId?: string
+            /** Pagination offset */
+            offset?: string
+            /**
+             * Pagination limit
+             *
+             * @default  100
+             */
+            limit?: number
+        }): Promise<StarsStatus>
+    /**
+     * Iterate over boosters of a channel.
+     *
+     * Wrapper over {@link getBoosters}
+     * **Available**: ✅ both users and bots
+     *
      */
     iterBoosters(
         peerId: InputPeerLike,
@@ -4589,6 +4654,37 @@ export interface TelegramClient extends ITelegramClient {
              */
             chunkSize?: number
         }): AsyncIterableIterator<Boost>
+    /**
+     * Iterate over Telegram Stars transactions for a given peer.
+     *
+     * You can either pass `self` to get your own transactions,
+     * or a chat/bot ID to get transactions of that peer.
+     *
+     * Wrapper over {@link getStarsTransactions}
+     *
+     * **Available**: ✅ both users and bots
+     *
+     * @param peerId  Peer ID
+     * @param params  Additional parameters
+     */
+    iterStarsTransactions(
+        peerId: InputPeerLike,
+        params?: Parameters<typeof getStarsTransactions>[2] & {
+        /**
+         * Total number of boosters to fetch
+         *
+         * @default  Infinity, i.e. fetch all boosters
+         */
+            limit?: number
+
+            /**
+             * Number of boosters to fetch per request
+             * Usually you don't need to change this
+             *
+             * @default  100
+             */
+            chunkSize?: number
+        }): AsyncIterableIterator<StarsTransaction>
 
     /**
      * Set current user's business introduction.
@@ -6179,6 +6275,9 @@ TelegramClient.prototype.sendMediaGroup = function (...args) {
 TelegramClient.prototype.sendMedia = function (...args) {
     return sendMedia(this._client, ...args)
 }
+TelegramClient.prototype.sendPaidReaction = function (...args) {
+    return sendPaidReaction(this._client, ...args)
+}
 TelegramClient.prototype.quoteWithText = function (...args) {
     return quoteWithText(this._client, ...args)
 }
@@ -6281,8 +6380,14 @@ TelegramClient.prototype.getBusinessConnection = function (...args) {
 TelegramClient.prototype.getMyBoostSlots = function (...args) {
     return getMyBoostSlots(this._client, ...args)
 }
+TelegramClient.prototype.getStarsTransactions = function (...args) {
+    return getStarsTransactions(this._client, ...args)
+}
 TelegramClient.prototype.iterBoosters = function (...args) {
     return iterBoosters(this._client, ...args)
+}
+TelegramClient.prototype.iterStarsTransactions = function (...args) {
+    return iterStarsTransactions(this._client, ...args)
 }
 TelegramClient.prototype.setBusinessIntro = function (...args) {
     return setBusinessIntro(this._client, ...args)
@@ -6531,6 +6636,9 @@ TelegramClient.prototype.getServerUpdateHandler = function (...args) {
 }
 TelegramClient.prototype.changePrimaryDc = function (...args) {
     return this._client.changePrimaryDc(...args)
+}
+TelegramClient.prototype.getMtprotoMessageId = function (...args) {
+    return this._client.getMtprotoMessageId(...args)
 }
 TelegramClient.prototype.onServerUpdate = function () {
     throw new Error('onServerUpdate is not available for TelegramClient, use .on() methods instead')

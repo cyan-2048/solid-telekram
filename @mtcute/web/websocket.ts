@@ -62,9 +62,7 @@ export abstract class BaseWebSocketTransport extends EventEmitter implements ITe
         baseDomain?: string
         /** Map of sub-domains (key is DC ID, value is string) */
         subdomains?: Record<string, string>
-        } = {}) {
-        
-        subdomains = subdomains ?? subdomainsMap;
+    } = {}) {
         super()
 
         if (!ws) {

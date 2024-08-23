@@ -1,17 +1,14 @@
-import type { tl } from "@mtcute/tl";
+import type { tl } from '@mtcute/tl'
+import JSBI from 'jsbi'
 
-import { getPlatform } from "../../platform.js";
-import { MtSecurityError, MtUnsupportedError } from "../../types/errors.js";
-import { bigIntModPow, bigIntToBuffer, bufferToBigInt } from "../bigint-utils.js";
-import { concatBuffers } from "../buffer-utils.js";
-import { assertTypeIs } from "../type-assertions.js";
+import { getPlatform } from '../../platform.js'
+import { MtSecurityError, MtUnsupportedError } from '../../types/errors.js'
+import { ZERO, bigIntModPow, bigIntToBuffer, bufferToBigInt } from '../bigint-utils.js'
+import { concatBuffers } from '../buffer-utils.js'
+import { assertTypeIs } from '../type-assertions.js'
 
-import type { ICryptoProvider } from "./abstract.js";
-import { xorBuffer } from "./utils.js";
-
-import { BigInteger } from "jsbn";
-
-const native = typeof BigInt !== "undefined";
+import type { ICryptoProvider } from './abstract.js'
+import { xorBuffer } from './utils.js'
 
 /**
  * Compute password hash as defined by MTProto.
@@ -27,12 +24,12 @@ export async function computePasswordHash(
     crypto: ICryptoProvider,
     password: Uint8Array,
     salt1: Uint8Array,
-    salt2: Uint8Array
+    salt2: Uint8Array,
 ): Promise<Uint8Array> {
-    const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(concatBuffers([salt, data, salt]));
-    const PH1 = (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(SH(pwd, salt1), salt2);
+    const SH = (data: Uint8Array, salt: Uint8Array) => crypto.sha256(concatBuffers([salt, data, salt]))
+    const PH1 = (pwd: Uint8Array, salt1: Uint8Array, salt2: Uint8Array) => SH(SH(pwd, salt1), salt2)
 
-    return SH(await crypto.pbkdf2(PH1(password, salt1, salt2), salt1, 100000), salt2);
+    return SH(await crypto.pbkdf2(PH1(password, salt1, salt2), salt1, 100000), salt2)
 }
 
 /**
@@ -45,22 +42,22 @@ export async function computePasswordHash(
 export async function computeNewPasswordHash(
     crypto: ICryptoProvider,
     algo: tl.TypePasswordKdfAlgo,
-    password: string
+    password: string,
 ): Promise<Uint8Array> {
-    assertTypeIs("account.getPassword", algo, "passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow");
+    assertTypeIs('account.getPassword', algo, 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow')
 
-    const salt1 = new Uint8Array(algo.salt1.length + 32);
-    salt1.set(algo.salt1);
-    crypto.randomFill(salt1.subarray(algo.salt1.length));
-    (algo as tl.Mutable<typeof algo>).salt1 = salt1;
+    const salt1 = new Uint8Array(algo.salt1.length + 32)
+    salt1.set(algo.salt1)
+    crypto.randomFill(salt1.subarray(algo.salt1.length))
+    ;(algo as tl.Mutable<typeof algo>).salt1 = salt1
 
-    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2);
+    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2)
 
-    const g = BigInt(algo.g);
-    const p = bufferToBigInt(algo.p);
-    const x = bufferToBigInt(_x);
+    const g = JSBI.BigInt(algo.g)
+    const p = bufferToBigInt(algo.p)
+    const x = bufferToBigInt(_x)
 
-    return bigIntToBuffer(bigIntModPow(g, x, p), 256);
+    return bigIntToBuffer(bigIntModPow(g, x, p), 256)
 }
 
 /**
@@ -73,76 +70,60 @@ export async function computeNewPasswordHash(
 export async function computeSrpParams(
     crypto: ICryptoProvider,
     request: tl.account.RawPassword,
-    password: string
+    password: string,
 ): Promise<tl.RawInputCheckPasswordSRP> {
     // nice naming thx durov
     if (
-        !request.currentAlgo ||
-        request.currentAlgo._ !== "passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow"
+        !request.currentAlgo
+        || request.currentAlgo._ !== 'passwordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow'
     ) {
-        throw new MtUnsupportedError(`Unknown algo ${request.currentAlgo?._}`);
+        throw new MtUnsupportedError(`Unknown algo ${request.currentAlgo?._}`)
     }
 
-    const algo = request.currentAlgo;
+    const algo = request.currentAlgo
 
     // here and after: underscored variables are buffers, non-underscored are bigInts
 
     if (!request.srpB) {
-        throw new MtSecurityError("SRP_B is not present in the request");
+        throw new MtSecurityError('SRP_B is not present in the request')
     }
 
     if (!request.srpId) {
-        throw new MtSecurityError("SRP_ID is not present in the request");
+        throw new MtSecurityError('SRP_ID is not present in the request')
     }
 
-    const g = native ? BigInt(algo.g) : new BigInteger(algo.g);
-    const _g = bigIntToBuffer(g, 256);
-    const p = bufferToBigInt(algo.p);
-    const gB = bufferToBigInt(request.srpB);
+    const g = JSBI.BigInt(algo.g)
+    const _g = bigIntToBuffer(g, 256)
+    const p = bufferToBigInt(algo.p)
+    const gB = bufferToBigInt(request.srpB)
 
-    const a = bufferToBigInt(crypto.randomBytes(256));
-    const gA = bigIntModPow(g, a, p);
-    const _gA = bigIntToBuffer(gA, 256);
+    const a = bufferToBigInt(crypto.randomBytes(256))
+    const gA = bigIntModPow(g, a, p)
+    const _gA = bigIntToBuffer(gA, 256)
 
-    const H = (data: Uint8Array) => crypto.sha256(data);
+    const H = (data: Uint8Array) => crypto.sha256(data)
 
-    const _k = crypto.sha256(concatBuffers([algo.p, _g]));
-    const _u = crypto.sha256(concatBuffers([_gA, request.srpB]));
-    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2);
-    const k = bufferToBigInt(_k);
-    const u = bufferToBigInt(_u);
-    const x = bufferToBigInt(_x);
+    const _k = crypto.sha256(concatBuffers([algo.p, _g]))
+    const _u = crypto.sha256(concatBuffers([_gA, request.srpB]))
+    const _x = await computePasswordHash(crypto, getPlatform().utf8Encode(password), algo.salt1, algo.salt2)
+    const k = bufferToBigInt(_k)
+    const u = bufferToBigInt(_u)
+    const x = bufferToBigInt(_x)
 
-    const v = bigIntModPow(g, x, p);
-    const kV = native
-        ? ((k as bigint) * (v as bigint)) % (p as bigint)
-        : (k as BigInteger).multiply(v as BigInteger).remainder(p as BigInteger);
+    const v = bigIntModPow(g, x, p)
+    const kV = JSBI.remainder(JSBI.multiply(k, v), p)
 
-    let t: bigint | BigInteger;
+    let t = JSBI.subtract(gB, kV)
+    if (JSBI.lessThan(t, ZERO)) t = JSBI.add(t, p)
+    const sA = bigIntModPow(t, JSBI.add(a, JSBI.multiply(u, x)), p)
+    const _kA = H(bigIntToBuffer(sA, 256))
 
-    if (native) {
-        t = (gB as bigint) - (kV as bigint);
-        if (t < BigInt(0)) (t as bigint) += p as bigint;
-    } else {
-        t = (gB as BigInteger).subtract(kV as BigInteger).remainder(p as BigInteger);
-        if ((t as BigInteger).compareTo(BigInteger.ZERO) < 0) t = (t as BigInteger).add(p as BigInteger);
-    }
-
-    const sA = bigIntModPow(
-        t,
-        native
-            ? (a as bigint) + (u as bigint) * (x as bigint)
-            : (a as BigInteger).add((u as BigInteger).multiply(x as BigInteger)),
-        p
-    );
-    const _kA = H(bigIntToBuffer(sA, 256));
-
-    const _M1 = H(concatBuffers([xorBuffer(H(algo.p), H(_g)), H(algo.salt1), H(algo.salt2), _gA, request.srpB, _kA]));
+    const _M1 = H(concatBuffers([xorBuffer(H(algo.p), H(_g)), H(algo.salt1), H(algo.salt2), _gA, request.srpB, _kA]))
 
     return {
-        _: "inputCheckPasswordSRP",
+        _: 'inputCheckPasswordSRP',
         srpId: request.srpId,
         A: _gA,
         M1: _M1,
-    };
+    }
 }
