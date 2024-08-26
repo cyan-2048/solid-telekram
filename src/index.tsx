@@ -3,9 +3,6 @@ if (import.meta.env.DEV) {
 	await import("./system");
 }
 
-import KaiAdsUrl from "./lib/kaiads/kaiads.v5.min.js?url";
-console.error("KAIADS", KaiAdsUrl);
-
 /* @refresh reload */
 import { render } from "solid-js/web";
 
@@ -22,9 +19,9 @@ import "./styles.scss";
 import App from "./App";
 import localforage from "localforage";
 
-// if (import.meta.env.DEV) {
-import("./dev");
-// }
+if (import.meta.env.DEV) {
+	import("./dev");
+}
 
 Object.assign(window, { localforage });
 

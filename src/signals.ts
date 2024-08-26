@@ -1,6 +1,8 @@
 import { batch, createSignal, observable, createMemo } from "solid-js";
 import { EventEmitter } from "eventemitter3";
 import { telegram } from "./lib/telegram";
+
+import KaiAdsUrl from "./lib/kaiads/kaiads.v5.min.js?url";
 import {
 	Chat,
 	ChatPermissions,
@@ -1384,26 +1386,60 @@ export const chatMinisearch = new MiniSearch({
 
 let __previousDialogs: Set<UIDialog> = new Set();
 
-observable(dialogs).subscribe((dialogs) => {
+observable(dialogs).subscribe(async (dialogs) => {
 	const prevState = __previousDialogs;
 	const newState = new Set(dialogs);
 	__previousDialogs = newState;
+	await sleep(0);
 
 	console.time("set difference 1");
 	// stuff in new state that's not in prevState
 	const added = newState.difference(prevState);
 	console.timeEnd("set difference 1");
-	console.error("ADDED UI DIALOGS", added);
+	await sleep(0);
+	// console.error("ADDED UI DIALOGS", added);
 	console.time("set difference 2");
 	const removed = prevState.difference(newState);
 	console.timeEnd("set difference 2");
-	console.error("REMOVED UI DIALOGS", removed);
+	await sleep(0);
+	// console.error("REMOVED UI DIALOGS", removed);
 
-	chatMinisearch.discardAll(Array.from(removed).map((a) => a.id));
-	chatMinisearch.addAllAsync(
-		Array.from(added).map((dialog) => ({
-			name: (dialog.$.chat.isSelf ? "Saved Messages" : dialog.$.chat.displayName).toLowerCase(),
-			id: dialog.id,
-		}))
-	);
+	if (removed.size) chatMinisearch.discardAll(Array.from(removed).map((a) => a.id));
+	await sleep(0);
+	if (added.size)
+		chatMinisearch.addAllAsync(
+			Array.from(added).map((dialog) => ({
+				name: (dialog.$.chat.isSelf ? "Saved Messages" : dialog.$.chat.displayName).toLowerCase(),
+				id: dialog.id,
+			}))
+		);
 });
+
+type __getKaiAd = (opts: KaiAdOpts) => void;
+interface KaiAdOpts {
+	publisher: string;
+	app: string;
+	slot: string;
+	onerror: (err: any) => void;
+	onready: (ad: any) => void;
+	h?: number;
+	w?: number;
+	container?: HTMLDivElement;
+	timeout?: number;
+}
+
+console.error("KAIADS", KaiAdsUrl);
+
+const _getKaiAd: () => Promise<__getKaiAd> = () =>
+	Promise.resolve(
+		import.meta.env.DEV ? require("./lib/kaiads/kaiads.v5.min.js") : System.import(KaiAdsUrl).then((m) => m.default)
+	);
+
+let cached: Promise<__getKaiAd>;
+
+const initGetKaiAd = () => cached || (cached = _getKaiAd());
+
+export async function getKaiAd(opts: KaiAdOpts) {
+	const e = await initGetKaiAd();
+	e(opts);
+}

@@ -34,6 +34,7 @@ import {
 	uiDialog,
 	setMessageInfo,
 	toaster,
+	getKaiAd,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -99,8 +100,10 @@ function willFocusScrollIfNeeded(e: { currentTarget: HTMLElement }) {
 const enum TextboxOptionsSelected {
 	SEND,
 	CANCEL,
-	VIEW,
+	CHAT_INFO,
 	PASTE,
+	COPY,
+	KAIAD,
 }
 
 function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsSelected | null) => void }) {
@@ -171,16 +174,28 @@ function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsS
 						Paste
 					</OptionsItem>
 				</Show>
+				<Show when={props.canSend}>
+					<OptionsItem
+						on:sn-willfocus={willFocusScrollIfNeeded}
+						classList={{ option: true, [styles.option_item]: true }}
+						tabIndex={-1}
+						on:sn-enter-down={() => {
+							props.onSelect(TextboxOptionsSelected.COPY);
+						}}
+					>
+						Copy
+					</OptionsItem>
+				</Show>
 				<OptionsItem
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
 					on:sn-enter-down={() => {
-						props.onSelect(TextboxOptionsSelected.VIEW);
+						props.onSelect(TextboxOptionsSelected.KAIAD);
 					}}
 					ref={lastRef}
 				>
-					Chat info
+					Show Ad
 				</OptionsItem>
 			</OptionsMenuMaxHeight>
 		</Options>
@@ -930,7 +945,7 @@ function TextBoxOptionsWrap(props: {
 					<TextboxOptions
 						canSend={!!text()}
 						onSelect={async (e) => {
-							await sleep(2);
+							await sleep(100);
 
 							props.setShowOptions(false);
 
@@ -950,6 +965,25 @@ function TextBoxOptionsWrap(props: {
 									const text = sessionStorage.getItem("copy");
 									sessionStorage.removeItem("copy");
 									if (text) typeInTextbox(text, props.textboxRef);
+									break;
+								}
+
+								case TextboxOptionsSelected.COPY: {
+									sessionStorage.setItem("copy", text());
+									break;
+								}
+
+								case TextboxOptionsSelected.KAIAD: {
+									getKaiAd({
+										publisher: "f76b7e40-cd70-4a3a-b98f-f03ad252de83",
+										app: "kaigram",
+										slot: "kaigram",
+										onerror: (err) => console.error("Custom catch:", err),
+										onready: (ad) => {
+											console.error("KAIADS READY");
+											ad.call("display");
+										},
+									});
 									break;
 								}
 
@@ -1012,7 +1046,7 @@ function TextBoxOptionsWrap(props: {
 				<Portal>
 					<EmojiPicker
 						onSelect={async (e) => {
-							await sleep(2);
+							await sleep(100);
 							props.setShowEmojiPicker(false);
 							props.textboxRef.focus();
 							await sleep(1);

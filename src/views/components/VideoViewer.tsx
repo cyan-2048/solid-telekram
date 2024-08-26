@@ -175,6 +175,7 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 	let timeout: any;
 
 	function handleKeydown(event: KeyboardEvent) {
+		if (!player) return;
 		const { key } = event;
 
 		var step = Math.max(player.duration / 20, 2);
@@ -211,6 +212,7 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 	return (
 		<div
 			onKeyDown={(e) => {
+				console.log("KEYDOWWNNN");
 				setShow(true);
 				clearTimeout(controlsTimeout);
 
@@ -230,7 +232,6 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 					return;
 				}
 
-				console.log("KEYDOWWNNN");
 				if (e.key == "Enter" || e.key == "SoftLeft") {
 					player.paused ? player.play() : player.pause();
 					setPaused(player.paused);
