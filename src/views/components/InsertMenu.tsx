@@ -98,21 +98,21 @@ export default function InsertMenu(props: { onSelect: (e: InsertMenuSelected | n
 					color="#5f33ea"
 					name="Video"
 				/>
-				<GridItem
+				{/* <GridItem
 					value={InsertMenuSelected.GIF}
 					onSelect={props.onSelect}
 					icon={<TelegramIcon name="gifs" />}
 					color="#4db9e8"
 					name="GIF"
-				/>
-				<GridItem
+				/> */}
+				{/* <GridItem
 					value={InsertMenuSelected.CONTACTS}
 					onSelect={props.onSelect}
 					icon={<TelegramIcon name="newprivate_filled" />}
 					color="#00aa5a"
 					name="Contacts"
-				/>
-				<GridItem
+				/> */}
+				{/* <GridItem
 					value={InsertMenuSelected.AUDIO}
 					onSelect={props.onSelect}
 					icon={
@@ -128,7 +128,7 @@ export default function InsertMenu(props: { onSelect: (e: InsertMenuSelected | n
 					}
 					color="#ff57d5"
 					name="Audio"
-				/>
+				/> */}
 				<GridItem
 					value={InsertMenuSelected.VOICE}
 					onSelect={props.onSelect}
@@ -136,13 +136,13 @@ export default function InsertMenu(props: { onSelect: (e: InsertMenuSelected | n
 					color="#ff57d5"
 					name="Voice Message"
 				/>
-				<GridItem
+				{/* <GridItem
 					value={InsertMenuSelected.LOCATION}
 					onSelect={props.onSelect}
 					icon={<TelegramIcon name="location" />}
 					color="#6a6a6a"
 					name="Location"
-				/>
+				/> */}
 			</div>
 		</Options>
 	);
