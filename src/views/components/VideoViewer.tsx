@@ -217,6 +217,7 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 				handleKeydown(e);
 
 				if (e.key == "Backspace") {
+					e.preventDefault();
 					if (!backspacePaused) {
 						if (
 							!document.fullscreenElement && // alternative standard method
@@ -292,7 +293,10 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 				></video>
 			</Show>
 			<Show when={!src()}>
-				<ProgressSpinner size={50} progress={progress() || 1}></ProgressSpinner>
+				<Show when={poster()}>
+					<img src={poster()}></img>
+				</Show>
+				<ProgressSpinner class={styles.progress_spin} size={50} progress={progress() || 1}></ProgressSpinner>
 			</Show>
 			<div
 				style={{
