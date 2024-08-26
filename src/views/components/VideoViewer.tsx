@@ -294,7 +294,7 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 			</Show>
 			<Show when={!src()}>
 				<Show when={poster()}>
-					<img src={poster()}></img>
+					<img class={styles.thumb} src={poster()}></img>
 				</Show>
 				<ProgressSpinner class={styles.progress_spin} size={50} progress={progress() || 1}></ProgressSpinner>
 			</Show>
