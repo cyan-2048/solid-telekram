@@ -194,3 +194,8 @@
 	top: 0;
 	left: 0;
 }
+
+.item:focus {
+	background-color: var(--accent-dark);
+	color: white;
+}

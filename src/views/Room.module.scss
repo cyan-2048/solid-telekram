@@ -8,6 +8,25 @@
 	background-color: #97beeb;
 }
 
+.info_date {
+	padding: 10px;
+	display: flex;
+	color: #6a6a6a;
+	font-size: 14px;
+
+	.date {
+		flex-grow: 1;
+		flex-shrink: 1;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.icon {
+		flex-grow: 0;
+		flex-shrink: 0;
+	}
+}
+
 .upload_image {
 	position: fixed;
 	height: 100vh;

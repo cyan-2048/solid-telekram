@@ -40,7 +40,6 @@ import TelegramIcon from "./components/TelegramIcon";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import ProgressSpinner from "./components/ProgressSpinner";
 import { isCached, loadAnimation, loadRlottie, requestFrame } from "@/lib/rlottie";
-import { media } from "@mtcute/core/highlevel/types/bots/inline-message/factories";
 
 /**
  * Chat type. Can be:
@@ -60,11 +59,11 @@ const enum ChatType {
 	GIGAGROUP = "gigagroup",
 }
 
-function toMidnight(date: dayjs.Dayjs) {
+export function toMidnight(date: dayjs.Dayjs) {
 	return date.set("hour", 0).set("minute", 0).set("second", 0);
 }
 
-function today() {
+export function today() {
 	return toMidnight(dayjs());
 }
 

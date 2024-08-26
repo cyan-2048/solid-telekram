@@ -67,3 +67,11 @@ export function formatTime(seconds: number) {
 	const t = [h, m > 9 ? m : h ? "0" + m : m || "0", s > 9 ? s : "0" + s].filter(Boolean).join(":");
 	return seconds < 0 && seconds ? `-${t}` : t;
 }
+
+export function isToday(date: Date, today = new Date()) {
+	return (
+		date.getDate() == today.getDate() &&
+		date.getMonth() == today.getMonth() &&
+		date.getFullYear() == today.getFullYear()
+	);
+}

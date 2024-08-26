@@ -11,7 +11,7 @@ import {
 	untrack,
 } from "solid-js";
 import styles from "./Login.module.scss";
-import { EE, LoginState, loginState, qrLink, setSoftkeys, setStatusbarColor, telegram } from "@signals";
+import { EE, LoginState, loginState, qrLink, setSoftkeys, setStatusbarColor, showKaiAd, telegram } from "@signals";
 import CountryCodePicker, { Country } from "./components/CountryCodePicker";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { sleep, useKeypress } from "@/lib/utils";
@@ -106,6 +106,16 @@ function HomeOptions(props: { showQr: () => void; onClose: () => void }) {
 				tabIndex={-1}
 			>
 				Log in by QR Code
+			</OptionsItem>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					showKaiAd();
+					props.onClose();
+				}}
+			>
+				Show Ad
 			</OptionsItem>
 		</Options>
 	);

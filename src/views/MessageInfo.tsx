@@ -14,11 +14,17 @@ import {
 } from "solid-js";
 import styles from "./Room.module.scss";
 import { MessageMedia, Photo, User, Video } from "@mtcute/core";
-import { reply } from "@mtcute/core/highlevel/types/bots/keyboards/factories";
 import { Dynamic, Portal } from "solid-js/web";
 import Markdown, { ModifyString } from "./components/Markdown";
-import { decideShowUsername, MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
-import { getColorFromPeer, sleep, useMessageChecks, useStore } from "@/lib/utils";
+import {
+	decideShowUsername,
+	MessageProvider,
+	switchMessageMedia,
+	today,
+	toMidnight,
+	useMessageContext,
+} from "./Messages";
+import { getColorFromPeer, isToday, sleep, useMessageChecks, useStore } from "@/lib/utils";
 import TelegramIcon from "./components/TelegramIcon";
 import { Download } from "@/lib/files/download";
 import { UsernameContainer } from "./Room";
@@ -26,6 +32,8 @@ import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
 import ImageViewer from "./components/ImageViewer";
 import VideoViewer from "./components/VideoViewer";
+import Separator from "./components/Separator";
+import dayjs from "dayjs";
 
 function ReplyBase(props: { title: JSXElement; children: JSXElement }) {
 	return (
@@ -131,6 +139,31 @@ function FocusableLink(props: { children: JSXElement }) {
 }
 
 let lastFocused: HTMLElement;
+
+function formatDate($: Date) {
+	const _today = today();
+
+	const __today = _today.toDate();
+
+	let date = "";
+
+	if (isToday($, __today)) {
+		date = "Today";
+	} else if (_today.diff(toMidnight(dayjs($)), "day") === 1) {
+		date = "Yesterday";
+	} else {
+		date = $.toLocaleDateString(navigator.language);
+	}
+
+	return (
+		date +
+		", " +
+		$.toLocaleTimeString(navigator.language, {
+			hour: "numeric",
+			minute: "numeric",
+		})
+	);
+}
 
 export default function MessageInfo(props: { $: UIMessage }) {
 	let viewRef!: HTMLDivElement;
@@ -329,6 +362,20 @@ export default function MessageInfo(props: { $: UIMessage }) {
 						</div>
 					</div>
 				</div>
+				<Separator>Sent</Separator>
+				<div class={styles.info_date}>
+					<div class={styles.date}>{formatDate(props.$.date)}</div>
+				</div>
+				<Show when={edited()}>
+					{(date) => (
+						<>
+							<Separator>Edited</Separator>
+							<div class={styles.info_date}>
+								<div class={styles.date}>{formatDate(date())}</div>
+							</div>
+						</>
+					)}
+				</Show>
 			</div>
 			<Show when={selectedPhoto()}>
 				<Portal>

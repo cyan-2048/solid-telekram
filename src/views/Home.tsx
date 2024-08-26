@@ -2,8 +2,11 @@ import styles from "./Home.module.scss";
 import { For, Show, batch, createEffect, createRenderEffect, createSignal, from, onCleanup, onMount } from "solid-js";
 import {
 	UIDialog,
+	UIDialogFilter,
 	chatMinisearch,
 	client,
+	currentTab,
+	dialogFilters,
 	dialogs,
 	dialogsJar,
 	room,
@@ -17,7 +20,7 @@ import {
 import Search from "./components/Search";
 import Content from "./components/Content";
 import Tabs, { Tab } from "./components/Tabs";
-import { resumeKeypress, sleep, useMessageChecks, useStore } from "@/lib/utils";
+import { isToday, resumeKeypress, sleep, useMessageChecks, useStore } from "@/lib/utils";
 import MarqueeOrNot from "./components/MarqueeOrNot";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -26,8 +29,10 @@ import { Unsubscriber, get, readable } from "@/lib/stores";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import { unparse } from "@/lib/unparse";
 import { ModifyString } from "./components/Markdown";
-import MiniSearch from "minisearch";
 import { debounce } from "lodash-es";
+import Options from "./components/Options";
+import OptionsItem from "./components/OptionsItem";
+import { Portal } from "solid-js/web";
 
 const focusable = true;
 
@@ -69,14 +74,6 @@ export function getWeek(d: Date) {
 	return weekNr;
 }
 
-export function isToday(date: Date, today = new Date()) {
-	return (
-		date.getDate() == today.getDate() &&
-		date.getMonth() == today.getMonth() &&
-		date.getFullYear() == today.getFullYear()
-	);
-}
-
 export function timeStamp(date: Date) {
 	const today = new Date();
 
@@ -84,25 +81,25 @@ export function timeStamp(date: Date) {
 
 	if (isSameYear) {
 		if (isToday(date, today)) {
-			return date.toLocaleTimeString([], {
+			return date.toLocaleTimeString(navigator.language, {
 				hour: "numeric",
 				minute: "numeric",
 			});
 		} else {
 			const isSameWeek = getWeek(date) == getWeek(today);
 			if (isSameWeek) {
-				return date.toLocaleDateString([], {
+				return date.toLocaleDateString(navigator.language, {
 					weekday: "short",
 				});
 			} else {
-				return date.toLocaleDateString([], {
+				return date.toLocaleDateString(navigator.language, {
 					month: "short",
 					day: "numeric",
 				});
 			}
 		}
 	} else {
-		return date.toLocaleDateString();
+		return date.toLocaleDateString(navigator.language);
 	}
 }
 
@@ -135,6 +132,86 @@ function DialogSender(props: { $: UIDialog }) {
 				<span class={styles.sender}>{lastMessage()!.sender.firstName || lastMessage()!.sender.displayName}: </span>
 			</Show>
 		</Show>
+	);
+}
+
+const SN_ID_OPTIONS = "dialog_options";
+
+// to do more shit
+const enum DialogOptionsSelected {
+	PIN,
+	UNPIN,
+
+	MUTE,
+	UNMUTE,
+
+	LOGOUT,
+	KAIAD,
+}
+
+function DialogOptions(props: {
+	$: UIDialog;
+	pinned: boolean;
+	muted: boolean;
+	onSelect: (e: DialogOptionsSelected | null) => void;
+}) {
+	onMount(() => {
+		SpatialNavigation.add(SN_ID_OPTIONS, {
+			selector: ".option",
+			restrict: "self-only",
+		});
+		SpatialNavigation.focus(SN_ID_OPTIONS);
+		setSoftkeys("", "OK", "");
+	});
+
+	onCleanup(() => {
+		SpatialNavigation.remove(SN_ID_OPTIONS);
+	});
+
+	return (
+		<Options
+			onClose={() => {
+				props.onSelect(null);
+			}}
+			title="Options"
+		>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				on:sn-enter-down={() => {
+					props.onSelect(props.pinned ? DialogOptionsSelected.UNPIN : DialogOptionsSelected.PIN);
+				}}
+				tabIndex={-1}
+			>
+				{props.pinned ? "Unpin" : "Pin"}
+			</OptionsItem>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					props.onSelect(props.muted ? DialogOptionsSelected.UNMUTE : DialogOptionsSelected.MUTE);
+				}}
+			>
+				{props.muted ? "Unmute" : "Mute"}
+			</OptionsItem>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					props.onSelect(DialogOptionsSelected.LOGOUT);
+				}}
+			>
+				Logout
+			</OptionsItem>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					props.onSelect(DialogOptionsSelected.KAIAD);
+				}}
+			>
+				Show Ad
+			</OptionsItem>
+		</Options>
 	);
 }
 
@@ -202,80 +279,115 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 		}
 	});
 
+	const [showOptions, setShowOptions] = createSignal(false);
+
 	return (
-		<div
-			ref={divRef}
-			onFocus={() => {
-				setStatusbarColor("#3b90bc");
-				setSoftkeys("New chat", "OPEN", "tg:more");
-				setFocused(true);
-			}}
-			onBlur={() => {
-				setFocused(false);
-			}}
-			on:sn-enter-down={async () => {
-				if (!props.$.messages.hasLoadedBefore) {
-					props.$.messages.loadMore();
-				}
+		<>
+			<div
+				ref={divRef}
+				onFocus={() => {
+					setStatusbarColor("#3b90bc");
+					setSoftkeys("New chat", "OPEN", "tg:more");
+					setFocused(true);
+				}}
+				onBlur={() => {
+					setFocused(false);
+				}}
+				onKeyDown={(e) => {
+					if (e.key == "SoftRight") {
+						setShowOptions(true);
+					}
+				}}
+				on:sn-enter-down={async () => {
+					if (!props.$.messages.hasLoadedBefore) {
+						props.$.messages.loadMore();
+					}
 
-				batch(() => {
-					setUIDialog(props.$);
-					setRoom(props.$.$.chat);
-					setView("room");
-				});
+					batch(() => {
+						setUIDialog(props.$);
+						setRoom(props.$.$.chat);
+						setView("room");
+					});
 
-				if (props.$.$.chat.isForum) {
-					// currently this one is so confusing
-					toaster("Forum supergroups are currently unstable!");
-				}
-			}}
-			tabIndex={-1}
-			classList={{ [styles.dialog]: true, focusable }}
-			on:sn-willfocus={(e) => {
-				scrollIntoView(e.currentTarget, {
-					scrollMode: "if-needed",
-					block: "nearest",
-					inline: "nearest",
-				});
-			}}
-		>
-			<div class={styles.icon}>
-				<ChatPhotoIcon chat={props.$.$.chat}></ChatPhotoIcon>
-			</div>
-			<div class={styles.details}>
-				<div class={styles.top}>
-					<div class={styles.name}>
-						<MarqueeOrNot marquee={focused()}>
-							{props.$.$.chat.isSelf ? "Saved Messages" : props.$.$.chat.displayName}
-						</MarqueeOrNot>
+					if (props.$.$.chat.isForum) {
+						// currently this one is so confusing
+						toaster("Forum supergroups are currently unstable!");
+					}
+				}}
+				tabIndex={-1}
+				classList={{ [styles.dialog]: true, focusable }}
+				on:sn-willfocus={(e) => {
+					scrollIntoView(e.currentTarget, {
+						scrollMode: "if-needed",
+						block: "nearest",
+						inline: "nearest",
+					});
+				}}
+			>
+				<div class={styles.icon}>
+					<ChatPhotoIcon chat={props.$.$.chat}></ChatPhotoIcon>
+				</div>
+				<div class={styles.details}>
+					<div class={styles.top}>
+						<div class={styles.name}>
+							<MarqueeOrNot marquee={focused()}>
+								{props.$.$.chat.isSelf ? "Saved Messages" : props.$.$.chat.displayName}
+							</MarqueeOrNot>
+						</div>
+						<div class={styles.time}>
+							<Show when={"verified" in props.$.$.chat.peer && props.$.$.chat.peer.verified}>
+								<VerifiedIcon width={14} height={14} class={styles.verified} />
+							</Show>
+							<Show when={muted()}>
+								<TelegramIcon classList={{ [styles.icons]: true }} name="muted" />
+							</Show>
+							<Show when={lastMessage()}>{(message) => <DialogDate $={message().date} />}</Show>
+						</div>
 					</div>
-					<div class={styles.time}>
-						<Show when={"verified" in props.$.$.chat.peer && props.$.$.chat.peer.verified}>
-							<VerifiedIcon width={14} height={14} class={styles.verified} />
-						</Show>
-						<Show when={muted()}>
-							<TelegramIcon classList={{ [styles.icons]: true }} name="muted" />
-						</Show>
-						<Show when={lastMessage()}>{(message) => <DialogDate $={message().date} />}</Show>
+					<div class={styles.bottom}>
+						<div class={styles.desc}>
+							<DialogSender $={props.$} />
+							<ModifyString text={textFactory()?.slice(0, 30) || "__"} />
+						</div>
+						<div class={styles.meta}>
+							<Show when={pinned() && !count()}>
+								<TelegramIcon name="chatspinned" />
+							</Show>
+							<Show when={count()}>
+								<div classList={{ [styles.count]: true, [styles.muted]: muted() }}>{count()}</div>
+							</Show>
+						</div>
 					</div>
 				</div>
-				<div class={styles.bottom}>
-					<div class={styles.desc}>
-						<DialogSender $={props.$} />
-						<ModifyString text={textFactory()?.slice(0, 30) || "__"} />
-					</div>
-					<div class={styles.meta}>
-						<Show when={pinned() && !count()}>
-							<TelegramIcon name="chatspinned" />
-						</Show>
-						<Show when={count()}>
-							<div classList={{ [styles.count]: true, [styles.muted]: muted() }}>{count()}</div>
-						</Show>
-					</div>
-				</div>
 			</div>
-		</div>
+
+			<Show when={showOptions()}>
+				<Portal>
+					<DialogOptions
+						onSelect={async (e) => {
+							await sleep(100);
+
+							setShowOptions(false);
+							await sleep(2);
+
+							toaster("unimplemented");
+
+							SpatialNavigation.focus("dialogs");
+						}}
+						$={props.$}
+						muted={muted()}
+						pinned={pinned()}
+					></DialogOptions>
+				</Portal>
+			</Show>
+		</>
 	);
+}
+
+function DialogFilterTab(props: { $: UIDialogFilter }) {
+	const text = useStore(() => props.$.title);
+
+	return <Tab selected={currentTab() == props.$}>{text()}</Tab>;
 }
 
 const ONE_FOCUSABLE = ".focusable";
@@ -352,8 +464,8 @@ export default function Home(props: { hidden: boolean }) {
 				hidden={props.hidden}
 				before={
 					<Tabs>
-						<Tab selected>Chats</Tab>
-						{/* <Tab>Stories</Tab> */}
+						<Tab selected={currentTab() == null}>Chats</Tab>
+						<For each={dialogFilters()}>{(a) => <DialogFilterTab $={a} />}</For>
 					</Tabs>
 				}
 			>

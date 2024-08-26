@@ -34,7 +34,7 @@ import {
 	uiDialog,
 	setMessageInfo,
 	toaster,
-	getKaiAd,
+	showKaiAd,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -974,16 +974,7 @@ function TextBoxOptionsWrap(props: {
 								}
 
 								case TextboxOptionsSelected.KAIAD: {
-									getKaiAd({
-										publisher: "f76b7e40-cd70-4a3a-b98f-f03ad252de83",
-										app: "kaigram",
-										slot: "kaigram",
-										onerror: (err) => console.error("Custom catch:", err),
-										onready: (ad) => {
-											console.error("KAIADS READY");
-											ad.call("display");
-										},
-									});
+									showKaiAd();
 									break;
 								}
 

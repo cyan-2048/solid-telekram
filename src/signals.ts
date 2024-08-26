@@ -396,7 +396,7 @@ export class UIMessage {
 				default: {
 					this.isUnsupported.set(true);
 					console.log("unsupported media type:", $.media.type, $);
-					newText = capitalizeFirstLetter($.media.type);
+					newText = capitalizeFirstLetter($.media.type.split("_").join(" "));
 				}
 			}
 		}
@@ -946,6 +946,65 @@ async function initDialogs(tg: TelegramClient) {
 	setDialogs(sortDialogs(dialogs));
 }
 
+export class UIDialogFilter {
+	$: tl.RawDialogFilter;
+
+	constructor(a: tl.RawDialogFilter) {
+		this.$ = a;
+		this.update(a);
+	}
+
+	id!: number;
+
+	title = writable("");
+
+	filterPredicate: (val: Dialog) => boolean = () => false;
+
+	filter(a: UIDialog) {
+		return this.filterPredicate(a.$);
+	}
+
+	update(a: tl.RawDialogFilter) {
+		this.$ = a;
+		this.id = a.id;
+
+		this.title.set(a.title);
+		this.filterPredicate = Dialog.filterFolder(a);
+	}
+}
+
+class UIDialogFilterJar extends Map<number, UIDialogFilter> {
+	list() {
+		return Array.from(this.values());
+	}
+
+	add(a: tl.RawDialogFilter) {
+		let has = this.get(a.id);
+		if (has) {
+			has.update(a);
+		} else {
+			this.set(a.id, (has = new UIDialogFilter(a)));
+		}
+		return has;
+	}
+}
+
+export const [currentTab, setTab] = createSignal<null | UIDialogFilter>(null);
+
+export const dialogsFilterJar = new UIDialogFilterJar();
+
+export const [dialogFilters, setDialogFilters] = createSignal<UIDialogFilter[]>([]);
+
+async function initTabs(tg: TelegramClient) {
+	const folders = await tg.getFolders();
+	folders.filters.forEach((a) => {
+		if (a._ == "dialogFilter") {
+			dialogsFilterJar.add(a);
+		}
+	});
+	setDialogFilters(dialogsFilterJar.list());
+}
+
 export async function refreshDialogsByPeer(peers: InputPeerLike[]) {
 	const tg = client();
 	if (!tg) {
@@ -1055,6 +1114,7 @@ export function resetLocalStorage() {
 async function telegramReady(tg: TelegramClient) {
 	sessionStorage.loggedIn = 1;
 	setClient(tg);
+	initTabs(tg);
 
 	await initDialogs(tg);
 
@@ -1439,7 +1499,20 @@ let cached: Promise<__getKaiAd>;
 
 const initGetKaiAd = () => cached || (cached = _getKaiAd());
 
-export async function getKaiAd(opts: KaiAdOpts) {
+async function getKaiAd(opts: KaiAdOpts) {
 	const e = await initGetKaiAd();
 	e(opts);
+}
+
+export function showKaiAd() {
+	getKaiAd({
+		publisher: "f76b7e40-cd70-4a3a-b98f-f03ad252de83",
+		app: "kaigram",
+		slot: "kaigram",
+		onerror: (err) => console.error("Custom catch:", err),
+		onready: (ad) => {
+			console.error("KAIADS READY");
+			ad.call("display");
+		},
+	});
 }
