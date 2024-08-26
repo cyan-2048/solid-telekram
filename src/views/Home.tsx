@@ -2,6 +2,7 @@ import styles from "./Home.module.scss";
 import { For, Show, batch, createEffect, createRenderEffect, createSignal, from, onCleanup, onMount } from "solid-js";
 import {
 	UIDialog,
+	chatMinisearch,
 	client,
 	dialogs,
 	dialogsJar,
@@ -137,10 +138,6 @@ function DialogSender(props: { $: UIDialog }) {
 	);
 }
 
-const minisearch = new MiniSearch({
-	fields: ["name"],
-});
-
 function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 	const [focused, setFocused] = createSignal(false);
 
@@ -199,18 +196,10 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 
 	createRenderEffect(() => {
 		// we won't index searchResults
-		if (props.isSearchResult) return;
-
-		const dialog = props.$;
-
-		minisearch.add({
-			name: (dialog.$.chat.isSelf ? "Saved Messages" : dialog.$.chat.displayName).toLowerCase(),
-			id: dialog.id,
-		});
-
-		onCleanup(() => {
-			minisearch.discard(dialog.id);
-		});
+		if (props.isSearchResult) {
+			console.error("search result dialog");
+			return;
+		}
 	});
 
 	return (
@@ -346,7 +335,7 @@ export default function Home(props: { hidden: boolean }) {
 
 	const debounced_search = debounce((str: string) => {
 		if (searchText()) {
-			setSearchResults(minisearch.search(str).map((a) => dialogsJar.get(a.id)!));
+			setSearchResults(chatMinisearch.search(str).map((a) => dialogsJar.get(a.id)!));
 		}
 	}, 150);
 
@@ -354,6 +343,8 @@ export default function Home(props: { hidden: boolean }) {
 		const toSearch = searchText();
 		debounced_search(toSearch.toLowerCase());
 	});
+
+	const [currentSlice, setCurrentSlice] = createSignal(20);
 
 	return (
 		<>
@@ -394,8 +385,17 @@ export default function Home(props: { hidden: boolean }) {
 									  }
 									: undefined
 							}
+							on:sn-navigatefailed={(e) => {
+								const direction = e.detail.direction;
+								if (direction == "down") {
+									if (currentSlice() < dialogs().length) {
+										setCurrentSlice((e) => e + 20);
+									}
+								} else if (direction == "up") {
+								}
+							}}
 						>
-							<For each={dialogs()}>{(dialog) => <DialogItem $={dialog} />}</For>
+							<For each={dialogs().slice(0, currentSlice())}>{(dialog) => <DialogItem $={dialog} />}</For>
 						</div>
 					</div>
 				</div>

@@ -279,13 +279,13 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 						Copy
 					</OptionsItem>
 				</Show>
-				<OptionsItem
+				{/* <OptionsItem
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
 				>
 					View contact
-				</OptionsItem>
+				</OptionsItem> */}
 				<OptionsItem
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}

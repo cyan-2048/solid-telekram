@@ -28,6 +28,7 @@ import dayjs from "dayjs";
 import Queue from "queue";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
+import MiniSearch from "minisearch";
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -180,6 +181,8 @@ export class UIMessage {
 	private __isGettingUser = false;
 
 	isLocation = false;
+
+	isUnsupported = writable(false);
 
 	/**
 	 * this means this will render synchrously (no scroll jumps)
@@ -341,6 +344,9 @@ export class UIMessage {
 					newText = $.action.action;
 					break;
 
+				case "contact_joined":
+					newText = "Joined Telegram";
+					break;
 				default: {
 					newText = "Unsupported Message Action: " + $.action.type;
 				}
@@ -386,6 +392,7 @@ export class UIMessage {
 					break;
 
 				default: {
+					this.isUnsupported.set(true);
 					console.log("unsupported media type:", $.media.type, $);
 					newText = capitalizeFirstLetter($.media.type);
 				}
@@ -920,7 +927,6 @@ async function initDialogs(tg: TelegramClient) {
 	for await (const dialog of tg.iterDialogs({
 		pinned: "keep",
 		archived: "exclude",
-		limit: localStorage.getItem("low_memory") ? 10 : Infinity,
 	})) {
 		if ("left" in dialog.chat.peer && dialog.chat.peer.left) {
 			continue;
@@ -936,37 +942,6 @@ async function initDialogs(tg: TelegramClient) {
 	}
 
 	setDialogs(sortDialogs(dialogs));
-}
-
-function getIdByInputPeer(peer: InputPeerLike) {
-	if (typeof peer == "number") {
-		return peer;
-	}
-
-	if (typeof peer == "string") {
-		return null;
-	}
-
-	if ("chatId" in peer) {
-		return peer.chatId;
-	}
-
-	if ("userId" in peer) {
-		return peer.userId;
-	}
-
-	if ("channelId" in peer) {
-		return peer.channelId;
-	}
-
-	if ("inputPeer" in peer) {
-		if ("peer" in peer.inputPeer) {
-			return getIdByInputPeer(peer.inputPeer.peer);
-		}
-		return getIdByInputPeer(peer.inputPeer);
-	}
-
-	return null;
 }
 
 export async function refreshDialogsByPeer(peers: InputPeerLike[]) {
@@ -1002,7 +977,6 @@ async function refreshDialogs() {
 	for await (const dialog of tg.iterDialogs({
 		pinned: "keep",
 		archived: "exclude",
-		limit: localStorage.getItem("low_memory") ? 10 : Infinity,
 	})) {
 		if ("left" in dialog.chat.peer && dialog.chat.peer.left) {
 			continue;
@@ -1318,7 +1292,7 @@ handleCombo("555", () => {
 	navigator.spatialNavigationEnabled = !navigator.spatialNavigationEnabled;
 });
 
-const nekoweb = "https://cyandiscordclient.nekoweb.org/";
+// const nekoweb = "https://cyandiscordclient.nekoweb.org/";
 
 // handleCombo("1234567", () => {
 // 	playVideo(nekoweb + "7.mp4");
@@ -1332,11 +1306,11 @@ const nekoweb = "https://cyandiscordclient.nekoweb.org/";
 // 	location.reload();
 // });
 
-handleCombo("7569", () => {
+handleCombo("7569", async () => {
 	localStorage.low_memory = "1";
-	toaster("Low memory mode enabled. Please re-launch the app.");
+	await toaster("Low memory mode doesn't do anything right now.");
 
-	window.close();
+	// window.close();
 });
 
 handleCombo("0000", async () => {
@@ -1401,7 +1375,35 @@ export async function toaster(text: string, latency?: number) {
 		return;
 	}
 
-	conns.forEach(function (conn) {
-		conn.postMessage({ message: text, latency });
-	});
+	conns.forEach((conn) => conn.postMessage({ message: text, latency }));
 }
+
+export const chatMinisearch = new MiniSearch({
+	fields: ["name"],
+});
+
+let __previousDialogs: Set<UIDialog> = new Set();
+
+observable(dialogs).subscribe((dialogs) => {
+	const prevState = __previousDialogs;
+	const newState = new Set(dialogs);
+	__previousDialogs = newState;
+
+	console.time("set difference 1");
+	// stuff in new state that's not in prevState
+	const added = newState.difference(prevState);
+	console.timeEnd("set difference 1");
+	console.error("ADDED UI DIALOGS", added);
+	console.time("set difference 2");
+	const removed = prevState.difference(newState);
+	console.timeEnd("set difference 2");
+	console.error("REMOVED UI DIALOGS", removed);
+
+	chatMinisearch.discardAll(Array.from(removed).map((a) => a.id));
+	chatMinisearch.addAllAsync(
+		Array.from(added).map((dialog) => ({
+			name: (dialog.$.chat.isSelf ? "Saved Messages" : dialog.$.chat.displayName).toLowerCase(),
+			id: dialog.id,
+		}))
+	);
+});

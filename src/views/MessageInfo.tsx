@@ -13,11 +13,11 @@ import {
 	Switch,
 } from "solid-js";
 import styles from "./Room.module.scss";
-import { MessageMedia, Photo, User } from "@mtcute/core";
+import { MessageMedia, Photo, User, Video } from "@mtcute/core";
 import { reply } from "@mtcute/core/highlevel/types/bots/keyboards/factories";
 import { Dynamic, Portal } from "solid-js/web";
 import Markdown, { ModifyString } from "./components/Markdown";
-import { decideShowUsername, MessageProvider, switchMessageMedia } from "./Messages";
+import { decideShowUsername, MessageProvider, switchMessageMedia, useMessageContext } from "./Messages";
 import { getColorFromPeer, sleep, useMessageChecks, useStore } from "@/lib/utils";
 import TelegramIcon from "./components/TelegramIcon";
 import { Download } from "@/lib/files/download";
@@ -111,6 +111,8 @@ function formatHref(str: string) {
 function FocusableLink(props: { children: JSXElement }) {
 	let spanRef!: HTMLSpanElement;
 
+	console.error("MESSAGE CONTEXT IN HEREE OMFG", useMessageContext());
+
 	return (
 		<span
 			ref={spanRef}
@@ -153,6 +155,7 @@ export default function MessageInfo(props: { $: UIMessage }) {
 	});
 
 	const [selectedPhoto, setSelectedPhoto] = createSignal<null | Photo>(null);
+	const [selectedVideo, setSelectedVideo] = createSignal<null | Video>(null);
 
 	const showUsername = createMemo(() => decideShowUsername(undefined, props.$));
 
@@ -273,49 +276,55 @@ export default function MessageInfo(props: { $: UIMessage }) {
 									}}
 									onSelect={(e: NonNullable<MessageMedia>) => {
 										console.error("MESSAGE INFO ONSELECT");
-										if (e.type == "photo") {
-											isFocusing = false;
-											setSelectedPhoto(e);
+										isFocusing = false;
+
+										switch (e.type) {
+											case "photo":
+												setSelectedPhoto(e);
+												break;
+											case "video":
+												setSelectedVideo(e);
+												break;
 										}
 									}}
 									component={switchMessageMedia(props.$.$.media?.type)}
 								/>
-							</MessageProvider>
-							<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
-								<div class={styles.text_container}>
-									<div style="max-height: unset !important;" class={styles.text_wrap}>
-										<div class={styles.text}>
-											{
-												<Markdown
-													customRenderer={(e, _default) => {
-														// console.error("MESSAGE INFO CUSTOM RENDERER", e);
-														if (e.tag == "a" && e.entity._.includes("Url")) {
-															return () => (
-																<FocusableLink>
-																	<Dynamic component={_default}></Dynamic>
-																</FocusableLink>
-															);
-														}
-													}}
-													entities={entities()}
-												/>
-											}
-											<span class={styles.extra_width} style={{ width: infoWidth() + "px" }}></span>
+								<Show when={!props.$.isSticker && (entities().entities || entities().text)}>
+									<div class={styles.text_container}>
+										<div style="max-height: unset !important;" class={styles.text_wrap}>
+											<div class={styles.text}>
+												{
+													<Markdown
+														customRenderer={(e, _default) => {
+															// console.error("MESSAGE INFO CUSTOM RENDERER", e);
+															if (e.tag == "a" && e.entity._.includes("Url")) {
+																return () => (
+																	<FocusableLink>
+																		<Dynamic component={_default}></Dynamic>
+																	</FocusableLink>
+																);
+															}
+														}}
+														entities={entities()}
+													/>
+												}
+												<span class={styles.extra_width} style={{ width: infoWidth() + "px" }}></span>
+											</div>
 										</div>
 									</div>
-								</div>
-								<div class={styles.message_info}>
-									<Show when={edited() && !props.$.$.hideEditMark}>
-										<div class={styles.edited}>edited</div>
-									</Show>
-									<Show when={props.$.isOutgoing}>
-										<div class={styles.info_check}>
-											<TelegramIcon name={check() ? "check" : "checks"} />
-										</div>
-									</Show>
-								</div>
-								<MessageAdditionalInfo $={props.$} setWidth={setInfoWidth} />
-							</Show>
+									<div class={styles.message_info}>
+										<Show when={edited() && !props.$.$.hideEditMark}>
+											<div class={styles.edited}>edited</div>
+										</Show>
+										<Show when={props.$.isOutgoing}>
+											<div class={styles.info_check}>
+												<TelegramIcon name={check() ? "check" : "checks"} />
+											</div>
+										</Show>
+									</div>
+									<MessageAdditionalInfo $={props.$} setWidth={setInfoWidth} />
+								</Show>
+							</MessageProvider>
 						</div>
 					</div>
 				</div>

@@ -12,6 +12,7 @@ import { render } from "solid-js/web";
 import "core-js/actual/array/flat";
 import "core-js/actual/array/at";
 import "core-js/actual/array/flat-map";
+import "core-js/actual/set/difference";
 
 import "core-js/actual/symbol";
 import "./lib/scrollBy";

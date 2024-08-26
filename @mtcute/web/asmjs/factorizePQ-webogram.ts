@@ -115,16 +115,16 @@ function pqPrimeLeemon(what: any): [Uint8Array, Uint8Array] {
 }
 
 export function webogramFactorizePQSync(crypto: ICryptoProvider, pq: Uint8Array): [Uint8Array, Uint8Array] {
-    //const what = bufferToBigInt(pq)
-//
-    //try {
-    //    console.time('leemon pq')
-    //    const result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
-    //    console.timeEnd('leemon pq')
-    //    return result
-    //} catch (e) {
-    //    console.error('Leemon pq failed', e)
-    //}
+    const what = bufferToBigInt(pq)
+
+    try {
+        console.time('leemon pq')
+        const result = pqPrimeLeemon(str2bigInt(what.toString(16), 16, Math.ceil(64 / bpe) + 1))
+        console.timeEnd('leemon pq')
+        return result
+    } catch (e) {
+        console.error('Leemon pq failed', e)
+    }
 
     return factorizePQSync(crypto, pq)
 }

@@ -3,7 +3,7 @@
 		"target": "ES6",
 		"useDefineForClassFields": true,
 		"module": "ESNext",
-		"lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+		"lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker", "ESNext"],
 		"skipLibCheck": true,
 
 		/* Bundler mode */

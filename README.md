@@ -52,10 +52,8 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 - [ ] Messages
   - [ ] Push Notifications
   - [ ] Telegram System Actions (not complete)
+  - [ ] Downloading Files
   - [ ] Message Attachments
-    - [ ] Uploading Files
-      - [x] Uploading Voice Messages
-      - [x] Uploading Images
     - [ ] Stickers
       - [ ] Sticker Picker
       - [x] webp
@@ -95,7 +93,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 
 - First launch of the app might take a while, the next app launches will not take so long.
 - Currently Forum Groups will act in a unstable "View as Messages" view as in the Telegram Web K client.
-- pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets)
+- pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets), non optimized stickers will run at a very horrible fps
 - using this app on a 256MB RAM KaiOS device is kinda unstable.
 
 ### Experimental Low Memory mode
@@ -131,7 +129,7 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 ## Technical Info
 
 - For KaiOS 2.5, the app utilizes _real_ asm.js and on KaiOS 3.0 it uses WebAssembly like normal.
-- mtcute is modified to use big-integer, this means BigInt can be used in KaiOS 2.5 and native BigInts are used for KaiOS 3.0.
+- mtcute is modified to use jsbi, this means BigInt can be used in KaiOS 2.5 and native BigInts are used for KaiOS 3.0.
 - mtcute is also modified in order for asm.js to be used.
 - there are 3 Web Workers
   - mtcute web worker proxy
@@ -146,7 +144,6 @@ add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
 - [emoji-data](https://github.com/iamcal/emoji-data) ([MIT License](https://github.com/iamcal/emoji-data/blob/master/LICENSE))
 - [rlottie](https://github.com/Samsung/rlottie) ([MIT License](https://github.com/Samsung/rlottie/blob/master/COPYING))
 - [js-spatial-navigation](https://github.com/luke-chang/js-spatial-navigation) ([MPL-2.0 License](https://github.com/luke-chang/js-spatial-navigation/blob/master/LICENSE))
-- [big-integer](https://github.com/peterolson/BigInteger.js) ([Unlicense License](https://github.com/peterolson/BigInteger.js/blob/master/LICENSE))
 - libwebpjs
 - many more
 

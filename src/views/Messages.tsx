@@ -1464,10 +1464,22 @@ function LocationMedia(props: FocusableMediaProps) {
 	);
 }
 
+function UnsupportedMedia() {
+	const { message, mediaType } = useMessageContext();
+
+	const unsupported = useStore(() => message().isUnsupported);
+
+	return (
+		<Show when={unsupported()}>
+			<div>Unsupported Media Type: {mediaType()}</div>
+		</Show>
+	);
+}
+
 export function switchMessageMedia(mediaType: MessageMediaType | undefined) {
 	switch (mediaType) {
-		case "audio":
-			return MusicMedia;
+		// case "audio":
+		// 	return MusicMedia;
 		case "location":
 			return LocationMedia;
 		case "voice":
@@ -1479,5 +1491,5 @@ export function switchMessageMedia(mediaType: MessageMediaType | undefined) {
 		case "photo":
 			return PhotoMedia;
 	}
-	return () => null;
+	return UnsupportedMedia;
 }
