@@ -3,6 +3,9 @@ import styles from "./VideoViewer.module.scss";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { Show, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import { toaster } from "@signals";
+import { Thumbnail, Video } from "@mtcute/core";
+import { downloadFile } from "@/lib/files/download";
+import ProgressSpinner from "./ProgressSpinner";
 
 async function rotateScreen(horizontal: boolean) {
 	if ("orientation" in window.screen) {
@@ -20,15 +23,15 @@ async function rotateScreen(horizontal: boolean) {
 	return false;
 }
 
-function exitFullscreen() {
+async function exitFullscreen() {
 	rotateScreen(false);
 
 	try {
 		if ("exitFullscreen" in document) {
-			document.exitFullscreen();
+			await document.exitFullscreen();
 		} else if ("mozCancelFullScreen" in document) {
 			// @ts-ignore
-			document.mozCancelFullScreen();
+			await document.mozCancelFullScreen();
 		}
 	} catch {}
 }
@@ -53,7 +56,7 @@ function toggleFullScreen() {
 	}
 }
 
-export default function VideoViewer(props: { poster?: string; filename?: string; src: string; onClose?: () => void }) {
+export default function VideoViewer(props: { video: Video; onClose?: () => void }) {
 	let divRef!: HTMLDivElement;
 
 	let backspacePaused = false;
@@ -64,6 +67,93 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 	const [time, setTime] = createSignal(0);
 
 	const [paused, setPaused] = createSignal(true);
+
+	const [poster, setPoster] = createSignal("");
+
+	const [progress, setProgress] = createSignal(0);
+
+	const [src, setSrc] = createSignal("");
+
+	let mounted = true;
+
+	onMount(() => {
+		const media = props.video;
+		const thumb = media.getThumbnail(Thumbnail.THUMB_320x320_BOX) || media.getThumbnail(Thumbnail.THUMB_VIDEO_PREVIEW);
+
+		const download = downloadFile(thumb!);
+
+		let url!: string;
+
+		const stateChange = () => {
+			if (download.state == "done" && mounted) {
+				setPoster((url = URL.createObjectURL(download.result)));
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+				download.abort();
+			});
+
+			return;
+		}
+
+		download.on("state", stateChange);
+
+		onCleanup(() => {
+			download.off("state", stateChange);
+			download.abort();
+			URL.revokeObjectURL(url);
+		});
+	});
+
+	onCleanup(() => {
+		mounted = false;
+	});
+
+	onMount(() => {
+		const download = downloadFile(props.video);
+
+		let url!: string;
+
+		const stateChange = () => {
+			if (download.state == "done") {
+				setProgress(100);
+				if (mounted) {
+					setSrc((url = URL.createObjectURL(download.result)));
+				}
+			}
+		};
+
+		if (download.state == "done") {
+			stateChange();
+
+			onCleanup(() => {
+				URL.revokeObjectURL(url);
+				download.abort();
+			});
+
+			return;
+		}
+
+		function progressChange() {
+			console.error("DOWNLOAD PRESS", download.progress);
+			setProgress(download.progress);
+		}
+
+		download.on("state", stateChange);
+		download.on("progress", progressChange);
+
+		onCleanup(() => {
+			download.off("progress", progressChange);
+			download.off("state", stateChange);
+			download.abort();
+			URL.revokeObjectURL(url);
+		});
+	});
 
 	onMount(() => {
 		pauseKeypress();
@@ -81,22 +171,6 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 		clearTimeout(controlsTimeout);
 		resumeKeypress();
 	});
-
-	useKeypress(
-		"Backspace",
-		() => {
-			if (!backspacePaused) {
-				if (
-					!document.fullscreenElement && // alternative standard method
-					// @ts-ignore
-					!document.mozFullScreenElement
-				)
-					props.onClose?.();
-				exitFullscreen();
-			}
-		},
-		true
-	);
 
 	let timeout: any;
 
@@ -117,7 +191,7 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 		}
 	}
 
-	const progress = () => {
+	const progressTime = () => {
 		if (time() && duration()) {
 			return (time() / duration()) * 100;
 		}
@@ -142,6 +216,19 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 
 				handleKeydown(e);
 
+				if (e.key == "Backspace") {
+					if (!backspacePaused) {
+						if (
+							!document.fullscreenElement && // alternative standard method
+							// @ts-ignore
+							!document.mozFullScreenElement
+						)
+							props.onClose?.();
+						exitFullscreen();
+					}
+					return;
+				}
+
 				console.log("KEYDOWWNNN");
 				if (e.key == "Enter" || e.key == "SoftLeft") {
 					player.paused ? player.play() : player.pause();
@@ -162,46 +249,51 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 			class={styles.viewer}
 			tabIndex={-1}
 		>
-			<video
-				poster={props.poster}
-				onError={function (evt) {
-					switch (evt.currentTarget.error!.code) {
-						case MediaError.MEDIA_ERR_ABORTED:
-							// This aborted error should be triggered by the user
-							// so we don't have to show any error messages
-							return;
-						case MediaError.MEDIA_ERR_NETWORK:
-							toaster("Network error occured when loading the video");
-							break;
-						case MediaError.MEDIA_ERR_DECODE:
-						case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-							// If users tap some video link in an offline page
-							// the error code will be MEDIA_ERR_SRC_NOT_SUPPORTED
-							// we also prompt the unsupported error message for it
-							toaster("Video file type is unsupported");
-							break;
-						// Is it possible to be unknown errors?
-						default:
-							toaster("Unknown error occured when loading the video");
-							break;
-					}
-				}}
-				ref={player}
-				onTimeUpdate={() => {
-					clearTimeout(timeout);
-					setTime(player.currentTime);
-					setPaused(player.paused);
-					timeout = setTimeout(() => {
-						if (player.paused) {
-							setPaused(player.paused);
+			<Show when={src()}>
+				<video
+					poster={poster()}
+					onError={function (evt) {
+						switch (evt.currentTarget.error!.code) {
+							case MediaError.MEDIA_ERR_ABORTED:
+								// This aborted error should be triggered by the user
+								// so we don't have to show any error messages
+								return;
+							case MediaError.MEDIA_ERR_NETWORK:
+								toaster("Network error occured when loading the video");
+								break;
+							case MediaError.MEDIA_ERR_DECODE:
+							case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+								// If users tap some video link in an offline page
+								// the error code will be MEDIA_ERR_SRC_NOT_SUPPORTED
+								// we also prompt the unsupported error message for it
+								toaster("Video file type is unsupported");
+								break;
+							// Is it possible to be unknown errors?
+							default:
+								toaster("Unknown error occured when loading the video");
+								break;
 						}
-					}, 1000);
-				}}
-				onLoadedMetadata={() => {
-					setDuration(player.duration != Infinity && !Number.isNaN(player.duration) ? player.duration : 0);
-				}}
-				src={props.src}
-			></video>
+					}}
+					ref={player}
+					onTimeUpdate={() => {
+						clearTimeout(timeout);
+						setTime(player.currentTime);
+						setPaused(player.paused);
+						timeout = setTimeout(() => {
+							if (player.paused) {
+								setPaused(player.paused);
+							}
+						}, 1000);
+					}}
+					onLoadedMetadata={() => {
+						setDuration(player.duration != Infinity && !Number.isNaN(player.duration) ? player.duration : 0);
+					}}
+					src={src()}
+				></video>
+			</Show>
+			<Show when={!src()}>
+				<ProgressSpinner size={50} progress={progress() || 1}></ProgressSpinner>
+			</Show>
 			<div
 				style={{
 					opacity: show() ? 1 : 0,
@@ -236,7 +328,7 @@ export default function VideoViewer(props: { poster?: string; filename?: string;
 					{formatTime(duration())}
 				</div>
 				<div class={styles.progress_wrap}>
-					<div class={styles.progress} style={{ width: progress() + "%" }}></div>
+					<div class={styles.progress} style={{ width: progressTime() + "%" }}></div>
 				</div>
 				<div class={styles.icon}>
 					<svg role="img" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24">

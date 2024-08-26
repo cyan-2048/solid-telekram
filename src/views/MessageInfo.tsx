@@ -25,6 +25,7 @@ import { UsernameContainer } from "./Room";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
 import ImageViewer from "./components/ImageViewer";
+import VideoViewer from "./components/VideoViewer";
 
 function ReplyBase(props: { title: JSXElement; children: JSXElement }) {
 	return (
@@ -339,6 +340,18 @@ export default function MessageInfo(props: { $: UIMessage }) {
 							viewRef.focus();
 						}}
 					></ImageViewer>
+				</Portal>
+			</Show>
+			<Show when={selectedVideo()}>
+				<Portal>
+					<VideoViewer
+						video={selectedVideo()!}
+						onClose={async () => {
+							setSelectedVideo(null);
+							await sleep(2);
+							viewRef.focus();
+						}}
+					></VideoViewer>
 				</Portal>
 			</Show>
 		</>

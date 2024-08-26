@@ -1,0 +1,73 @@
+.viewer {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 99;
+
+	background-color: black;
+
+	> video,
+	> img {
+		height: 100vh;
+		width: 100vw;
+	}
+}
+
+.controls {
+	background: linear-gradient(to top, transparent 35%, rgba(110, 110, 110, 0.6) 100%);
+	background-color: rgba(0, 0, 0, 0.6);
+	border-top: 1px solid rgba(230, 230, 230, 0.4);
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 10px 10px rgba(0, 0, 0, 0.4);
+	position: absolute;
+	height: 24px;
+	width: 100vw;
+	bottom: 0;
+	left: 0;
+
+	display: flex;
+	align-items: center;
+}
+
+.icon {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	svg {
+		color: rgb(194, 193, 192);
+	}
+	margin: 0 3px;
+}
+
+.progress_wrap {
+	position: relative;
+	height: 6px;
+	background-color: rgba(196, 201, 206, 0.3);
+	flex: 1;
+	border-radius: 6px;
+	overflow: hidden;
+	margin: 0 5px;
+}
+
+.progress {
+	background: linear-gradient(to top, transparent 35%, rgba(38, 159, 230) 100%);
+	background-color: rgba(15, 126, 194);
+	height: 6px;
+	position: absolute;
+	left: 0;
+	border-radius: 6px;
+}
+
+.buffer {
+	@extend .progress;
+	background: white;
+	opacity: 0.3;
+}
+
+.time {
+	font-size: 10px;
+	font-family: monospace;
+	margin-left: 5px;
+}
