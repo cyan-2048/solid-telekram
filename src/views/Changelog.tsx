@@ -33,12 +33,32 @@ export default function Changelog(props: { onClose: () => void }) {
 								props.onClose();
 							}
 						}}
+						class={styles.inner}
 						ref={divRef}
 						tabIndex={-1}
 					>
-						<ModifyString text="🎉" />
-						<div>First Release</div>
-						<div>(expect missing features)</div>
+						<div
+							style={{
+								"text-align": "center",
+								"font-size": "25px",
+							}}
+						>
+							<ModifyString text="🎉" />
+						</div>
+						<div
+							style={{
+								"text-align": "center",
+							}}
+						>
+							First Release
+						</div>
+						<div
+							style={{
+								"text-align": "center",
+							}}
+						>
+							<small>(expect missing features)</small>
+						</div>
 						<div>Source code available at: https://github.com/cyan-2048/solid-telekram</div>
 					</div>
 				</Options>

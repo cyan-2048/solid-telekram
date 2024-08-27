@@ -13,8 +13,10 @@ import {
 	setRoom,
 	setSoftkeys,
 	setStatusbarColor,
+	setTab,
 	setUIDialog,
 	setView,
+	showKaiAd,
 	toaster,
 } from "@signals";
 import Search from "./components/Search";
@@ -33,6 +35,7 @@ import { debounce } from "lodash-es";
 import Options from "./components/Options";
 import OptionsItem from "./components/OptionsItem";
 import { Portal } from "solid-js/web";
+import Changelog from "./Changelog";
 
 const focusable = true;
 
@@ -147,6 +150,7 @@ const enum DialogOptionsSelected {
 
 	LOGOUT,
 	KAIAD,
+	CHANGELOG,
 }
 
 function DialogOptions(props: {
@@ -175,7 +179,7 @@ function DialogOptions(props: {
 			}}
 			title="Options"
 		>
-			<OptionsItem
+			{/* <OptionsItem
 				classList={{ option: true, [styles.item]: true }}
 				on:sn-enter-down={() => {
 					props.onSelect(props.pinned ? DialogOptionsSelected.UNPIN : DialogOptionsSelected.PIN);
@@ -192,6 +196,15 @@ function DialogOptions(props: {
 				}}
 			>
 				{props.muted ? "Unmute" : "Mute"}
+			</OptionsItem> */}
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					props.onSelect(DialogOptionsSelected.CHANGELOG);
+				}}
+			>
+				Changelog
 			</OptionsItem>
 			<OptionsItem
 				classList={{ option: true, [styles.item]: true }}
@@ -279,6 +292,8 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 		}
 	});
 
+	const [showChangelog, setShowChangelog] = createSignal(false);
+
 	const [showOptions, setShowOptions] = createSignal(false);
 
 	return (
@@ -365,13 +380,28 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				<Portal>
 					<DialogOptions
 						onSelect={async (e) => {
-							await sleep(100);
-
+							const tg = client()!;
 							setShowOptions(false);
-							await sleep(2);
 
-							toaster("unimplemented");
+							switch (e) {
+								case DialogOptionsSelected.KAIAD:
+									showKaiAd();
+									break;
+								case DialogOptionsSelected.LOGOUT:
+									await sleep(100);
+									const success = confirm("Are you sure you want to logout?") ? await tg.logOut() : false;
+									if (!success) {
+										alert("Logout was not successful!");
+										await tg.storage.clear(true);
+									}
+									location.reload();
+									return;
+								case DialogOptionsSelected.CHANGELOG:
+									setShowChangelog(true);
+									return;
+							}
 
+							await sleep(100);
 							SpatialNavigation.focus("dialogs");
 						}}
 						$={props.$}
@@ -380,6 +410,15 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 					></DialogOptions>
 				</Portal>
 			</Show>
+			<Show when={showChangelog()}>
+				<Changelog
+					onClose={async () => {
+						setShowChangelog(false);
+						await sleep(100);
+						SpatialNavigation.focus("dialogs");
+					}}
+				></Changelog>
+			</Show>
 		</>
 	);
 }
@@ -387,7 +426,16 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 function DialogFilterTab(props: { $: UIDialogFilter }) {
 	const text = useStore(() => props.$.title);
 
-	return <Tab selected={currentTab() == props.$}>{text()}</Tab>;
+	return (
+		<Tab
+			onClick={() => {
+				setTab(props.$);
+			}}
+			selected={currentTab() == props.$}
+		>
+			{text()}
+		</Tab>
+	);
 }
 
 const ONE_FOCUSABLE = ".focusable";
@@ -499,15 +547,53 @@ export default function Home(props: { hidden: boolean }) {
 							}
 							on:sn-navigatefailed={(e) => {
 								const direction = e.detail.direction;
-								if (direction == "down") {
-									if (currentSlice() < dialogs().length) {
-										setCurrentSlice((e) => e + 20);
-									}
-								} else if (direction == "up") {
+
+								switch (direction) {
+									case "down":
+										if (currentSlice() < dialogs().length) {
+											setCurrentSlice((e) => e + 20);
+										}
+										break;
+
+									case "right":
+									case "left":
+										const filters = dialogFilters();
+										const current = currentTab();
+
+										if (direction == "right") {
+											if (current === null) {
+												setTab(filters[0]);
+											} else {
+												setTab(filters[Math.min(filters.indexOf(current) + 1, filters.length - 1)]);
+											}
+										} else {
+											if (current !== null) {
+												const index = filters.indexOf(current);
+												if (index) setTab(filters[Math.max(0, index - 1)]);
+												else setTab(null);
+											}
+										}
+
+										refreshFocusables();
+										SpatialNavigation.focus("dialogs");
+										break;
 								}
 							}}
 						>
-							<For each={dialogs().slice(0, currentSlice())}>{(dialog) => <DialogItem $={dialog} />}</For>
+							<Show
+								when={currentTab() == null}
+								fallback={
+									<For
+										each={dialogs()
+											.filter((a) => currentTab()!.filter(a))
+											.slice(0, currentSlice())}
+									>
+										{(dialog) => <DialogItem $={dialog} />}
+									</For>
+								}
+							>
+								<For each={dialogs().slice(0, currentSlice())}>{(dialog) => <DialogItem $={dialog} />}</For>
+							</Show>
 						</div>
 					</div>
 				</div>

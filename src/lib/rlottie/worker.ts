@@ -1,3 +1,5 @@
+// the worker implementation seems to actually cause low fps?
+
 import WasmURL from "./wasm/rlottie-wasm.wasm?url";
 import AsmMemURL from "./asmjs/rlottie-wasm.js.mem?url";
 import AsmURL from "./asmjs/rlottie-wasm.asm.js?url";
@@ -39,7 +41,7 @@ async function _loadRlottie() {
 		}
 	}
 
-	console.error("LOADING RLOTTIE SUCESSFUL!", RlottieWasm);
+	console.error("LOADING RLOTTIE SUCESSFUL!");
 
 	return true;
 }
@@ -62,7 +64,7 @@ function isCached(id: string) {
  * loads animation, return number of frames
  */
 async function loadAnimation(id: string, data: string) {
-	console.error("LOAD ANIM", RlottieWasm);
+	console.error("LOAD ANIM");
 	const instance = new RlottieWasm();
 
 	instance.load(data);

@@ -1,9 +1,21 @@
-import { JSXElement } from "solid-js";
+import { createEffect, JSXElement } from "solid-js";
 import styles from "./Tabs.module.scss";
+import scrollIntoView from "scroll-into-view-if-needed";
 
-export function Tab(props: { selected?: boolean; children: JSXElement }) {
+export function Tab(props: { onClick?: any; selected?: boolean; children: JSXElement }) {
+	let divRef!: HTMLDivElement;
+
+	createEffect(() => {
+		if (props.selected) {
+			scrollIntoView(divRef, {
+				block: "center",
+				inline: "center",
+			});
+		}
+	});
+
 	return (
-		<div classList={{ [styles.tab]: true, [styles.selected]: props.selected }}>
+		<div ref={divRef} onClick={props.onClick} classList={{ [styles.tab]: true, [styles.selected]: props.selected }}>
 			{props.children}
 		</div>
 	);
