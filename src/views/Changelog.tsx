@@ -6,13 +6,13 @@ import { Portal } from "solid-js/web";
 import Options from "./components/Options";
 import { setSoftkeys } from "@signals";
 
-export const VERSION = "1";
+export const CHANGELOG_VERSION = "1";
 
 export default function Changelog(props: { onClose: () => void }) {
 	let divRef!: HTMLDivElement;
 
 	onMount(() => {
-		localStorage.setItem("Changelog", VERSION);
+		localStorage.setItem("CHANGELOG_VERSION", CHANGELOG_VERSION);
 		SpatialNavigation.pause();
 		divRef.focus();
 

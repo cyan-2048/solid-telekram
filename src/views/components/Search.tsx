@@ -27,6 +27,12 @@ export default function Search(
 						setFocused(false);
 						local.onBlur?.(e);
 					}}
+					onKeyDown={(e) => {
+						if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+							e.stopImmediatePropagation();
+							e.stopPropagation();
+						}
+					}}
 				></input>
 			</div>
 		</div>
