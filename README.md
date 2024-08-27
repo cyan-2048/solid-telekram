@@ -53,6 +53,9 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
   - [ ] Push Notifications
   - [ ] Telegram System Actions (not complete)
   - [ ] Downloading Files
+  - [ ] Uploading Files
+    - [x] Uploading Photos
+    - [ ] Uploading Videos
   - [ ] Message Attachments
     - [ ] Stickers
       - [ ] Sticker Picker
@@ -66,11 +69,10 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
     - [ ] Gifs
       - [ ] Gif Picker
       - [x] Gif previews
-    - [ ] Photos
-      - [x] Photo previews
+    - [x] Photos
     - [x] Voice Messages
     - [ ] Music
-    - [ ] Videos
+    - [x] Videos
     - [ ] Location
       - [x] Location Previews
       - [ ] Live Location (o.map help me lmao)
@@ -96,11 +98,15 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 - pre-optimized lottie stickers are pre-converted apng images so client side rendering is not an issue, those stickers can be found in [kaigram-assets](https://github.com/cyan-2048/kaigram-assets), non optimized stickers will run at a very horrible fps
 - using this app on a 256MB RAM KaiOS device is kinda unstable.
 
+### Cache
+
+- the cache is stored in the sdcard/storage delete the kaigram folder to clear the cache.
+
 ### Experimental Low Memory mode
 
-- the app already attempts to use as less memory as possible, however some users still encounter crashing
-- hover on anything non-text-input, and click on 7-5-6-9-Call, this will enable an experimental low memory mode, in this mode, only 10 HTML elements are rendered instead of 40 (messages), as well as only showing 10 chats.
-- if this mode fixes your problems please contact the dev.
+- this mode is now disabled
+- the chat list will render only 10 chats and scrolling down will render more
+- if the app still crashes, please contact the dev.
 
 ## Developing
 
