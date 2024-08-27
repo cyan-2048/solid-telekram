@@ -370,7 +370,7 @@ function DeleteOptions(props: { onSelect: () => void }) {
 									})
 									.then(() => {
 										dialog().messages.delete(message.id);
-										refreshDialogsByPeer([dialog().id]);
+										refreshDialogsByPeer([dialog().$.chat.inputPeer]);
 									});
 								// dialog().messages.delete(message.id);
 							});
@@ -933,7 +933,7 @@ function TextBoxOptionsWrap(props: {
 										waveform: audioWaveform,
 									})
 								).then((msg) => {
-									dialog.messages.add(msg);
+									dialog.lastMessage.set(dialog.messages.add(msg));
 								});
 							}
 						}}
@@ -980,8 +980,8 @@ function TextBoxOptionsWrap(props: {
 
 								case TextboxOptionsSelected.SEND:
 									if (!interacting()) {
-										tg.sendText(props.dialog.$.chat, md(text())).then((msg) => {
-											dialog.messages.add(msg);
+										tg.sendText(props.dialog.$.chat, md(text()), {}).then((msg) => {
+											dialog.lastMessage.set(dialog.messages.add(msg));
 										});
 									} else {
 										const editing = editingMessage();
@@ -1000,8 +1000,8 @@ function TextBoxOptionsWrap(props: {
 												dialog.messages.update(msg.id, msg);
 											});
 										} else if (replying) {
-											tg.replyText(replying.$, md(text())).then((msg) => {
-												dialog.messages.add(msg);
+											tg.replyText(replying.$, md(text()), { shouldDispatch: true }).then((msg) => {
+												dialog.lastMessage.set(dialog.messages.add(msg));
 											});
 
 											sleep(0).then(() => {
@@ -1163,7 +1163,7 @@ function TextBox(props: { dialog: UIDialog }) {
 										: {}
 								)
 							).then((msg) => {
-								dialog.messages.add(msg);
+								dialog.lastMessage.set(dialog.messages.add(msg));
 							});
 						}}
 					></ImageUpload>
