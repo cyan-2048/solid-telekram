@@ -38,7 +38,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
   - [x] Pinned Chats
   - [ ] Archived Chats
   - [x] Unread/Muted/Sent/Received
-  - [ ] Chat Folders
+  - [x] Chat Folders
   - [ ] Chat Info
   - [ ] User Info
   - [x] Private Chats
