@@ -587,6 +587,7 @@ export default function Home(props: { hidden: boolean }) {
 									case "right":
 									case "left":
 										const filters = dialogFilters();
+										if (!filters.length) break;
 										const current = currentTab();
 
 										if (direction == "right") {
