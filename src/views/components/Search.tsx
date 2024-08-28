@@ -28,7 +28,7 @@ export default function Search(
 						local.onBlur?.(e);
 					}}
 					onKeyDown={(e) => {
-						if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+						if (e.currentTarget.value !== "" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
 							e.stopImmediatePropagation();
 							e.stopPropagation();
 						}

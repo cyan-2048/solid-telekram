@@ -7,6 +7,7 @@ import {
 	Chat,
 	ChatPermissions,
 	Dialog,
+	getMarkedPeerId,
 	InputPeerLike,
 	Message,
 	Peer,
@@ -969,7 +970,77 @@ export class UIDialogFilter {
 		this.id = a.id;
 
 		this.title.set(a.title);
-		this.filterPredicate = Dialog.filterFolder(a);
+		this.filterPredicate = (() => {
+			const folder = a as tl.TypeDialogFilter;
+			const excludePinned = false;
+
+			if (folder._ === "dialogFilterDefault") {
+				return () => true;
+			}
+
+			const pinned = new Set<number>();
+			const include = new Set<number>();
+			const exclude = new Set<number>();
+
+			// populate indices
+			if (excludePinned) {
+				folder.pinnedPeers.forEach((peer) => {
+					pinned.add(getMarkedPeerId(peer));
+				});
+			}
+			folder.includePeers.forEach((peer) => {
+				include.add(getMarkedPeerId(peer));
+			});
+
+			if (folder._ === "dialogFilterChatlist") {
+				return (dialog) => {
+					const chatId = dialog.chat.id;
+
+					if (excludePinned && pinned.has(chatId)) return false;
+
+					return include.has(chatId) || pinned.has(chatId);
+				};
+			}
+
+			folder.excludePeers.forEach((peer) => {
+				exclude.add(getMarkedPeerId(peer));
+			});
+
+			return (dialog) => {
+				const chat = dialog.chat;
+				const chatId = dialog.chat.id;
+				const chatType = dialog.chat.chatType;
+
+				// manual exclusion/inclusion and pins
+				if (include.has(chatId)) return true;
+
+				if (exclude.has(chatId) || (excludePinned && pinned.has(chatId))) {
+					return false;
+				}
+
+				// exclusions based on status
+				if (folder.excludeRead && !dialog.isUnread) return false;
+				if (folder.excludeMuted && dialog.isMuted) return false;
+				// even though this was handled in getDialogs, this method
+				// could be used outside of it, so check again
+				if (folder.excludeArchived && dialog.isArchived) return false;
+
+				// inclusions based on chat type
+				if (folder.contacts && chatType === "private" && chat.isContact) {
+					return true;
+				}
+				if (folder.nonContacts && chatType === "private" && !chat.isContact) {
+					return true;
+				}
+				if (folder.groups && (chatType === "group" || chatType === "supergroup")) {
+					return true;
+				}
+				if (folder.broadcasts && chatType === "channel") return true;
+				if (folder.bots && chatType === "bot") return true;
+
+				return false;
+			};
+		})();
 	}
 }
 

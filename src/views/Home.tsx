@@ -1,5 +1,16 @@
 import styles from "./Home.module.scss";
-import { For, Show, batch, createEffect, createRenderEffect, createSignal, from, onCleanup, onMount } from "solid-js";
+import {
+	For,
+	Show,
+	batch,
+	createEffect,
+	createMemo,
+	createRenderEffect,
+	createSignal,
+	from,
+	onCleanup,
+	onMount,
+} from "solid-js";
 import {
 	UIDialog,
 	UIDialogFilter,
@@ -302,7 +313,12 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				ref={divRef}
 				onFocus={() => {
 					setStatusbarColor("#3b90bc");
-					setSoftkeys("New chat", "OPEN", "tg:more");
+					setSoftkeys(
+						// "New chat"
+						"",
+						"OPEN",
+						"tg:more"
+					);
 					setFocused(true);
 				}}
 				onBlur={() => {
@@ -506,6 +522,14 @@ export default function Home(props: { hidden: boolean }) {
 
 	const [currentSlice, setCurrentSlice] = createSignal(20);
 
+	const tabFiltered = createMemo(() => {
+		const _tab = currentTab();
+		const slice = currentSlice();
+		const _dialogs = dialogs();
+		if (_tab == null) return [];
+		return _dialogs.filter((a) => _tab.filter(a)).slice(0, slice);
+	});
+
 	return (
 		<>
 			<Content
@@ -526,7 +550,12 @@ export default function Home(props: { hidden: boolean }) {
 							onFocus={(e) => {
 								e.currentTarget.scrollIntoView(false);
 								setStatusbarColor("#3b90bc");
-								setSoftkeys("New chat", "", "tg:more");
+								setSoftkeys(
+									// "New chat",
+									"",
+									"",
+									"tg:more"
+								);
 							}}
 							classList={{ focusable }}
 							placeholder="Search"
@@ -580,20 +609,16 @@ export default function Home(props: { hidden: boolean }) {
 								}
 							}}
 						>
-							<Show
-								when={currentTab() == null}
+							<For
 								fallback={
-									<For
-										each={dialogs()
-											.filter((a) => currentTab()!.filter(a))
-											.slice(0, currentSlice())}
-									>
-										{(dialog) => <DialogItem $={dialog} />}
-									</For>
+									<div>
+										<ModifyString text="👀"></ModifyString>
+									</div>
 								}
+								each={currentTab() == null ? dialogs().slice(0, currentSlice()) : tabFiltered()}
 							>
-								<For each={dialogs().slice(0, currentSlice())}>{(dialog) => <DialogItem $={dialog} />}</For>
-							</Show>
+								{(dialog) => <DialogItem $={dialog} />}
+							</For>
 						</div>
 					</div>
 				</div>
