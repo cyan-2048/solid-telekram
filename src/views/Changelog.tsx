@@ -40,7 +40,7 @@ export default function Changelog(props: { onClose: () => void }) {
 						<div
 							style={{
 								"text-align": "center",
-								"font-size": "25px",
+								"font-size": "32px",
 							}}
 						>
 							<ModifyString text="🎉" />
@@ -57,9 +57,15 @@ export default function Changelog(props: { onClose: () => void }) {
 								"text-align": "center",
 							}}
 						>
-							<small>(expect missing features)</small>
+							<span style={{ "font-size": "10px" }}>(expect missing features)</span>
 						</div>
-						<div>Source code available at: https://github.com/cyan-2048/solid-telekram</div>
+						<div
+							style={{
+								"font-size": "12px",
+							}}
+						>
+							Source code available at: https://github.com/cyan-2048/solid-telekram
+						</div>
 					</div>
 				</Options>
 			</div>

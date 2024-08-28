@@ -1,9 +1,16 @@
 import { isEqual } from "lodash-es";
 
+let counter = 0;
+
 async function hash(buffer: ArrayBuffer) {
-	return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", buffer)), (byte) =>
+	const count = counter++;
+	console.time("integrity-hash-" + count);
+	const result = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", buffer)), (byte) =>
 		byte.toString(16).padStart(2, "0")
 	).join("");
+	console.timeEnd("integrit-hash-" + count);
+
+	return result;
 }
 
 /**
