@@ -1472,10 +1472,17 @@ window.addEventListener("keydown", (e) => {
 
 export const integrityCheck = import("./lib/checkIntegrity").then((m) => m.default(import.meta.url));
 
+const [appIntegrity, setAppIntegrity] = createSignal(true);
+
+export { appIntegrity };
+
 integrityCheck.then((integrity) => {
 	console.log("INTEGRITY CHECK PASSED:", integrity);
 	if (!integrity) {
-		alert("The app failed its integrity check, this means the app was modified maliciously, please don't use it.");
+		setAppIntegrity(false);
+		alert(
+			"The app failed its integrity check, this means the app could have been modified maliciously, please don't use it."
+		);
 	}
 });
 

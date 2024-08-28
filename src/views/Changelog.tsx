@@ -1,10 +1,10 @@
-import { onCleanup, onMount } from "solid-js";
+import { onCleanup, onMount, Show } from "solid-js";
 import { ModifyString } from "./components/Markdown";
 import styles from "./Changelog.module.scss";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { Portal } from "solid-js/web";
 import Options from "./components/Options";
-import { setSoftkeys } from "@signals";
+import { appIntegrity, setSoftkeys } from "@signals";
 
 export const CHANGELOG_VERSION = "1";
 
@@ -37,6 +37,16 @@ export default function Changelog(props: { onClose: () => void }) {
 						ref={divRef}
 						tabIndex={-1}
 					>
+						<Show when={!appIntegrity()}>
+							<div
+								style={{
+									"font-size": "14px",
+									"margin-bottom": "4px",
+								}}
+							>
+								<ModifyString text="🚫"></ModifyString> Integrity Check failed!
+							</div>
+						</Show>
 						<div
 							style={{
 								"text-align": "center",
