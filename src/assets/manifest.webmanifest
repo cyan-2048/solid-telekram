@@ -1,7 +1,7 @@
 {
 	"id": "telekram-solid",
-	"name": "KGram",
-	"short_name": "KGram",
+	"name": "ТеlеКrаm",
+	"short_name": "Telegram",
 	"description": "Telegram Client for KaiOS.",
 
 	"start_url": "/index.html",
@@ -34,8 +34,8 @@
 	"type": "privileged",
 
 	"b2g_features": {
-		"display": "KGram",
-		"version": "3.0.8",
+		"display": "Telegram",
+		"version": "3.0.9",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {

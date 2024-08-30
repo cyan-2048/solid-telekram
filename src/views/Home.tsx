@@ -527,7 +527,13 @@ export default function Home(props: { hidden: boolean }) {
 		const slice = currentSlice();
 		const _dialogs = dialogs();
 		if (_tab == null) return [];
-		return _dialogs.filter((a) => _tab.filter(a)).slice(0, slice);
+		// maybe i should memoize these values?
+		// a huge array filled of object pointers shouldn't use too much memory right?
+		console.time("dialog filter");
+		const filtered = _dialogs.filter((a) => _tab.filter(a)).slice(0, slice);
+		console.timeEnd("dialog filter");
+
+		return filtered;
 	});
 
 	return (

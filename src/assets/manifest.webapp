@@ -1,9 +1,9 @@
 {
-	"name": "KGram",
+	"name": "ТеlеКrаm",
 	"description": "Telegram Client for KaiOS.",
 	"display": "Telegram",
 	"short_name": "Telegram",
-	"version": "1.0.8",
+	"version": "1.0.9",
 	"launch_path": "/index.html",
 	"theme": "#fff",
 	"theme_color": "#fff",
@@ -39,7 +39,7 @@
 	},
 	"locales": {
 		"en-US": {
-			"name": "KGram",
+			"name": "TeleKram",
 			"subtitle": "Telegram for KaiOS",
 			"description": "Telegram Client for KaiOS.",
 			"display": "Telegram",
