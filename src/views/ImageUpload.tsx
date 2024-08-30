@@ -4,13 +4,13 @@ import styles from "./Room.module.scss";
 import { sleep } from "@/lib/helpers";
 import EmojiPicker from "./components/EmojiPicker";
 import { typeInTextbox } from "@/lib/utils";
-import { Portal } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 import Options from "./components/Options";
 import OptionsMenuMaxHeight from "./components/OptionsMenuMaxHeight";
 import OptionsItem from "./components/OptionsItem";
 import { setSoftkeys } from "@signals";
 
-export default function ImageUpload(props: { image: Blob; onSend: (bool: false | string) => void }) {
+export default function ImageUpload(props: { image: Blob; isVideo?: boolean; onSend: (bool: false | string) => void }) {
 	let inputRef!: HTMLInputElement;
 
 	const [src, setSrc] = createSignal("");
@@ -47,7 +47,8 @@ export default function ImageUpload(props: { image: Blob; onSend: (bool: false |
 				}
 				class={styles.upload_image}
 			>
-				<img
+				<Dynamic
+					component={props.isVideo ? "video" : "img"}
 					style={
 						showEmojiPicker() || showOptions()
 							? {
@@ -56,7 +57,7 @@ export default function ImageUpload(props: { image: Blob; onSend: (bool: false |
 							: undefined
 					}
 					src={src()}
-				></img>
+				></Dynamic>
 				<input
 					ref={inputRef}
 					class={styles.caption_textbox}

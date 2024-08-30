@@ -16,6 +16,7 @@ import Loading from "./views/Loading";
 import Home from "./views/Home";
 import Room from "./views/Room";
 import MessageInfo from "./views/MessageInfo";
+import TemporaryUploadingIndicator from "./views/components/TemporaryUploadingIndicator";
 
 function App() {
 	document.querySelector(".LOADING")?.remove();
@@ -30,6 +31,7 @@ function App() {
 
 	return (
 		<>
+			<TemporaryUploadingIndicator></TemporaryUploadingIndicator>
 			<Switch>
 				<Match when={currentView() == "login"}>
 					<Login />

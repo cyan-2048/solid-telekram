@@ -65,6 +65,7 @@ import { MessageProvider, switchMessageMedia, useMessageContext } from "./Messag
 import { VoiceRecorderWeb } from "./components/VoiceRecorder";
 import { volumeUp, volumeDown } from "@/lib/volumeManager";
 import ImageUpload from "./ImageUpload";
+import { temp_setUploadingFiles, TempFileUploading } from "./components/TemporaryUploadingIndicator";
 
 function getMembersCount(chat: Chat) {
 	if ((chat.peer as tl.RawChannel).participantsCount) {
@@ -887,6 +888,7 @@ function TextBoxOptionsWrap(props: {
 	setShowInsertMenu: (e: boolean) => void;
 
 	onPhotoSelect: (e: Blob) => void;
+	onVideoSelect: (e: Blob) => void;
 
 	dialog: UIDialog;
 	textboxRef: HTMLPreElement;
@@ -1080,11 +1082,10 @@ function TextBoxOptionsWrap(props: {
 									input.accept = "video/*";
 
 									input.onchange = () => {
-										console.error(input.files);
+										props.onVideoSelect(input.files![0]);
 									};
 
 									input.click();
-									toaster("not yet implemented!");
 
 									break;
 								}
@@ -1116,6 +1117,7 @@ function TextBox(props: { dialog: UIDialog }) {
 	const [showInsertMenu, setShowInsertMenu] = createSignal(false);
 
 	const [photoBlob, setPhotoBlob] = createSignal<null | Blob>(null);
+	const [videoBlob, setVideoBlob] = createSignal<null | Blob>(null);
 
 	const tg = client()!;
 
@@ -1169,7 +1171,49 @@ function TextBox(props: { dialog: UIDialog }) {
 					></ImageUpload>
 				</Portal>
 			</Show>
+			<Show when={videoBlob()}>
+				<Portal>
+					<ImageUpload
+						image={videoBlob()!}
+						isVideo
+						onSend={async (e) => {
+							const blob = videoBlob()!;
+							setVideoBlob(null);
+							sleep(0);
+							textboxRef.focus();
 
+							if (e === false) return;
+
+							const dialog = props.dialog;
+
+							console.error(e);
+
+							const upload = new TempFileUploading();
+
+							temp_setUploadingFiles((e) => e.concat(upload));
+
+							tg.sendMedia(
+								dialog.$.chat,
+								InputMedia.video(
+									blob,
+									e
+										? {
+												caption: e,
+										  }
+										: {}
+								),
+								{
+									progressCallback(uploaded, total) {
+										upload.progress.set(Math.ceil((uploaded / total) * 100));
+									},
+								}
+							).then((msg) => {
+								dialog.lastMessage.set(dialog.messages.add(msg));
+							});
+						}}
+					></ImageUpload>
+				</Portal>
+			</Show>
 			<div
 				style={
 					interacting()
@@ -1236,6 +1280,7 @@ function TextBox(props: { dialog: UIDialog }) {
 			<TextBoxOptionsWrap
 				text={text()}
 				onPhotoSelect={setPhotoBlob}
+				onVideoSelect={setVideoBlob}
 				showOptions={showOptions()}
 				setShowOptions={setShowOptions}
 				showEmojiPicker={showEmojiPicker()}
@@ -1373,6 +1418,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 	const [text, setText] = createSignal("");
 
 	const [photoBlob, setPhotoBlob] = createSignal<null | Blob>(null);
+	const [videoBlob, setVideoBlob] = createSignal<null | Blob>(null);
 
 	const debounced_sendTyping = debounce(
 		() => {
@@ -1398,6 +1444,82 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 
 	return (
 		<>
+			<Show when={photoBlob()}>
+				<Portal>
+					<ImageUpload
+						image={photoBlob()!}
+						onSend={async (e) => {
+							const blob = photoBlob()!;
+							setPhotoBlob(null);
+							sleep(0);
+							textboxRef.focus();
+
+							if (e === false) return;
+
+							const dialog = props.dialog;
+
+							console.error(e);
+
+							tg.sendMedia(
+								dialog.$.chat,
+								InputMedia.photo(
+									blob,
+									e
+										? {
+												caption: e,
+										  }
+										: {}
+								)
+							).then((msg) => {
+								dialog.lastMessage.set(dialog.messages.add(msg));
+							});
+						}}
+					></ImageUpload>
+				</Portal>
+			</Show>
+			<Show when={videoBlob()}>
+				<Portal>
+					<ImageUpload
+						image={videoBlob()!}
+						isVideo
+						onSend={async (e) => {
+							const blob = videoBlob()!;
+							setVideoBlob(null);
+							sleep(0);
+							textboxRef.focus();
+
+							if (e === false) return;
+
+							const dialog = props.dialog;
+
+							console.error(e);
+
+							const upload = new TempFileUploading();
+
+							temp_setUploadingFiles((e) => e.concat(upload));
+
+							tg.sendMedia(
+								dialog.$.chat,
+								InputMedia.video(
+									blob,
+									e
+										? {
+												caption: e,
+										  }
+										: {}
+								),
+								{
+									progressCallback(uploaded, total) {
+										upload.progress.set(Math.ceil((uploaded / total) * 100));
+									},
+								}
+							).then((msg) => {
+								dialog.lastMessage.set(dialog.messages.add(msg));
+							});
+						}}
+					></ImageUpload>
+				</Portal>
+			</Show>
 			<div classList={{ [styles.floating_textbox]: true, [styles.focused]: true }}>
 				<div
 					style={{
@@ -1460,6 +1582,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 				setShowInsertMenu={setShowInsertMenu}
 				dialog={props.dialog}
 				textboxRef={textboxRef}
+				onVideoSelect={setVideoBlob}
 			/>
 		</>
 	);
