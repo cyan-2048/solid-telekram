@@ -526,11 +526,22 @@ export default function Home(props: { hidden: boolean }) {
 		const _tab = currentTab();
 		const slice = currentSlice();
 		const _dialogs = dialogs();
-		if (_tab == null) return [];
+
+		if (_tab == null) return _dialogs.slice(0, slice);
 		// maybe i should memoize these values?
 		// a huge array filled of object pointers shouldn't use too much memory right?
 		console.time("dialog filter");
-		const filtered = _dialogs.filter((a) => _tab.filter(a)).slice(0, slice);
+
+		const filtered: UIDialog[] = [];
+
+		for (let i = 0; i < _dialogs.length; i++) {
+			const d = _dialogs[i];
+			if (_tab.filter(d)) {
+				filtered.push(d);
+				if (filtered.length >= slice) break;
+			}
+		}
+
 		console.timeEnd("dialog filter");
 
 		return filtered;
@@ -622,7 +633,7 @@ export default function Home(props: { hidden: boolean }) {
 										<ModifyString text="👀"></ModifyString>
 									</div>
 								}
-								each={currentTab() == null ? dialogs().slice(0, currentSlice()) : tabFiltered()}
+								each={tabFiltered()}
 							>
 								{(dialog) => <DialogItem $={dialog} />}
 							</For>

@@ -56,7 +56,15 @@ export default function ImageUpload(props: { image: Blob; isVideo?: boolean; onS
 							  }
 							: undefined
 					}
+					preload="metadata"
 					src={src()}
+					onLoadedMetadata={async (e: Event & { currentTarget: HTMLVideoElement }) => {
+						if (!props.isVideo) return;
+						console.error("VIDEO PREVIEW AVAILABLE");
+						const target = e.currentTarget;
+						await sleep(0);
+						target.currentTime = 0.00000000001;
+					}}
 				></Dynamic>
 				<input
 					ref={inputRef}

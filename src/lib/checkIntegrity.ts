@@ -8,7 +8,7 @@ async function hash(buffer: ArrayBuffer) {
 	const result = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", buffer)), (byte) =>
 		byte.toString(16).padStart(2, "0")
 	).join("");
-	console.timeEnd("integrit-hash-" + count);
+	console.timeEnd("integrity-hash-" + count);
 
 	return result;
 }

@@ -19,7 +19,12 @@ import {
 	UserStatus,
 	UserStatusUpdate,
 } from "@mtcute/web";
-import { debounce } from "lodash-es";
+import { debounce, memoize } from "lodash-es";
+
+type MemoizedFunction = {
+	cache: ReturnType<typeof memoize>["cache"];
+};
+
 import { get, writable, Writable } from "./lib/stores";
 // import playVideo from "./lib/playVideo";
 // import localforage from "localforage";
@@ -959,88 +964,97 @@ export class UIDialogFilter {
 
 	title = writable("");
 
-	filterPredicate: (val: Dialog) => boolean = () => false;
+	filterPredicate: (((val: Dialog) => boolean) & MemoizedFunction) | null = null;
 
 	filter(a: UIDialog) {
-		return this.filterPredicate(a.$);
+		return this.filterPredicate?.(a.$) || false;
 	}
 
 	update(a: tl.RawDialogFilter) {
+		if (this.filterPredicate) {
+			this.filterPredicate.cache.clear?.();
+		}
+
 		this.$ = a;
 		this.id = a.id;
 
 		this.title.set(a.title);
-		this.filterPredicate = (() => {
-			const folder = a as tl.TypeDialogFilter;
-			const excludePinned = false;
 
-			if (folder._ === "dialogFilterDefault") {
-				return () => true;
-			}
+		this.filterPredicate = memoize(
+			(() => {
+				const folder = a as tl.TypeDialogFilter;
+				const excludePinned = false;
 
-			const pinned = new Set<number>();
-			const include = new Set<number>();
-			const exclude = new Set<number>();
+				if (folder._ === "dialogFilterDefault") {
+					return () => true;
+				}
 
-			// populate indices
-			if (excludePinned) {
-				folder.pinnedPeers.forEach((peer) => {
-					pinned.add(getMarkedPeerId(peer));
+				const pinned = new Set<number>();
+				const include = new Set<number>();
+				const exclude = new Set<number>();
+
+				// populate indices
+				if (excludePinned) {
+					folder.pinnedPeers.forEach((peer) => {
+						pinned.add(getMarkedPeerId(peer));
+					});
+				}
+				folder.includePeers.forEach((peer) => {
+					include.add(getMarkedPeerId(peer));
 				});
-			}
-			folder.includePeers.forEach((peer) => {
-				include.add(getMarkedPeerId(peer));
-			});
 
-			if (folder._ === "dialogFilterChatlist") {
+				if (folder._ === "dialogFilterChatlist") {
+					return (dialog) => {
+						const chatId = dialog.chat.id;
+
+						if (excludePinned && pinned.has(chatId)) return false;
+
+						return include.has(chatId) || pinned.has(chatId);
+					};
+				}
+
+				folder.excludePeers.forEach((peer) => {
+					exclude.add(getMarkedPeerId(peer));
+				});
+
 				return (dialog) => {
+					const chat = dialog.chat;
 					const chatId = dialog.chat.id;
+					const chatType = dialog.chat.chatType;
 
-					if (excludePinned && pinned.has(chatId)) return false;
+					// manual exclusion/inclusion and pins
+					if (include.has(chatId)) return true;
 
-					return include.has(chatId) || pinned.has(chatId);
-				};
-			}
+					if (exclude.has(chatId) || (excludePinned && pinned.has(chatId))) {
+						return false;
+					}
 
-			folder.excludePeers.forEach((peer) => {
-				exclude.add(getMarkedPeerId(peer));
-			});
+					// exclusions based on status
+					if (folder.excludeRead && !dialog.isUnread) return false;
+					if (folder.excludeMuted && dialog.isMuted) return false;
+					// even though this was handled in getDialogs, this method
+					// could be used outside of it, so check again
+					if (folder.excludeArchived && dialog.isArchived) return false;
 
-			return (dialog) => {
-				const chat = dialog.chat;
-				const chatId = dialog.chat.id;
-				const chatType = dialog.chat.chatType;
+					// inclusions based on chat type
+					if (folder.contacts && chatType === "private" && chat.isContact) {
+						return true;
+					}
+					if (folder.nonContacts && chatType === "private" && !chat.isContact) {
+						return true;
+					}
+					if (folder.groups && (chatType === "group" || chatType === "supergroup")) {
+						return true;
+					}
+					if (folder.broadcasts && chatType === "channel") return true;
+					if (folder.bots && chatType === "bot") return true;
 
-				// manual exclusion/inclusion and pins
-				if (include.has(chatId)) return true;
-
-				if (exclude.has(chatId) || (excludePinned && pinned.has(chatId))) {
 					return false;
-				}
+				};
+			})()
+		);
 
-				// exclusions based on status
-				if (folder.excludeRead && !dialog.isUnread) return false;
-				if (folder.excludeMuted && dialog.isMuted) return false;
-				// even though this was handled in getDialogs, this method
-				// could be used outside of it, so check again
-				if (folder.excludeArchived && dialog.isArchived) return false;
-
-				// inclusions based on chat type
-				if (folder.contacts && chatType === "private" && chat.isContact) {
-					return true;
-				}
-				if (folder.nonContacts && chatType === "private" && !chat.isContact) {
-					return true;
-				}
-				if (folder.groups && (chatType === "group" || chatType === "supergroup")) {
-					return true;
-				}
-				if (folder.broadcasts && chatType === "channel") return true;
-				if (folder.bots && chatType === "bot") return true;
-
-				return false;
-			};
-		})();
+		console.error("FILTER PREDICATE SET", this.filterPredicate);
 	}
 }
 
