@@ -162,6 +162,8 @@ const enum DialogOptionsSelected {
 	LOGOUT,
 	KAIAD,
 	CHANGELOG,
+
+	SETTINGS,
 }
 
 function DialogOptions(props: {
@@ -230,11 +232,22 @@ function DialogOptions(props: {
 				classList={{ option: true, [styles.item]: true }}
 				tabIndex={-1}
 				on:sn-enter-down={() => {
-					props.onSelect(DialogOptionsSelected.KAIAD);
+					props.onSelect(DialogOptionsSelected.SETTINGS);
 				}}
 			>
-				Show Ad
+				Settings
 			</OptionsItem>
+			<Show when={!localStorage.getItem("NO_ADS")}>
+				<OptionsItem
+					classList={{ option: true, [styles.item]: true }}
+					tabIndex={-1}
+					on:sn-enter-down={() => {
+						props.onSelect(DialogOptionsSelected.KAIAD);
+					}}
+				>
+					Show Ad
+				</OptionsItem>
+			</Show>
 		</Options>
 	);
 }
@@ -313,12 +326,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				ref={divRef}
 				onFocus={() => {
 					setStatusbarColor("#3b90bc");
-					setSoftkeys(
-						// "New chat"
-						"",
-						"OPEN",
-						"tg:more"
-					);
+					setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
 				}}
 				onBlur={() => {
@@ -568,8 +576,8 @@ export default function Home(props: { hidden: boolean }) {
 								e.currentTarget.scrollIntoView(false);
 								setStatusbarColor("#3b90bc");
 								setSoftkeys(
-									// "New chat",
-									"",
+									"New chat",
+
 									"",
 									"tg:more"
 								);

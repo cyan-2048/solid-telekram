@@ -107,16 +107,18 @@ function HomeOptions(props: { showQr: () => void; onClose: () => void }) {
 			>
 				Log in by QR Code
 			</OptionsItem>
-			<OptionsItem
-				classList={{ option: true, [styles.item]: true }}
-				tabIndex={-1}
-				on:sn-enter-down={() => {
-					showKaiAd();
-					props.onClose();
-				}}
-			>
-				Show Ad
-			</OptionsItem>
+			<Show when={!localStorage.getItem("NO_ADS")}>
+				<OptionsItem
+					classList={{ option: true, [styles.item]: true }}
+					tabIndex={-1}
+					on:sn-enter-down={() => {
+						showKaiAd();
+						props.onClose();
+					}}
+				>
+					Show Ad
+				</OptionsItem>
+			</Show>
 		</Options>
 	);
 }
@@ -214,7 +216,7 @@ export default function Login() {
 
 	onMount(() => {
 		SpatialNavigation.add(SN_ID, {
-			selector: `.${styles.login} :-moz-any(.${styles.select}, input)`,
+			selector: `.${styles.login} .${styles.select}, .${styles.login} input`,
 			restrict: "self-only",
 			defaultElement: `.${styles.login} input`,
 		});

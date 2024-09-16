@@ -105,6 +105,7 @@ const enum TextboxOptionsSelected {
 	PASTE,
 	COPY,
 	KAIAD,
+	SETTINGS,
 }
 
 function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsSelected | null) => void }) {
@@ -192,12 +193,29 @@ function TextboxOptions(props: { canSend: boolean; onSelect: (e: TextboxOptionsS
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
 					on:sn-enter-down={() => {
-						props.onSelect(TextboxOptionsSelected.KAIAD);
+						props.onSelect(TextboxOptionsSelected.SETTINGS);
 					}}
-					ref={lastRef}
+					ref={(ref) => {
+						if (localStorage.getItem("NO_ADS")) lastRef = ref;
+					}}
 				>
-					Show Ad
+					Settings
 				</OptionsItem>
+				<Show when={!localStorage.getItem("NO_ADS")}>
+					<OptionsItem
+						on:sn-willfocus={willFocusScrollIfNeeded}
+						classList={{ option: true, [styles.option_item]: true }}
+						tabIndex={-1}
+						on:sn-enter-down={() => {
+							props.onSelect(TextboxOptionsSelected.KAIAD);
+						}}
+						ref={(ref) => {
+							lastRef = ref;
+						}}
+					>
+						Show Ad
+					</OptionsItem>
+				</Show>
 			</OptionsMenuMaxHeight>
 		</Options>
 	);

@@ -29,6 +29,9 @@
 		"video-capture": {
 			"description": "Reading Codes using the Camera"
 		},
+		"serviceworker": {
+			"description": "Needed for assocating service worker"
+		},
 		"desktop-notification": {},
 		"tcp-socket": { "description": "Required to do any TCP" },
 		"device-storage:sdcard": { "access": "readwrite" },
@@ -37,6 +40,11 @@
 	"dependencies": {
 		"ads-sdk": "1.5.8"
 	},
+	"messages": [
+		{
+			"serviceworker-notification": "/index.html"
+		}
+	],
 	"locales": {
 		"en-US": {
 			"name": "TeleKram",

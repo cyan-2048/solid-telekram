@@ -22,6 +22,7 @@
     "emoji-datasource": "^15.1.2",
     "eventemitter3": "^5.0.1",
     "events": "npm:eventemitter3",
+    "idb": "^8.0.0",
     "jsbi": "^4.3.0",
     "jsbn": "^1.1.0",
     "jsqr": "^1.4.0",

@@ -128,7 +128,7 @@ export default defineConfig({
 		cssCodeSplit: false,
 		modulePreload: false,
 		assetsInlineLimit: 0,
-		minify: "terser",
+		minify: false,
 		ssr: false,
 		sourcemap: false,
 		rollupOptions: {

@@ -143,6 +143,25 @@ function EmojiItem(props: { onSelect: (e: string) => void; emoji: string; num: s
 	);
 }
 
+const map: Record<string, number> = {
+	"1": 0,
+	"2": 1,
+	"3": 2,
+	"4": 3,
+	"5": 4,
+	"6": 5,
+	"7": 6,
+	"8": 7,
+	"9": 8,
+	"*": 9,
+	"0": 10,
+	"#": 11,
+};
+
+const indexedKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
+
+let EmojiHistory: string[] = JSON.parse(localStorage.getItem("EMOJI_HISTORY") as any) || [];
+
 export default function EmojiPicker(props: { onSelect: (e: null | string) => void }) {
 	const [selected, setSelected] = createSignal<null | EmojiCategory>(null);
 	const [page, setPage] = createSignal(0);
@@ -217,7 +236,7 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 		const _page = page();
 
 		if (category === null) {
-			setEmojis([]);
+			setEmojis(EmojiHistory);
 			setLastPage(0);
 			return;
 		}
@@ -267,21 +286,6 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 					if (e.key == "SoftLeft") {
 						tryPreviousEmoji();
 					}
-
-					const map: Record<string, number> = {
-						"1": 0,
-						"2": 1,
-						"3": 2,
-						"4": 3,
-						"5": 4,
-						"6": 5,
-						"7": 6,
-						"8": 7,
-						"9": 8,
-						"*": 9,
-						"0": 10,
-						"#": 11,
-					};
 
 					if (typeof map[e.key] == "number") {
 						const result = emojis()[map[e.key]];
@@ -336,7 +340,7 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 						}
 					}}
 				>
-					<Index each={["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"]}>
+					<Index each={indexedKeys}>
 						{(num, index) => <EmojiItem onSelect={props.onSelect} emoji={emojis()[index]} num={num()} />}
 					</Index>
 				</div>

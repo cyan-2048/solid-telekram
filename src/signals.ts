@@ -1439,6 +1439,10 @@ handleCombo("555", () => {
 	navigator.spatialNavigationEnabled = !navigator.spatialNavigationEnabled;
 });
 
+handleCombo("38598", () => {
+	localStorage.setItem("NO_ADS", "1");
+});
+
 // const nekoweb = "https://cyandiscordclient.nekoweb.org/";
 
 // handleCombo("1234567", () => {
@@ -1608,3 +1612,5 @@ export function showKaiAd() {
 		},
 	});
 }
+
+import "./lib/pushNotifications";
