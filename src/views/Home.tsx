@@ -416,7 +416,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 
 									const sure = confirm("Are you sure you want to logout?");
 
-									if (!sure) return;
+									if (!sure) break;
 
 									const success = await tg.logOut();
 									if (!success) {
