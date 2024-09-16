@@ -413,7 +413,12 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 									break;
 								case DialogOptionsSelected.LOGOUT:
 									await sleep(100);
-									const success = confirm("Are you sure you want to logout?") ? await tg.logOut() : false;
+
+									const sure = confirm("Are you sure you want to logout?");
+
+									if (!sure) return;
+
+									const success = await tg.logOut();
 									if (!success) {
 										alert("Logout was not successful!");
 										await tg.storage.clear(true);
