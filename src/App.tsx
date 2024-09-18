@@ -17,6 +17,7 @@ import Home from "./views/Home";
 import Room from "./views/Room";
 import MessageInfo from "./views/MessageInfo";
 import TemporaryUploadingIndicator from "./views/components/TemporaryUploadingIndicator";
+import Settings from "./views/Settings";
 
 function App() {
 	document.querySelector(".LOADING")?.remove();

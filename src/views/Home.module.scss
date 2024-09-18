@@ -54,7 +54,7 @@
 
 	color: white;
 
-	background-color: var(--accent-dark);
+	background-color: var(--accent);
 
 	padding: 2px 5px;
 	min-width: 20px;
@@ -129,7 +129,7 @@
 }
 
 .check {
-	color: var(--accent-dark);
+	color: var(--accent);
 
 	margin-right: 2px;
 
@@ -155,7 +155,7 @@
 
 .verified {
 	@extend .icons;
-	color: var(--accent-dark);
+	color: var(--accent);
 	display: inline-block;
 	float: left;
 }
@@ -169,7 +169,7 @@
 	min-height: 60px;
 
 	&:focus {
-		background-color: var(--accent-dark);
+		background-color: var(--accent);
 
 		* {
 			color: white;
@@ -177,11 +177,11 @@
 
 		.count {
 			background-color: white;
-			color: var(--accent-dark);
+			color: var(--accent);
 		}
 
 		.verified {
-			--color: var(--accent-dark);
+			--color: var(--accent);
 		}
 	}
 }
@@ -196,6 +196,6 @@
 }
 
 .item:focus {
-	background-color: var(--accent-dark);
+	background-color: var(--accent);
 	color: white;
 }

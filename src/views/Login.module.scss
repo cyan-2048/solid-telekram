@@ -6,7 +6,7 @@
 .item:focus,
 .login div:focus,
 .focus {
-	background-color: var(--accent-dark);
+	background-color: var(--accent);
 	color: white;
 }
 
@@ -19,7 +19,7 @@
 .heading {
 	font-size: 17px;
 	font-weight: 600;
-	color: var(--accent-dark);
+	color: var(--accent);
 }
 
 .text {
