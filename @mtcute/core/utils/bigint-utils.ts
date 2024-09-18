@@ -1,5 +1,5 @@
 import JSBI from 'jsbi'
-import {BigInteger} from "jsbn"
+import { BigInteger } from 'jsbn'
 
 import { bufferToReversed } from './buffer-utils.js'
 import type { ICryptoProvider } from './crypto/abstract.js'
@@ -170,15 +170,37 @@ export function bigIntGcd(a: JSBI, b: JSBI): JSBI {
     return a
 }
 
+const native = typeof BigInt !== 'undefined'
+
 export function bigIntModPow(_base: JSBI, _exp: JSBI, _mod: JSBI): JSBI {
-    const base = new BigInteger(_base.toString(16), 16);
-    const exp = new BigInteger(_exp.toString(16), 16);
-    const mod = new BigInteger(_mod.toString(16), 16);
+    if (native) {
+        // using the binary method is good enough for our use case
+        // https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
 
-    const result = base.modPow(exp, mod);
-    const final = JSBI.BigInt("0x" + result.toString(16));
+        _base = JSBI.remainder(_base, _mod)
 
-    return final
+        let result = ONE
+
+        while (JSBI.greaterThan(_exp, ONE)) {
+            if (JSBI.equal(JSBI.remainder(_exp, TWO), ONE)) {
+                result = JSBI.remainder(JSBI.multiply(result, _base), _mod)
+            }
+
+            _exp = JSBI.signedRightShift(_exp, ONE)
+            _base = JSBI.remainder(JSBI.exponentiate(_base, TWO), _mod)
+        }
+
+        return result
+    } else {
+        const base = new BigInteger(_base.toString(16), 16)
+        const exp = new BigInteger(_exp.toString(16), 16)
+        const mod = new BigInteger(_mod.toString(16), 16)
+
+        const result = base.modPow(exp, mod)
+        const final = JSBI.BigInt(`0x${result.toString(16)}`)
+
+        return final
+    }
 }
 
 // below code is based on https://github.com/juanelas/bigint-mod-arith, MIT license

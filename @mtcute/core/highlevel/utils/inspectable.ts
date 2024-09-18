@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 /**
  * Small helper function that adds `toJSON` and `util.custom.inspect`
  * methods to a given class based on its getters
