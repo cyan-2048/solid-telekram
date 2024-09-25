@@ -72,7 +72,11 @@ export function setSoftkeys(
 	});
 }
 
-export const [currentView, setView] = createSignal("loading" as "login" | "loading" | "home" | "room" | "info");
+type Views = "login" | "loading" | "home" | "room" | "info" | "settings";
+
+export const [currentView, setView] = createSignal("loading" as Views);
+
+export const [previousView, setPreviousView] = createSignal("home" as Views);
 
 export const [messageInfo, setMessageInfo] = createSignal<null | UIMessage>(null);
 
@@ -1054,7 +1058,7 @@ export class UIDialogFilter {
 			})()
 		);
 
-		console.error("FILTER PREDICATE SET", this.filterPredicate);
+		// console.error("FILTER PREDICATE SET", this.filterPredicate);
 	}
 }
 

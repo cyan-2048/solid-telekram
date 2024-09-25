@@ -35,6 +35,7 @@ import {
 	setMessageInfo,
 	toaster,
 	showKaiAd,
+	setPreviousView,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -968,6 +969,15 @@ function TextBoxOptionsWrap(props: {
 							await sleep(100);
 
 							props.setShowOptions(false);
+
+							if (e == TextboxOptionsSelected.SETTINGS) {
+								batch(() => {
+									setPreviousView("room");
+									setView("settings");
+								});
+
+								return;
+							}
 
 							if (!interacting()) {
 								// TODO: don't focus if show info

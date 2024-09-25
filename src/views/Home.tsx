@@ -21,6 +21,7 @@ import {
 	dialogs,
 	dialogsJar,
 	room,
+	setPreviousView,
 	setRoom,
 	setSoftkeys,
 	setStatusbarColor,
@@ -424,6 +425,13 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 										await tg.storage.clear(true);
 									}
 									location.reload();
+									return;
+								case DialogOptionsSelected.SETTINGS:
+									batch(() => {
+										setPreviousView("home");
+										setView("settings");
+									});
+
 									return;
 								case DialogOptionsSelected.CHANGELOG:
 									setShowChangelog(true);

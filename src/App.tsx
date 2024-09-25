@@ -4,6 +4,8 @@ import {
 	client,
 	currentView,
 	messageInfo,
+	previousView,
+	setView,
 	softcenter,
 	softkeysBlack,
 	softkeysLoading,
@@ -39,6 +41,13 @@ function App() {
 				</Match>
 				<Match when={currentView() == "loading"}>
 					<Loading />
+				</Match>
+				<Match when={currentView() == "settings"}>
+					<Settings
+						onClose={() => {
+							setView(previousView());
+						}}
+					></Settings>
 				</Match>
 			</Switch>
 			<Show when={client()}>
