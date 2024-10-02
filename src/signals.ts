@@ -1552,15 +1552,17 @@ observable(dialogs).subscribe(async (dialogs) => {
 	__previousDialogs = newState;
 	await sleep(0);
 
-	console.time("set difference 1");
+	// TODO: Make this faster? kinda blocks the UI (on KaiOS at least), can't think of a better solution
+
+	// console.time("set difference 1");
 	// stuff in new state that's not in prevState
 	const added = newState.difference(prevState);
-	console.timeEnd("set difference 1");
+	// console.timeEnd("set difference 1");
 	await sleep(0);
 	// console.error("ADDED UI DIALOGS", added);
-	console.time("set difference 2");
+	// console.time("set difference 2");
 	const removed = prevState.difference(newState);
-	console.timeEnd("set difference 2");
+	// console.timeEnd("set difference 2");
 	await sleep(0);
 	// console.error("REMOVED UI DIALOGS", removed);
 

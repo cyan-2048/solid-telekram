@@ -2847,6 +2847,14 @@ var Module = (function () {
 				Module["preInit"].pop()();
 			}
 		}
+
+		// WHY THE FUCK IS THIS EVEN MISSING IN THE FIRST PLACE?????
+		Module.ready = new Promise(res => {
+			Module.onRuntimeInitialized = () => {
+				res(Module);
+			};
+		})
+
 		run();
 
 		return Module.ready;
