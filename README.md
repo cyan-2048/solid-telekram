@@ -118,6 +118,9 @@ You **must** use bun!
 
 Dev Mode:
 
+> [!NOTE]  
+> There is an unresolved issue with 2fa when using the dev mode, I have no idea what's wrong with it, works fine on KaiOS 2.5.
+
 ```
 bun run dev
 ```
