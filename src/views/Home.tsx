@@ -224,15 +224,6 @@ function DialogOptions(props: {
 				classList={{ option: true, [styles.item]: true }}
 				tabIndex={-1}
 				on:sn-enter-down={() => {
-					props.onSelect(DialogOptionsSelected.LOGOUT);
-				}}
-			>
-				Logout
-			</OptionsItem>
-			<OptionsItem
-				classList={{ option: true, [styles.item]: true }}
-				tabIndex={-1}
-				on:sn-enter-down={() => {
 					props.onSelect(DialogOptionsSelected.SETTINGS);
 				}}
 			>
@@ -327,7 +318,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				ref={divRef}
 				onFocus={() => {
 					setStatusbarColor("#3b90bc");
-					setSoftkeys("New chat", "OPEN", "tg:more");
+					setSoftkeys(/* "New chat" */ "", "OPEN", "tg:more");
 					setFocused(true);
 				}}
 				onBlur={() => {
@@ -589,7 +580,7 @@ export default function Home(props: { hidden: boolean }) {
 								e.currentTarget.scrollIntoView(false);
 								setStatusbarColor("#3b90bc");
 								setSoftkeys(
-									"New chat",
+									/* "New chat" */ "",
 
 									"",
 									"tg:more"

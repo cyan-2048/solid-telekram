@@ -1,8 +1,8 @@
 {
-	"name": "Kаigram",
+	"name": "ТеlеКrаm",
 	"description": "Telegram Client for KaiOS.",
-	"display": "Kaigram",
-	"short_name": "Kaigram",
+	"display": "Telegram",
+	"short_name": "Telegram",
 	"version": "1.0.10",
 	"launch_path": "/index.html",
 	"theme": "#fff",
@@ -21,7 +21,7 @@
 		"url": "https://discord.gg/W9DF2q3Vv2"
 	},
 	"origin": "app://telekram.cyankindasus.com",
-	"type": "certified",
+	"type": "privileged",
 	"permissions": {
 		"spatialnavigation-app-manage": {},
 		"systemXHR": {},
@@ -47,11 +47,11 @@
 	],
 	"locales": {
 		"en-US": {
-			"name": "Kaigram",
+			"name": "TeleKram",
 			"subtitle": "Telegram for KaiOS",
 			"description": "Telegram Client for KaiOS.",
-			"display": "Kaigram",
-			"short_name": "Kaigram"
+			"display": "Telegram",
+			"short_name": "Telegram"
 		}
 	},
 

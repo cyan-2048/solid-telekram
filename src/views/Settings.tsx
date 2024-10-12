@@ -6,6 +6,7 @@ import SpatialNavigation from "@/lib/spatial_navigation";
 import { sleep } from "@/lib/utils";
 import { client } from "@signals";
 import scrollIntoView from "scroll-into-view-if-needed";
+import { manuallySubscribePushNotification } from "@/lib/pushNotifications";
 
 function SettingsItem(props: { children: JSXElement; onEnterDown?: () => void }) {
 	return (
@@ -51,7 +52,7 @@ export default function Settings(props: { onClose: () => void }) {
 				}}
 				style={{ "background-color": "white", height: "100%" }}
 			>
-				<SettingsItem>Proxy</SettingsItem>
+				{/* <SettingsItem>Proxy</SettingsItem> */}
 				<SettingsItem
 					onEnterDown={async () => {
 						const tg = client()!;
@@ -72,8 +73,15 @@ export default function Settings(props: { onClose: () => void }) {
 				>
 					Logout
 				</SettingsItem>
-				<SettingsItem>Subscribe Push Notifications</SettingsItem>
-				<SettingsItem>About</SettingsItem>
+				<SettingsItem
+					onEnterDown={async () => {
+						const result = await manuallySubscribePushNotification(client()!);
+						alert(result ? "Sucessfully toggled Push Notifications." : "Something went wrong. :(");
+					}}
+				>
+					Toggle Push Notifications
+				</SettingsItem>
+				{/* <SettingsItem>About</SettingsItem> */}
 			</div>
 		</Content>
 	);

@@ -171,7 +171,7 @@ export class Download extends EventEmitter<{
 			return;
 		}
 
-		const download = (this.downloader = createDownloader(this.hash));
+		const download = (this.downloader = await createDownloader(this.hash));
 
 		for await (const chunk of this.tg.downloadAsIterable(this.location, {
 			abortSignal: this.abortController.signal,

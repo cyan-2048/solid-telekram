@@ -34,7 +34,9 @@ const kaigramFolder = (async function getKaigramFolder() {
 	}
 })();
 
-const useLocalforage = Boolean(!systemStorage);
+const useLocalforage = (async () => {
+	return !(await kaigramFolder);
+})();
 
 async function deleteKaigramFolder() {
 	const root = await resolveRoot;
@@ -50,7 +52,7 @@ async function clearCacheLocalforage() {
 }
 
 export async function clearCache() {
-	await (useLocalforage ? clearCacheLocalforage() : clearCacheStorage());
+	await ((await useLocalforage) ? clearCacheLocalforage() : clearCacheStorage());
 }
 
 export interface Downloader {
@@ -232,14 +234,14 @@ async function addToCacheLocalforage(hash: string | number, ...buffer: BlobPart[
 	return localforage.getItem<Blob>(filename);
 }
 
-export function addToCache(hash: string | number, ...buffer: BlobPart[]) {
-	return useLocalforage ? addToCacheLocalforage(hash, ...buffer) : addToCacheStorage(hash, ...buffer);
+export async function addToCache(hash: string | number, ...buffer: BlobPart[]) {
+	return (await useLocalforage) ? addToCacheLocalforage(hash, ...buffer) : addToCacheStorage(hash, ...buffer);
 }
 
-export function getFileFromCache(hash: string | number) {
-	return useLocalforage ? getFileFromCacheLocalforage(hash) : getFileFromCacheStorage(hash);
+export async function getFileFromCache(hash: string | number) {
+	return (await useLocalforage) ? getFileFromCacheLocalforage(hash) : getFileFromCacheStorage(hash);
 }
 
-export function createDownloader(hash: string | number): Downloader {
-	return useLocalforage ? createDownloaderLocalForage(hash) : createDownloaderStorage(hash);
+export async function createDownloader(hash: string | number): Promise<Downloader> {
+	return (await useLocalforage) ? createDownloaderLocalForage(hash) : createDownloaderStorage(hash);
 }

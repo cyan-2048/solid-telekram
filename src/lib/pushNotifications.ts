@@ -151,5 +151,3 @@ export async function manuallySubscribePushNotification(client: TelegramClient) 
 		return Promise.reject(err);
 	}
 }
-
-Object.assign(window, { manuallySubscribePushNotification });
