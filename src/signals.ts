@@ -1508,7 +1508,10 @@ integrityCheck.then((integrity) => {
 	}
 });
 
-const toastConnections = navigator.mozApps?.getSelf().then((a) => a.connect("systoaster"));
+const toastConnections = navigator.mozApps
+	?.getSelf()
+	.then((a) => a.connect("systoaster"))
+	.catch(() => undefined);
 
 export async function toaster(text: string, latency?: number) {
 	// thanks tbrrss
@@ -1528,6 +1531,7 @@ export async function toaster(text: string, latency?: number) {
 		const notif = new Notification(text, {
 			tag: "kaigram",
 			data: {},
+			silent: true,
 		});
 
 		setTimeout(() => {

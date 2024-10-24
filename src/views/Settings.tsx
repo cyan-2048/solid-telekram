@@ -4,7 +4,7 @@ import Header from "./components/Header";
 import styles from "./Settings.module.scss";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { sleep } from "@/lib/utils";
-import { client } from "@signals";
+import { client, setStatusbarColor } from "@signals";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { manuallySubscribePushNotification } from "@/lib/pushNotifications";
 
@@ -35,6 +35,8 @@ export default function Settings(props: { onClose: () => void }) {
 		});
 
 		SpatialNavigation.focus("settings");
+
+		setStatusbarColor("#0a323f");
 	});
 
 	onCleanup(() => {

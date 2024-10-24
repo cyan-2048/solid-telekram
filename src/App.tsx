@@ -5,6 +5,7 @@ import {
 	currentView,
 	messageInfo,
 	previousView,
+	setStatusbarColor,
 	setView,
 	softcenter,
 	softkeysBlack,
@@ -46,6 +47,7 @@ function App() {
 					<Settings
 						onClose={() => {
 							setView(previousView());
+							setStatusbarColor("#3b90bc");
 						}}
 					></Settings>
 				</Match>
