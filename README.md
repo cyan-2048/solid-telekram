@@ -50,7 +50,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
   - [ ] Bots
   - [ ] Gigagroups
 - [ ] Messages
-  - [ ] Push Notifications
+  - [x] Push Notifications
   - [ ] Telegram System Actions (not complete)
   - [ ] Downloading Files
   - [ ] Uploading Files

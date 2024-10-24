@@ -16,6 +16,7 @@ import {
 	TextWithEntities,
 	tl,
 	TypingStatus,
+	User,
 	UserStatus,
 	UserStatusUpdate,
 } from "@mtcute/web";
@@ -72,7 +73,7 @@ export function setSoftkeys(
 	});
 }
 
-type Views = "login" | "loading" | "home" | "room" | "info" | "settings";
+type Views = "login" | "loading" | "home" | "room" | "info" | "settings" | "new_chat";
 
 export const [currentView, setView] = createSignal("loading" as Views);
 
@@ -85,6 +86,8 @@ export const [editingMessage, setEditingMessage] = createSignal<null | UIMessage
 
 export const [room, setRoom] = createSignal<Chat | UIDialog | null>(null);
 export const [uiDialog, setUIDialog] = createSignal<null | UIDialog>(null);
+
+export const [cachedContacts, setCachedContacts] = createSignal([] as User[]);
 
 export const chat = createMemo(() => {
 	const _room = room();

@@ -140,7 +140,7 @@ export default function VideoViewer(props: { video: Video; onClose?: () => void 
 		}
 
 		function progressChange() {
-			console.error("DOWNLOAD PRESS", download.progress);
+			// console.error("DOWNLOAD PRESS", download.progress);
 			setProgress(download.progress);
 		}
 

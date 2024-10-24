@@ -146,7 +146,8 @@ function fireNotification(obj) {
 	console.log("[SW] show notify", title, body, icon, obj);
 
 	self.registration.showNotification(title, {
-		body: collapse(body),
+		// we slice so that it doesn't look ugly
+		body: collapse(body).slice(0, 35),
 		icon: icon,
 		tag: tag,
 		data: obj,

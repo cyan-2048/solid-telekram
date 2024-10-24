@@ -21,6 +21,7 @@ import Room from "./views/Room";
 import MessageInfo from "./views/MessageInfo";
 import TemporaryUploadingIndicator from "./views/components/TemporaryUploadingIndicator";
 import Settings from "./views/Settings";
+import NewChat from "./views/NewChat";
 
 function App() {
 	document.querySelector(".LOADING")?.remove();
@@ -51,7 +52,16 @@ function App() {
 						}}
 					></Settings>
 				</Match>
+				<Match when={currentView() == "new_chat"}>
+					<NewChat
+						onClose={() => {
+							setView(previousView());
+							setStatusbarColor("#3b90bc");
+						}}
+					/>
+				</Match>
 			</Switch>
+
 			<Show when={client()}>
 				<Home hidden={currentView() != "home"}></Home>
 			</Show>

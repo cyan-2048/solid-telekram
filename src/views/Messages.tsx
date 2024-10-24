@@ -866,7 +866,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 		download.on("state", stateChange);
 
 		function progressChange() {
-			console.error("DOWNLOAD PRESS", download.progress);
+			// console.error("DOWNLOAD PRESS", download.progress);
 			setProgress(download.progress);
 		}
 

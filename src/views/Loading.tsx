@@ -11,16 +11,14 @@ export default function Loading() {
 		window.close();
 	});
 
-	//const [showSpinner, setShowSpinner] = createSignal(false);
-	//
-	//
-	//
-	//onMount(() => {
-	//	const timeout = setTimeout(() => {
-	//		setShowSpinner(true);
-	//	}, 3_000);
-	//	onCleanup(() => clearTimeout(timeout));
-	//});
+	const [showSpinner, setShowSpinner] = createSignal(false);
+
+	onMount(() => {
+		const timeout = setTimeout(() => {
+			setShowSpinner(true);
+		}, 11_000);
+		onCleanup(() => clearTimeout(timeout));
+	});
 
 	return (
 		<div
@@ -29,9 +27,11 @@ export default function Loading() {
 			}}
 			class={styles.loading}
 		>
-			<svg class={styles.progressRing} height={24} width={24} viewBox="0 0 16 16">
-				<circle cx="8px" cy="8px" r="7px"></circle>
-			</svg>
+			<Show when={showSpinner()}>
+				<svg class={styles.progressRing} height={24} width={24} viewBox="0 0 16 16">
+					<circle cx="8px" cy="8px" r="7px"></circle>
+				</svg>
+			</Show>
 		</div>
 	);
 }

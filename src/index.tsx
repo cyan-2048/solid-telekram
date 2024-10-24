@@ -19,9 +19,9 @@ import "./styles.scss";
 import App from "./App";
 import localforage from "localforage";
 
-if (import.meta.env.DEV) {
-	import("./dev");
-}
+// if (import.meta.env.DEV) {
+import("./dev");
+// }
 
 Object.assign(window, { localforage });
 

@@ -289,7 +289,7 @@ if (import.meta.env.VITE_KAIOS != 3) {
 				},
 			});
 			s.dispatchEvent(event);
-			console.error(promise, reason, reason && "stack" in reason && reason.stack);
+			console.error(promise, reason, typeof reason == "object" && "stack" in reason && reason.stack);
 		}
 
 		const MyPromise = function (resolver) {

@@ -165,6 +165,7 @@ const enum DialogOptionsSelected {
 	CHANGELOG,
 
 	SETTINGS,
+	EXIT,
 }
 
 function DialogOptions(props: {
@@ -228,6 +229,15 @@ function DialogOptions(props: {
 				}}
 			>
 				Settings
+			</OptionsItem>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={() => {
+					props.onSelect(DialogOptionsSelected.EXIT);
+				}}
+			>
+				Exit
 			</OptionsItem>
 			<Show when={!localStorage.getItem("NO_ADS")}>
 				<OptionsItem
@@ -318,7 +328,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				ref={divRef}
 				onFocus={() => {
 					setStatusbarColor("#3b90bc");
-					setSoftkeys(/* "New chat" */ "", "OPEN", "tg:more");
+					setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
 				}}
 				onBlur={() => {
@@ -327,6 +337,13 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
 						setShowOptions(true);
+					}
+
+					if (e.key == "SoftLeft") {
+						batch(() => {
+							setPreviousView("home");
+							setView("new_chat");
+						});
 					}
 				}}
 				on:sn-enter-down={async () => {
@@ -426,6 +443,9 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 									return;
 								case DialogOptionsSelected.CHANGELOG:
 									setShowChangelog(true);
+									return;
+								case DialogOptionsSelected.EXIT:
+									window.close();
 									return;
 							}
 
@@ -579,12 +599,7 @@ export default function Home(props: { hidden: boolean }) {
 							onFocus={(e) => {
 								e.currentTarget.scrollIntoView(false);
 								setStatusbarColor("#3b90bc");
-								setSoftkeys(
-									/* "New chat" */ "",
-
-									"",
-									"tg:more"
-								);
+								setSoftkeys("New chat", "", "tg:more");
 							}}
 							classList={{ focusable }}
 							placeholder="Search"

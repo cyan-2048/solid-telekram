@@ -105,6 +105,7 @@ export async function registerDevice(tg: TelegramClient, subscription: any) {
 	// messy
 	const data = readStringSession(await tg.exportSession());
 
+	console.error("REGISTER DEVICE", subscription);
 	const result = await tg.call({
 		_: "account.registerDevice",
 		tokenType: 10,

@@ -1,7 +1,8 @@
 // eslint-disable-next-line unicorn/prefer-node-protocol
 import EventEmitter from "events";
 
-import type { Socket } from "bun";
+type Socket = any;
+
 import type { IPacketCodec, ITelegramTransport } from "@mtcute/core";
 import { IntermediatePacketCodec, MtcuteError, TransportState } from "@mtcute/core";
 import type { BasicDcOption, ICryptoProvider, Logger } from "@mtcute/core/utils.js";
@@ -99,7 +100,7 @@ export abstract class BaseTcpTransport extends EventEmitter implements ITelegram
 		}
 	}
 
-	handleConnect(socket: Socket): void {
+	private handleConnect(socket: Socket): void {
 		this._socket = socket;
 		this.log.info("connected");
 

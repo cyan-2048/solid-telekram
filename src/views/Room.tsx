@@ -267,16 +267,18 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 				>
 					Message info
 				</OptionsItem>
-				<OptionsItem
-					on:sn-willfocus={willFocusScrollIfNeeded}
-					classList={{ option: true, [styles.option_item]: true }}
-					tabIndex={-1}
-					on:sn-enter-down={() => {
-						props.onSelect(MessageOptionsSelected.REPLY);
-					}}
-				>
-					Reply
-				</OptionsItem>
+				<Show when={chat()!.chatType !== "channel"}>
+					<OptionsItem
+						on:sn-willfocus={willFocusScrollIfNeeded}
+						classList={{ option: true, [styles.option_item]: true }}
+						tabIndex={-1}
+						on:sn-enter-down={() => {
+							props.onSelect(MessageOptionsSelected.REPLY);
+						}}
+					>
+						Reply
+					</OptionsItem>
+				</Show>
 				<Show when={message().canEdit()}>
 					<OptionsItem
 						on:sn-willfocus={willFocusScrollIfNeeded}
@@ -945,8 +947,25 @@ function TextBoxOptionsWrap(props: {
 							await sleep(5);
 
 							props.textboxRef.focus();
+
 							if (send) {
 								const dialog = props.dialog;
+
+								if (replyingMessage()) {
+									tg.replyMedia(
+										replyingMessage()!.$,
+										InputMedia.voice(audioBlob, {
+											duration: audioDuration,
+											waveform: audioWaveform,
+										})
+									).then((msg) => {
+										dialog.lastMessage.set(dialog.messages.add(msg));
+										setReplyingMessage(null);
+									});
+
+									return;
+								}
+
 								tg.sendMedia(
 									props.dialog.$.chat,
 									InputMedia.voice(audioBlob, {
@@ -955,6 +974,12 @@ function TextBoxOptionsWrap(props: {
 									})
 								).then((msg) => {
 									dialog.lastMessage.set(dialog.messages.add(msg));
+
+									// we can't edit
+									batch(() => {
+										setEditingMessage(null);
+										setReplyingMessage(null);
+									});
 								});
 							}
 						}}
@@ -1180,7 +1205,26 @@ function TextBox(props: { dialog: UIDialog }) {
 
 							const dialog = props.dialog;
 
-							console.error(e);
+							// console.error(e);
+
+							if (replyingMessage()) {
+								tg.replyMedia(
+									replyingMessage()!.$,
+									InputMedia.photo(
+										blob,
+										e
+											? {
+													caption: e,
+											  }
+											: {}
+									)
+								).then((msg) => {
+									dialog.lastMessage.set(dialog.messages.add(msg));
+									setReplyingMessage(null);
+								});
+
+								return;
+							}
 
 							tg.sendMedia(
 								dialog.$.chat,
@@ -1194,6 +1238,10 @@ function TextBox(props: { dialog: UIDialog }) {
 								)
 							).then((msg) => {
 								dialog.lastMessage.set(dialog.messages.add(msg));
+								batch(() => {
+									setEditingMessage(null);
+									setReplyingMessage(null);
+								});
 							});
 						}}
 					></ImageUpload>
@@ -1486,7 +1534,26 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 
 							const dialog = props.dialog;
 
-							console.error(e);
+							// console.error(e);
+
+							if (replyingMessage()) {
+								tg.replyMedia(
+									replyingMessage()!.$,
+									InputMedia.photo(
+										blob,
+										e
+											? {
+													caption: e,
+											  }
+											: {}
+									)
+								).then((msg) => {
+									dialog.lastMessage.set(dialog.messages.add(msg));
+									setReplyingMessage(null);
+								});
+
+								return;
+							}
 
 							tg.sendMedia(
 								dialog.$.chat,
@@ -1500,6 +1567,10 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 								)
 							).then((msg) => {
 								dialog.lastMessage.set(dialog.messages.add(msg));
+								batch(() => {
+									setEditingMessage(null);
+									setReplyingMessage(null);
+								});
 							});
 						}}
 					></ImageUpload>

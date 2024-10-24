@@ -2,7 +2,16 @@ export function capitalizeFirstLetter(string: string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function sleep(ms = 0) {
+/**
+ *
+ * @param ms if not passed with a number, use this as a cheap queueMicrotask
+ * @returns
+ */
+export function sleep(ms: void | number) {
+	if (ms === undefined) {
+		return Promise.resolve();
+	}
+
 	return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
