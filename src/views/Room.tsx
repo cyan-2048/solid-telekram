@@ -951,16 +951,26 @@ function TextBoxOptionsWrap(props: {
 							if (send) {
 								const dialog = props.dialog;
 
-								if (replyingMessage()) {
+								const replying = replyingMessage();
+
+								batch(() => {
+									setEditingMessage(null);
+									setReplyingMessage(null);
+								});
+
+								sleep(0).then(() => {
+									document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
+								});
+
+								if (replying) {
 									tg.replyMedia(
-										replyingMessage()!.$,
+										replying.$,
 										InputMedia.voice(audioBlob, {
 											duration: audioDuration,
 											waveform: audioWaveform,
 										})
 									).then((msg) => {
 										dialog.lastMessage.set(dialog.messages.add(msg));
-										setReplyingMessage(null);
 									});
 
 									return;
@@ -974,12 +984,6 @@ function TextBoxOptionsWrap(props: {
 									})
 								).then((msg) => {
 									dialog.lastMessage.set(dialog.messages.add(msg));
-
-									// we can't edit
-									batch(() => {
-										setEditingMessage(null);
-										setReplyingMessage(null);
-									});
 								});
 							}
 						}}
@@ -1056,7 +1060,8 @@ function TextBoxOptionsWrap(props: {
 											});
 										} else if (replying) {
 											tg.replyText(replying.$, md(text()), { shouldDispatch: true }).then((msg) => {
-												dialog.lastMessage.set(dialog.messages.add(msg));
+												// console.error("THIS MESSAGE IS SUPPOSED TO HAVE A REPLY HEADER", msg);
+												// dialog.lastMessage.set(dialog.messages.add(msg));
 											});
 
 											sleep(0).then(() => {
@@ -1198,33 +1203,12 @@ function TextBox(props: { dialog: UIDialog }) {
 						onSend={async (e) => {
 							const blob = photoBlob()!;
 							setPhotoBlob(null);
-							sleep(0);
+							await sleep(0);
 							textboxRef.focus();
 
 							if (e === false) return;
 
 							const dialog = props.dialog;
-
-							// console.error(e);
-
-							if (replyingMessage()) {
-								tg.replyMedia(
-									replyingMessage()!.$,
-									InputMedia.photo(
-										blob,
-										e
-											? {
-													caption: e,
-											  }
-											: {}
-									)
-								).then((msg) => {
-									dialog.lastMessage.set(dialog.messages.add(msg));
-									setReplyingMessage(null);
-								});
-
-								return;
-							}
 
 							tg.sendMedia(
 								dialog.$.chat,
@@ -1238,10 +1222,6 @@ function TextBox(props: { dialog: UIDialog }) {
 								)
 							).then((msg) => {
 								dialog.lastMessage.set(dialog.messages.add(msg));
-								batch(() => {
-									setEditingMessage(null);
-									setReplyingMessage(null);
-								});
 							});
 						}}
 					></ImageUpload>
@@ -1255,7 +1235,7 @@ function TextBox(props: { dialog: UIDialog }) {
 						onSend={async (e) => {
 							const blob = videoBlob()!;
 							setVideoBlob(null);
-							sleep(0);
+							await sleep(0);
 							textboxRef.focus();
 
 							if (e === false) return;
@@ -1527,7 +1507,7 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 						onSend={async (e) => {
 							const blob = photoBlob()!;
 							setPhotoBlob(null);
-							sleep(0);
+							await sleep(0);
 							textboxRef.focus();
 
 							if (e === false) return;
@@ -1536,9 +1516,20 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 
 							// console.error(e);
 
-							if (replyingMessage()) {
+							const replying = replyingMessage();
+
+							batch(() => {
+								setEditingMessage(null);
+								setReplyingMessage(null);
+							});
+
+							sleep(0).then(() => {
+								document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
+							});
+
+							if (replying) {
 								tg.replyMedia(
-									replyingMessage()!.$,
+									replying.$,
 									InputMedia.photo(
 										blob,
 										e
@@ -1549,7 +1540,6 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 									)
 								).then((msg) => {
 									dialog.lastMessage.set(dialog.messages.add(msg));
-									setReplyingMessage(null);
 								});
 
 								return;
@@ -1567,10 +1557,6 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 								)
 							).then((msg) => {
 								dialog.lastMessage.set(dialog.messages.add(msg));
-								batch(() => {
-									setEditingMessage(null);
-									setReplyingMessage(null);
-								});
 							});
 						}}
 					></ImageUpload>
@@ -1584,37 +1570,67 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 						onSend={async (e) => {
 							const blob = videoBlob()!;
 							setVideoBlob(null);
-							sleep(0);
+							await sleep(0);
 							textboxRef.focus();
 
 							if (e === false) return;
 
 							const dialog = props.dialog;
 
-							console.error(e);
+							const replying = replyingMessage();
+
+							batch(() => {
+								setEditingMessage(null);
+								setReplyingMessage(null);
+							});
+
+							sleep(0).then(() => {
+								document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
+							});
 
 							const upload = new TempFileUploading();
 
 							temp_setUploadingFiles((e) => e.concat(upload));
 
-							tg.sendMedia(
-								dialog.$.chat,
-								InputMedia.video(
-									blob,
-									e
-										? {
-												caption: e,
-										  }
-										: {}
-								),
-								{
-									progressCallback(uploaded, total) {
-										upload.progress.set(Math.ceil((uploaded / total) * 100));
-									},
-								}
-							).then((msg) => {
-								dialog.lastMessage.set(dialog.messages.add(msg));
-							});
+							if (replying) {
+								tg.replyMedia(
+									replying.$,
+									InputMedia.video(
+										blob,
+										e
+											? {
+													caption: e,
+											  }
+											: {}
+									),
+									{
+										progressCallback(uploaded, total) {
+											upload.progress.set(Math.ceil((uploaded / total) * 100));
+										},
+									}
+								).then((msg) => {
+									dialog.lastMessage.set(dialog.messages.add(msg));
+								});
+							} else {
+								tg.sendMedia(
+									dialog.$.chat,
+									InputMedia.video(
+										blob,
+										e
+											? {
+													caption: e,
+											  }
+											: {}
+									),
+									{
+										progressCallback(uploaded, total) {
+											upload.progress.set(Math.ceil((uploaded / total) * 100));
+										},
+									}
+								).then((msg) => {
+									dialog.lastMessage.set(dialog.messages.add(msg));
+								});
+							}
 						}}
 					></ImageUpload>
 				</Portal>

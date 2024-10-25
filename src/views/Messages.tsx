@@ -1055,7 +1055,7 @@ function VideoMedia(props: FocusableMediaProps) {
 		<div
 			on:sn-enter-down={() => {
 				const media = message().$.media;
-				props.onSelect?.(media!);
+				if (!isGif()) props.onSelect?.(media!);
 			}}
 			tabIndex={props.focusable ? -1 : undefined}
 			classList={{ [styles.video]: true, focusable: !!props.focusable }}
