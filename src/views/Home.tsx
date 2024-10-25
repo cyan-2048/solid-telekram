@@ -601,6 +601,14 @@ export default function Home(props: { hidden: boolean }) {
 								setStatusbarColor("#3b90bc");
 								setSoftkeys("New chat", "", "tg:more");
 							}}
+							onKeyDown={(e) => {
+								if (e.key == "SoftLeft") {
+									batch(() => {
+										setPreviousView("home");
+										setView("new_chat");
+									});
+								}
+							}}
 							classList={{ focusable }}
 							placeholder="Search"
 						/>

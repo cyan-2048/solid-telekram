@@ -7,7 +7,7 @@ export default function Search(
 		onBlur?: JSX.FocusEventHandler<HTMLInputElement, FocusEvent>;
 	}
 ) {
-	const [local, rest] = splitProps(props, ["onFocus", "onBlur"]);
+	const [local, rest] = splitProps(props, ["onFocus", "onBlur", "onKeyDown"]);
 
 	const [focused, setFocused] = createSignal(false);
 
@@ -28,6 +28,10 @@ export default function Search(
 						local.onBlur?.(e);
 					}}
 					onKeyDown={(e) => {
+						if (typeof local.onKeyDown == "function") {
+							local.onKeyDown(e);
+						}
+
 						if (e.currentTarget.value !== "" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
 							e.stopImmediatePropagation();
 							e.stopPropagation();
