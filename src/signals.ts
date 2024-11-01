@@ -89,6 +89,19 @@ export const [uiDialog, setUIDialog] = createSignal<null | UIDialog>(null);
 
 export const [cachedContacts, setCachedContacts] = createSignal([] as User[]);
 
+export async function reloadCachedContacts() {
+	let contacts!: User[];
+
+	try {
+		setCachedContacts((contacts = await client()!.getContacts()));
+
+		return contacts;
+	} catch (e) {
+		toaster("Error occured while trying to reload contacts!");
+		return [];
+	}
+}
+
 export const chat = createMemo(() => {
 	const _room = room();
 	return _room && "$" in _room ? _room.$.chat : _room;

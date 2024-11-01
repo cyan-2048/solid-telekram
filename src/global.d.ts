@@ -106,7 +106,131 @@ function mozSetMessageHandler(type: "activity", handler: (request: MozActivityRe
 function mozSetMessageHandler(type: "alarm", handler: (request: mozAlarm) => void): void;
 function mozSetMessageHandler(type: string, handler: (request: unknown) => void): void;
 
+interface TelField {
+	type: string[];
+	pref: boolean;
+	value: string;
+	carrier: string;
+}
+
+interface AddressField {
+	type: string; // A string representing the type for that address (e.g., "home", "work")
+	pref: boolean; // A boolean indicating if it is the preferred address (true) or not (false)
+	streetAddress: string; // A string representing the street name, number, etc. of the address
+	locality: string; // A string representing the city of the address
+	region: string; // A string representing the geographical region of the address
+	postalCode: string; // A string representing the postal code for the address
+	countryName: string; // A string representing the name of the country for the address
+}
+
+interface ContactField {
+	/**
+	 * An array of strings representing all possible types for this means of contact.
+	 * For example, ["home", "work"].
+	 */
+	type: string[];
+
+	/**
+	 * The actual contact value, such as a phone number or email address.
+	 */
+	value: string;
+
+	/**
+	 * Indicates if this is the preferred means of contact.
+	 * `true` if preferred, `false` otherwise.
+	 */
+	pref: boolean;
+}
+
+class ContactManager {
+	clear(): DOMRequest<void>;
+	find(
+		options: Partial<{
+			filterBy: string[];
+			filterValue: string;
+			filterOp: "equals" | "startsWith" | "match";
+			filterLimit: number;
+		}>
+	): DOMRequest<mozContact[]>;
+	getAll(
+		options?: Partial<{
+			sortBy: "givenName" | "familyName";
+			sortOrder: "descending" | "ascending";
+
+			filterBy: string[];
+			filterValue: string;
+			filterOp: "equals" | "startsWith" | "match";
+			filterLimit: number;
+		}>
+	): DOMCursor<mozContact>;
+
+	getCount(): DOMRequest<number>;
+	getRevision(): DOMRequest<number>;
+	remove(contact: mozContact): DOMRequest<void>;
+	save(contact: mozContact): DOMRequest<void>;
+}
+
 declare global {
+	class mozContact {
+		readonly id: string;
+		readonly published: Date;
+		readonly updated: Date;
+
+		name: string[];
+		honorificPrefix: string[];
+		givenName: string[];
+
+		additionalName: string[];
+		familyName: string[];
+		honorificSuffix: string[];
+		nickname: string[];
+		email: ContactField[];
+		photo: Blob[];
+		url: ContactField[];
+		category: string[];
+		adr: AddressField[];
+		tel: TelField[];
+
+		org: string[];
+		jobTitle: string[];
+		bday: Date;
+		note: string[];
+		impp: ContactField[];
+		anniversary: Date;
+		sex: string;
+		genderIdentity: string;
+		key: string[];
+
+		constructor(
+			data: Partial<{
+				name: string[];
+				honorificPrefix: string[];
+				givenName: string[];
+
+				additionalName: string[];
+				familyName: string[];
+				honorificSuffix: string[];
+				nickname: string[];
+				email: ContactField[];
+				photo: Blob[];
+				url: ContactField[];
+				category: string[];
+				adr: AddressField[];
+				tel: TelField[];
+
+				org: string[];
+				jobTitle: string[];
+				bday: Date;
+				note: string[];
+				impp: ContactField[];
+				anniversary: Date;
+				sex: string;
+				genderIdentity: string;
+				key: string[];
+			}>
+		);
+	}
+
 	interface Navigator {
 		volumeManager: VolumeManager;
 		getDeviceStorage(deviceStorage: ValidDeviceStorages): DeviceStorage;
@@ -126,6 +250,8 @@ declare global {
 		mozApps: DOMApplicationsRegistry;
 		mozAlarms: MozAlarmsManager;
 		mozSetMessageHandler: typeof mozSetMessageHandler;
+
+		mozContacts: ContactManager;
 
 		b2g: {
 			getDeviceStorage(deviceStorage: ValidDeviceStorages): DeviceStorage;

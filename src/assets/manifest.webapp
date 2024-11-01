@@ -35,6 +35,7 @@
 		"desktop-notification": {},
 		"tcp-socket": { "description": "Required to do any TCP" },
 		"device-storage:sdcard": { "access": "readwrite" },
+		"contacts": { "access": "readonly" },
 		"volumemanager": {}
 	},
 	"dependencies": {

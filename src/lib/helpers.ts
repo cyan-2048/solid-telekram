@@ -84,3 +84,22 @@ export function isToday(date: Date, today = new Date()) {
 		date.getFullYear() == today.getFullYear()
 	);
 }
+
+export async function Array_from_DOMCursor<T>(cursor: DOMCursor<T>): Promise<T[]> {
+	const arr: T[] = [];
+
+	return new Promise((res, err) => {
+		cursor.onsuccess = function () {
+			if (cursor.result) {
+				arr.push(cursor.result);
+				cursor.continue();
+			} else {
+				res(arr);
+			}
+		};
+
+		cursor.onerror = function () {
+			err(cursor.error);
+		};
+	});
+}

@@ -18,11 +18,12 @@ import "./event-target.js";
 import "./styles.scss";
 import App from "./App";
 import localforage from "localforage";
+import { importKaiContacts } from "./lib/import-contacts";
 
 // if (import.meta.env.DEV) {
 import("./dev");
 // }
 
-Object.assign(window, { localforage });
+Object.assign(window, { localforage, importKaiContacts });
 
 render(() => <App />, document.body);

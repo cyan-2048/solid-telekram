@@ -8,6 +8,13 @@
 	height: 52px;
 }
 
+.option {
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+	}
+}
+
 .contact {
 	display: flex;
 	align-items: center;
