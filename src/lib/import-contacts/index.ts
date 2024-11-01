@@ -10,7 +10,9 @@ export async function importKaiContacts(tg: TelegramClient, cachedContacts: User
 
 	const contactsForTelegram: Parameters<typeof tg.importContacts>[0] = [];
 
-	const numbersAlreadySaved = new Set(cachedContacts.map((a) => a.phoneNumber!));
+	const numbersAlreadySaved = new Set(cachedContacts.map((a) => "+" + a.phoneNumber!));
+
+	console.error(numbersAlreadySaved);
 
 	contactsFromKai.forEach((contact) => {
 		const isFullname = contact.givenName && contact.familyName;
@@ -31,5 +33,13 @@ export async function importKaiContacts(tg: TelegramClient, cachedContacts: User
 
 	if (!contactsForTelegram.length) return null;
 
-	return tg.importContacts(contactsForTelegram);
+	const users = (await tg.importContacts(contactsForTelegram)).users;
+
+	// return early
+	if (!users.length) return [];
+
+	const idSet = new Set(cachedContacts.map((a) => a.id));
+
+	// only return users that were not there before! and also return the User object
+	return users.filter((a) => !idSet.has(a.id)).map((a) => new User(a));
 }

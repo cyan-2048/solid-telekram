@@ -76,13 +76,14 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 						const result = await importKaiContacts(client()!, cached.length ? cached : await reloadCachedContacts());
 
 						if (!result) return;
-						if (result.users.length) {
-							setCachedContacts((a) => a.concat(result.users.map((a) => new User(a))));
+						if (result.length) {
+							setCachedContacts((a) => a.concat(result));
 						}
+						props.onClose();
 					}}
 					tabIndex={-1}
 				>
-					Import Contacts
+					Import contacts
 				</OptionsItem>
 			</Show>
 		</Options>
@@ -180,39 +181,60 @@ export default function NewChat(props: { onClose: () => void }) {
 		SpatialNavigation.remove("new_chat");
 	});
 
+	const [showOptions, setShowOptions] = createSignal(false);
+
 	return (
-		<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
-			<div
-				onKeyDown={(e) => {
-					if (e.key == "SoftLeft") {
-						props.onClose();
-					}
-
-					if (e.key == "Backspace") {
-						const actEl = document.activeElement as HTMLInputElement;
-
-						if (actEl?.tagName == "INPUT" && actEl.value != "") {
-							return;
+		<>
+			<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
+				<div
+					onKeyDown={(e) => {
+						if (e.key == "SoftLeft") {
+							props.onClose();
 						}
 
-						e.preventDefault();
-						props.onClose();
-					}
-				}}
-				style={{ "background-color": "white", height: "100%" }}
-			>
-				<Search
-					class="new_chat_search"
-					onFocus={(e) => {
-						setSoftkeys("Cancel", "", "tg:more");
+						if (e.key == "Backspace") {
+							const actEl = document.activeElement as HTMLInputElement;
+
+							if (actEl?.tagName == "INPUT" && actEl.value != "") {
+								return;
+							}
+
+							e.preventDefault();
+							props.onClose();
+						}
 					}}
-					on:sn-willfocus={(e) => {
-						e.currentTarget.scrollIntoView(false);
-					}}
-					placeholder="Search"
-				></Search>
-				<For each={cachedContacts()}>{(r) => <ContactItem user={r} />}</For>
-			</div>
-		</Content>
+					style={{ "background-color": "white", height: "100%" }}
+				>
+					<Search
+						class="new_chat_search"
+						onFocus={(e) => {
+							setSoftkeys("Cancel", "", "tg:more");
+						}}
+						on:sn-willfocus={(e) => {
+							e.currentTarget.scrollIntoView(false);
+						}}
+						onKeyDown={(e) => {
+							if (e.key == "SoftRight") {
+								setShowOptions(true);
+							}
+						}}
+						placeholder="Search"
+					></Search>
+					<For each={cachedContacts()}>{(r) => <ContactItem user={r} />}</For>
+				</div>
+			</Content>
+
+			<Show when={showOptions()}>
+				<Portal>
+					<OptionsContactItem
+						onClose={async () => {
+							setShowOptions(false);
+							SpatialNavigation.focus("new_chat");
+						}}
+						user={null}
+					></OptionsContactItem>
+				</Portal>
+			</Show>
+		</>
 	);
 }
