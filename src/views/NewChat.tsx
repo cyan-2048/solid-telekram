@@ -80,6 +80,7 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 							setCachedContacts((a) => a.concat(result.users.map((a) => new User(a))));
 						}
 					}}
+					tabIndex={-1}
 				>
 					Import Contacts
 				</OptionsItem>
