@@ -1564,6 +1564,20 @@ export const chatMinisearch = new MiniSearch({
 	fields: ["name"],
 });
 
+export const contactsMinisearch = new MiniSearch({
+	fields: ["name"],
+});
+
+observable(cachedContacts).subscribe(async (contacts) => {
+	contactsMinisearch.removeAll();
+	contactsMinisearch.addAllAsync(
+		contacts.map((a) => ({
+			id: a.id,
+			name: a.displayName,
+		}))
+	);
+});
+
 let __previousDialogs: Set<UIDialog> = new Set();
 
 observable(dialogs).subscribe(async (dialogs) => {

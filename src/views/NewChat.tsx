@@ -1,6 +1,6 @@
 import styles from "./NewChat.module.scss";
 
-import { batch, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js";
+import { batch, createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js";
 import Content from "./components/Content";
 import Header from "./components/Header";
 import SpatialNavigation from "@/lib/spatial_navigation";
@@ -8,6 +8,7 @@ import { sleep } from "@/lib/utils";
 import {
 	cachedContacts,
 	client,
+	contactsMinisearch,
 	dialogsJar,
 	reloadCachedContacts,
 	setCachedContacts,
@@ -25,7 +26,10 @@ import { ModifyString } from "./components/Markdown";
 import Options from "./components/Options";
 import OptionsItem from "./components/OptionsItem";
 import { Portal } from "solid-js/web";
-import { importKaiContacts } from "@/lib/import-contacts";
+import { importKaiContact, importKaiContacts } from "@/lib/import-contacts";
+import MiniSearch from "minisearch";
+import debounce from "lodash-es/debounce";
+import { startActivity } from "@/lib/webActivities";
 
 const SUPPORTS_IMPORT_CONTACTS = Boolean(navigator.mozContacts);
 
@@ -47,7 +51,34 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 
 	return (
 		<Options onClose={props.onClose} title="Options">
-			<OptionsItem classList={{ [styles.option]: true }} tabIndex={-1}>
+			<OptionsItem
+				classList={{ [styles.option]: true }}
+				tabIndex={-1}
+				on:sn-enter-down={async () => {
+					startActivity<{ contact: mozContact }>("pick", {
+						type: ["webcontacts/contact"],
+					}).then(async (data) => {
+						const contact = data?.contact;
+
+						if (contact) {
+							const cached = cachedContacts();
+
+							const result = await importKaiContact(
+								client()!,
+								cached.length ? cached : await reloadCachedContacts(),
+								contact
+							);
+
+							if (!result) return;
+							if (result.length) {
+								setCachedContacts((a) => a.concat(result));
+							}
+						}
+					});
+
+					props.onClose();
+				}}
+			>
 				Add new contact
 			</OptionsItem>
 			<OptionsItem
@@ -183,6 +214,21 @@ export default function NewChat(props: { onClose: () => void }) {
 
 	const [showOptions, setShowOptions] = createSignal(false);
 
+	const [searchText, setSearchText] = createSignal("");
+
+	const [searchResults, setSearchResults] = createSignal<User[]>([]);
+
+	const debounced_search = debounce((str: string) => {
+		if (searchText()) {
+			setSearchResults(contactsMinisearch.search(str).map((a) => cachedContacts().find((e) => e.id == a.id)!));
+		}
+	}, 150);
+
+	createEffect(() => {
+		const toSearch = searchText();
+		debounced_search(toSearch.toLowerCase());
+	});
+
 	return (
 		<>
 			<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
@@ -218,9 +264,17 @@ export default function NewChat(props: { onClose: () => void }) {
 								setShowOptions(true);
 							}
 						}}
+						onInput={(e) => {
+							setSearchText(e.currentTarget.value);
+						}}
 						placeholder="Search"
 					></Search>
-					<For each={cachedContacts()}>{(r) => <ContactItem user={r} />}</For>
+					<Show
+						when={!searchResults().length || searchText() === ""}
+						fallback={<For each={searchResults()}>{(r) => <ContactItem user={r} />}</For>}
+					>
+						<For each={cachedContacts()}>{(r) => <ContactItem user={r} />}</For>
+					</Show>
 				</div>
 			</Content>
 
