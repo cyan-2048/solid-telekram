@@ -48,7 +48,7 @@ function App() {
 					<Settings
 						onClose={() => {
 							setView(previousView());
-							setStatusbarColor("#3b90bc");
+							setStatusbarColor("#1c96c3");
 						}}
 					></Settings>
 				</Match>
@@ -56,7 +56,7 @@ function App() {
 					<NewChat
 						onClose={() => {
 							setView(previousView());
-							setStatusbarColor("#3b90bc");
+							setStatusbarColor("#1c96c3");
 						}}
 					/>
 				</Match>

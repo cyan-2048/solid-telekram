@@ -327,7 +327,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean }) {
 			<div
 				ref={divRef}
 				onFocus={() => {
-					setStatusbarColor("#3b90bc");
+					setStatusbarColor("#1c96c3");
 					setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
 				}}
@@ -598,7 +598,7 @@ export default function Home(props: { hidden: boolean }) {
 							}}
 							onFocus={(e) => {
 								e.currentTarget.scrollIntoView(false);
-								setStatusbarColor("#3b90bc");
+								setStatusbarColor("#1c96c3");
 								setSoftkeys("New chat", "", "tg:more");
 							}}
 							onKeyDown={(e) => {

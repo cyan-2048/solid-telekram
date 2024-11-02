@@ -156,7 +156,7 @@ function ContactItem(props: { user: User }) {
 						}
 
 						batch(() => {
-							setStatusbarColor("#3b90bc");
+							setStatusbarColor("#1c96c3");
 							setUIDialog(uiDialog);
 							setRoom(uiDialog.$.chat);
 							setView("room");

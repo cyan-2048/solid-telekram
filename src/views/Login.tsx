@@ -198,7 +198,7 @@ export default function Login() {
 	const [inputFocused, setInputFocused] = createSignal(false);
 
 	function updateSoftkeys() {
-		setStatusbarColor("#3b90bc");
+		setStatusbarColor("#1c96c3");
 		switch (loginState()) {
 			case LoginState.Phone:
 				setSoftkeys("Options", inputFocused() ? "" : "Select", value() ? "Next" : "");
