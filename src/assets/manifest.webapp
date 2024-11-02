@@ -34,7 +34,8 @@
 		},
 		"desktop-notification": {},
 		"tcp-socket": { "description": "Required to do any TCP" },
-		"device-storage:sdcard": { "access": "readwrite" },
+		"indexedDB-unlimited": {},
+		"storage": {},
 		"contacts": { "access": "readonly" },
 		"volumemanager": {}
 	},

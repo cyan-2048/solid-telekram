@@ -78,10 +78,10 @@ export default function Settings(props: { onClose: () => void }) {
 				<SettingsItem
 					onEnterDown={async () => {
 						const result = await manuallySubscribePushNotification(client()!);
-						alert(result ? "Sucessfully toggled Push Notifications." : "Something went wrong. :(");
+						alert(result ? "Sucessfully enabled Push Notifications." : "Something went wrong. :(");
 					}}
 				>
-					Toggle Push Notifications
+					Enable Push Notifications
 				</SettingsItem>
 				{/* <SettingsItem>About</SettingsItem> */}
 			</div>
