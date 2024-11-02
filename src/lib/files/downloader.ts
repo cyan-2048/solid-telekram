@@ -1,58 +1,11 @@
 import localforage from "localforage";
-import { sleep } from "../helpers";
-
-const systemStorage: DeviceStorage = localStorage.localforage_cache
-	? (undefined as any)
-	: navigator.b2g?.getDeviceStorage("sdcard") || navigator.getDeviceStorage?.("sdcard");
-
-const resolveRoot = new Promise<Directory | null>((res) => {
-	res(systemStorage?.getRoot().catch(() => null) || null);
-});
-
-const kaigramFolder = (async function getKaigramFolder() {
-	try {
-		const root = await resolveRoot;
-		if (!root) return null as any as Directory;
-
-		const files = await root.getFilesAndDirectories().catch(() => null);
-
-		const result = files?.find((a) => a.name == "kaigram");
-
-		if (!result) {
-			return root.createDirectory("kaigram");
-		}
-
-		if ("path" in result) {
-			return result;
-		}
-
-		await deleteKaigramFolder();
-
-		return root.createDirectory("kaigram").catch(() => null as any as Directory);
-	} catch {
-		return null as any as Directory;
-	}
-})();
-
-const useLocalforage = (async () => {
-	return !(await kaigramFolder);
-})();
-
-async function deleteKaigramFolder() {
-	const root = await resolveRoot;
-	await root?.removeDeep("kaigram").catch(() => null);
-}
-
-async function clearCacheStorage() {
-	await deleteKaigramFolder();
-}
 
 async function clearCacheLocalforage() {
 	await localforage.clear();
 }
 
 export async function clearCache() {
-	await ((await useLocalforage) ? clearCacheLocalforage() : clearCacheStorage());
+	await clearCacheLocalforage();
 }
 
 export interface Downloader {
@@ -122,110 +75,9 @@ function createDownloaderLocalForage(hash: string | number): Downloader {
 	};
 }
 
-function createDownloaderStorage(hash: string | number): Downloader {
-	const filename = hash + ".tgcache";
-	const temp_filename = "_" + filename;
-
-	let init = false;
-	let finalized = false;
-
-	let blobFinalizeEarly: Blob;
-
-	let kaigramCache: Directory;
-
-	return {
-		get finalized() {
-			return finalized;
-		},
-
-		async append(a) {
-			if (finalized) return;
-
-			kaigramCache ||= await kaigramFolder;
-
-			if (!init) {
-				await kaigramCache.removeDeep(temp_filename);
-				init = true;
-
-				const fileCached = await systemStorage
-					.get("kaigram/" + filename)
-					.then((a) => a)
-					.catch(() => null);
-
-				if (fileCached) {
-					finalized = true;
-
-					return (blobFinalizeEarly = fileCached);
-				}
-
-				await systemStorage
-					.addNamed(new Blob([]), "kaigram/" + temp_filename)
-					.then((a) => a)
-					.catch(() => null);
-			}
-
-			await sleep(1);
-
-			await systemStorage
-				.appendNamed(new Blob([a]), "kaigram/" + temp_filename)
-				.then((a) => a)
-				.catch(() => null);
-		},
-
-		async finalize() {
-			if (blobFinalizeEarly) return blobFinalizeEarly;
-			if (finalized) throw new Error("Can only finalize once!!");
-
-			kaigramCache ||= await kaigramFolder;
-
-			await kaigramCache.renameTo(temp_filename, filename).catch(() => null);
-			finalized = true;
-
-			await sleep(1);
-
-			return systemStorage
-				.get("kaigram/" + filename)
-				.then((a) => a)
-				.catch(() => null as never);
-		},
-
-		async cancel() {
-			kaigramCache ||= await kaigramFolder;
-
-			if (finalized) return;
-			await sleep(1);
-			await kaigramCache.removeDeep(temp_filename).catch(() => null as never);
-		},
-	};
-}
-
-async function getFileFromCacheStorage(hash: string | number) {
-	await kaigramFolder;
-	await sleep(50);
-	const filename = hash + ".tgcache";
-	return systemStorage
-		.get("kaigram/" + filename)
-		.then((a) => a)
-		.catch(() => null);
-}
-
 function getFileFromCacheLocalforage(hash: string | number) {
 	const filename = "file:" + hash;
 	return localforage.getItem<Blob>(filename);
-}
-
-async function addToCacheStorage(hash: string | number, ...buffer: BlobPart[]) {
-	await kaigramFolder;
-	const filename = hash + ".tgcache";
-	await systemStorage
-		.addNamed(new Blob(buffer), "kaigram/" + filename)
-		.then((a) => a)
-		.catch(() => null);
-	await sleep(50);
-	return systemStorage
-		.get("kaigram/" + filename)
-		.then((a) => a)
-		.catch(() => null);
 }
 
 async function addToCacheLocalforage(hash: string | number, ...buffer: BlobPart[]) {
@@ -235,13 +87,13 @@ async function addToCacheLocalforage(hash: string | number, ...buffer: BlobPart[
 }
 
 export async function addToCache(hash: string | number, ...buffer: BlobPart[]) {
-	return (await useLocalforage) ? addToCacheLocalforage(hash, ...buffer) : addToCacheStorage(hash, ...buffer);
+	return addToCacheLocalforage(hash, ...buffer);
 }
 
 export async function getFileFromCache(hash: string | number) {
-	return (await useLocalforage) ? getFileFromCacheLocalforage(hash) : getFileFromCacheStorage(hash);
+	return getFileFromCacheLocalforage(hash);
 }
 
 export async function createDownloader(hash: string | number): Promise<Downloader> {
-	return (await useLocalforage) ? createDownloaderLocalForage(hash) : createDownloaderStorage(hash);
+	return createDownloaderLocalForage(hash);
 }
