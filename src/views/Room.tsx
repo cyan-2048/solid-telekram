@@ -1,4 +1,4 @@
-import { Chat, InputMedia, Message, tl, User } from "@mtcute/core";
+import { Chat, InputMedia, Message, tl, TypingStatus, User } from "@mtcute/core";
 import styles from "./Room.module.scss";
 import Content from "./components/Content";
 import {
@@ -36,6 +36,7 @@ import {
 	toaster,
 	showKaiAd,
 	setPreviousView,
+	typingIndicatorUserJar,
 } from "@signals";
 import ChatPhotoIcon from "./components/ChatPhoto";
 import {
@@ -1703,6 +1704,38 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 	);
 }
 
+function typingStatusToEnglish(status: TypingStatus) {
+	return (
+		(
+			{
+				typing: "typing",
+				upload_voice: "sending file",
+				upload_document: "sending file",
+				upload_photo: "sending a photo",
+				upload_video: "sending a video",
+				upload_round: "sending a video",
+				record_video: "recording video",
+				record_voice: "recording voice",
+				record_round: "recording video",
+				game: "playing a game",
+				sticker: "choosing a sticker",
+			} as any
+		)[status] || status
+	);
+}
+
+function PrivateChatBottomHeader(props: { userId: number }) {
+	const typingStatus = useStore(() => typingIndicatorUserJar.get(props.userId).status);
+
+	return (
+		<>
+			<Show when={typingStatus() === null} fallback={<>{typingStatusToEnglish(typingStatus()!)}...</>}>
+				<UserStatusIndicator userId={props.userId} />
+			</Show>
+		</>
+	);
+}
+
 export default function Room(props: { hidden: boolean }) {
 	const interacting = createMemo(() => {
 		const editing = editingMessage();
@@ -1747,7 +1780,7 @@ export default function Room(props: { hidden: boolean }) {
 											when={chat().chatType != "private"}
 											fallback={
 												<Show when={!chat().isSupport && chat().peer._ == "user" && !(chat().peer as tl.RawUser).bot}>
-													<UserStatusIndicator userId={chat().peer.id} />
+													<PrivateChatBottomHeader userId={chat().peer.id}></PrivateChatBottomHeader>
 												</Show>
 											}
 										>

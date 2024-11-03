@@ -132,7 +132,10 @@ export { telegram };
 
 export const [client, setClient] = createSignal<TelegramClient | null>(null);
 
-class UITypingIndicator {
+/**
+ * this should only be used for typing indicators for Private Messages
+ */
+export class UITypingIndicatorUser {
 	status = writable<TypingStatus | null>(null);
 
 	private timeout: any;
@@ -140,13 +143,35 @@ class UITypingIndicator {
 	update(newStatus: TypingStatus) {
 		clearTimeout(this.timeout);
 
+		if (newStatus == "cancel") {
+			this.status.set(null);
+			return;
+		}
+
 		this.status.set(newStatus);
 
 		this.timeout = setTimeout(() => {
 			this.status.set(null);
 		}, 6_000);
 	}
+
+	constructor(public id: number) {}
 }
+
+class TypingIndicatorUserJar extends Map<number, UITypingIndicatorUser> {
+	get(id: number) {
+		const has = super.get(id);
+		if (has) {
+			return has;
+		}
+
+		const indicator = new UITypingIndicatorUser(id);
+		this.set(id, indicator);
+		return indicator;
+	}
+}
+
+export const typingIndicatorUserJar = new TypingIndicatorUserJar();
 
 export class UIPoll {
 	closed = writable(false);
@@ -1380,8 +1405,8 @@ async function telegramReady(tg: TelegramClient) {
 
 				// is PM
 				if (data.chatType == "user") {
-					data.status;
-					console.error("TYPING TYPING OMFG", dialogsJar.get(data.chatId));
+					console.error("USER TYPING OMG", data);
+					typingIndicatorUserJar.get(data.userId).update(data.status);
 				}
 
 				break;
