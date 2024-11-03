@@ -1704,24 +1704,22 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 	);
 }
 
+const typingStatusDictionaryForPrivateChats = {
+	typing: "typing",
+	upload_voice: "sending file",
+	upload_document: "sending file",
+	upload_photo: "sending a photo",
+	upload_video: "sending a video",
+	upload_round: "sending a video",
+	record_video: "recording video",
+	record_voice: "recording voice",
+	record_round: "recording video",
+	game: "playing a game",
+	sticker: "choosing a sticker",
+};
+
 function typingStatusToEnglish(status: TypingStatus) {
-	return (
-		(
-			{
-				typing: "typing",
-				upload_voice: "sending file",
-				upload_document: "sending file",
-				upload_photo: "sending a photo",
-				upload_video: "sending a video",
-				upload_round: "sending a video",
-				record_video: "recording video",
-				record_voice: "recording voice",
-				record_round: "recording video",
-				game: "playing a game",
-				sticker: "choosing a sticker",
-			} as any
-		)[status] || status
-	);
+	return (typingStatusDictionaryForPrivateChats as any)[status] || status;
 }
 
 function PrivateChatBottomHeader(props: { userId: number }) {
