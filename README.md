@@ -34,6 +34,7 @@ The app is heavily inspired by Telegram Web K and the dead WhatsApp client for K
 - [ ] Chats
   - [ ] Typing Indicator
     - [x] Self (others can see you type)
+    - [x] Private chats
     - [ ] Others
   - [x] Pinned Chats
   - [ ] Archived Chats
