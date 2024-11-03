@@ -1234,7 +1234,14 @@ function TextBox(props: { dialog: UIDialog }) {
 						image={videoBlob()!}
 						isVideo
 						onSend={async (e) => {
-							const blob = videoBlob()!;
+							const originalBlob = videoBlob()! as File;
+
+							const blob = originalBlob.type.includes("3gp")
+								? new File([originalBlob], originalBlob.name ? originalBlob.name.slice(0, -4) + ".mp4" : "video.mp4", {
+										type: "video/mp4",
+								  })
+								: originalBlob;
+
 							setVideoBlob(null);
 							await sleep(0);
 							textboxRef.focus();
@@ -1569,7 +1576,14 @@ function FloatingTextbox(props: { message: UIMessage; dialog: UIDialog }) {
 						image={videoBlob()!}
 						isVideo
 						onSend={async (e) => {
-							const blob = videoBlob()!;
+							const originalBlob = videoBlob()! as File;
+
+							const blob = originalBlob.type.includes("3gp")
+								? new File([originalBlob], originalBlob.name ? originalBlob.name.slice(0, -4) + ".mp4" : "video.mp4", {
+										type: "video/mp4",
+								  })
+								: originalBlob;
+
 							setVideoBlob(null);
 							await sleep(0);
 							textboxRef.focus();
