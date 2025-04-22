@@ -1,7 +1,5 @@
 # Telegram4KaiOS
 
-### HELP!!! I need a better name for this client. (TeleKram is taken)
-
 Telegram client for KaiOS.
 
 ### Made with
