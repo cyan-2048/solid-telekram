@@ -4,7 +4,16 @@ import * as styles from "./Zoom.module.scss";
 import Matrix from "./matrix";
 // @ts-ignore
 import { calculateAspectRatioFit } from "./other";
-import { createSignal, ComponentProps, splitProps, createEffect, onCleanup, untrack, onMount, batch } from "solid-js";
+import {
+	createSignal,
+	type ComponentProps,
+	splitProps,
+	createEffect,
+	onCleanup,
+	untrack,
+	onMount,
+	batch,
+} from "solid-js";
 
 const alt = "svelte-zoom";
 
@@ -22,7 +31,7 @@ export default function Zoom(
 		maxScale?: number;
 		scaleValue?: number;
 		ref?: (e: ZoomRef) => void;
-	}
+	},
 ) {
 	const [_props, $$props] = splitProps(props, ["maxScale", "scaleValue", "src"]);
 
@@ -101,7 +110,7 @@ export default function Zoom(
 			_ratio,
 			maxScale,
 			untrack(scaleValue) * xFactor,
-			dir
+			dir,
 		);
 
 		batch(() => {

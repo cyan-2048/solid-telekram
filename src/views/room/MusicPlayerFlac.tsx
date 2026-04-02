@@ -1,4 +1,4 @@
-import { Audio } from "@mtcute/core";
+import type { Audio } from "@mtcute/core";
 import * as styles from "./MusicPlayer.module.scss";
 
 // lazy load this for performance reasons

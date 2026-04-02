@@ -80,7 +80,7 @@ export default function ProxySettings(props: {
 	const [showQRScanner, setShowQRScanner] = createSignal(false);
 
 	const [proxy, setProxy] = createSignal(
-		props.initialMtproto ? Proxies.MTPROTO : props.initialSocks ? Proxies.SOCKS5 : getProxy($proxyMode.get())
+		props.initialMtproto ? Proxies.MTPROTO : props.initialSocks ? Proxies.SOCKS5 : getProxy($proxyMode.get()),
 	);
 
 	// init values

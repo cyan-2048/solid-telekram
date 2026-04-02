@@ -49,7 +49,7 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 			checkState().then((enabled) => {
 				setLoading(false);
 				setEnabled((cachedIsEnabled = enabled));
-			})
+			}),
 		);
 	});
 

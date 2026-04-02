@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -14,7 +14,13 @@
 		"lineWidth": 120
 	},
 	"linter": {
-		"enabled": false
+		"enabled": true,
+		"rules": {
+			"recommended": false,
+			"style": {
+				"useImportType": "error"
+			}
+		}
 	},
 	"javascript": {
 		"formatter": {

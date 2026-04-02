@@ -4,7 +4,9 @@ import appVersion from "@/lib/appVersion";
 import parseUserAgent from "@/lib/parseUserAgent";
 import type { Middleware } from "@fuman/utils";
 import type { RpcCallMiddlewareContext } from "@mtcute/core";
+// @ts-ignore
 import { floodWaiter } from "@mtcute/core/network/middlewares/flood-waiter";
+// @ts-ignore
 import { internalErrorsHandler } from "@mtcute/core/network/middlewares/internal-errors";
 import type { mtp } from "@mtcute/tl";
 import type { BaseTelegramClientOptions } from "@mtcute/web";

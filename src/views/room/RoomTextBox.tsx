@@ -249,8 +249,8 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 					status: typing ? "typing" : "cancel",
 				});
 			},
-			{ defer: true }
-		)
+			{ defer: true },
+		),
 	);
 
 	onCleanup(() => {
@@ -265,9 +265,12 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 		clearTimeout(typingTimeout);
 		setIsTyping(true);
 
-		typingTimeout = setTimeout(() => {
-			setIsTyping(false);
-		}, 1000 + Math.floor(Math.random() * 500));
+		typingTimeout = setTimeout(
+			() => {
+				setIsTyping(false);
+			},
+			1000 + Math.floor(Math.random() * 500),
+		);
 	};
 
 	const interacting = createMemo(() => {
@@ -341,7 +344,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 				const exists = document.querySelector<HTMLElement>(
 					props.dialog.$uploading.get().length
 						? `.${stylesRoom.room} .focusable.uploading`
-						: `.${stylesRoom.room} .focusable.actual_last`
+						: `.${stylesRoom.room} .focusable.actual_last`,
 				);
 
 				if (exists) {
@@ -474,7 +477,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 					!props.floating && interacting()
 						? {
 								display: "none",
-						  }
+							}
 						: undefined
 				}
 				ref={setDivRef}
@@ -582,8 +585,8 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 									e
 										? {
 												caption: e,
-										  }
-										: {}
+											}
+										: {},
 								),
 								{
 									...additionalProps,
@@ -595,7 +598,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 										const progress = Math.ceil((uploaded / total) * 100);
 										upload.setProgress(progress);
 									},
-								}
+								},
 							)
 								.then((msg) => {
 									dialog.removeUpload(upload);
@@ -630,7 +633,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 							const blob = originalBlob.type.includes("3gp")
 								? new File([originalBlob], originalBlob.name ? originalBlob.name.slice(0, -4) + ".mp4" : "video.mp4", {
 										type: "video/mp4",
-								  })
+									})
 								: originalBlob;
 
 							setVideoBlob(null);
@@ -673,8 +676,8 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 										? {
 												caption: e,
 												supportsStreaming: true,
-										  }
-										: { supportsStreaming: true }
+											}
+										: { supportsStreaming: true },
 								),
 								{
 									...additionalProps,
@@ -693,7 +696,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 											progress: progress / 100,
 										});
 									},
-								}
+								},
 							)
 								.then((msg) => {
 									dialog.removeUpload(upload);
@@ -913,7 +916,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 												const progress = Math.ceil((uploaded / total) * 100);
 												upload.setProgress(progress);
 											},
-										}
+										},
 									)
 										.then((msg) => {
 											dialog.$lastMessage.set(dialog.messages.add(msg));
@@ -944,7 +947,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 											const progress = Math.ceil((uploaded / total) * 100);
 											upload.setProgress(progress);
 										},
-									}
+									},
 								)
 									.then((msg) => {
 										dialog.$lastMessage.set(dialog.messages.add(msg));

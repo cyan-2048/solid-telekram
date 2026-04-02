@@ -1,15 +1,16 @@
 import { cloudphone } from "@/config";
 
 const features = ["AudioCapture", "VideoUpload", "FileDownload", "FileUpload", "ImageUpload"] as const;
+type FeatureName = (typeof features)[number];
+type FeatureFlags = Record<FeatureName, boolean>;
+
 export class CloudphoneFeatures {
-	AudioCapture = false;
-	VideoUpload = false;
-	FileDownload = false;
-	FileUpload = false;
-	ImageUpload = false;
 	ready: Promise<true>;
 
 	constructor() {
+		for (let i = 0; i < features.length; i++) {
+			this[features[i]] = false;
+		}
 		this.ready = this.init();
 	}
 
@@ -18,14 +19,16 @@ export class CloudphoneFeatures {
 
 		const results = await Promise.all(features.map((a) => this.detect(a)));
 
-		features.forEach((a, i) => {
-			this[a] = results[i];
-		});
+		for (let i = 0; i < features.length; i++) {
+			this[features[i]] = results[i];
+		}
 
 		return true;
 	}
 
-	private detect(name: string) {
+	private detect(name: FeatureName) {
 		return navigator.hasFeature?.(name) || false;
 	}
 }
+
+export interface CloudphoneFeatures extends FeatureFlags {}

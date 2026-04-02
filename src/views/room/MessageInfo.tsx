@@ -1,23 +1,17 @@
 import * as styles from "./MessageItem.module.scss";
 import Content from "@components/Content";
+import { MessageItemInner, MessageProvider, today, toMidnight, useMessageContext } from "./MessageItem";
 import {
-  MessageItemInner,
-  MessageProvider,
-  today,
-  toMidnight,
-  useMessageContext,
-} from "./MessageItem";
-import {
-  type ComponentProps,
-  createEffect,
-  createSignal,
-  createUniqueId,
-  type JSXElement,
-  lazy,
-  onCleanup,
-  onMount,
-  Show,
-  untrack,
+	type ComponentProps,
+	createEffect,
+	createSignal,
+	createUniqueId,
+	type JSXElement,
+	lazy,
+	onCleanup,
+	onMount,
+	Show,
+	untrack,
 } from "solid-js";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { isToday, setSoftkeys, sleep, toaster } from "@utils";
@@ -26,305 +20,294 @@ import { Wallpaper } from "./Room";
 import Separator from "../components/Separator";
 import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
-import UIMessage from "@/ui/UIMessage";
+import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
 import type { tl } from "@mtcute/tl";
 import { cloudphone } from "@/config";
 import once from "lodash-es/once";
 
 import { SPOILER_CLASS, SPOILER_TOGGLE } from "../components/Markdown";
-import { Photo } from "@mtcute/core";
+import type { Photo } from "@mtcute/core";
 import ImageViewer from "./ImageViewer";
 import { setStatusbarColor } from "@/stores";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
 function tryURL(text: string) {
-  try {
-    return new URL(text);
-  } catch {}
-  return null;
+	try {
+		return new URL(text);
+	} catch {}
+	return null;
 }
 
 function parseURL(text: string) {
-  return tryURL(text) || tryURL("https://" + text);
+	return tryURL(text) || tryURL("https://" + text);
 }
 
 function formatDate($: Date) {
-  const _today = today();
+	const _today = today();
 
-  const __today = _today;
+	const __today = _today;
 
-  let date = "";
+	let date = "";
 
-  if (isToday($, __today)) {
-    date = "Today";
-  } else if (differenceInCalendarDays(_today, toMidnight($)) === 1) {
-    date = "Yesterday";
-  } else {
-    date = $.toLocaleDateString(navigator.language);
-  }
+	if (isToday($, __today)) {
+		date = "Today";
+	} else if (differenceInCalendarDays(_today, toMidnight($)) === 1) {
+		date = "Yesterday";
+	} else {
+		date = $.toLocaleDateString(navigator.language);
+	}
 
-  return (
-    date +
-    ", " +
-    $.toLocaleTimeString(navigator.language, {
-      hour: "numeric",
-      minute: "numeric",
-    })
-  );
+	return (
+		date +
+		", " +
+		$.toLocaleTimeString(navigator.language, {
+			hour: "numeric",
+			minute: "numeric",
+		})
+	);
 }
 
 type ProxySettingsProps = ComponentProps<typeof ProxySettings>;
-type InitialProxyURL =
-  | ProxySettingsProps["initialMtproto"]
-  | ProxySettingsProps["initialSocks"];
+type InitialProxyURL = ProxySettingsProps["initialMtproto"] | ProxySettingsProps["initialSocks"];
 
 let __viewRef: HTMLDivElement | null = null;
 
 function FocusableSpoiler(props: { children: JSXElement }) {
-  onCleanup(() => {
-    __viewRef?.focus();
-  });
+	onCleanup(() => {
+		__viewRef?.focus();
+	});
 
-  const [toggle, setToggle] = createSignal(false);
+	const [toggle, setToggle] = createSignal(false);
 
-  return (
-    <span
-      classList={{
-        focusable: true,
-        [SPOILER_CLASS]: true,
-        [SPOILER_TOGGLE]: toggle(),
-      }}
-      tabIndex={-1}
-      on:sn-enter-down={() => {
-        setToggle((e) => !e);
-      }}
-    >
-      {props.children}
-    </span>
-  );
+	return (
+		<span
+			classList={{
+				focusable: true,
+				[SPOILER_CLASS]: true,
+				[SPOILER_TOGGLE]: toggle(),
+			}}
+			tabIndex={-1}
+			on:sn-enter-down={() => {
+				setToggle((e) => !e);
+			}}
+		>
+			{props.children}
+		</span>
+	);
 }
 
 function FocusableLink(props: { children: JSXElement; url: null | URL }) {
-  const [showProxySettings, setShowProxySettings] = createSignal(false);
+	const [showProxySettings, setShowProxySettings] = createSignal(false);
 
-  let spanRef!: HTMLSpanElement;
+	let spanRef!: HTMLSpanElement;
 
-  onCleanup(() => {
-    __viewRef?.focus();
-  });
+	onCleanup(() => {
+		__viewRef?.focus();
+	});
 
-  let isSocks: boolean | null = null;
-  let initial: InitialProxyURL = null;
+	let isSocks: boolean | null = null;
+	let initial: InitialProxyURL = null;
 
-  return (
-    <>
-      <span
-        ref={spanRef}
-        on:sn-enter-down={(e) => {
-          const url = props.url;
+	return (
+		<>
+			<span
+				ref={spanRef}
+				on:sn-enter-down={(e) => {
+					const url = props.url;
 
-          // toaster("HREF!!! " + url?.href);
+					// toaster("HREF!!! " + url?.href);
 
-          if (!url) {
-            toaster("Invalid URL!");
-            return;
-          }
+					if (!url) {
+						toaster("Invalid URL!");
+						return;
+					}
 
-          if (url.host == "t.me" || url.protocol == "tg:") {
-            // proxy is unavailable on CloudPhone
-            if (!cloudphone) {
-              isSocks = null;
+					if (url.host == "t.me" || url.protocol == "tg:") {
+						// proxy is unavailable on CloudPhone
+						if (!cloudphone) {
+							isSocks = null;
 
-              const searchParams = url.searchParams;
+							const searchParams = url.searchParams;
 
-              const port = searchParams.get("port") || "";
-              const server = searchParams.get("server") || "";
+							const port = searchParams.get("port") || "";
+							const server = searchParams.get("server") || "";
 
-              initial = null;
+							initial = null;
 
-              if (url.pathname == "/proxy" || url.host == "proxy") {
-                initial = {
-                  host: server,
-                  port: port,
-                  secret: searchParams.get("secret") || "",
-                };
-                isSocks = false;
-              } else if (url.pathname == "/socks" || url.host == "socks") {
-                initial = {
-                  host: server,
-                  port: port,
-                  password: searchParams.get("pass") || "",
-                  user: searchParams.get("user") || "",
-                };
-                isSocks = true;
-              }
+							if (url.pathname == "/proxy" || url.host == "proxy") {
+								initial = {
+									host: server,
+									port: port,
+									secret: searchParams.get("secret") || "",
+								};
+								isSocks = false;
+							} else if (url.pathname == "/socks" || url.host == "socks") {
+								initial = {
+									host: server,
+									port: port,
+									password: searchParams.get("pass") || "",
+									user: searchParams.get("user") || "",
+								};
+								isSocks = true;
+							}
 
-              if (initial) {
-                setShowProxySettings(true);
-                return;
-              }
-            }
-            toaster("Unsupported Telegram Link!");
-          } else {
-            window.open(url, "_blank");
-          }
-        }}
-        tabIndex={-1}
-        class="focusable"
-      >
-        {props.children}
-      </span>
-      <Show when={showProxySettings()}>
-        <Portal>
-          <ProxySettings
-            onCancel={() => {
-              spanRef.focus();
-              setShowProxySettings(false);
-            }}
-            initialMtproto={isSocks ? null : initial}
-            initialSocks={isSocks ? initial : null}
-          ></ProxySettings>
-        </Portal>
-      </Show>
-    </>
-  );
+							if (initial) {
+								setShowProxySettings(true);
+								return;
+							}
+						}
+						toaster("Unsupported Telegram Link!");
+					} else {
+						window.open(url, "_blank");
+					}
+				}}
+				tabIndex={-1}
+				class="focusable"
+			>
+				{props.children}
+			</span>
+			<Show when={showProxySettings()}>
+				<Portal>
+					<ProxySettings
+						onCancel={() => {
+							spanRef.focus();
+							setShowProxySettings(false);
+						}}
+						initialMtproto={isSocks ? null : initial}
+						initialSocks={isSocks ? initial : null}
+					></ProxySettings>
+				</Portal>
+			</Show>
+		</>
+	);
 }
 
 function MessageInfoProviderInner(props: { children: JSXElement }) {
-  const { setFocused } = useMessageContext();
+	const { setFocused } = useMessageContext();
 
-  setFocused(true);
+	setFocused(true);
 
-  return <>{props.children}</>;
+	return <>{props.children}</>;
 }
 
-function MessageInfoProvider(props: {
-  $: UIMessage;
-  dialog: UIDialog;
-  children: JSXElement;
-}) {
-  return (
-    <MessageProvider dialog={props.dialog} $={props.$} last first expanded>
-      <MessageInfoProviderInner>{props.children}</MessageInfoProviderInner>
-    </MessageProvider>
-  );
+function MessageInfoProvider(props: { $: UIMessage; dialog: UIDialog; children: JSXElement }) {
+	return (
+		<MessageProvider dialog={props.dialog} $={props.$} last first expanded>
+			<MessageInfoProviderInner>{props.children}</MessageInfoProviderInner>
+		</MessageProvider>
+	);
 }
 
 // my initial idea for MessageInfo is that it would be a view
 // but I think it being a modal makes more sense?
 export default function MessageInfo(props: { onClose: () => void }) {
-  const { message, entities, dialog, edited, isOutgoing, isSticker, isReply } =
-    useMessageContext();
+	const { message, entities, dialog, edited, isOutgoing, isSticker, isReply } = useMessageContext();
 
-  function tail() {
-    const sticker = isSticker();
-    const reply = isReply();
-    const tail = true;
+	function tail() {
+		const sticker = isSticker();
+		const reply = isReply();
+		const tail = true;
 
-    return sticker ? reply && tail : tail;
-  }
+		return sticker ? reply && tail : tail;
+	}
 
-  const onClose = once(props.onClose);
+	const onClose = once(props.onClose);
 
-  let viewRef!: HTMLDivElement;
+	let viewRef!: HTMLDivElement;
 
-  let hasFocusable = false;
-  let isFocusing = false;
+	let hasFocusable = false;
+	let isFocusing = false;
 
-  const SN_ID = createUniqueId();
+	const SN_ID = createUniqueId();
 
-  onMount(() => {
-    hasFocusable = !!viewRef.querySelector(".focusable");
-    viewRef.focus();
-    __viewRef = viewRef;
+	onMount(() => {
+		hasFocusable = !!viewRef.querySelector(".focusable");
+		viewRef.focus();
+		__viewRef = viewRef;
 
-    SpatialNavigation.add(SN_ID, {
-      restrict: "self-only",
-      rememberSource: true,
-      selector: `.${styles.view_message_info} .focusable`,
-    });
-  });
+		SpatialNavigation.add(SN_ID, {
+			restrict: "self-only",
+			rememberSource: true,
+			selector: `.${styles.view_message_info} .focusable`,
+		});
+	});
 
-  function updateSoftkeys() {
-    setSoftkeys("Back", hasFocusable ? "SELECT" : "", "");
-  }
+	function updateSoftkeys() {
+		setSoftkeys("Back", hasFocusable ? "SELECT" : "", "");
+	}
 
-  const [photo, setPhoto] = createSignal<Photo | null>(null);
+	const [photo, setPhoto] = createSignal<Photo | null>(null);
 
-  createEffect(() => {
-    entities();
+	createEffect(() => {
+		entities();
 
-    untrack(() => {
-      sleep(10).then(() => {
-        hasFocusable = !!viewRef.querySelector(".focusable");
-        isFocusing = false;
-        viewRef.focus();
-        updateSoftkeys();
-      });
-    });
-  });
+		untrack(() => {
+			sleep(10).then(() => {
+				hasFocusable = !!viewRef.querySelector(".focusable");
+				isFocusing = false;
+				viewRef.focus();
+				updateSoftkeys();
+			});
+		});
+	});
 
-  onCleanup(() => {
-    SpatialNavigation.remove(SN_ID);
-    __viewRef = null;
-    onClose();
-  });
+	onCleanup(() => {
+		SpatialNavigation.remove(SN_ID);
+		__viewRef = null;
+		onClose();
+	});
 
-  return (
-    <>
-      <Content>
-        <div
-          ref={viewRef}
-          tabIndex={0}
-          class={styles.view_message_info}
-          onFocus={() => {
-            updateSoftkeys();
-          }}
-          oncapture:sn-willfocus={(e) => {
-            const target = e.target;
+	return (
+		<>
+			<Content>
+				<div
+					ref={viewRef}
+					tabIndex={0}
+					class={styles.view_message_info}
+					onFocus={() => {
+						updateSoftkeys();
+					}}
+					oncapture:sn-willfocus={(e) => {
+						const target = e.target;
 
-            setSoftkeys(
-              "",
-              target.classList.contains(SPOILER_CLASS) ? "TOGGLE" : "VIEW",
-              "",
-            );
-            scrollIntoView(target, {
-              behavior: "smooth",
-              block: "center",
-            });
-          }}
-          onKeyDown={(e) => {
-            if (isFocusing) {
-              if (e.key == "Backspace" || (cloudphone && e.key == "SoftLeft")) {
-                e.preventDefault();
-                sleep(10).then(() => viewRef.focus());
-                isFocusing = false;
-              }
+						setSoftkeys("", target.classList.contains(SPOILER_CLASS) ? "TOGGLE" : "VIEW", "");
+						scrollIntoView(target, {
+							behavior: "smooth",
+							block: "center",
+						});
+					}}
+					onKeyDown={(e) => {
+						if (isFocusing) {
+							if (e.key == "Backspace" || (cloudphone && e.key == "SoftLeft")) {
+								e.preventDefault();
+								sleep(10).then(() => viewRef.focus());
+								isFocusing = false;
+							}
 
-              return;
-            }
+							return;
+						}
 
-            if (hasFocusable && !isFocusing && e.key == "Enter") {
-              isFocusing = true;
-              sleep(10).then(() => {
-                SpatialNavigation.focus(SN_ID);
-              });
+						if (hasFocusable && !isFocusing && e.key == "Enter") {
+							isFocusing = true;
+							sleep(10).then(() => {
+								SpatialNavigation.focus(SN_ID);
+							});
 
-              // console.error("SHOULD BE FOCUSING");
-              return;
-            }
+							// console.error("SHOULD BE FOCUSING");
+							return;
+						}
 
-            if (e.key == "Backspace" || e.key == "SoftLeft") {
-              e.preventDefault();
-              sleep(10).then(() => onClose());
-            }
-          }}
-        >
-          <div class={styles.container}>
-            <Wallpaper classList={{ [styles.wallpaper]: true }} />
-            {/* <div
+						if (e.key == "Backspace" || e.key == "SoftLeft") {
+							e.preventDefault();
+							sleep(10).then(() => onClose());
+						}
+					}}
+				>
+					<div class={styles.container}>
+						<Wallpaper classList={{ [styles.wallpaper]: true }} />
+						{/* <div
 							style={{
 								"text-align": "center",
 								"font-size": "13px",
@@ -334,93 +317,91 @@ export default function MessageInfo(props: { onClose: () => void }) {
 							🚧🚀 UNDER CONSTRUCTION 🛠️👷
 						</div> */}
 
-            <div
-              classList={{
-                [styles.message]: true,
-                [styles.padTop]: true,
-              }}
-            >
-              <div
-                classList={{
-                  [styles.message_inner]: true,
-                  [styles.message_inner_sticker]: isSticker(),
-                  [styles.outgoing]: isOutgoing(),
-                  [styles.tail]: tail(),
-                }}
-              >
-                <MessageInfoProvider $={message()} dialog={dialog()}>
-                  <MessageItemInner
-                    onSelect={(media) => {
-                      switch (media.type) {
-                        case "photo":
-                          setPhoto(media);
-                          break;
-                      }
-                    }}
-                    customRenderer={(e, _default, _children) => {
-                      if (e.tag == "spoiler") {
-                        return () => (
-                          <FocusableSpoiler>
-                            <Dynamic component={_children}></Dynamic>
-                          </FocusableSpoiler>
-                        );
-                      }
+						<div
+							classList={{
+								[styles.message]: true,
+								[styles.padTop]: true,
+							}}
+						>
+							<div
+								classList={{
+									[styles.message_inner]: true,
+									[styles.message_inner_sticker]: isSticker(),
+									[styles.outgoing]: isOutgoing(),
+									[styles.tail]: tail(),
+								}}
+							>
+								<MessageInfoProvider $={message()} dialog={dialog()}>
+									<MessageItemInner
+										onSelect={(media) => {
+											switch (media.type) {
+												case "photo":
+													setPhoto(media);
+													break;
+											}
+										}}
+										customRenderer={(e, _default, _children) => {
+											if (e.tag == "spoiler") {
+												return () => (
+													<FocusableSpoiler>
+														<Dynamic component={_children}></Dynamic>
+													</FocusableSpoiler>
+												);
+											}
 
-                      // console.error("MESSAGE INFO CUSTOM RENDERER", e);
-                      if (e.tag == "a" && e.entity._.includes("Url")) {
-                        const entity = e.entity as
-                          | tl.RawMessageEntityUrl
-                          | tl.RawMessageEntityTextUrl;
+											// console.error("MESSAGE INFO CUSTOM RENDERER", e);
+											if (e.tag == "a" && e.entity._.includes("Url")) {
+												const entity = e.entity as tl.RawMessageEntityUrl | tl.RawMessageEntityTextUrl;
 
-                        let url: URL | null;
+												let url: URL | null;
 
-                        if (entity._ == "messageEntityUrl") {
-                          url = parseURL(e.source);
-                        } else {
-                          url = parseURL(entity.url);
-                        }
+												if (entity._ == "messageEntityUrl") {
+													url = parseURL(e.source);
+												} else {
+													url = parseURL(entity.url);
+												}
 
-                        return () => (
-                          <FocusableLink url={url}>
-                            <Dynamic component={_default}></Dynamic>
-                          </FocusableLink>
-                        );
-                      }
-                    }}
-                  />
-                </MessageInfoProvider>
-              </div>
-            </div>
-          </div>
-          <div class={styles.view_message_info_more_info}>
-            <Separator>Sent</Separator>
-            <div class={styles.info_date}>
-              <div class={styles.date}>{formatDate(message().date)}</div>
-            </div>
-            <Show when={edited()}>
-              {(date) => (
-                <>
-                  <Separator>Edited</Separator>
-                  <div class={styles.info_date}>
-                    <div class={styles.date}>{formatDate(date())}</div>
-                  </div>
-                </>
-              )}
-            </Show>
-          </div>
-        </div>
-      </Content>
-      <Show when={photo()}>
-        <Portal>
-          <ImageViewer
-            photo={photo()!}
-            onClose={() => {
-              setPhoto(null);
-              setStatusbarColor("#1c96c3");
-            }}
-          ></ImageViewer>
-        </Portal>
-      </Show>
-    </>
-  );
+												return () => (
+													<FocusableLink url={url}>
+														<Dynamic component={_default}></Dynamic>
+													</FocusableLink>
+												);
+											}
+										}}
+									/>
+								</MessageInfoProvider>
+							</div>
+						</div>
+					</div>
+					<div class={styles.view_message_info_more_info}>
+						<Separator>Sent</Separator>
+						<div class={styles.info_date}>
+							<div class={styles.date}>{formatDate(message().date)}</div>
+						</div>
+						<Show when={edited()}>
+							{(date) => (
+								<>
+									<Separator>Edited</Separator>
+									<div class={styles.info_date}>
+										<div class={styles.date}>{formatDate(date())}</div>
+									</div>
+								</>
+							)}
+						</Show>
+					</div>
+				</div>
+			</Content>
+			<Show when={photo()}>
+				<Portal>
+					<ImageViewer
+						photo={photo()!}
+						onClose={() => {
+							setPhoto(null);
+							setStatusbarColor("#1c96c3");
+						}}
+					></ImageViewer>
+				</Portal>
+			</Show>
+		</>
+	);
 }

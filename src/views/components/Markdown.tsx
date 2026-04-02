@@ -7,7 +7,7 @@ import { createStore } from "solid-js/store";
 import { reconcile } from "solid-js/store";
 import memoize from "lodash-es/memoize";
 import { cloudphone } from "@/config";
-// @ts-ignore
+// @ts-expect-error
 import twemojiMatcher from "@twemoji/parser/dist/lib/regex";
 
 type CustomRenderer = (

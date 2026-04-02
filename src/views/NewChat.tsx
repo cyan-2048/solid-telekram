@@ -9,7 +9,7 @@ import { setSoftkeys, sleep } from "@utils";
 import scrollIntoView from "scroll-into-view-if-needed";
 import Search from "@components/Search";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
-import { User } from "@mtcute/core";
+import type { User } from "@mtcute/core";
 import { MarkdownText } from "@components/Markdown";
 import Options from "@components/Options";
 import OptionsItem from "@components/OptionsItem";

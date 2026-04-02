@@ -1,4 +1,4 @@
-import { Photo, Thumbnail } from "@mtcute/core";
+import { type Photo, Thumbnail } from "@mtcute/core";
 import * as styles from "./ImageViewer.module.scss";
 import * as softkeyStyles from "../components/Softkeys.module.scss";
 import { createSignal, createEffect, onCleanup, Show, onMount, createUniqueId, batch, createMemo } from "solid-js";
@@ -6,7 +6,7 @@ import ProgressSpinner from "@components/ProgressSpinner";
 import { downloadAsync } from "./MessageMedia";
 import { downloadToFile, niceBytes, NOOP, setSoftkeys, sleep } from "@/utils";
 import { Portal } from "solid-js/web";
-import Zoom, { ZoomRef } from "@components/zoom";
+import Zoom, { type ZoomRef } from "@components/zoom";
 import { cloudphone, cloudphone_features } from "@/config";
 import OptionsMenuMaxHeight from "../components/OptionsMenuMaxHeight";
 import OptionsItem from "../components/OptionsItem";
@@ -137,7 +137,7 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
 		}
 
 		onCleanup(() => {
@@ -162,7 +162,7 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 				setLoading(false);
 				setSrc(url);
 			},
-			setProgress
+			setProgress,
 		);
 	});
 

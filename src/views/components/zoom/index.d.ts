@@ -1,4 +1,4 @@
-import { ComponentProps, JSXElement } from "solid-js";
+import type { ComponentProps, JSXElement } from "solid-js";
 
 export interface ZoomRef {
 	fireManualZoom(dir: number): void;
@@ -14,9 +14,9 @@ type _Zoom = (
 		maxScale?: number;
 		scaleValue?: number;
 		ref?: (e: ZoomRef) => void;
-	}
+	},
 ) => JSXElement;
 
-const Zoom: _Zoom;
+declare const Zoom: _Zoom;
 
 export default Zoom;

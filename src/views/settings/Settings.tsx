@@ -84,7 +84,7 @@ function DataSettings(props: { onClose: () => void }) {
 							(["caches", "localforage", supported ? "device" : null] as const)
 								.filter((a) => a != null)
 								.map((a) => [switchStorage(a), a]),
-							$storage.get()
+							$storage.get(),
 						);
 
 						if (result) {

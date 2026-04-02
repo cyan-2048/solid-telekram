@@ -1,7 +1,7 @@
 import { useStore } from "@nanostores/solid";
 import * as styles from "./Room.module.scss";
 import { $editingMessage, $replyingMessage, $room, $view, $wallpaper, $wallpaper_color } from "@/stores";
-import { ComponentProps, createEffect, createMemo, For, type JSX, onCleanup, onMount, Show } from "solid-js";
+import { type ComponentProps, createEffect, createMemo, For, type JSX, onCleanup, onMount, Show } from "solid-js";
 import { tg, typingIndicatorPrivateJar, userStatusJar } from "@globals";
 import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
@@ -9,7 +9,7 @@ import type { tl } from "@mtcute/tl";
 import type { Peer, TypingStatus } from "@mtcute/core";
 import { setSoftkeys, sleep, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
 import { timeStamp } from "../Home";
-import UIDialog from "@/ui/UIDialog";
+import type UIDialog from "@/ui/UIDialog";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import WhenMounted from "@components/WhenMounted";
 import MessageItem, { MessageProvider, UploadingMessageItem } from "./MessageItem";
@@ -115,7 +115,7 @@ function Messages(props: { dialog: UIDialog }) {
 				import.meta.env.DEV
 					? {
 							overflow: "auto",
-					  }
+						}
 					: undefined
 			}
 		>
@@ -171,7 +171,7 @@ function RoomAvatar(props: { dialog: UIDialog }) {
 					showSpinner()
 						? {
 								opacity: "0.5",
-						  }
+							}
 						: undefined
 				}
 			>
@@ -193,11 +193,11 @@ export function Wallpaper(props: { classList?: ComponentProps<"div">["classList"
 		return _wallpaper == "color"
 			? {
 					"background-color": color,
-			  }
+				}
 			: {
 					"background-image": `var(--wallpaper)`,
 					"background-color": WALLPAPER_AVERAGE_COLORS[_wallpaper as number],
-			  };
+				};
 	}
 
 	return (

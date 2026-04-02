@@ -26,8 +26,8 @@ import {
 	$view,
 	setStatusbarColor,
 } from "@/stores";
-import UIDialog from "@/ui/UIDialog";
-import UIDialogFilter from "@/ui/UIDialogFilter";
+import type UIDialog from "@/ui/UIDialog";
+import type UIDialogFilter from "@/ui/UIDialogFilter";
 import { isToday, last, setSoftkeys, sleep, toaster, useMessageChecks, useStore } from "@/utils";
 import Tabs, { Tab } from "@components/Tabs";
 import Content from "@components/Content";
@@ -289,8 +289,8 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 							typeof a == "string"
 								? a
 								: a.entity._ == "messageEntitySpoiler"
-								? generateHiddenCodeThing(a.source.length)
-								: a.source
+									? generateHiddenCodeThing(a.source.length)
+									: a.source,
 						)
 						.join("") || lastMsg.$text.get()
 				: lastMsg.$text.get();
@@ -698,7 +698,7 @@ export default function Home(props: { hidden: boolean }) {
 								searchText()
 									? {
 											display: "none",
-									  }
+										}
 									: undefined
 							}
 						>
