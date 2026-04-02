@@ -1,8 +1,5 @@
 .grid {
-	// height: 240px;
-
-	height: 100vw;
-	max-height: 70vh;
+	height: 240px;
 
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);

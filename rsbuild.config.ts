@@ -92,6 +92,7 @@ export default defineConfig({
 				content: "#000",
 			},
 		},
+		tags: [{ tag: "div", attrs: { class: "LOADING" }, append: false }],
 	},
 
 	resolve: {
@@ -117,7 +118,25 @@ export default defineConfig({
 
 	output: {
 		overrideBrowserslist: [isKai3 ? "firefox 84" : isKai4 ? "firefox 123" : "firefox 48"],
-		minify: true,
+		minify: {
+			css: true,
+			jsOptions: {
+				minimizerOptions: {
+					compress: {
+						toplevel: true,
+						arguments: true,
+						ecma: 2015,
+						keep_fargs: false,
+						passes: 5,
+						pure_getters: false,
+						unsafe_symbols: true,
+					},
+					mangle: {
+						toplevel: true,
+					},
+				},
+			},
+		},
 
 		dataUriLimit: 0,
 
