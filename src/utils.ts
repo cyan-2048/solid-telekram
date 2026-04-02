@@ -1,7 +1,7 @@
 // this file contains utils that should only be used in the main thread
 
 import { tl } from "@mtcute/web";
-import { type MaybeDynamic, type MaybePromise, type Peer, SentCode, TelegramClient, User } from "@mtcute/web";
+import { type MaybeDynamic, type MaybePromise, type Peer, type SentCode, type TelegramClient, User } from "@mtcute/web";
 import { normalizePhoneNumber, resolveMaybeDynamic } from "@mtcute/web/utils";
 
 import { sleep } from "./helpers";
@@ -11,8 +11,8 @@ import type { Accessor } from "solid-js";
 import { createRenderEffect, createSignal, onCleanup } from "solid-js";
 import { useStore as _useStore } from "@nanostores/solid";
 import type { TelegramIcons } from "@components/Softkeys";
-import UIMessage from "./ui/UIMessage";
-import UIDialog from "./ui/UIDialog";
+import type UIMessage from "./ui/UIMessage";
+import type UIDialog from "./ui/UIDialog";
 
 export * from "./helpers";
 
@@ -227,9 +227,6 @@ async function startLogin_(
 					throw e;
 				}
 			}
-
-			// if there was no error, code was valid, so it's either 2fa or signup
-			break;
 		}
 	}
 

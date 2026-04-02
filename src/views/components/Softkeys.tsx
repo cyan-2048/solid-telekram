@@ -2,7 +2,7 @@ import { batch, createEffect, createSignal, onCleanup } from "solid-js";
 import * as styles from "./Softkeys.module.scss";
 import { Show } from "solid-js";
 import { setSoftkeys, sleep } from "@utils";
-import TelegramIcon, { TelegramIconNames } from "./TelegramIcon.tsx";
+import TelegramIcon, { type TelegramIconNames } from "./TelegramIcon.tsx";
 
 export type TelegramIcons = `tg:${TelegramIconNames}`;
 
@@ -97,7 +97,7 @@ export default function Softkeys() {
 		center?: string | null,
 		right?: string | null,
 		loading?: boolean | null,
-		black?: boolean | null
+		black?: boolean | null,
 	) {
 		batch(() => {
 			left != undefined && setSoftleft(left);

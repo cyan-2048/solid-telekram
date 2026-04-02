@@ -2645,7 +2645,7 @@ const t = (function () {
 										(this.sampleRate = t),
 											(this.channels = e),
 											(this.refill = n(this.refill, this)),
-											(this.context = null != h ? h : (h = new i("content"))),
+											(this.context = null != h ? h : (h = import.meta.env.KAIOS == 2 && !import.meta.env.DEV ? new i("content") : new i())),
 											(this.deviceSampleRate = this.context.sampleRate),
 											(this.bufferSize = Math.ceil((4096 / (this.deviceSampleRate / this.sampleRate)) * this.channels)),
 											(this.bufferSize += this.bufferSize % this.channels),
