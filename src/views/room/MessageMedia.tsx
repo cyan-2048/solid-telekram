@@ -51,7 +51,6 @@ function StickerThumbnail() {
 		<Show when={thumbnail()}>
 			<div class={styles.svg}>
 				<svg
-					version="1.1"
 					xmlns="http://www.w3.org/2000/svg"
 					xmlns:xlink="http://www.w3.org/1999/xlink"
 					viewBox={`0 0 ${photoSize()?.w || 512} ${photoSize()?.h || 512}`}

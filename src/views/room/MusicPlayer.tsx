@@ -340,7 +340,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 					<Show
 						when={!loading()}
-						fallback={<div class={styles.subtitle}>Loading... {Math.floor(downloadProgress())}%</div>}
+						fallback={<div class={styles.subtitle}>Downloading... {Math.floor(downloadProgress())}%</div>}
 					>
 						<>
 							<div class={styles.timeline}>
