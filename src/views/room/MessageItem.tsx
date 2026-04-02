@@ -40,7 +40,7 @@ import type { TelegramClient } from "@mtcute/web";
 import * as styles from "./MessageItem.module.scss";
 import scrollIntoView from "scroll-into-view-if-needed";
 import SpatialNavigation from "@/lib/spatial_navigation";
-import { $editingMessage, $replyingMessage, $view } from "@/stores";
+import { $editingMessage, $replyingMessage, $view, setStatusbarColor } from "@/stores";
 import { volumeDown, volumeUp } from "@/lib/volumeManager";
 import Markdown, { MarkdownText } from "@components/Markdown";
 import TelegramIcon from "@components/TelegramIcon";
@@ -1175,6 +1175,7 @@ function MessageContainer(props: { children: JSXElement }) {
 						music={media() as Audio}
 						onClose={() => {
 							setShowMusicPlayer(false);
+							setStatusbarColor("#1c96c3");
 							divRef.focus();
 						}}
 					></MusicPlayer>

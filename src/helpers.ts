@@ -230,7 +230,9 @@ export function getColorFromPeer(peer: RawPeer) {
 	const assertColor = (color?: number) => (color ? color != -1 && color : false);
 
 	let idx =
-		"color" in peer ? assertColor(peer.color?.color) || getPeerColorIndexById(peer.id) : getPeerColorIndexById(peer.id);
+		"color" in peer && peer.color && "color" in peer.color
+			? assertColor(peer.color?.color) || getPeerColorIndexById(peer.id)
+			: getPeerColorIndexById(peer.id);
 
 	let color = DialogColors[idx];
 
@@ -243,12 +245,18 @@ export function getColorFromPeer(peer: RawPeer) {
 		const hsla = hexaToHsla(fgColor[0]);
 		const hue = hsla.h;
 
-		if (hue >= 345 || hue < 29) idx = 0; // red
-		else if (hue < 67) idx = 1; // orange
-		else if (hue < 140) idx = 3; // green
-		else if (hue < 199) idx = 4; // cyan
-		else if (hue < 234) idx = 5; // blue
-		else if (hue < 301) idx = 2; // violet
+		if (hue >= 345 || hue < 29)
+			idx = 0; // red
+		else if (hue < 67)
+			idx = 1; // orange
+		else if (hue < 140)
+			idx = 3; // green
+		else if (hue < 199)
+			idx = 4; // cyan
+		else if (hue < 234)
+			idx = 5; // blue
+		else if (hue < 301)
+			idx = 2; // violet
 		else idx = 6; // pink
 
 		color = DialogColors[idx];

@@ -1,15 +1,26 @@
 import type { Audio } from "@mtcute/core";
-import { batch, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { batch, createEffect, createMemo, createSignal, createUniqueId, onCleanup, onMount, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 import { formatTime } from "@/helpers";
+import SpatialNavigation from "@/lib/spatial_navigation";
 import { setStatusbarColor } from "@/stores";
 import { downloadToFile, setSoftkeys } from "@/utils";
 import defaultCoverImage from "@/assets/default_cover_image.png";
+import scrollIntoView from "scroll-into-view-if-needed";
 import Options from "../components/Options";
 import OptionsItem from "../components/OptionsItem";
 import OptionsMenuMaxHeight from "../components/OptionsMenuMaxHeight";
 import { downloadAsync } from "./MessageMedia";
 import * as styles from "./MusicPlayer.module.scss";
+import { volumeDown, volumeUp } from "@/lib/volumeManager";
+
+function willFocusScrollIfNeeded(e: { currentTarget: HTMLElement }) {
+	scrollIntoView(e.currentTarget, {
+		scrollMode: "if-needed",
+		block: "nearest",
+		inline: "nearest",
+	});
+}
 
 function fileExtFromMime(mimeType: string): string {
 	const ext = mimeType.split("/")[1]?.split(";")[0];
@@ -35,6 +46,14 @@ type FlacPlayer = {
 	destroy?: () => void;
 };
 
+type FlacPlayerListeners = {
+	onDuration: (ms: number) => void;
+	onProgress: (ms: number) => void;
+	onEnd: () => void;
+	onError: (err: unknown) => void;
+	onReady: () => void;
+};
+
 function canSeekFlacPlayer(player: FlacPlayer | null): boolean {
 	if (!player) return false;
 
@@ -53,9 +72,14 @@ function canSeekFlacPlayer(player: FlacPlayer | null): boolean {
 
 function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDecoder?: boolean }) {
 	let divRef!: HTMLDivElement;
+	let flacListeners: FlacPlayerListeners | null = null;
 	let optionDownloadRef!: HTMLDivElement;
 	let audioRef!: HTMLAudioElement;
 	let flacPlayer: FlacPlayer | null = null;
+	let FlacModule: any = null;
+	let flacCanSeekKnown = false;
+	let nativeEndFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
+	const optionsSnId = createUniqueId();
 
 	const [src, setSrc] = createSignal("");
 	const [downloadUrl, setDownloadUrl] = createSignal("");
@@ -73,8 +97,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	const title = createMemo(() => props.music.title || props.music.fileName || "Unknown Audio");
 	const subtitle = createMemo(() => {
 		const performer = props.music.performer || "Unknown Artist";
-		const codec = props.useFlacDecoder ? " • FLAC" : "";
-		return `${performer} • ${formatTime(duration())}${codec}`;
+		return performer;
 	});
 
 	const backgroundImage = createMemo(() => `url(${cover() || defaultCoverImage})`);
@@ -85,27 +108,166 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		return Math.min(100, (currentTime() / total) * 100);
 	});
 
-	const controlsText = createMemo(() => {
-		if (!canSeek()) {
-			return `${playing() ? "Pause" : "Play"} • Seek unavailable`;
+	const clearNativeEndFallback = () => {
+		if (!nativeEndFallbackTimeout) return;
+		clearTimeout(nativeEndFallbackTimeout);
+		nativeEndFallbackTimeout = null;
+	};
+
+	const handleNativeEnded = () => {
+		clearNativeEndFallback();
+
+		if (audioRef) {
+			try {
+				audioRef.currentTime = 0;
+			} catch {
+				// Ignore browsers that may reject setting currentTime at this stage.
+			}
 		}
 
-		return `${playing() ? "Pause" : "Play"} • Left/Right seek`;
-	});
+		batch(() => {
+			setPlaying(false);
+			setCurrentTime(0);
+		});
+	};
+
+	const scheduleNativeEndFallback = () => {
+		if (props.useFlacDecoder) return;
+		if (!audioRef) return;
+
+		const total = duration();
+		if (!Number.isFinite(total) || total <= 0) return;
+
+		const remainingSeconds = total - audioRef.currentTime;
+		if (!Number.isFinite(remainingSeconds)) return;
+		if (remainingSeconds > 1.25 || remainingSeconds < 0) return;
+
+		clearNativeEndFallback();
+		nativeEndFallbackTimeout = setTimeout(
+			() => {
+				nativeEndFallbackTimeout = null;
+				if (!audioRef) return;
+
+				const nearEnd = audioRef.currentTime >= Math.max(0, total - 0.2);
+				const stillPlaying = !audioRef.paused;
+
+				if (nearEnd && stillPlaying) {
+					audioRef.pause();
+					handleNativeEnded();
+				}
+			},
+			Math.max(300, remainingSeconds * 1000 + 150),
+		);
+	};
+
+	const destroyFlacPlayer = () => {
+		if (!flacPlayer) return;
+
+		if (flacListeners && flacPlayer.off) {
+			flacPlayer.off("duration", flacListeners.onDuration);
+			flacPlayer.off("progress", flacListeners.onProgress);
+			flacPlayer.off("end", flacListeners.onEnd);
+			flacPlayer.off("error", flacListeners.onError);
+			flacPlayer.off("ready", flacListeners.onReady);
+		}
+
+		flacPlayer.pause();
+		flacPlayer.stop();
+		flacPlayer.destroy?.();
+		flacPlayer = null;
+		flacListeners = null;
+
+		setPlaying(false);
+		setFlacReady(false);
+	};
+
+	const createFlacPlayer = () => {
+		if (!props.useFlacDecoder) return null;
+		if (!FlacModule) return null;
+		const buffer = downloadBuffer();
+		if (!buffer) return null;
+
+		destroyFlacPlayer();
+
+		const player = FlacModule.Player.fromBuffer(buffer) as FlacPlayer;
+		flacPlayer = player;
+		setCurrentTime(0);
+		setFlacReady(false);
+		setCanSeek(flacCanSeekKnown);
+		player.preload?.();
+
+		const onDuration = (ms: number) => {
+			if (flacPlayer !== player) return;
+			if (!Number.isFinite(ms)) return;
+			setDuration(Math.max(0, Math.floor(ms / 1000)));
+		};
+
+		const onProgress = (ms: number) => {
+			if (flacPlayer !== player) return;
+			if (!Number.isFinite(ms)) return;
+			setCurrentTime(Math.max(0, ms / 1000));
+		};
+
+		const onEnd = () => {
+			if (flacPlayer !== player) return;
+
+			destroyFlacPlayer();
+			batch(() => {
+				setCurrentTime(0);
+				setCanSeek(flacCanSeekKnown);
+			});
+		};
+
+		const onError = (err: unknown) => {
+			if (flacPlayer !== player) return;
+			console.error("[MusicPlayer][FLAC] error", err);
+			setPlaying(false);
+			setCanSeek(false);
+		};
+
+		const onReady = () => {
+			if (flacPlayer !== player) return;
+			flacCanSeekKnown = canSeekFlacPlayer(player);
+			setFlacReady(true);
+			setCanSeek(flacCanSeekKnown);
+		};
+
+		flacListeners = {
+			onDuration,
+			onProgress,
+			onEnd,
+			onError,
+			onReady,
+		};
+
+		player.on("duration", flacListeners.onDuration);
+		player.on("progress", flacListeners.onProgress);
+		player.on("end", flacListeners.onEnd);
+		player.on("error", flacListeners.onError);
+		player.on("ready", flacListeners.onReady);
+
+		return player;
+	};
 
 	const togglePlay = async () => {
 		if (!src()) return;
 
 		if (props.useFlacDecoder) {
-			if (!flacPlayer) return;
+			if (!flacPlayer) {
+				const recreated = createFlacPlayer();
+				if (!recreated) return;
+			}
+
+			const player = flacPlayer;
+			if (!player) return;
 
 			if (playing()) {
-				flacPlayer.pause();
+				player.pause();
 				setPlaying(false);
 				return;
 			}
 
-			flacPlayer.play();
+			player.play();
 			setPlaying(true);
 			return;
 		}
@@ -113,6 +275,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		if (!audioRef) return;
 
 		if (playing()) {
+			clearNativeEndFallback();
 			audioRef.pause();
 			setPlaying(false);
 			return;
@@ -121,6 +284,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		try {
 			await audioRef.play();
 			setPlaying(true);
+			scheduleNativeEndFallback();
 		} catch (err) {
 			console.error("[MusicPlayer] play failed", err);
 		}
@@ -152,18 +316,17 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		const next = Math.max(0, Math.min(duration(), audioRef.currentTime + offsetSeconds));
 		audioRef.currentTime = next;
 		setCurrentTime(next);
+		scheduleNativeEndFallback();
 	};
 
 	const disposePlayerResources = () => {
+		clearNativeEndFallback();
 		audioRef?.pause();
 		audioRef?.removeAttribute("src");
 		audioRef?.load();
 
 		if (flacPlayer) {
-			flacPlayer.pause();
-			flacPlayer.stop();
-			flacPlayer.destroy?.();
-			flacPlayer = null;
+			destroyFlacPlayer();
 		}
 
 		batch(() => {
@@ -187,6 +350,35 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		props.onClose();
 	};
 
+	const closeOptions = () => {
+		setShowOptions(false);
+		queueMicrotask(() => divRef?.focus());
+	};
+
+	const handleDownload = () => {
+		if (!src()) {
+			closeOptions();
+			return;
+		}
+
+		let url = downloadUrl();
+		let ephemeralUrl: string | null = null;
+
+		if (!url && props.useFlacDecoder && downloadBuffer()) {
+			ephemeralUrl = URL.createObjectURL(new Blob([downloadBuffer()!], { type: props.music.mimeType || "audio/flac" }));
+			url = ephemeralUrl;
+		}
+
+		if (url) {
+			downloadToFile(url, musicFilename(props.music));
+			if (ephemeralUrl) {
+				setTimeout(() => URL.revokeObjectURL(ephemeralUrl!), 1000);
+			}
+		}
+
+		closeOptions();
+	};
+
 	onMount(() => {
 		divRef.focus();
 		setStatusbarColor("#000");
@@ -196,65 +388,12 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 				props.music,
 				"buffer",
 				async (buffer) => {
-					const AV = (await import("@/lib/flac")).default;
+					FlacModule = (await import("@/lib/flac")).default;
 
 					setSrc("flac://loaded");
 					setDownloadBuffer(buffer);
 					setLoading(false);
-
-					const player = AV.Player.fromBuffer(buffer) as FlacPlayer;
-					flacPlayer = player;
-					player.preload?.();
-
-					const onDuration = (ms: number) => {
-						if (!Number.isFinite(ms)) return;
-						setDuration(Math.max(0, Math.floor(ms / 1000)));
-					};
-
-					const onProgress = (ms: number) => {
-						if (!Number.isFinite(ms)) return;
-						setCurrentTime(Math.max(0, ms / 1000));
-					};
-
-					const onEnd = () => {
-						batch(() => {
-							setPlaying(false);
-							setCurrentTime(0);
-						});
-					};
-
-					const onError = (err: unknown) => {
-						console.error("[MusicPlayer][FLAC] error", err);
-						setPlaying(false);
-						setCanSeek(false);
-					};
-
-					const onReady = () => {
-						setFlacReady(true);
-						setCanSeek(canSeekFlacPlayer(player));
-					};
-
-					player.on("duration", onDuration);
-					player.on("progress", onProgress);
-					player.on("end", onEnd);
-					player.on("error", onError);
-					player.on("ready", onReady);
-
-					onCleanup(() => {
-						if (player.off) {
-							player.off("duration", onDuration);
-							player.off("progress", onProgress);
-							player.off("end", onEnd);
-							player.off("error", onError);
-							player.off("ready", onReady);
-						}
-
-						player.pause();
-						player.stop();
-						player.destroy?.();
-						flacPlayer = null;
-						setDownloadBuffer(null);
-					});
+					createFlacPlayer();
 				},
 				setDownloadProgress,
 			);
@@ -282,37 +421,54 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	});
 
 	createEffect(() => {
+		if (!showOptions()) return;
+
+		SpatialNavigation.add(optionsSnId, {
+			selector: ".option",
+			restrict: "self-only",
+		});
+		SpatialNavigation.focus(optionsSnId);
+
+		onCleanup(() => {
+			SpatialNavigation.remove(optionsSnId);
+		});
+	});
+
+	createEffect(() => {
 		if (showOptions()) {
-			setSoftkeys("Cancel", "Select", "", false, false);
+			setSoftkeys("", "Select", "", false, false);
 			queueMicrotask(() => optionDownloadRef?.focus());
 			return;
 		}
 
-		setSoftkeys("Back", loading() ? "" : playing() ? "Pause" : "Play", "Options", false, true);
+		setSoftkeys("Back", loading() ? "" : playing() ? "tg:pause" : "tg:play", loading() ? "" : "Options", false, true);
 	});
 
 	return (
 		<>
 			<div
 				ref={divRef}
-				on:keydown={(e) => {
+				onKeyDown={(e) => {
 					if (showOptions()) return;
 
 					const key = e.key;
 
 					if (key == "Backspace" || key == "SoftLeft") {
 						e.preventDefault();
-						closePlayer();
+						setTimeout(() => {
+							closePlayer();
+						}, 100);
 						return;
 					}
 
 					if (key == "SoftRight") {
 						e.preventDefault();
+						if (loading()) return;
 						setShowOptions(true);
 						return;
 					}
 
-					if (key == "Enter" || key == "SoftCenter") {
+					if (key == "Enter") {
 						e.preventDefault();
 						togglePlay();
 						return;
@@ -327,6 +483,18 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 					if (key == "ArrowRight") {
 						e.preventDefault();
 						if (canSeek()) seekBy(5);
+						return;
+					}
+
+					if (key == "ArrowUp") {
+						e.preventDefault();
+						volumeUp();
+						return;
+					}
+
+					if (key == "ArrowDown") {
+						e.preventDefault();
+						volumeDown();
 					}
 				}}
 				tabIndex={-1}
@@ -348,9 +516,14 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 							</div>
 							<div class={styles.times}>
 								<span>{formatTime(currentTime())}</span>
+								<Show when={props.useFlacDecoder}>
+									<span>FLAC</span>
+								</Show>
 								<span>{formatTime(Math.max(duration() - currentTime(), 0))}</span>
 							</div>
-							<div class={styles.controls}>{controlsText()}</div>
+							<Show when={!canSeek()}>
+								<div class={styles.controls}>Seek unavailable</div>
+							</Show>
 						</>
 					</Show>
 				</div>
@@ -364,63 +537,32 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 							: props.music.duration || 0;
 						setDuration(value);
 					}}
-					onPlay={() => setPlaying(true)}
-					onPause={() => setPlaying(false)}
+					onPlay={() => {
+						setPlaying(true);
+						scheduleNativeEndFallback();
+					}}
+					onPause={() => {
+						clearNativeEndFallback();
+						setPlaying(false);
+					}}
 					onTimeUpdate={(e) => {
 						setCurrentTime(e.currentTarget.currentTime);
+						scheduleNativeEndFallback();
 					}}
-					onEnded={() => {
-						batch(() => {
-							setPlaying(false);
-							setCurrentTime(0);
-						});
-					}}
+					onEnded={handleNativeEnded}
 				></audio>
 			</div>
 
 			<Show when={showOptions()}>
 				<Portal>
-					<Options
-						title="Options"
-						onClose={() => {
-							setShowOptions(false);
-							queueMicrotask(() => divRef?.focus());
-						}}
-					>
+					<Options title="Options" onClose={closeOptions}>
 						<OptionsMenuMaxHeight>
 							<OptionsItem
 								ref={optionDownloadRef}
-								tabIndex={0}
-								on:keydown={(e) => {
-									if (e.key !== "Enter") return;
-									e.preventDefault();
-
-									if (!src()) {
-										setShowOptions(false);
-										queueMicrotask(() => divRef?.focus());
-										return;
-									}
-
-									let url = downloadUrl();
-									let ephemeralUrl: string | null = null;
-
-									if (!url && props.useFlacDecoder && downloadBuffer()) {
-										ephemeralUrl = URL.createObjectURL(
-											new Blob([downloadBuffer()!], { type: props.music.mimeType || "audio/flac" }),
-										);
-										url = ephemeralUrl;
-									}
-
-									if (url) {
-										downloadToFile(url, musicFilename(props.music));
-										if (ephemeralUrl) {
-											setTimeout(() => URL.revokeObjectURL(ephemeralUrl!), 1000);
-										}
-									}
-
-									setShowOptions(false);
-									queueMicrotask(() => divRef?.focus());
-								}}
+								on:sn-willfocus={willFocusScrollIfNeeded}
+								classList={{ option: true, [styles.option_item]: true }}
+								tabIndex={-1}
+								on:sn-enter-down={handleDownload}
 							>
 								Download
 							</OptionsItem>

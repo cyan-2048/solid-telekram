@@ -1,5 +1,5 @@
 import memoize from "lodash-es/memoize";
-import { ComponentProps, splitProps } from "solid-js";
+import { type ComponentProps, splitProps } from "solid-js";
 
 const Icons = Object.freeze([
 	"check",
@@ -303,7 +303,7 @@ export type TelegramIconNames = (typeof Icons)[number];
 const getIcon = memoize((name: (typeof Icons)[number]) => String.fromCharCode(59648 + Icons.indexOf(name)));
 
 export default function TelegramIcon(
-	props: Omit<ComponentProps<"span">, "children"> & { name: (typeof Icons)[number] }
+	props: Omit<ComponentProps<"span">, "children"> & { name: (typeof Icons)[number] },
 ) {
 	const [local, rest] = splitProps(props, ["classList", "name"]);
 

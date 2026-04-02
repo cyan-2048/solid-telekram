@@ -7,7 +7,9 @@
 
 	z-index: 99;
 
-	transition: color 0.3s linear, background-color 0.3s linear;
+	transition:
+		color 0.3s linear,
+		background-color 0.3s linear;
 
 	font-size: 17px;
 
@@ -42,6 +44,11 @@
 			text-align: center;
 			font-weight: 800;
 			text-transform: uppercase;
+
+			:global(.tgico) {
+				float: none;
+				display: inline-block;
+			}
 		}
 		div:nth-child(3) {
 			text-align: right;
