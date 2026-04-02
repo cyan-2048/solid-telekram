@@ -1008,8 +1008,8 @@ function MessageContainer(props: { children: JSXElement }) {
 						SpatialNavigation.pause();
 					} else if (type == "audio") {
 						// TODO: make music player
-						toaster("not yet available :(");
-						// setShowMusicPlayer(true);
+						// toaster("not yet available :(");
+						setShowMusicPlayer(true);
 					} else {
 						setShowMessageInfo(true);
 					}
