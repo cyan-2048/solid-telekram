@@ -117,7 +117,7 @@ export default defineConfig({
 
 	output: {
 		overrideBrowserslist: [isKai3 ? "firefox 84" : isKai4 ? "firefox 123" : "firefox 48"],
-		minify: false,
+		minify: true,
 
 		dataUriLimit: 0,
 

@@ -120,6 +120,8 @@ spawnSync(["npm", "run", "gen-tl"], {
 	stderr: "inherit",
 });
 
+fs.rmSync(mtcuteFolder, { recursive: true, force: true });
+
 // console.error({ mtcuteFolder, coreFolder, webFolder, upstreamCore, upstreamWeb });
 
 copyAndMergeFolder(upstreamCore, coreFolder);

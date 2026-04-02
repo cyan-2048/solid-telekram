@@ -425,8 +425,12 @@ export function StickerMedia(props: FocusableMediaProps) {
 
   createEffect(() => {
     const media = message().media;
+
     if (!media) return;
+
     if (media.type !== "sticker") return;
+
+    console.error("STICKEERRRR", media, media.mimeType);
 
     if (media.mimeType.includes("webm")) {
       downloadAsync(media, "url", setVideo);
@@ -438,7 +442,7 @@ export function StickerMedia(props: FocusableMediaProps) {
 
     let mounted = true;
 
-    if (media.hasStickerSet) {
+    if (media.mimeType.includes("x-tgsticker")) {
       console.error(
         "non-webp sticker set",
         media.mimeType,

@@ -24,7 +24,7 @@ sw.addEventListener("install", (event) => {
 	event.waitUntil(sw.skipWaiting());
 });
 
-const CACHE_NAME = "static-cache-v1";
+const CACHE_NAME = "static-cache-v2";
 
 sw.addEventListener("activate", (event) => {
 	console.info("[SW] on activate");
@@ -53,19 +53,41 @@ function shouldCacheRequest(request: Request) {
 	);
 }
 
+function isEmoji2Request(request: Request) {
+	return request.url.startsWith("https://cyan-2048.github.io/kaigram-assets/emoji2/");
+}
+
+function fetchAndMaybeCache(request: Request, skip404Cache: boolean) {
+	return fetch(request).then((networkResponse) => {
+		if (skip404Cache && networkResponse.status === 404) {
+			return networkResponse;
+		}
+
+		return caches.open(CACHE_NAME).then((cache) => {
+			cache.put(request, networkResponse.clone()); // Store in cache
+			return networkResponse;
+		});
+	});
+}
+
 sw.addEventListener("fetch", (event) => {
 	if (shouldCacheRequest(event.request)) {
+		const skip404Cache = isEmoji2Request(event.request);
+
 		event.respondWith(
 			caches.match(event.request).then((cachedResponse) => {
 				if (cachedResponse) {
+					if (skip404Cache && cachedResponse.status === 404) {
+						return caches.open(CACHE_NAME).then((cache) => {
+							cache.delete(event.request);
+							return fetchAndMaybeCache(event.request, skip404Cache);
+						});
+					}
+
 					return cachedResponse; // Serve from cache
 				}
-				return fetch(event.request).then((networkResponse) => {
-					return caches.open(CACHE_NAME).then((cache) => {
-						cache.put(event.request, networkResponse.clone()); // Store in cache
-						return networkResponse;
-					});
-				});
+
+				return fetchAndMaybeCache(event.request, skip404Cache);
 			}),
 		);
 	}

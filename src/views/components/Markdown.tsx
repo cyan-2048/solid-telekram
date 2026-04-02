@@ -1,7 +1,7 @@
 import type { TextWithEntities } from "@mtcute/core";
 import * as styles from "./Markdown.module.scss";
-import { For, Match, Switch, Show, createRenderEffect, Component, createSignal, JSXElement } from "solid-js";
-import { ASTNode, ASTObjectNode, unparse } from "@/lib/unparse";
+import { For, Match, Switch, Show, createRenderEffect, type Component, createSignal, type JSXElement } from "solid-js";
+import { type ASTNode, type ASTObjectNode, unparse } from "@/lib/unparse";
 import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
 import { reconcile } from "solid-js/store";
@@ -13,7 +13,7 @@ import twemojiMatcher from "@twemoji/parser/dist/lib/regex";
 type CustomRenderer = (
 	e: ASTObjectNode,
 	_default: () => JSXElement,
-	_children: () => JSXElement
+	_children: () => JSXElement,
 ) => Component<ASTObjectNode> | null | void;
 
 function EntityChildren(props: { $: ASTNode[]; customRenderer?: CustomRenderer }) {
@@ -48,9 +48,7 @@ function EntityNode(props: { $: ASTObjectNode; customRenderer?: CustomRenderer }
 							<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
 						</Dynamic>
 					),
-					() => (
-						<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
-					)
+					() => <EntityChildren $={props.$.children} customRenderer={props.customRenderer} />,
 				)}
 			>
 				{(e) => <Dynamic {...props.$} component={e()!} />}
@@ -184,7 +182,19 @@ export function MarkdownText(props: { text: string }) {
 	return (
 		<For each={parsed()}>
 			{(match) => (
-				<Show when={typeof match == "string"} fallback={<Twemoji text={(match as EmojiMatch).match} />}>
+				<Show
+					when={typeof match == "string"}
+					fallback={
+						<Show
+							when={
+								// ignore single fe0f
+								(match as EmojiMatch).match != "️"
+							}
+						>
+							<Twemoji text={(match as EmojiMatch).match} />
+						</Show>
+					}
+				>
 					{match as string}
 				</Show>
 			)}
@@ -210,7 +220,7 @@ export default function Markdown(props: { entities: TextWithEntities; customRend
 		setAst(
 			reconcile(unparse(props.entities), {
 				merge: true,
-			})
+			}),
 		);
 	});
 	return (

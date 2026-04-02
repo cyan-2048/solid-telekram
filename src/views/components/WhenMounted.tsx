@@ -1,4 +1,4 @@
-import { JSXElement, onMount } from "solid-js";
+import { type JSXElement, onMount } from "solid-js";
 
 export default function WhenMounted(props: { children: JSXElement; onMount: () => void }) {
 	onMount(() => {

@@ -10,7 +10,7 @@
         "@fuman/utils": "0.0.19",
         "@modern-dev/jsbn": "^1.2.5",
         "@mtcute/file-id": "0.29.0",
-        "@mtcute/markdown-parser": "0.29.4",
+        "@mtcute/markdown-parser": "0.29.5",
         "@mtcute/tl": "223.0.0",
         "@mtcute/tl-runtime": "0.29.0",
         "@mtcute/wasm": "0.19.9",
@@ -21,7 +21,7 @@
         "comlink": "^4.4.2",
         "countries-and-timezones": "^3.8.0",
         "date-fns": "^4.1.0",
-        "emoji-datasource": "^16.0.0",
+        "emojibase-data": "^17.0.0",
         "idb": "^8.0.3",
         "jsqr": "^1.4.0",
         "leemon": "^6.2.0",
@@ -204,11 +204,11 @@
 
     "@module-federation/webpack-bundler-runtime": ["@module-federation/webpack-bundler-runtime@0.22.0", "", { "dependencies": { "@module-federation/runtime": "0.22.0", "@module-federation/sdk": "0.22.0" } }, "sha512-aM8gCqXu+/4wBmJtVeMeeMN5guw3chf+2i6HajKtQv7SJfxV/f4IyNQJUeUQu9HfiAZHjqtMV5Lvq/Lvh8LdyA=="],
 
-    "@mtcute/core": ["@mtcute/core@0.29.4", "", { "dependencies": { "@fuman/io": "0.0.19", "@fuman/net": "0.0.19", "@fuman/utils": "0.0.19", "@mtcute/file-id": "^0.29.0", "@mtcute/tl-runtime": "^0.29.0", "@types/events": "3.0.0", "long": "^5.3.2" } }, "sha512-dEbuKvJp53jy533lXICd3c93IbL5iM5gi70lqzPtnS75MpBmufmMeKJqUEWsTXUmps3U6epmczCCbVz4+uweEA=="],
+    "@mtcute/core": ["@mtcute/core@0.29.5", "", { "dependencies": { "@fuman/io": "0.0.19", "@fuman/net": "0.0.19", "@fuman/utils": "0.0.19", "@mtcute/file-id": "^0.29.0", "@mtcute/tl-runtime": "^0.29.0", "@types/events": "3.0.0", "long": "^5.3.2" } }, "sha512-VLwUdVXyc0KrqCFyJMLjCthoZ7O4UsMLRsr57+sG98h6KuQIYW9fPfmoWckQBFkrnfSiUJazZuuPk9GERMhcgA=="],
 
     "@mtcute/file-id": ["@mtcute/file-id@0.29.0", "", { "dependencies": { "@fuman/utils": "0.0.19", "@mtcute/tl-runtime": "^0.29.0", "long": "^5.3.2" } }, "sha512-kfNFKjdfFoo9YIl823EJ068u0djgK6MsqfIHIcb6iwmKOxnCFTLRvBGnJUaO+SbOejg63Tz5lzQxKnt03kEV6A=="],
 
-    "@mtcute/markdown-parser": ["@mtcute/markdown-parser@0.29.4", "", { "dependencies": { "@mtcute/core": "^0.29.4", "long": "^5.3.2" } }, "sha512-jORffOdQaiFyS+HtQymlgIPP7agCSW6RPH+k2O9obvRv4zUHx68I9AYLfoMGHA54rbIWkMWuBdaV3SD8MAv5CQ=="],
+    "@mtcute/markdown-parser": ["@mtcute/markdown-parser@0.29.5", "", { "dependencies": { "@mtcute/core": "^0.29.5", "long": "^5.3.2" } }, "sha512-V6A2CtVe41SFBr0rtjWc5iHZDPYgSwb8XKOOa210DXQfuCe/VzpRd6WuKntkE1f+Gh15N8NlFGWsarJGbnk5xQ=="],
 
     "@mtcute/tl": ["@mtcute/tl@223.0.0", "", { "dependencies": { "long": "5.2.3" } }, "sha512-RBppaVVpp+YsGC5PTsZ2hk1NI4rI0iAj7ll9urbUmII9OCaOMSswiF9ZcjQ1aQhofey8Im87DRhxpiBZQ4OEUg=="],
 
@@ -356,7 +356,9 @@
 
     "electron-to-chromium": ["electron-to-chromium@1.5.329", "", {}, "sha512-/4t+AS1l4S3ZC0Ja7PHFIWeBIxGA3QGqV8/yKsP36v7NcyUCl+bIcmw6s5zVuMIECWwBrAK/6QLzTmbJChBboQ=="],
 
-    "emoji-datasource": ["emoji-datasource@16.0.0", "", {}, "sha512-/qHKqK5Nr3+8zhgO6kHmF43Fm5C8HNn0AaFRIpgw8HF3+uF0Vfc8jgLI1ZQS5ba1vBzksS8NBCjHejwLb2D/Sg=="],
+    "emojibase": ["emojibase@17.0.0", "", {}, "sha512-bXdpf4HPY3p41zK5swVKZdC/VynsMZ4LoLxdYDE+GucqkFwzcM1GVc4ODfYAlwoKaf2U2oNNUoOO78N96ovpBA=="],
+
+    "emojibase-data": ["emojibase-data@17.0.0", "", { "peerDependencies": { "emojibase": "*" } }, "sha512-Yvgb5AWoHViHV/gq1qr5ZAarcBip+B27/ZLRsUJkbgAEaLlZ/fof9g882LTpmEpyhBNEC0m2SEmItljHsTygjA=="],
 
     "emojis-list": ["emojis-list@3.0.0", "", {}, "sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q=="],
 

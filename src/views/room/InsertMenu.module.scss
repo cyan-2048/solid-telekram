@@ -1,5 +1,8 @@
 .grid {
-	height: 240px;
+	// height: 240px;
+
+	height: 100vw;
+	max-height: 70vh;
 
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -42,7 +45,6 @@
 		svg {
 			width: 32px;
 			height: 32px;
-			display: inline-block;
 			float: left;
 		}
 	}
