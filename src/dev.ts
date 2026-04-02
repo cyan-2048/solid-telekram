@@ -7,10 +7,12 @@ import * as stores from "@stores";
 import * as storage from "@/lib/storage";
 import * as modals from "@/views/modals";
 import * as config from "./config";
+// @ts-ignore
 import * as leemon from "leemon";
 import localforage from "localforage";
 import { BigInteger } from "@modern-dev/jsbn";
 import Long from "long";
+import appVersion from "./lib/appVersion";
 
 if (import.meta.env.DEV || import.meta.env.CANARY)
 	Object.assign(window, {
@@ -33,6 +35,7 @@ if (import.meta.env.DEV || import.meta.env.CANARY)
 			modals,
 			...modals,
 			config,
+			appVersion,
 		},
 	});
 

@@ -11,6 +11,26 @@ const isKai4 = process.env.KAIOS == "4";
 
 const isProd = process.env.NODE_ENV === "production";
 
+function getManifestFileName() {
+	return isKai3 || isKai4 ? "manifest.webmanifest" : "manifest.webapp";
+}
+
+function readManifest() {
+	const manifestFileName = getManifestFileName();
+	const manifest = JSON.parse(fs.readFileSync(resolve("src", "assets", manifestFileName), "utf8"));
+
+	if (isKai4) {
+		const version = manifest.b2g_features.version;
+		manifest.b2g_features.version = version.replace(/^3\./, "4.");
+	}
+
+	return manifest;
+}
+
+function resolveManifestVersion(manifest: any) {
+	return isKai3 || isKai4 ? manifest.b2g_features.version : manifest.version;
+}
+
 function getCommitMessage() {
 	try {
 		const message = execSync("git log -1 --pretty=%B", { stdio: "ignore" }).toString().trim();
@@ -28,6 +48,13 @@ function getCommitHash() {
 }
 
 export function pluginKaiOSManifest(): RsbuildPlugin {
+	try {
+		const manifest = readManifest();
+		process.env.APP_VERSION = resolveManifestVersion(manifest);
+	} catch {
+		// Keep existing APP_VERSION fallback if manifest read fails during config evaluation.
+	}
+
 	return {
 		name: "kai-manifest-plugin",
 		enforce: "post",
@@ -42,21 +69,16 @@ export function pluginKaiOSManifest(): RsbuildPlugin {
 						"report",
 				},
 				({ compiler, compilation }) => {
-					const manifestFileName = isKai3 || isKai4 ? "manifest.webmanifest" : "manifest.webapp";
+					const manifestFileName = getManifestFileName();
 
 					const asmjsAssets = api.useExposed<string[]>("GET_ASM_ASSETS") || [];
 
-					const manifest = JSON.parse(fs.readFileSync(resolve("src", "assets", manifestFileName), "utf8"));
+					const manifest = readManifest();
 
 					if (isKai2 && asmjsAssets.length) {
 						// I should probably split up the asm.js files hmmm
 						// (actually did do that already lol)
 						manifest.precompile = asmjsAssets;
-					}
-
-					if (isKai4) {
-						const version = manifest.b2g_features.version;
-						manifest.b2g_features.version = version.replace(/^3\./, "4.");
 					}
 
 					const manifestJSON = JSON.stringify(manifest);
@@ -79,7 +101,7 @@ export function pluginKaiOSManifest(): RsbuildPlugin {
 					fs.writeFileSync(
 						buildsVersionPath,
 						JSON.stringify({
-							version: isKai3 || isKai4 ? manifest.b2g_features.version : manifest.version,
+							version: resolveManifestVersion(manifest),
 							build: Date.now(),
 							description: getCommitMessage(),
 							hash: getCommitHash(),

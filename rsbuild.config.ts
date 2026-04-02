@@ -81,6 +81,7 @@ export default defineConfig({
 			"import.meta.env.CLOUDPHONE": isCloudphone,
 			"import.meta.env.VITE_APP_ID": process.env.VITE_APP_ID || 0,
 			"import.meta.env.VITE_APP_HASH": JSON.stringify(process.env.VITE_APP_HASH || ""),
+			"import.meta.env.APP_VERSION": JSON.stringify(process.env.APP_VERSION || "0.0.0"),
 		},
 	},
 
