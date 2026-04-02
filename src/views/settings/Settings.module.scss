@@ -1,0 +1,14 @@
+div.item {
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+	}
+
+	height: 60px;
+	padding: 10px;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.s_item {
+	line-height: 39px;
+}

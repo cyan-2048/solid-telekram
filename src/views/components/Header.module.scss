@@ -1,0 +1,12 @@
+.header {
+	color: white;
+	background-color: var(--accent-dark);
+	min-height: 28px;
+	max-height: calc(2 * 28px);
+	line-height: calc(0.8 * 28px);
+	flex: none;
+	padding: 0 10px;
+	text-align: center;
+	width: 100vw;
+	font-size: 17px;
+}

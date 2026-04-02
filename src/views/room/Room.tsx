@@ -1,0 +1,285 @@
+import { useStore } from "@nanostores/solid";
+import * as styles from "./Room.module.scss";
+import { $editingMessage, $replyingMessage, $room, $view, $wallpaper, $wallpaper_color } from "@/stores";
+import { ComponentProps, createEffect, createMemo, For, type JSX, onCleanup, onMount, Show } from "solid-js";
+import { tg, typingIndicatorPrivateJar, userStatusJar } from "@globals";
+import Content from "@components/Content";
+import PeerPhotoIcon from "@components/PeerPhotoIcon";
+import type { tl } from "@mtcute/tl";
+import type { Peer, TypingStatus } from "@mtcute/core";
+import { setSoftkeys, sleep, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
+import { timeStamp } from "../Home";
+import UIDialog from "@/ui/UIDialog";
+import SpatialNavigation from "@/lib/spatial_navigation";
+import WhenMounted from "@components/WhenMounted";
+import MessageItem, { MessageProvider, UploadingMessageItem } from "./MessageItem";
+import ISpinner from "@components/ISpinner";
+import RoomTextBox from "./RoomTextBox";
+
+function getMembersCount(peer: Peer) {
+	if ((peer.raw as tl.RawChannel).participantsCount) {
+		return (peer.raw as tl.RawChannel).participantsCount;
+	}
+	return null;
+}
+
+const typingStatusDictionaryForPrivateChats = {
+	typing: "typing",
+	upload_voice: "sending file",
+	upload_document: "sending file",
+	upload_photo: "sending a photo",
+	upload_video: "sending a video",
+	upload_round: "sending a video",
+	record_video: "recording video",
+	record_voice: "recording voice",
+	record_round: "recording video",
+	game: "playing a game",
+	sticker: "choosing a sticker",
+};
+
+function typingStatusToEnglish(status: TypingStatus): string {
+	return (typingStatusDictionaryForPrivateChats as any)[status] || status;
+}
+
+function UserStatusIndicator(props: { userId: number }) {
+	const userStatus = () => userStatusJar.get(props.userId);
+
+	const lastOnline = useStore_(() => userStatus().lastOnline);
+	const status = useStore_(() => userStatus().status);
+
+	return (
+		<Show when={lastOnline()} fallback={status() == "long_time_ago" ? "offline" : status()}>
+			Last online on {timeStamp(lastOnline()!)}
+		</Show>
+	);
+}
+
+function PrivateChatBottomHeader(props: { userId: number }) {
+	const typingStatus = useStore_(() => typingIndicatorPrivateJar.get(props.userId).$status);
+
+	return (
+		<>
+			<Show when={typingStatus() === null} fallback={<>{typingStatusToEnglish(typingStatus()!)}...</>}>
+				<UserStatusIndicator userId={props.userId} />
+			</Show>
+		</>
+	);
+}
+
+function Messages(props: { dialog: UIDialog }) {
+	const messages = useStore_(() => props.dialog.messages.$sorted);
+
+	const loading = useStore_(() => props.dialog.messages.$isLoading);
+
+	createEffect(() => {
+		const _ = loading();
+
+		if (_) {
+			setSoftkeys("", "Loading...", "", true);
+		}
+	});
+
+	let divRef!: HTMLDivElement;
+
+	const uploading = useStore_(() => props.dialog.$uploading);
+
+	onMount(() => {
+		SpatialNavigation.add("room", {
+			selector: `.${styles.room} .focusable, .${styles.room} .last.focusable`,
+			rememberSource: true,
+			enterTo: "last-focused",
+			restrict: "self-only",
+			defaultElement: `.${styles.room} .last.focusable`,
+		});
+	});
+
+	const view = useStore($view);
+
+	createEffect(() => {
+		const inView = view() == "room";
+
+		if (inView && !loading()) {
+			sleep(100).then(() => SpatialNavigation.focus("room"));
+		}
+	});
+
+	onCleanup(() => {
+		SpatialNavigation.remove("room");
+	});
+
+	return (
+		<div
+			ref={divRef}
+			class={styles.room}
+			style={
+				import.meta.env.DEV
+					? {
+							overflow: "auto",
+					  }
+					: undefined
+			}
+		>
+			<Show when={!loading()}>
+				<WhenMounted
+					onMount={() => {
+						divRef.scrollTop = divRef.scrollHeight;
+						sleep(10).then(() => {
+							SpatialNavigation.focus("room");
+						});
+					}}
+				>
+					<For each={messages()}>
+						{(e, index) => (
+							<MessageProvider
+								first={index() == 0}
+								last={index() == messages().length - 1}
+								dialog={props.dialog}
+								$={e}
+								before={messages()[index() - 1]}
+							>
+								<MessageItem />
+							</MessageProvider>
+						)}
+					</For>
+				</WhenMounted>
+				<For each={uploading()}>{(upload) => <UploadingMessageItem upload={upload} />}</For>
+				<Show when={props.dialog.chatType !== "channel"}>
+					<RoomTextBox dialog={props.dialog} />
+				</Show>
+			</Show>
+		</div>
+	);
+}
+
+function AvatarSpinner(props: { spin: boolean }) {
+	return (
+		<Show when={props.spin}>
+			<div class={styles.spinner}>
+				<ISpinner></ISpinner>
+			</div>
+		</Show>
+	);
+}
+
+function RoomAvatar(props: { dialog: UIDialog }) {
+	const showSpinner = useStore_(() => props.dialog.messages.$showSpinner);
+
+	return (
+		<>
+			<div
+				style={
+					showSpinner()
+						? {
+								opacity: "0.5",
+						  }
+						: undefined
+				}
+			>
+				<PeerPhotoIcon peer={props.dialog.peer} />
+			</div>
+			<AvatarSpinner spin={showSpinner()}></AvatarSpinner>
+		</>
+	);
+}
+
+export function Wallpaper(props: { classList?: ComponentProps<"div">["classList"] }) {
+	const wallpaper = useStore($wallpaper);
+	const wallpaperColor = useStore($wallpaper_color);
+
+	function wallpaperStyle(): JSX.CSSProperties {
+		const _wallpaper = wallpaper();
+		const color = wallpaperColor();
+
+		return _wallpaper == "color"
+			? {
+					"background-color": color,
+			  }
+			: {
+					"background-image": `var(--wallpaper)`,
+					"background-color": WALLPAPER_AVERAGE_COLORS[_wallpaper as number],
+			  };
+	}
+
+	return (
+		<Show when={typeof wallpaper() == "number" || wallpaper() == "color"}>
+			<div classList={{ [styles.wallpaper_image]: true, ...props.classList }} style={wallpaperStyle()}></div>
+		</Show>
+	);
+}
+
+export default function Room(props: { hidden: boolean }) {
+	const editingMessage = useStore($editingMessage);
+	const replyingMessage = useStore($replyingMessage);
+
+	const room = useStore($room);
+
+	const interacting = createMemo(() => {
+		const editing = editingMessage();
+		const replying = replyingMessage();
+		return editing || replying;
+	});
+
+	createEffect(() => {
+		const _room = room()?.peer;
+
+		if (_room) {
+			tg.openChat(_room);
+
+			// console.log(dialogsJar.get(_room.id), _room.id, _room);
+
+			onCleanup(() => {
+				tg.closeChat(_room);
+			});
+		}
+	});
+
+	return (
+		<Show when={room()}>
+			{(dialog) => (
+				<Content
+					before={
+						<div class={styles.header}>
+							<div class={styles.avatar}>
+								<RoomAvatar dialog={dialog()} />
+							</div>
+							<div class={styles.details}>
+								<div class={styles.top}>
+									<span>{dialog().isSelf ? "Saved Messages" : dialog().displayName}</span>
+								</div>
+
+								<div class={styles.bottom}>
+									<span>
+										<Show
+											when={dialog().chatType != "private"}
+											fallback={
+												<Show
+													when={
+														!dialog().isSupport &&
+														dialog().peer.raw._ == "user" &&
+														!(dialog().peer.raw as tl.RawUser).bot
+													}
+												>
+													<PrivateChatBottomHeader userId={dialog().peer.id}></PrivateChatBottomHeader>
+												</Show>
+											}
+										>
+											{getMembersCount(dialog().peer)} {dialog().chatType == "channel" ? "Subscribers" : "Members"}
+										</Show>
+									</span>
+								</div>
+							</div>
+						</div>
+					}
+					after={
+						<Show when={interacting()}>{(msg) => <RoomTextBox floating dialog={dialog()} message={msg()} />}</Show>
+					}
+					hidden={props.hidden}
+					mainClass={styles.room_wrap}
+				>
+					<Wallpaper />
+					<Messages dialog={dialog()}></Messages>
+				</Content>
+			)}
+		</Show>
+	);
+}

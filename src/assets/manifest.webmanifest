@@ -1,0 +1,67 @@
+{
+	"id": "telekram-solid",
+	"name": "TeleKram",
+	"short_name": "Telegram",
+	"description": "Telegram Client for KaiOS.",
+
+	"start_url": "/index.html",
+	"orientation": "natural",
+	"dir": "auto",
+	"lang": "en-US",
+	"display": "standalone",
+
+	"theme": "#fff",
+	"theme_color": "#fff",
+	"background_color": "#fff",
+
+	"categories": ["social"],
+
+	"icons": [
+		{
+			"src": "/icon56.png",
+			"type": "image/png",
+			"sizes": "56x56"
+		},
+		{
+			"src": "/icon112.png",
+			"type": "image/png",
+			"sizes": "112x112"
+		}
+	],
+
+	"priority": "high",
+
+	"type": "privileged",
+
+	"b2g_features": {
+		"display": "Telegram",
+		"version": "3.2.0",
+		"type": "privileged",
+		"default_locale": "en-US",
+		"developer": {
+			"name": "Cyan",
+			"url": "https://discord.gg/W9DF2q3Vv2"
+		},
+
+		"cursor": false,
+		"fullscreen": false,
+
+		"origin": "telekram-solid",
+
+		"focus_color": "#fff",
+
+		"priority": "high",
+
+		"permissions": {
+			"systemXHR": {},
+			"audio-capture": {},
+			"video-capture": {
+				"description": "Reading Codes using the Camera"
+			},
+			"desktop-notification": {},
+			"tcp-socket": { "description": "Required to do any TCP" },
+			"volumemanager": {},
+			"device-storage:sdcard": { "access": "readwrite" }
+		}
+	}
+}

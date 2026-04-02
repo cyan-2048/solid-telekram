@@ -1,0 +1,63 @@
+import type { mtp } from '../tl/index.js'
+import { timers } from '@fuman/utils'
+import Long from 'long'
+
+export class ServerSaltManager {
+  private _futureSalts: mtp.RawMt_future_salt[] = []
+
+  currentSalt: Long = Long.ZERO
+
+  isFetching = false
+
+  shouldFetchSalts(): boolean {
+    return !this.isFetching && !this.currentSalt.isZero() && this._futureSalts.length < 2
+  }
+
+  setFutureSalts(salts: mtp.RawMt_future_salt[]): void {
+    this._futureSalts = salts
+
+    // todo: we should use adjusted monotonic clock here
+    const now = Date.now() / 1000
+
+    while (salts.length > 0 && salts[0].validSince <= now) {
+      this.currentSalt = salts[0].salt
+      this._futureSalts.shift()
+    }
+
+    if (this._futureSalts.length) {
+      this._scheduleReplace(this._futureSalts[0])
+    }
+  }
+
+  private _timer?: timers.Timer
+
+  private _scheduleReplace(salt: mtp.RawMt_future_salt): void {
+    this._timer = timers.setTimeout(() => {
+      this.currentSalt = salt.salt
+      this._replaceAndScheduleNext()
+    }, salt.validSince * 1000 - Date.now())
+  }
+
+  private _replaceAndScheduleNext(): void {
+    if (this._timer) timers.clearTimeout(this._timer)
+
+    const now = Date.now() / 1000
+
+    // consume any salts that are already valid
+    while (this._futureSalts.length !== 0) {
+      const salt = this._futureSalts[0]
+      if (salt.validSince > now) break
+      this.currentSalt = salt.salt
+      this._futureSalts.shift()
+    }
+
+    // schedule the next future salt, if any
+    if (this._futureSalts.length) {
+      this._scheduleReplace(this._futureSalts[0])
+    }
+  }
+
+  destroy(): void {
+    timers.clearTimeout(this._timer)
+  }
+}

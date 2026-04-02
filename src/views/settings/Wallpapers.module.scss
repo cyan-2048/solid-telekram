@@ -1,0 +1,45 @@
+.wallpapers {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	height: 100vh;
+	width: 100vw;
+}
+
+.preview {
+	height: 60px;
+	width: 60px;
+	object-fit: cover;
+	object-position: center;
+
+	flex-shrink: 0;
+
+	&:focus {
+		outline: 2px white solid;
+		outline-offset: -2px;
+	}
+}
+
+.previews {
+	display: flex;
+	width: 100vw;
+	overflow: hidden;
+
+	position: fixed;
+	bottom: 30px;
+	z-index: 10;
+}
+
+.wallpaper_preview {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 9;
+	background-color: black;
+	width: 100vw;
+	height: 100vh;
+
+	background-size: cover;
+	background-position: center;
+}

@@ -1,0 +1,114 @@
+.radio_container {
+	position: relative;
+	box-sizing: border-box;
+	padding: 10px 30px 10px 10px;
+	min-height: 60px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	.text {
+		word-wrap: break-word;
+		font-size: 17px;
+	}
+
+	.subtext {
+		word-wrap: break-word;
+		font-size: 14px;
+	}
+
+	.radio,
+	.checkbox {
+		color: var(--accent);
+
+		box-sizing: border-box;
+		height: 20px;
+		width: 20px;
+		top: 50%;
+		transform: translate3d(0, -50%, 0);
+		position: absolute;
+		right: 10px;
+		display: inline-block;
+
+		font-family: "gaia-icons";
+		font-weight: 500;
+		font-size: 30px;
+
+		&::after {
+			position: absolute;
+			white-space: nowrap;
+			top: -12px;
+			left: -5px;
+		}
+	}
+
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+
+		.radio,
+		.checkbox {
+			color: white;
+		}
+	}
+
+	&:disabled,
+	&[aria-disabled="true"],
+	&[aria-readonly="true"] {
+		opacity: 0.3;
+	}
+}
+
+.radio {
+	// &::before {
+	// 	content: "";
+	// 	visibility: hidden;
+	// 	clip-path: url(../../assets/radio-off-kaios-2.5.svg#radio);
+	// }
+
+	// &::after {
+	// 	content: "";
+	// 	visibility: hidden;
+	// 	clip-path: url(../../assets/radio-on-kaios-2.5.svg#radio);
+	// }
+
+	&::after {
+		content: "radio-off";
+	}
+
+	&.on {
+		&::after {
+			content: "radio-on";
+		}
+	}
+}
+
+.checkbox {
+	// &::before {
+	// 	content: "";
+	// 	visibility: hidden;
+	// 	clip-path: url(../../assets/checkbox-off-kaios-2.5.3.svg#checkbox);
+	// }
+
+	// &::after {
+	// 	content: "";
+	// 	visibility: hidden;
+	// 	clip-path: url(../../assets/checkbox-on-kaios-2.5.3.svg#checkbox);
+	// }
+
+	// clip-path: url(../../assets/checkbox-off-kaios-2.5.3.svg#checkbox);
+
+	// &.on {
+	// 	clip-path: url(../../assets/checkbox-on-kaios-2.5.3.svg#checkbox);
+	// }
+
+	&::after {
+		content: "check-off";
+	}
+
+	&.on {
+		&::after {
+			content: "check-on";
+		}
+	}
+}

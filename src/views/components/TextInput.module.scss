@@ -1,0 +1,45 @@
+.text_input {
+	padding: 10px;
+
+	label {
+		padding-bottom: 5px;
+		display: block;
+		color: rgb(133, 133, 133);
+
+		font-size: 13px;
+	}
+
+	&.invalid {
+		label {
+			color: #df3f40;
+		}
+	}
+
+	input {
+		display: block;
+		width: 100%;
+		box-sizing: border-box;
+		line-height: 36px;
+		padding: 0 5px;
+		border: 1px solid rgb(133, 133, 133);
+		border-radius: 2px;
+		background-color: white;
+		&:focus {
+			outline: none;
+		}
+
+		font-size: 17px;
+	}
+
+	&.focused {
+		background-color: var(--accent);
+
+		label {
+			color: white;
+		}
+
+		&.invalid {
+			background-color: #df3f40;
+		}
+	}
+}

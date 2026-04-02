@@ -1,0 +1,489 @@
+import type { ITelegramClient } from '../../client.types.js'
+import type { UploadFileLike } from '../../types/files/utils.js'
+import type { InputMediaLike } from '../../types/media/input-media/types.js'
+
+import { parseFileId, tdFileId } from '@mtcute/file-id'
+import Long from 'long'
+import { tl } from '../../../tl/index.js'
+import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { isUploadedFile } from '../../types/files/uploaded-file.js'
+import { inputTextToTl } from '../../types/misc/entities.js'
+import { fileIdToInputDocument, fileIdToInputPhoto } from '../../utils/convert-file-id.js'
+import { normalizeDate } from '../../utils/misc-utils.js'
+import { encodeWaveform } from '../../utils/voice-utils.js'
+import { _normalizeInputText } from '../misc/normalize-text.js'
+import { resolvePeer } from '../users/resolve-peer.js'
+
+import { _normalizeInputFile } from './normalize-input-file.js'
+import { uploadFile } from './upload-file.js'
+
+/**
+ * Normalize an {@link InputMediaLike} to `InputMedia`,
+ * uploading the file if needed.
+ */
+export async function _normalizeInputMedia(
+  client: ITelegramClient,
+  media: InputMediaLike,
+  params: {
+    progressCallback?: (uploaded: number, total: number) => void
+    uploadPeer?: tl.TypeInputPeer
+    abortSignal?: AbortSignal
+    businessConnectionId?: string
+  } = {},
+  uploadMedia = false,
+): Promise<tl.TypeInputMedia> {
+  // my condolences to those poor souls who are going to maintain this (myself included)
+
+  // thanks to @pacificescape for pointing out messages.uploadMedia method
+
+  if (tl.isAnyInputMedia(media)) {
+    // make sure the peers in the media are correctly resolved (i.e. mtcute.* ones are replaced with proper ones)
+    switch (media._) {
+      case 'inputMediaStory':
+        return {
+          ...media,
+          peer: await resolvePeer(client, media.peer),
+        }
+    }
+
+    return media
+  }
+
+  if (media.type === 'venue') {
+    return {
+      _: 'inputMediaVenue',
+      geoPoint: {
+        _: 'inputGeoPoint',
+        lat: media.latitude,
+        long: media.longitude,
+      },
+      title: media.title,
+      address: media.address,
+      provider: media.source?.provider ?? '',
+      venueId: media.source?.id ?? '',
+      venueType: media.source?.type ?? '',
+    }
+  }
+
+  if (media.type === 'geo') {
+    return {
+      _: 'inputMediaGeoPoint',
+      geoPoint: {
+        _: 'inputGeoPoint',
+        lat: media.latitude,
+        long: media.longitude,
+      },
+    }
+  }
+
+  if (media.type === 'geo_live') {
+    return {
+      _: 'inputMediaGeoLive',
+      geoPoint: {
+        _: 'inputGeoPoint',
+        lat: media.latitude,
+        long: media.longitude,
+      },
+      stopped: media.stopped,
+      heading: media.heading,
+      period: media.period,
+      proximityNotificationRadius: media.proximityNotificationRadius,
+    }
+  }
+
+  if (media.type === 'dice') {
+    return {
+      _: 'inputMediaDice',
+      emoticon: media.emoji,
+    }
+  }
+
+  if (media.type === 'contact') {
+    return {
+      _: 'inputMediaContact',
+      phoneNumber: media.phone,
+      firstName: media.firstName,
+      lastName: media.lastName ?? '',
+      vcard: media.vcard ?? '',
+    }
+  }
+
+  if (media.type === 'game') {
+    return {
+      _: 'inputMediaGame',
+      id:
+                typeof media.game === 'string'
+                  ? {
+                      _: 'inputGameShortName',
+                      botId: { _: 'inputUserSelf' },
+                      shortName: media.game,
+                    }
+                  : media.game,
+    }
+  }
+
+  if (media.type === 'invoice') {
+    return {
+      _: 'inputMediaInvoice',
+      title: media.title,
+      description: media.description,
+      photo:
+        typeof media.photo === 'string'
+          ? {
+              _: 'inputWebDocument',
+              url: media.photo,
+              mimeType: 'image/jpeg',
+              size: 0,
+              attributes: [],
+            }
+          : media.photo,
+      invoice: media.invoice,
+      payload: media.payload,
+      provider: media.token,
+      providerData: {
+        _: 'dataJSON',
+        data: JSON.stringify(media.providerData),
+      },
+      startParam: media.startParam,
+      extendedMedia: media.extendedMedia
+        ? await _normalizeInputMedia(client, media.extendedMedia, params)
+        : undefined,
+    }
+  }
+
+  if (media.type === 'poll' || media.type === 'quiz') {
+    // eslint-disable-next-line ts/await-thenable
+    const answers: tl.TypePollAnswer[] = await Promise.all(media.answers.map((ans) => {
+      if (typeof ans === 'string') return { _: 'inputPollAnswer', text: inputTextToTl(ans) }
+      if (tl.isAnyPollAnswer(ans)) return ans
+      if ('media' in ans && ans.media) {
+        return _normalizeInputMedia(client, ans.media, params).then(m => ({
+          _: 'inputPollAnswer' as const,
+          text: inputTextToTl(ans.text),
+          media: m,
+        }))
+      }
+
+      return {
+        _: 'inputPollAnswer' as const,
+        text: inputTextToTl(ans.text),
+      }
+    }))
+
+    let correct: number[] | undefined
+    let solution: string | undefined
+    let solutionEntities: tl.TypeMessageEntity[] | undefined
+
+    if (media.type === 'quiz') {
+      let input = media.correct
+      if (!Array.isArray(input)) input = [input]
+      correct = input
+
+      if (media.solution) {
+        [solution, solutionEntities] = await _normalizeInputText(client, media.solution)
+      }
+    }
+
+    return {
+      _: 'inputMediaPoll',
+      poll: {
+        _: 'poll',
+        closed: media.closed,
+        id: Long.ZERO,
+        publicVoters: media.public,
+        multipleChoice: media.multiple,
+        quiz: media.type === 'quiz',
+        question: inputTextToTl(media.question),
+        answers,
+        closePeriod: media.closePeriod,
+        closeDate: normalizeDate(media.closeDate),
+        hash: Long.ZERO,
+      },
+      correctAnswers: correct,
+      solution,
+      solutionEntities,
+    }
+  }
+
+  if (media.type === 'story') {
+    return {
+      _: 'inputMediaStory',
+      peer: await resolvePeer(client, media.peer),
+      id: media.id,
+    }
+  }
+
+  if (media.type === 'webpage') {
+    return {
+      _: 'inputMediaWebPage',
+      forceLargeMedia: media.size === 'large',
+      forceSmallMedia: media.size === 'small',
+      optional: !media.required,
+      url: media.url,
+    }
+  }
+
+  if (media.type === 'paid') {
+    let medias: tl.TypeInputMedia[]
+
+    if (Array.isArray(media.media)) {
+      medias = await Promise.all(media.media.map(m => _normalizeInputMedia(client, m, params)))
+    } else {
+      medias = [await _normalizeInputMedia(client, media.media, params)]
+    }
+
+    return {
+      _: 'inputMediaPaidMedia',
+      starsAmount: Long.isLong(media.starsAmount) ? media.starsAmount : Long.fromNumber(media.starsAmount),
+      extendedMedia: medias,
+      payload: media.payload,
+    }
+  }
+
+  if (media.type === 'todo') {
+    return {
+      _: 'inputMediaTodo',
+      todo: {
+        _: 'todoList',
+        othersCanAppend: media.othersCanAppend,
+        othersCanComplete: media.othersCanComplete,
+        title: inputTextToTl(media.title),
+        list: media.items.map((it, idx) => ({
+          _: 'todoItem',
+          id: idx,
+          title: inputTextToTl(it),
+        })),
+      },
+    }
+  }
+
+  let inputFile: tl.TypeInputFile | undefined
+  let thumb: tl.TypeInputFile | undefined
+  let mime = 'application/octet-stream'
+
+  const upload = async (file: UploadFileLike): Promise<void> => {
+    let sendMime
+
+    if (media.type === 'sticker') {
+      sendMime = media.isAnimated ? 'application/x-tgsticker' : 'image/webp'
+    } else {
+      sendMime = media.fileMime
+    }
+
+    const uploaded = await uploadFile(client, {
+      file,
+      progressCallback: params.progressCallback,
+      fileName: media.fileName,
+      fileMime: sendMime,
+      fileSize: media.fileSize,
+      requireFileSize: media.type === 'photo',
+      requireExtension: media.type === 'photo',
+      abortSignal: params.abortSignal,
+    })
+    inputFile = uploaded.inputFile
+    mime = uploaded.mime
+  }
+
+  let videoCover: tl.TypeInputPhoto | undefined
+  if (media.type === 'video' && media.cover) {
+    const inputMedia = await _normalizeInputMedia(client, media.cover, params)
+    assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaPhoto')
+
+    videoCover = inputMedia.id
+  }
+
+  const uploadPeer = params.uploadPeer ?? { _: 'inputPeerSelf' }
+
+  const uploadMediaIfNeeded = async (inputMedia: tl.TypeInputMedia, photo: boolean): Promise<tl.TypeInputMedia> => {
+    if (!uploadMedia) return inputMedia
+
+    const res = await client.call({
+      _: 'messages.uploadMedia',
+      peer: uploadPeer,
+      media: inputMedia,
+      businessConnectionId: params.businessConnectionId,
+    }, { abortSignal: params.abortSignal })
+
+    if (photo) {
+      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
+      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+
+      return {
+        _: 'inputMediaPhoto',
+        id: {
+          _: 'inputPhoto',
+          id: res.photo.id,
+          accessHash: res.photo.accessHash,
+          fileReference: res.photo.fileReference,
+        },
+        ttlSeconds: media.ttlSeconds,
+        spoiler: media.type === 'video' && media.spoiler,
+      }
+    }
+    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
+    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+
+    return {
+      _: 'inputMediaDocument',
+      id: {
+        _: 'inputDocument',
+        id: res.document.id,
+        accessHash: res.document.accessHash,
+        fileReference: res.document.fileReference,
+      },
+      ttlSeconds: media.ttlSeconds,
+      spoiler: media.type === 'video' && media.spoiler,
+      videoCover,
+      videoTimestamp: media.type === 'video' ? media.timestamp : undefined,
+    }
+  }
+
+  const input = media.file
+
+  if (tdFileId.isFileIdLike(input)) {
+    const spoiler = (media.type === 'video' || media.type === 'photo') && media.spoiler
+    if (typeof input === 'string' && input.match(/^https?:\/\//)) {
+      return uploadMediaIfNeeded(
+        {
+          _: media.type === 'photo' ? 'inputMediaPhotoExternal' : 'inputMediaDocumentExternal',
+          url: input,
+          ttlSeconds: media.ttlSeconds,
+          spoiler,
+        },
+        media.type === 'photo',
+      )
+    } else if (typeof input === 'string' && input.match(/^file:/)) {
+      await upload(input.substring(5))
+    } else {
+      const parsed = typeof input === 'string' ? parseFileId(input) : input
+
+      if (parsed.location._ === 'photo') {
+        return {
+          _: 'inputMediaPhoto',
+          id: fileIdToInputPhoto(parsed),
+          ttlSeconds: media.ttlSeconds,
+          spoiler,
+        }
+      } else if (parsed.location._ === 'web') {
+        return uploadMediaIfNeeded(
+          {
+            _:
+                            parsed.type === tdFileId.FileType.Photo
+                              ? 'inputMediaPhotoExternal'
+                              : 'inputMediaDocumentExternal',
+            url: parsed.location.url,
+            ttlSeconds: media.ttlSeconds,
+            spoiler,
+          },
+          parsed.type === tdFileId.FileType.Photo,
+        )
+      }
+
+      return {
+        _: 'inputMediaDocument',
+        id: fileIdToInputDocument(parsed),
+        ttlSeconds: media.ttlSeconds,
+        spoiler,
+      }
+    }
+  } else if (typeof input === 'object' && tl.isAnyInputMedia(input)) {
+    return input
+  } else if (isUploadedFile(input)) {
+    inputFile = input.inputFile
+    mime = input.mime
+  } else if (typeof input === 'object' && tl.isAnyInputFile(input)) {
+    inputFile = input
+  } else {
+    await upload(input)
+  }
+
+  if (!inputFile) throw new Error('should not happen')
+
+  if (media.type === 'photo') {
+    return uploadMediaIfNeeded(
+      {
+        _: 'inputMediaUploadedPhoto',
+        file: inputFile,
+        ttlSeconds: media.ttlSeconds,
+        spoiler: media.spoiler,
+      },
+      true,
+    )
+  }
+
+  if ('thumb' in media && media.thumb) {
+    thumb = await _normalizeInputFile(client, media.thumb, { abortSignal: params.abortSignal })
+  }
+
+  const attributes: tl.TypeDocumentAttribute[] = []
+
+  if (media.type !== 'voice') {
+    attributes.push({
+      _: 'documentAttributeFilename',
+      fileName: media.fileName || (inputFile._ === 'inputFileStoryDocument' ? 'story' : inputFile.name),
+    })
+  }
+
+  if (media.type === 'video') {
+    const attr: tl.RawDocumentAttributeVideo = {
+      _: 'documentAttributeVideo',
+      duration: media.duration || 0,
+      w: media.width || 0,
+      h: media.height || 0,
+      supportsStreaming: media.supportsStreaming,
+      roundMessage: media.isRound,
+    }
+
+    if (media.isRound) {
+      // for whatever reason, telegram won't accept round messages if w/h/duration are 0,
+      // but will accept them (and fix the values) if they're not 0. :woozy:
+      if (attr.w === 0) attr.w = 1
+      if (attr.h === 0) attr.h = 1
+      if (attr.duration === 0) attr.duration = 1
+    }
+
+    attributes.push(attr)
+
+    if (media.isAnimated) {
+      attributes.push({ _: 'documentAttributeAnimated' })
+    }
+  }
+
+  if (media.type === 'audio' || media.type === 'voice') {
+    attributes.push({
+      _: 'documentAttributeAudio',
+      voice: media.type === 'voice',
+      duration: media.duration || 0,
+      title: media.type === 'audio' ? media.title : undefined,
+      performer: media.type === 'audio' ? media.performer : undefined,
+      waveform: media.type === 'voice' && media.waveform ? encodeWaveform(media.waveform) : undefined,
+    })
+  }
+
+  if (media.type === 'sticker') {
+    attributes.push({
+      _: 'documentAttributeSticker',
+      stickerset: {
+        _: 'inputStickerSetEmpty',
+      },
+      alt: media.alt ?? '',
+    })
+  }
+
+  return uploadMediaIfNeeded(
+    {
+      _: 'inputMediaUploadedDocument',
+      nosoundVideo: media.type === 'video' && !media.isAnimated,
+      forceFile: media.type === 'document',
+      file: inputFile,
+      thumb,
+      mimeType: mime,
+      attributes,
+      ttlSeconds: media.ttlSeconds,
+      spoiler: media.type === 'video' && media.spoiler,
+      videoTimestamp: media.type === 'video' ? media.timestamp : undefined,
+      videoCover,
+    },
+    false,
+  )
+}

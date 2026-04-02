@@ -1,0 +1,109 @@
+* {
+	font-family: Roboto, roboto, "Open Sans", emoji, "Noto Sans Symbols 2", sans-serif;
+	box-sizing: border-box;
+
+	background-repeat: no-repeat;
+}
+
+@font-face {
+	font-family: emoji;
+
+	@if $cloudphone {
+		src: url("https://cyan-2048.github.io/kaigram-assets/AppleColorEmoji.ttf");
+	} @else {
+		src: url("./assets/Twemoji Mozilla.ttf");
+	}
+
+	font-display: swap;
+}
+
+@if $cloudphone {
+	@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+}
+
+:root {
+	--accent: #1c96c3;
+	--accent-dark: #0a323f;
+}
+
+html,
+body {
+	padding: 0;
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: white;
+}
+
+:focus {
+	outline: none;
+}
+
+html {
+	font-size: 17px;
+	line-height: 1.445;
+	color: #323232;
+}
+
+@font-face {
+	font-family: tgico;
+	src: url(./assets/tgico.ttf?ix597f) format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: block;
+}
+
+@font-face {
+	font-family: "gaia-icons";
+	src: url(./assets/gaia-icons.ttf) format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-variant-numeric: nominal;
+}
+
+.tgico {
+	font-family: tgico !important;
+	font-style: normal;
+	font-weight: 400;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+	float: left;
+}
+
+/* noto-sans-symbols-2-regular - symbols */
+@font-face {
+	font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+	font-family: "Noto Sans Symbols 2";
+	font-style: normal;
+	font-weight: 400;
+	src: url("./assets/NotoSansSymbols-BrailleSubset.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+.LOADING::before {
+	content: "";
+	background-image: url(/icon112.png);
+	position: absolute;
+	top: 50%;
+	left: 50%;
+
+	background-repeat: no-repeat;
+	background-size: contain;
+	transform: translate(-50%, -50%);
+}
+
+.LOADING {
+	position: fixed;
+	bottom: 0;
+	height: 320px;
+	max-height: 320px;
+	width: 100vw;
+	background-color: #000;
+	color: white;
+	z-index: 999;
+
+	&::before {
+		width: 84.5px;
+		height: 84.5px;
+	}
+}

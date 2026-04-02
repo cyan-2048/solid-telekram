@@ -1,0 +1,119 @@
+.photo {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: black;
+}
+
+.thumb {
+	filter: blur(12px);
+	position: absolute;
+}
+
+.spinner {
+	height: 40px;
+	width: 40px;
+	position: absolute;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 2;
+}
+
+.thumb_container {
+	background-color: black;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: calc(100vh - 30px);
+	width: 100vw;
+
+	> img,
+	.thumb {
+		height: 100%;
+		width: 100%;
+		object-fit: contain;
+	}
+}
+
+.zoom {
+	@extend .photo;
+	z-index: 101;
+	pointer-events: none;
+}
+
+.option {
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+	}
+}
+
+.info_view {
+	@extend .container;
+	position: fixed;
+
+	background-color: white;
+
+	.header {
+		line-height: 28px;
+		color: #323232;
+		padding: 0 10px;
+		text-align: center;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 17px;
+		font-weight: 300;
+		height: 28px;
+	}
+
+	.description_container {
+		overflow: auto;
+		height: calc(100vh - 30px - 28px);
+	}
+
+	.description {
+		padding: 10px 8px;
+		overflow: hidden;
+	}
+
+	.detail_title {
+		color: rgb(0, 0, 0);
+		font-size: 17px;
+		font-weight: 400;
+	}
+
+	.detail_description {
+		color: rgb(106, 106, 106);
+		font-size: 14px;
+		font-weight: 400;
+		margin-bottom: 10px;
+
+		word-break: break-all;
+
+		&:last-child {
+			margin-bottom: 3px;
+		}
+	}
+}
+
+.softkeys {
+	background-color: rgba(0, 0, 0, 0.5) !important;
+
+	div {
+		transition: 0.2s linear opacity;
+	}
+}

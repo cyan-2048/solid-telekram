@@ -1,0 +1,100 @@
+.ispinner {
+	position: relative;
+	width: 20px;
+	height: 20px;
+}
+
+.ispinner .ispinner_blade {
+	position: absolute;
+	top: 6.5px;
+	left: 8.5px;
+	width: 2.5px;
+	height: 6.5px;
+	background-color: white;
+	border-radius: 1.25px;
+	animation: iSpinnerBlade 1s linear infinite;
+	will-change: opacity;
+}
+
+.ispinner .ispinner_blade:nth-child(1) {
+	transform: rotate3d(0, 0, 1, 45deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1.625s;
+}
+.ispinner .ispinner_blade:nth-child(2) {
+	transform: rotate3d(0, 0, 1, 90deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1.5s;
+}
+.ispinner .ispinner_blade:nth-child(3) {
+	transform: rotate3d(0, 0, 1, 135deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1.375s;
+}
+.ispinner .ispinner_blade:nth-child(4) {
+	transform: rotate3d(0, 0, 1, 180deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1.25s;
+}
+.ispinner .ispinner_blade:nth-child(5) {
+	transform: rotate3d(0, 0, 1, 225deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1.125s;
+}
+.ispinner .ispinner_blade:nth-child(6) {
+	transform: rotate3d(0, 0, 1, 270deg) translate3d(0, -6.5px, 0);
+	animation-delay: -1s;
+}
+.ispinner .ispinner_blade:nth-child(7) {
+	transform: rotate3d(0, 0, 1, 315deg) translate3d(0, -6.5px, 0);
+	animation-delay: -0.875s;
+}
+.ispinner .ispinner_blade:nth-child(8) {
+	transform: rotate3d(0, 0, 1, 360deg) translate3d(0, -6.5px, 0);
+	animation-delay: -0.75s;
+}
+
+.ispinner.ispinner_large {
+	width: 35px;
+	height: 35px;
+}
+
+.ispinner.ispinner_large .ispinner_blade {
+	top: 11.5px;
+	left: 15px;
+	width: 5px;
+	height: 12px;
+	border-radius: 2.5px;
+}
+
+.ispinner.ispinner_large .ispinner_blade:nth-child(1) {
+	transform: rotate3d(0, 0, 1, 45deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(2) {
+	transform: rotate3d(0, 0, 1, 90deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(3) {
+	transform: rotate3d(0, 0, 1, 135deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(4) {
+	transform: rotate3d(0, 0, 1, 180deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(5) {
+	transform: rotate3d(0, 0, 1, 225deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(6) {
+	transform: rotate3d(0, 0, 1, 270deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(7) {
+	transform: rotate3d(0, 0, 1, 315deg) translate3d(0, -11.5px, 0);
+}
+.ispinner.ispinner_large .ispinner_blade:nth-child(8) {
+	transform: rotate3d(0, 0, 1, 360deg) translate3d(0, -11.5px, 0);
+}
+
+@keyframes iSpinnerBlade {
+	0% {
+		opacity: 0.85;
+	}
+	50% {
+		opacity: 0.25;
+	}
+	100% {
+		opacity: 0.25;
+	}
+}

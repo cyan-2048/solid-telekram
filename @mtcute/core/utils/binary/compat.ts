@@ -1,0 +1,501 @@
+import type { TlReaderMap } from '@mtcute/tl-runtime'
+import type { tlCompat } from '../../tl/compat/index.js'
+import { Bytes, read } from '@fuman/io'
+import { assert, objectEntries } from '@fuman/utils'
+import { TlBinaryReader } from '@mtcute/tl-runtime'
+import Long from 'long'
+import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
+import { __tlReaderMap } from '../../tl/binary/reader.js'
+import { __tlReaderMapCompat } from '../../tl/compat/reader.js'
+import { tl } from '../../tl/index.js'
+
+function replaceType<
+  Input extends tlCompat.TlObject,
+  NewTypeName extends tl.TlObject['_'],
+>(obj: Input, type: NewTypeName): Omit<Input, '_'> & { _: NewTypeName } {
+  // modifying the object is safe because we have created the object ourselves inside the original reader fn
+  return Object.assign(obj, { _: type })
+}
+
+function dropFields<T extends tlCompat.TlObject, const Fields extends (keyof T)[]>(
+  obj: T,
+  fields: Fields,
+): Omit<T, Fields[number]> {
+  for (let i = 0; i < fields.length; i++) {
+    delete obj[fields[i]]
+  }
+  return obj
+}
+
+function mapCompatStarGiftAttribute(obj: tlCompat.TypeStarGiftAttribute): tl.TypeStarGiftAttribute {
+  switch (obj._) {
+    case 'starGiftAttributeBackdrop_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributeBackdrop',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    case 'starGiftAttributePattern_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributePattern',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    case 'starGiftAttributeModel_layer221':
+      return {
+        ...dropFields(obj, ['rarityPermille']),
+        _: 'starGiftAttributeModel',
+        rarity: { _: 'starGiftAttributeRarity', permille: obj.rarityPermille },
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatStarGift(obj: tlCompat.TypeStarGift): tl.TypeStarGift {
+  switch (obj._) {
+    case 'starGiftUnique_layer197':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        ownerId: obj.ownerId ? { _: 'peerUser', userId: obj.ownerId } : undefined,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+      }
+    case 'starGiftUnique_layer198':
+    case 'starGiftUnique_layer202':
+    case 'starGiftUnique_layer206':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+      }
+    case 'starGiftUnique_layer210':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+        resellAmount: obj.resellStars
+          ? [{
+              _: 'starsAmount',
+              amount: obj.resellStars,
+              nanos: 0,
+            }]
+          : undefined,
+      }
+    case 'starGiftUnique_layer211':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        giftId: Long.ZERO,
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+      }
+    case 'starGiftUnique_layer214':
+    case 'starGiftUnique_layer218':
+    case 'starGiftUnique_layer221':
+      return {
+        ...obj,
+        _: 'starGiftUnique',
+        attributes: obj.attributes.map(mapCompatStarGiftAttribute),
+      }
+    case 'starGift_layer202':
+    case 'starGift_layer206':
+    case 'starGift_layer209':
+    case 'starGift_layer211':
+    case 'starGift_layer216':
+    case 'starGift_layer218':
+      return replaceType(obj, 'starGift')
+    default:
+      return obj
+  }
+}
+
+function mapCompatEmojiStatus(obj: tlCompat.TypeEmojiStatus): tl.TypeEmojiStatus {
+  switch (obj._) {
+    case 'emojiStatus_layer197':
+      return {
+        ...obj,
+        _: 'emojiStatus',
+        documentId: obj.documentId,
+      }
+    case 'emojiStatusUntil_layer214':
+      return {
+        _: 'emojiStatus',
+        documentId: obj.documentId,
+        until: obj.until,
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatPoll(obj: tlCompat.TypePoll): tl.TypePoll {
+  switch (obj._) {
+    case 'poll_layer223':
+      return {
+        ...obj,
+        _: 'poll',
+        hash: Long.ZERO,
+        // answers are mapped at runtime by wrapped compat readers
+        answers: obj.answers as tl.TypePollAnswer[],
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatMessageMedia(obj: tlCompat.TypeMessageMedia): tl.TypeMessageMedia {
+  switch (obj._) {
+    case 'messageMediaDocument_layer197':
+      return replaceType(obj, 'messageMediaDocument')
+    case 'messageMediaDice_layer220':
+      return replaceType(obj, 'messageMediaDice')
+    case 'messageMediaPhoto_layer223':
+      return replaceType(obj, 'messageMediaPhoto')
+    case 'messageMediaPoll_layer223':
+      return {
+        _: 'messageMediaPoll',
+        poll: mapCompatPoll(obj.poll),
+        results: obj.results as tl.TypePollResults,
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessageAction {
+  switch (obj._) {
+    case 'messageActionStarGiftUnique_layer197':
+    case 'messageActionStarGiftUnique_layer202':
+    case 'messageActionStarGiftUnique_layer214':
+    case 'messageActionStarGiftUnique_layer221':
+      return {
+        ...obj,
+        _: 'messageActionStarGiftUnique',
+        gift: mapCompatStarGift(obj.gift),
+      }
+    case 'messageActionStarGiftUnique_layer210':
+      return {
+        ...obj,
+        _: 'messageActionStarGiftUnique',
+        gift: mapCompatStarGift(obj.gift),
+        resaleAmount: obj.resaleStars
+          ? {
+              _: 'starsAmount',
+              amount: obj.resaleStars,
+              nanos: 0,
+            }
+          : undefined,
+      }
+    case 'messageActionStarGift_layer197':
+    case 'messageActionStarGift_layer211':
+    case 'messageActionStarGift_layer216':
+    case 'messageActionStarGift_layer218':
+      return {
+        ...obj,
+        _: 'messageActionStarGift',
+        gift: mapCompatStarGift(obj.gift),
+      }
+    case 'messageActionPaidMessagesPrice_layer203':
+      return replaceType(obj, 'messageActionPaidMessagesPrice')
+    case 'messageActionSetChatTheme_layer211':
+      return {
+        _: 'messageActionSetChatTheme',
+        theme: {
+          _: 'chatTheme',
+          emoticon: obj.emoticon,
+        },
+      }
+    case 'messageActionGiftCode_layer216':
+      return {
+        ...obj,
+        _: 'messageActionGiftCode',
+        days: obj.months / 30,
+      }
+    case 'messageActionGiftPremium_layer216':
+      return {
+        ...obj,
+        _: 'messageActionGiftPremium',
+        days: obj.months / 30,
+      }
+    default:
+      return obj
+  }
+}
+
+function mapMessageReplyHeader(obj: tlCompat.TypeMessageReplyHeader): tl.TypeMessageReplyHeader {
+  switch (obj._) {
+    case 'messageReplyHeader_layer206':
+      return {
+        ...obj,
+        _: 'messageReplyHeader',
+        replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
+      }
+    case 'messageReplyHeader_layer223':
+      return {
+        ...obj,
+        _: 'messageReplyHeader',
+        replyMedia: obj.replyMedia ? mapCompatMessageMedia(obj.replyMedia) : undefined,
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
+  switch (obj._) {
+    case 'message_layer199':
+    case 'message_layer204':
+    case 'message_layer216':
+    case 'message_layer220':
+    case 'message_layer222':
+      return {
+        ...obj,
+        _: 'message',
+        media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
+        replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
+      }
+    case 'messageService_layer204':
+      return {
+        ...obj,
+        _: 'messageService',
+        action: mapCompatMessageAction(obj.action),
+        replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
+      }
+    default:
+      return obj
+  }
+}
+
+function mapCompatKeyboardButton(obj: tlCompat.TypeKeyboardButton): tl.TypeKeyboardButton {
+  switch (obj._) {
+    case 'keyboardButton_layer221': return replaceType(obj, 'keyboardButton')
+    case 'keyboardButtonUrl_layer221': return replaceType(obj, 'keyboardButtonUrl')
+    case 'keyboardButtonCallback_layer221': return replaceType(obj, 'keyboardButtonCallback')
+    case 'keyboardButtonRequestPhone_layer221': return replaceType(obj, 'keyboardButtonRequestPhone')
+    case 'keyboardButtonRequestGeoLocation_layer221': return replaceType(obj, 'keyboardButtonRequestGeoLocation')
+    case 'keyboardButtonSwitchInline_layer221': return replaceType(obj, 'keyboardButtonSwitchInline')
+    case 'keyboardButtonGame_layer221': return replaceType(obj, 'keyboardButtonGame')
+    case 'keyboardButtonBuy_layer221': return replaceType(obj, 'keyboardButtonBuy')
+    case 'keyboardButtonUrlAuth_layer221': return replaceType(obj, 'keyboardButtonUrlAuth')
+    case 'inputKeyboardButtonUrlAuth_layer221': return replaceType(obj, 'inputKeyboardButtonUrlAuth')
+    case 'keyboardButtonRequestPoll_layer221': return replaceType(obj, 'keyboardButtonRequestPoll')
+    case 'inputKeyboardButtonUserProfile_layer221': return replaceType(obj, 'inputKeyboardButtonUserProfile')
+    case 'keyboardButtonUserProfile_layer221': return replaceType(obj, 'keyboardButtonUserProfile')
+    case 'keyboardButtonWebView_layer221': return replaceType(obj, 'keyboardButtonWebView')
+    case 'keyboardButtonSimpleWebView_layer221': return replaceType(obj, 'keyboardButtonSimpleWebView')
+    case 'keyboardButtonRequestPeer_layer221': return replaceType(obj, 'keyboardButtonRequestPeer')
+    case 'inputKeyboardButtonRequestPeer_layer221': return replaceType(obj, 'inputKeyboardButtonRequestPeer')
+    case 'keyboardButtonCopy_layer221': return replaceType(obj, 'keyboardButtonCopy')
+    default: return obj
+  }
+}
+
+function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
+  switch (obj._) {
+    case 'starGiftUnique_layer197':
+    case 'starGiftUnique_layer198':
+    case 'starGiftUnique_layer202':
+    case 'starGiftUnique_layer206':
+    case 'starGiftUnique_layer210':
+    case 'starGiftUnique_layer211':
+    case 'starGiftUnique_layer214':
+    case 'starGiftUnique_layer218':
+    case 'starGiftUnique_layer221':
+    case 'starGift_layer202':
+    case 'starGift_layer206':
+    case 'starGift_layer209':
+    case 'starGift_layer211':
+    case 'starGift_layer216':
+    case 'starGift_layer218':
+      return mapCompatStarGift(obj)
+    case 'emojiStatus_layer197':
+    case 'emojiStatusUntil_layer214':
+      return mapCompatEmojiStatus(obj)
+    case 'messageMediaDocument_layer197':
+    case 'messageMediaDice_layer220':
+    case 'messageMediaPhoto_layer223':
+    case 'messageMediaPoll_layer223':
+      return mapCompatMessageMedia(obj)
+    case 'channelFull_layer197':
+    case 'channelFull_layer204':
+      return replaceType(obj, 'channelFull')
+    case 'messageActionStarGift_layer197':
+    case 'messageActionStarGift_layer211':
+    case 'messageActionStarGiftUnique_layer197':
+    case 'messageActionStarGiftUnique_layer202':
+    case 'messageActionStarGiftUnique_layer210':
+    case 'messageActionPaidMessagesPrice_layer203':
+    case 'messageActionSetChatTheme_layer211':
+    case 'messageActionStarGiftUnique_layer214':
+    case 'messageActionGiftCode_layer216':
+    case 'messageActionGiftPremium_layer216':
+    case 'messageActionStarGift_layer216':
+    case 'messageActionStarGift_layer218':
+    case 'messageActionStarGiftUnique_layer221':
+      return mapCompatMessageAction(obj)
+    case 'userFull_layer199':
+      return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
+    case 'userFull_layer200':
+    case 'userFull_layer209':
+    case 'userFull_layer210':
+    case 'userFull_layer211':
+    case 'userFull_layer214':
+    case 'userFull_layer223':
+      return replaceType(obj, 'userFull')
+    case 'user_layer199':
+    case 'user_layer216':
+      return {
+        ...obj,
+        _: 'user',
+        storiesMaxId: obj.storiesMaxId ? { _: 'recentStory', maxId: obj.storiesMaxId } : undefined,
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'channel_layer199':
+    case 'channel_layer203':
+    case 'channel_layer216':
+      return {
+        ...obj,
+        _: 'channel',
+        storiesMaxId: obj.storiesMaxId ? { _: 'recentStory', maxId: obj.storiesMaxId } : undefined,
+        emojiStatus: obj.emojiStatus ? mapCompatEmojiStatus(obj.emojiStatus) : undefined,
+      }
+    case 'channelFull_layer211':
+      return replaceType(obj, 'channelFull')
+    case 'phoneCallDiscardReasonAllowGroupCall_layer202':
+      // removed constructor in favor of phoneCallDiscardReasonMigrateConferenceCall,
+      // which requires extra info we don't have
+      return { _: 'phoneCallDiscardReasonMissed' }
+    case 'message_layer199':
+    case 'message_layer204':
+    case 'message_layer216':
+    case 'message_layer220':
+    case 'message_layer222':
+    case 'messageService_layer204':
+      return mapCompatMessage(obj)
+    case 'messageReplyHeader_layer206':
+    case 'messageReplyHeader_layer223':
+      return mapMessageReplyHeader(obj)
+    case 'storyItem_layer210':
+    case 'storyItem_layer223':
+      return {
+        ...obj,
+        _: 'storyItem',
+        media: mapCompatMessageMedia(obj.media),
+      }
+    case 'todoCompletion_layer216':
+      return {
+        _: 'todoCompletion',
+        date: obj.date,
+        completedBy: { _: 'peerUser', userId: obj.completedBy },
+        id: obj.id,
+      }
+    case 'premiumGiftOption_layer199':
+      // can only be present in userFull_layer199, but we strip the field containing that
+      return null!
+    case 'webPageAttributeStarGiftAuction_layer218':
+      return {
+        _: 'webPageAttributeStarGiftAuction',
+        gift: mapCompatStarGift(obj.gift),
+        endDate: obj.endDate,
+      }
+    case 'starGiftAttributeBackdrop_layer221':
+    case 'starGiftAttributePattern_layer221':
+    case 'starGiftAttributeModel_layer221':
+      return mapCompatStarGiftAttribute(obj)
+    case 'chatParticipant_layer222':
+      return replaceType(obj, 'chatParticipant')
+    case 'chatParticipantCreator_layer222':
+      return replaceType(obj, 'chatParticipantCreator')
+    case 'chatParticipantAdmin_layer222':
+      return replaceType(obj, 'chatParticipantAdmin')
+    case 'pollResults_layer223':
+      return replaceType(obj, 'pollResults') as unknown as tl.RawPollResults
+    case 'pollAnswerVoters_layer223':
+      return replaceType(obj, 'pollAnswerVoters')
+    case 'poll_layer223':
+      return mapCompatPoll(obj)
+    case 'pollAnswer_layer223':
+      return replaceType(obj, 'pollAnswer')
+    case 'keyboardButton_layer221':
+    case 'keyboardButtonUrl_layer221':
+    case 'keyboardButtonCallback_layer221':
+    case 'keyboardButtonRequestPhone_layer221':
+    case 'keyboardButtonRequestGeoLocation_layer221':
+    case 'keyboardButtonSwitchInline_layer221':
+    case 'keyboardButtonGame_layer221':
+    case 'keyboardButtonBuy_layer221':
+    case 'keyboardButtonUrlAuth_layer221':
+    case 'inputKeyboardButtonUrlAuth_layer221':
+    case 'keyboardButtonRequestPoll_layer221':
+    case 'inputKeyboardButtonUserProfile_layer221':
+    case 'keyboardButtonUserProfile_layer221':
+    case 'keyboardButtonWebView_layer221':
+    case 'keyboardButtonSimpleWebView_layer221':
+    case 'keyboardButtonRequestPeer_layer221':
+    case 'inputKeyboardButtonRequestPeer_layer221':
+    case 'keyboardButtonCopy_layer221':
+      return mapCompatKeyboardButton(obj)
+    default:
+      return obj
+  }
+}
+
+function wrapReader(reader: (r: unknown) => unknown) {
+  return (r: unknown) => mapCompatObject(reader(r) as tlCompat.TlObject)
+}
+
+function getCombinedReaderMap(): Record<number, (r: unknown) => unknown> {
+  const ret: Record<number, (r: unknown) => unknown> = {
+    ...__tlReaderMap,
+  }
+
+  for (const [id, reader] of objectEntries(__tlReaderMapCompat)) {
+    ret[id] = wrapReader(reader)
+  }
+
+  return ret
+}
+
+const _combinedReaderMap: TlReaderMap = /* @__PURE__ */ getCombinedReaderMap()
+
+export { _combinedReaderMap as __tlReaderMapWithCompat }
+
+/**
+ * Deserialize a TL object previously serialized with {@link serializeObject},
+ * with backwards compatibility for older versions of the schema.
+ *
+ * > **Note**: only some types from some layers are supported for backward compatibility,
+ * > for the complete list please see [TYPES_FOR_COMPAT](https://github.com/mtcute/mtcute/blob/master/packages/tl/scripts/constants.ts)
+ * > or [compat.tl](https://github.com/mtcute/mtcute/blob/master/packages/tl/data/compat.tl)
+ */
+export function deserializeObjectWithCompat(data: Uint8Array): tl.TlObject {
+  return TlBinaryReader.deserializeObject(_combinedReaderMap, data)
+}
+
+/** Helper function to deserialize a {@link PeersIndex} with backwards compatibility */
+export function deserializePeersIndexWithCompat(data: Uint8Array): PeersIndex {
+  const res = new PeersIndex()
+
+  const bytes = Bytes.from(data)
+
+  const userCount = read.int32le(bytes)
+  for (let i = 0; i < userCount; i++) {
+    const len = read.int32le(bytes)
+    const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+    assert(tl.isAnyUser(obj))
+    res.users.set(obj.id, obj)
+  }
+
+  const chatCount = read.int32le(bytes)
+  for (let i = 0; i < chatCount; i++) {
+    const len = read.int32le(bytes)
+    const obj = deserializeObjectWithCompat(read.exactly(bytes, len))
+    assert(tl.isAnyChat(obj))
+    res.chats.set(obj.id, obj)
+  }
+
+  return res
+}

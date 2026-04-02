@@ -1,0 +1,112 @@
+.room_wrap {
+	display: flex;
+	align-items: end;
+}
+
+.header {
+	background-color: var(--accent);
+	padding: 0 10px;
+	text-align: center;
+
+	border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+
+	height: 42px;
+
+	color: white;
+	line-height: 22.4px;
+	flex: none;
+
+	display: flex;
+	height: 42px;
+
+	flex-direction: row;
+
+	align-items: center;
+
+	width: 100%;
+
+	.avatar {
+		border-radius: 50%;
+		width: 32px;
+		height: 32px;
+		flex: none;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.details {
+		padding-left: 8px;
+
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+
+		white-space: nowrap;
+
+		.top,
+		.bottom {
+			display: flex;
+			width: 100%;
+			align-items: center;
+
+			span {
+				width: 100%;
+				overflow: hidden;
+				line-height: 1.5;
+
+				text-align: left;
+
+				text-overflow: ellipsis;
+			}
+		}
+		.top {
+			flex: 1;
+			line-height: 1;
+			font-size: 16px;
+		}
+
+		.bottom {
+			font-size: 12px;
+			line-height: 12px;
+		}
+	}
+}
+
+.room {
+	max-height: 100%;
+	width: 100%;
+	overflow: hidden;
+
+	scrollbar-width: none;
+
+	&:hover {
+		overflow: auto;
+	}
+}
+
+.wallpaper_image {
+	position: fixed;
+	height: 100vh;
+	width: 100vw;
+	background-position: center;
+	background-attachment: fixed;
+	background-size: 100vw auto;
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
+
+.spinner {
+	height: 100%;
+	width: 100%;
+
+	background-color: rgba(0, 0, 0, 0.2);
+
+	/* filter: drop-shadow(0 0 0.75rem crimson); */
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

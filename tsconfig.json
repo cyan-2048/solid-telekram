@@ -1,0 +1,50 @@
+{
+	"compilerOptions": {
+		"lib": [
+			"DOM",
+			"ES2021",
+			"ES2024.Promise",
+			"DOM.Iterable",
+			"WebWorker",
+			"ESNext.Collection",
+			"ES2023.Array",
+			"ES2022.Object"
+		],
+		"jsx": "preserve",
+		"target": "es6",
+		"noEmit": true,
+		"skipLibCheck": true,
+		"jsxImportSource": "solid-js",
+		"useDefineForClassFields": true,
+
+		/* modules */
+		"module": "ESNext",
+		"moduleDetection": "force",
+		"moduleResolution": "bundler",
+		"verbatimModuleSyntax": true,
+		"resolveJsonModule": true,
+		"allowImportingTsExtensions": true,
+		"noUncheckedSideEffectImports": true,
+
+		/* type checking */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+
+		"paths": {
+			"@globals": ["./src/globals.ts"],
+			"@/*": ["./src/*"],
+			"@mtcute/web": ["./@mtcute/web/index.ts"],
+			"@mtcute/web/*": ["./@mtcute/web/*"],
+
+			"@workers": ["./src/workers/index.ts"],
+			"@helpers": ["./src/helpers.ts"],
+			"@utils": ["./src/utils.ts"],
+			"@ui/*": ["./src/ui/*"],
+			"@proxies": ["./src/lib/proxies/index.ts"],
+			"@stores": ["./src/stores.ts"],
+			"@components/*": ["./src/views/components/*"]
+		}
+	},
+	"include": ["src", "scripts/**/*"]
+}

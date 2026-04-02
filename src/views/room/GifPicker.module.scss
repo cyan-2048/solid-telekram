@@ -1,0 +1,130 @@
+@use "./EmojiPicker.module.scss";
+
+.categories {
+	@extend %categories;
+}
+
+.category {
+	@extend %category;
+
+	svg {
+		height: 22px;
+		width: 22px;
+	}
+}
+
+.selected {
+	@extend %selected;
+}
+
+.search {
+	background-color: white;
+	height: 100%;
+	overflow: auto;
+
+	.columns {
+		width: 100vw;
+		display: flex;
+		justify-content: center;
+		margin-bottom: 5px;
+
+		.column {
+			&:first-child {
+				margin-right: 5px;
+			}
+			width: 110px;
+
+			.gif {
+				width: 110px;
+				position: relative;
+				overflow: hidden;
+
+				margin-top: 5px;
+
+				img,
+				video,
+				.glass {
+					position: absolute;
+					height: 100%;
+					width: 100%;
+					top: 0;
+					left: 0;
+
+					object-fit: cover;
+				}
+
+				&:focus {
+					.glass {
+						@extend %focus;
+					}
+				}
+
+				.thumb {
+					filter: blur(10px);
+				}
+			}
+		}
+	}
+}
+
+%focus {
+	outline: var(--accent) solid 4px;
+	outline-offset: -4px;
+}
+
+.gifItem {
+	&:focus {
+		.glass {
+			@extend %focus;
+		}
+	}
+
+	&:nth-child(even) {
+		margin-left: 2px;
+	}
+
+	&:not(:nth-last-child(-n + 2)) {
+		margin-bottom: 2px;
+	}
+
+	height: calc((100vh - 28px - 30px) / 3);
+	width: calc(50vw - 1px);
+
+	overflow: hidden;
+
+	position: relative;
+
+	img,
+	video,
+	.glass {
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		top: 0;
+		left: 0;
+
+		object-fit: cover;
+	}
+
+	.thumb {
+		filter: blur(10px);
+	}
+}
+
+.container {
+	height: calc(100vh - 30px);
+}
+
+.gifs_container {
+	height: calc(100% - 28px);
+	overflow: hidden;
+	width: 100vw;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.glass {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

@@ -1,0 +1,63 @@
+{
+	"name": "ТеleKram",
+	"description": "Telegram Client for KaiOS.",
+	"display": "Telegram",
+	"short_name": "Telegram",
+	"version": "1.0.10",
+	"launch_path": "/index.html",
+	"theme": "#fff",
+	"theme_color": "#fff",
+	"background_color": "#fff",
+	"orientation": "default",
+
+	"categories": ["social"],
+
+	"icons": {
+		"56": "/icon56.png",
+		"112": "/icon112.png"
+	},
+	"developer": {
+		"name": "Cyan",
+		"url": "https://discord.gg/W9DF2q3Vv2"
+	},
+	"origin": "app://telekram.cyankindasus.com",
+	"type": "privileged",
+	"permissions": {
+		"spatialnavigation-app-manage": {},
+		"systemXHR": {},
+		"audio-capture": {},
+		"video-capture": {
+			"description": "Reading Codes using the Camera"
+		},
+		"serviceworker": {
+			"description": "Needed for assocating service worker"
+		},
+		"desktop-notification": {},
+		"tcp-socket": { "description": "Required to do any TCP" },
+		"storage": {},
+		"device-storage:sdcard": { "access": "readwrite" },
+		"contacts": { "access": "readonly" },
+		"volumemanager": {}
+	},
+	"dependencies": {
+		"ads-sdk": "1.5.8"
+	},
+	"messages": [
+		{
+			"serviceworker-notification": "/index.html"
+		}
+	],
+	"locales": {
+		"en-US": {
+			"name": "TeleKram",
+			"subtitle": "Telegram for KaiOS",
+			"description": "Telegram Client for KaiOS.",
+			"display": "Telegram",
+			"short_name": "Telegram"
+		}
+	},
+
+	"priority": "high",
+
+	"default_locale": "en"
+}

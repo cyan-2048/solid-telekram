@@ -1,0 +1,32 @@
+import type { MaybeArray } from '../../../types/utils.js'
+import type { ITelegramClient } from '../../client.types.js'
+import type { InputPeerLike } from '../../types/index.js'
+import { User } from '../../types/index.js'
+import { toInputUser } from '../../utils/peer-utils.js'
+import { _getUsersBatched } from '../chats/batched-queries.js'
+
+import { resolvePeerMany } from './resolve-peer-many.js'
+import { resolveUser } from './resolve-peer.js'
+
+/**
+ * Get information about multiple users.
+ * You can retrieve up to 200 users at once.
+ *
+ * @param ids  Users' identifiers. Can be ID, username, phone number, `"me"`, `"self"` or TL object
+ * @returns  The list of users in the same order as the input
+ */
+export async function getUsers(client: ITelegramClient, ids: MaybeArray<InputPeerLike>): Promise<(User | null)[]> {
+  if (!Array.isArray(ids)) {
+    // avoid unnecessary overhead of Promise.all and resolvePeerMany
+    const res = await _getUsersBatched(client, await resolveUser(client, ids))
+
+    return [res ? new User(res) : null]
+  }
+
+  const inputPeers = await resolvePeerMany(client, ids, toInputUser)
+
+  // pooling will be done by the helper
+  const res = await Promise.all(inputPeers.map(peer => _getUsersBatched(client, peer)))
+
+  return res.map(it => (it ? new User(it) : null))
+}

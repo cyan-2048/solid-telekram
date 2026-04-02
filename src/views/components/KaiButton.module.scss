@@ -1,0 +1,33 @@
+.button_container {
+	padding: 10px;
+
+	button {
+		box-sizing: border-box;
+		width: 100%;
+		height: 36px;
+		border: none;
+		outline: none;
+		font-size: 17px;
+		background-color: #ccc;
+		color: #323232;
+		background-image: none;
+
+		&:focus {
+			background-color: var(--accent);
+			color: white;
+		}
+
+		&:disabled,
+		&[aria-readonly="true"] {
+			opacity: 0.8;
+		}
+	}
+}
+
+.container {
+	padding-bottom: 10px;
+
+	.button_container {
+		padding-bottom: 0;
+	}
+}

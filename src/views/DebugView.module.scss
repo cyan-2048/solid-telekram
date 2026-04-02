@@ -1,0 +1,20 @@
+.icon_item {
+	display: flex;
+
+	&:focus {
+		background-color: var(--accent);
+		color: white;
+	}
+
+	width: 100vw;
+
+	div:nth-child(1) {
+		margin-right: 2px;
+	}
+
+	div:nth-child(2) {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}

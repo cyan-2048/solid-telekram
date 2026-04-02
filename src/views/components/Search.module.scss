@@ -1,0 +1,45 @@
+.search_wrap {
+	input {
+		padding: 8px 10px;
+
+		padding-left: calc(8px + 32px);
+
+		border-radius: 2px;
+
+		background-color: #fff;
+
+		border: 1px solid #8c8c8c;
+		width: 100%;
+
+		font-size: 17px;
+		height: 40.7px;
+	}
+
+	div {
+		width: 100%;
+		position: relative;
+	}
+
+	svg {
+		margin-top: auto;
+		left: 4px;
+		margin-bottom: auto;
+
+		position: absolute;
+		height: 32px;
+		width: 32px;
+		top: 0;
+
+		bottom: 0;
+
+		fill: #8c8c8c;
+
+		opacity: 0.5;
+	}
+
+	padding: 10px;
+
+	&.focused {
+		background-color: var(--accent);
+	}
+}

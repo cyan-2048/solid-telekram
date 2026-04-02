@@ -1,0 +1,35 @@
+import type { tl } from '../../../../tl/index.js'
+
+import type { PeersIndex } from '../../peers/peers-index.js'
+import { makeInspectable } from '../../../utils/index.js'
+import { memoizeGetters } from '../../../utils/memoize.js'
+import { Chat } from '../../peers/chat.js'
+
+import { StoryInteractiveArea } from './base.js'
+
+/**
+ * Interactive element containing a channel post
+ */
+export class StoryInteractiveChannelPost extends StoryInteractiveArea {
+  readonly type = 'channel_post' as const
+
+  constructor(
+    override readonly raw: tl.RawMediaAreaChannelPost,
+    readonly _peers: PeersIndex,
+  ) {
+    super(raw)
+  }
+
+  /** Channel being mentioned */
+  get chat(): Chat {
+    return new Chat(this._peers.chat(this.raw.channelId))
+  }
+
+  /** ID of the message being mentioned */
+  get messageId(): number {
+    return this.raw.msgId
+  }
+}
+
+memoizeGetters(StoryInteractiveChannelPost, ['chat'])
+makeInspectable(StoryInteractiveChannelPost)

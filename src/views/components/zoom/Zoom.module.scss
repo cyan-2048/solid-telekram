@@ -1,0 +1,30 @@
+.zoom {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	transform-origin: 0 0;
+	backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+}
+
+.contain {
+	object-fit: contain;
+}
+
+.no_contain {
+	object-fit: contain;
+}
+
+.transition {
+	:global(.animate) & {
+		transition: transform 0.2s;
+	}
+}
+
+.visible {
+	visibility: visible;
+}
+
+.hidden {
+	visibility: hidden;
+}
