@@ -13,6 +13,7 @@ import OptionsMenuMaxHeight from "../components/OptionsMenuMaxHeight";
 import { downloadAsync } from "./MessageMedia";
 import * as styles from "./MusicPlayer.module.scss";
 import { volumeDown, volumeUp } from "@/lib/volumeManager";
+import type { Download } from "@/lib/storage";
 
 function willFocusScrollIfNeeded(e: { currentTarget: HTMLElement }) {
 	scrollIntoView(e.currentTarget, {
@@ -77,7 +78,8 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	let audioRef!: HTMLAudioElement;
 	let flacPlayer: FlacPlayer | null = null;
 	let FlacModule: any = null;
-	let flacCanSeekKnown = false;
+	let flacCanSeekKnown = true;
+	let downloadRef: Download;
 	let nativeEndFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
 	const optionsSnId = createUniqueId();
 
@@ -396,6 +398,9 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 					createFlacPlayer();
 				},
 				setDownloadProgress,
+				(ref) => {
+					downloadRef = ref;
+				},
 			);
 		} else {
 			downloadAsync(
@@ -407,8 +412,13 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 					setLoading(false);
 				},
 				setDownloadProgress,
+				(ref) => {
+					downloadRef = ref;
+				},
 			);
 		}
+
+		console.error(props.music);
 
 		const coverThumb = props.music.getThumbnail("m") || props.music.getThumbnail("i");
 		if (coverThumb) {
@@ -418,6 +428,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 	onCleanup(() => {
 		disposePlayerResources();
+		downloadRef.abort();
 	});
 
 	createEffect(() => {
@@ -508,7 +519,11 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 					<Show
 						when={!loading()}
-						fallback={<div class={styles.subtitle}>Downloading... {Math.floor(downloadProgress())}%</div>}
+						fallback={
+							<div class={styles.downloading}>
+								<span>Downloading... {Math.floor(downloadProgress())}%</span>
+							</div>
+						}
 					>
 						<>
 							<div class={styles.timeline}>

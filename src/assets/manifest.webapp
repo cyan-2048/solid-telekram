@@ -37,7 +37,13 @@
 		"storage": {},
 		"device-storage:sdcard": { "access": "readwrite" },
 		"contacts": { "access": "readonly" },
-		"volumemanager": {}
+		"volumemanager": {},
+		"audio-channel-normal": {
+			"description": "Needed to play this app's audio content on the normal channel"
+		},
+		"audio-channel-content": {
+			"description": "To play audio in background"
+		}
 	},
 	"dependencies": {
 		"ads-sdk": "1.5.8"

@@ -14,5 +14,8 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"prettier.printWidth": 120,
-	"prettier.useTabs": true
+	"prettier.useTabs": true,
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
 }
