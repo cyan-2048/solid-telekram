@@ -35,18 +35,6 @@ function musicFilename(audio: Audio): string {
 	return `${base}.${fileExtFromMime(audio.mimeType)}`;
 }
 
-type FlacPlayer = {
-	playing: boolean;
-	play: () => void;
-	pause: () => void;
-	stop: () => void;
-	preload?: () => void;
-	seek: (ms: number) => number;
-	on: (event: string, callback: (...args: any[]) => void) => void;
-	off?: (event: string, callback: (...args: any[]) => void) => void;
-	destroy?: () => void;
-};
-
 type FlacPlayerListeners = {
 	onDuration: (ms: number) => void;
 	onProgress: (ms: number) => void;
@@ -54,6 +42,10 @@ type FlacPlayerListeners = {
 	onError: (err: unknown) => void;
 	onReady: () => void;
 };
+
+type FlacModuleType = typeof import("av");
+
+type FlacPlayer = InstanceType<FlacModuleType["Player"]>;
 
 function canSeekFlacPlayer(player: FlacPlayer | null): boolean {
 	if (!player) return false;
@@ -71,13 +63,13 @@ function canSeekFlacPlayer(player: FlacPlayer | null): boolean {
 	return Array.isArray(seekPoints) && seekPoints.length > 0;
 }
 
-function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDecoder?: boolean }) {
+function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDecoder?: boolean; isFlac?: boolean }) {
 	let divRef!: HTMLDivElement;
 	let flacListeners: FlacPlayerListeners | null = null;
 	let optionDownloadRef!: HTMLDivElement;
 	let audioRef!: HTMLAudioElement;
 	let flacPlayer: FlacPlayer | null = null;
-	let FlacModule: any = null;
+	let FlacModule: FlacModuleType | null = null;
 	let flacCanSeekKnown = true;
 	let downloadRef: Download;
 	let nativeEndFallbackTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -175,6 +167,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 		flacPlayer.pause();
 		flacPlayer.stop();
+		// @ts-ignore
 		flacPlayer.destroy?.();
 		flacPlayer = null;
 		flacListeners = null;
@@ -191,8 +184,9 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 		destroyFlacPlayer();
 
-		const player = FlacModule.Player.fromBuffer(buffer) as FlacPlayer;
+		const player = FlacModule.Player.fromBuffer(buffer) as unknown as FlacPlayer;
 		flacPlayer = player;
+		console.error("[MusicPlayer][FLAC] player created", player);
 		setCurrentTime(0);
 		setFlacReady(false);
 		setCanSeek(flacCanSeekKnown);
@@ -303,6 +297,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 			const next = Math.max(0, Math.min(duration(), currentTime() + offsetSeconds));
 
 			try {
+				// @ts-ignore
 				flacPlayer.seek(next * 1000);
 			} catch (err) {
 				console.error("[MusicPlayer][FLAC] seek failed", err);
@@ -402,6 +397,26 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 					downloadRef = ref;
 				},
 			);
+		} else if (props.isFlac) {
+			// force mimetype to be flac
+			downloadAsync(
+				props.music,
+				"blob",
+				(blob) => {
+					const flacBlob = blob.slice(0, blob.size, "audio/flac");
+
+					const url = URL.createObjectURL(flacBlob);
+					setSrc(url);
+					setDownloadUrl(url);
+					setLoading(false);
+
+					return url;
+				},
+				setDownloadProgress,
+				(ref) => {
+					downloadRef = ref;
+				},
+			);
 		} else {
 			downloadAsync(
 				props.music,
@@ -428,7 +443,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 
 	onCleanup(() => {
 		disposePlayerResources();
-		downloadRef.abort();
+		downloadRef?.abort();
 	});
 
 	createEffect(() => {
@@ -531,7 +546,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 							</div>
 							<div class={styles.times}>
 								<span>{formatTime(currentTime())}</span>
-								<Show when={props.useFlacDecoder}>
+								<Show when={props.useFlacDecoder || props.isFlac}>
 									<span>FLAC</span>
 								</Show>
 								<span>{formatTime(Math.max(duration() - currentTime(), 0))}</span>
@@ -589,8 +604,17 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	);
 }
 
-export default function MusicPlayer(props: { music: Audio; onClose: () => void }) {
-	const useFlacDecoder = props.music.mimeType.includes("flac") && import.meta.env.KAIOS == 2;
+let _flac_supported: boolean | undefined = undefined;
 
-	return <MusicPlayerShared {...props} useFlacDecoder={useFlacDecoder} />;
+function isFlacSupported() {
+	if (import.meta.env.KAIOS != 2) return true;
+	if (typeof _flac_supported == "boolean") return _flac_supported;
+	return (_flac_supported = new globalThis.Audio().canPlayType("audio/flac") !== "");
+}
+
+export default function MusicPlayer(props: { music: Audio; onClose: () => void }) {
+	const isFlac = props.music.mimeType.includes("flac");
+	const useFlacDecoder = isFlac && !isFlacSupported();
+
+	return <MusicPlayerShared {...props} useFlacDecoder={useFlacDecoder} isFlac={isFlac} />;
 }

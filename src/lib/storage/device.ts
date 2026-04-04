@@ -1,5 +1,5 @@
 import { sleep } from "@utils";
-import { Downloader } from "./types";
+import type { Downloader } from "./types";
 
 const systemStorage = navigator.b2g?.getDeviceStorage("sdcard") || navigator.getDeviceStorage?.("sdcard");
 
@@ -26,10 +26,9 @@ async function getKaigramFolder() {
 
 		// let's wait for a bit
 		await Promise.resolve();
-		
+
 		return root.createDirectory("kaigram").catch(() => null as any as Directory);
-	} catch {
-	}
+	} catch {}
 
 	return null as any as Directory;
 }

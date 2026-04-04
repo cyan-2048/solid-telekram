@@ -485,7 +485,7 @@ import AV from "./aurora";
 								buf = data.peek(32 - offset) << offset,
 								v = 0;
 
-							var log = 31 - clz(buf | 1); // log2(buf)
+							var log = 31 - Math.clz32(buf | 1); // log2(buf)
 
 							if (log - k >= 32 - MIN_CACHE_BITS && 32 - log < limit) {
 								buf >>>= log - k;
@@ -512,6 +512,7 @@ import AV from "./aurora";
 							return (v >> 1) ^ -(v & 1);
 						};
 
+						/*
 						// Should be in the damned standard library...
 						function clz(input) {
 							var output = 0,
@@ -552,6 +553,7 @@ import AV from "./aurora";
 							// shouldn't get here
 							return output + 4;
 						}
+						*/
 					});
 
 					module.exports = FLACDecoder;
