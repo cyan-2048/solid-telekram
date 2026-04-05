@@ -78,6 +78,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	const [src, setSrc] = createSignal("");
 	const [downloadUrl, setDownloadUrl] = createSignal("");
 	const [downloadBuffer, setDownloadBuffer] = createSignal<ArrayBuffer | null>(null);
+	const [nativeFlacBlob, setNativeFlacBlob] = createSignal<Blob | null>(null);
 	const [cover, setCover] = createSignal("");
 	const [playing, setPlaying] = createSignal(false);
 	const [loading, setLoading] = createSignal(true);
@@ -86,6 +87,8 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	const [currentTime, setCurrentTime] = createSignal(0);
 	const [duration, setDuration] = createSignal(props.music.duration || 0);
 	const [flacReady, setFlacReady] = createSignal(false);
+	const [useFlacDecoder, setUseFlacDecoder] = createSignal(!!props.useFlacDecoder);
+	const [flacFallbackTriggered, setFlacFallbackTriggered] = createSignal(false);
 	const [canSeek, setCanSeek] = createSignal(!props.useFlacDecoder);
 
 	const title = createMemo(() => props.music.title || props.music.fileName || "Unknown Audio");
@@ -126,7 +129,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	};
 
 	const scheduleNativeEndFallback = () => {
-		if (props.useFlacDecoder) return;
+		if (useFlacDecoder()) return;
 		if (!audioRef) return;
 
 		const total = duration();
@@ -177,7 +180,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	};
 
 	const createFlacPlayer = () => {
-		if (!props.useFlacDecoder) return null;
+		if (!useFlacDecoder()) return null;
 		if (!FlacModule) return null;
 		const buffer = downloadBuffer();
 		if (!buffer) return null;
@@ -248,7 +251,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 	const togglePlay = async () => {
 		if (!src()) return;
 
-		if (props.useFlacDecoder) {
+		if (useFlacDecoder()) {
 			if (!flacPlayer) {
 				const recreated = createFlacPlayer();
 				if (!recreated) return;
@@ -290,7 +293,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		if (!canSeek()) return;
 		if (!duration()) return;
 
-		if (props.useFlacDecoder) {
+		if (useFlacDecoder()) {
 			if (!flacPlayer) return;
 			if (!flacReady()) return;
 
@@ -333,12 +336,13 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 			setDuration(0);
 			setDownloadProgress(0);
 			setFlacReady(false);
+			setNativeFlacBlob(null);
 			setDownloadBuffer(null);
 			setDownloadUrl("");
 			setSrc("");
 			setCover("");
 			setShowOptions(false);
-			setCanSeek(!props.useFlacDecoder);
+			setCanSeek(!useFlacDecoder());
 		});
 	};
 
@@ -361,7 +365,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		let url = downloadUrl();
 		let ephemeralUrl: string | null = null;
 
-		if (!url && props.useFlacDecoder && downloadBuffer()) {
+		if (!url && useFlacDecoder() && downloadBuffer()) {
 			ephemeralUrl = URL.createObjectURL(new Blob([downloadBuffer()!], { type: props.music.mimeType || "audio/flac" }));
 			url = ephemeralUrl;
 		}
@@ -376,11 +380,48 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 		closeOptions();
 	};
 
+	const fallbackToFlacDecoder = async () => {
+		if (!props.isFlac) return;
+		if (useFlacDecoder()) return;
+		if (flacFallbackTriggered()) return;
+		const blob = nativeFlacBlob();
+		if (!blob) return;
+
+		clearNativeEndFallback();
+		audioRef?.pause();
+		setFlacFallbackTriggered(true);
+		setUseFlacDecoder(true);
+		setPlaying(false);
+		setLoading(true);
+		setCanSeek(false);
+
+		try {
+			if (!FlacModule) {
+				FlacModule = (await import("@/lib/flac")).default;
+			}
+
+			const buffer = await blob.arrayBuffer();
+			batch(() => {
+				setSrc("flac://loaded");
+				setDownloadUrl("");
+				setDownloadBuffer(buffer);
+				setCurrentTime(0);
+				setDuration(props.music.duration || 0);
+				setLoading(false);
+			});
+
+			createFlacPlayer();
+		} catch (err) {
+			console.error("[MusicPlayer] failed to switch to FLAC decoder", err);
+			setLoading(false);
+		}
+	};
+
 	onMount(() => {
 		divRef.focus();
 		setStatusbarColor("#000");
 
-		if (props.useFlacDecoder) {
+		if (useFlacDecoder()) {
 			downloadAsync(
 				props.music,
 				"buffer",
@@ -398,12 +439,13 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 				},
 			);
 		} else if (props.isFlac) {
-			// force mimetype to be flac
 			downloadAsync(
 				props.music,
 				"blob",
 				(blob) => {
+					// force mimetype to be flac
 					const flacBlob = blob.slice(0, blob.size, "audio/flac");
+					setNativeFlacBlob(flacBlob);
 
 					const url = URL.createObjectURL(flacBlob);
 					setSrc(url);
@@ -546,7 +588,7 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 							</div>
 							<div class={styles.times}>
 								<span>{formatTime(currentTime())}</span>
-								<Show when={props.useFlacDecoder || props.isFlac}>
+								<Show when={useFlacDecoder() || props.isFlac}>
 									<span>FLAC</span>
 								</Show>
 								<span>{formatTime(Math.max(duration() - currentTime(), 0))}</span>
@@ -559,6 +601,8 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 				</div>
 
 				<audio
+					// @ts-ignore
+					prop:mozAudioChannelType="content"
 					ref={audioRef}
 					src={src()}
 					onLoadedMetadata={(e) => {
@@ -578,6 +622,16 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void; useFlacDe
 					onTimeUpdate={(e) => {
 						setCurrentTime(e.currentTarget.currentTime);
 						scheduleNativeEndFallback();
+					}}
+					onError={(e) => {
+						if (!props.isFlac || useFlacDecoder()) return;
+
+						const error = e.currentTarget.error;
+						const srcUnsupported = error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || error?.code === 4;
+						if (!srcUnsupported) return;
+
+						console.error("[MusicPlayer] native FLAC playback unsupported, falling back to decoder", error);
+						fallbackToFlacDecoder();
 					}}
 					onEnded={handleNativeEnded}
 				></audio>

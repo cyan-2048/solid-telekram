@@ -1024,6 +1024,7 @@ function VoiceMedia(props: FocusableMediaProps) {
 					setWaveformIndex(0);
 					setAudioPlaying(false);
 				}}
+				prop:mozAudioChannelType="content"
 				src={src()}
 			></audio>
 		</>
