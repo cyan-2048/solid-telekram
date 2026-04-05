@@ -164,7 +164,7 @@ export default defineConfig({
 			compressed: false,
 		},
 
-		// removeConsole: true,
+		removeConsole: isProd,
 	},
 
 	tools: {

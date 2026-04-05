@@ -1,6 +1,6 @@
-import type { tl } from "@mtcute/tl";
+import type { tl } from "@mtcute/core";
 import type UIDialog from "./UIDialog";
-import { Dialog, getMarkedPeerId } from "@mtcute/core";
+import { type Dialog, getMarkedPeerId } from "@mtcute/core";
 import { atom } from "nanostores";
 
 export default class UIDialogFilter {

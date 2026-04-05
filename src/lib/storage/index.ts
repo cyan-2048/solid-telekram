@@ -6,7 +6,7 @@ import * as fromDevice from "./device";
 import * as fromCaches from "./caches";
 import { deleteAuthkeyByDC, tg } from "@globals";
 import Deferred from "../Deffered";
-import type { tl } from "@mtcute/tl";
+import type { tl } from "@mtcute/core";
 import type { Downloader } from "./types";
 import { $storage } from "@stores";
 

@@ -5,7 +5,7 @@ import { type ComponentProps, createEffect, createMemo, For, type JSX, onCleanup
 import { tg, typingIndicatorPrivateJar, userStatusJar } from "@globals";
 import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
-import type { tl } from "@mtcute/tl";
+import type { tl } from "@mtcute/core";
 import type { Peer, TypingStatus } from "@mtcute/core";
 import { setSoftkeys, sleep, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
 import { timeStamp } from "../Home";

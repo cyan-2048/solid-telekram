@@ -1,4 +1,4 @@
-import type { tl } from "@mtcute/tl";
+import type { tl } from "@mtcute/core";
 
 export function capitalizeFirstLetter(string: string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);

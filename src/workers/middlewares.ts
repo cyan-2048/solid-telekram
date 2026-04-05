@@ -8,7 +8,7 @@ import type { RpcCallMiddlewareContext } from "@mtcute/core";
 import { floodWaiter } from "@mtcute/core/network/middlewares/flood-waiter";
 // @ts-ignore
 import { internalErrorsHandler } from "@mtcute/core/network/middlewares/internal-errors";
-import type { mtp } from "@mtcute/tl";
+import type { mtp } from "@mtcute/core";
 import type { BaseTelegramClientOptions } from "@mtcute/web";
 
 function isTlRpcError(obj: unknown): obj is mtp.RawMt_rpc_error {

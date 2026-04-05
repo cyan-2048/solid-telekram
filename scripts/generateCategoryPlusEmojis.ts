@@ -137,11 +137,14 @@ function normalizeEmoji(emoji: EmojiDataItem): string | null {
 	return emoji.emoji;
 }
 
+// emojis not avaible on iOS devices
+const nonApple = ["♀️", "♂️"];
+
 ([...emojiData] as EmojiDataItem[])
 	.sort((a, b) => {
 		return (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER);
 	})
-	.filter((a) => a.emoji && typeof a.group === "number" && typeof a.order === "number")
+	.filter((a) => a.emoji && typeof a.group === "number" && typeof a.order === "number" && !nonApple.includes(a.emoji))
 	.forEach((emoji) => {
 		const categoryName = getCategoryName(emoji.group!);
 		if (!categoryName) return;

@@ -1,5 +1,5 @@
 import { apiHash, apiId } from "@/config";
-import { BaseTelegramClient, MtProxySettings } from "@mtcute/web";
+import { BaseTelegramClient, type MtProxySettings } from "@mtcute/web";
 import MtProxyTcpTransport from "./MtProxyTcpTransport";
 
 let loaded: BaseTelegramClient | null = null;

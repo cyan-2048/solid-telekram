@@ -14,7 +14,7 @@ const mtcuteDependencies = [
 	"@fuman/net",
 	"@fuman/utils",
 	"@mtcute/file-id",
-	"@mtcute/tl",
+	// "@mtcute/tl",
 	"@mtcute/tl-runtime",
 	"@mtcute/markdown-parser",
 ];

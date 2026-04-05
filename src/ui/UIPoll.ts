@@ -1,5 +1,4 @@
-import type { Poll } from "@mtcute/core";
-import type { tl } from "@mtcute/tl";
+import type { Poll, tl } from "@mtcute/core";
 import { atom } from "nanostores";
 
 export default class UIPoll {

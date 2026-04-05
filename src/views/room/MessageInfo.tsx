@@ -22,7 +22,7 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { tl } from "@mtcute/tl";
+import type { tl } from "@mtcute/core";
 import { cloudphone } from "@/config";
 import once from "lodash-es/once";
 

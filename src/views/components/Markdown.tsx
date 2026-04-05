@@ -100,6 +100,9 @@ function encodeEmoji(emojiText: string) {
 	return codepoints;
 }
 
+const removeTrailingVs16 = Object.freeze(["2757", "1f21a", "1f22f", "26ea", "26bd", "26be", "26f3", "1f004"]);
+const addTrailingVs16 = Object.freeze(["267e"]);
+
 function toCodePoints(unicodeSurrogates: string) {
 	const points = [];
 	let char = 0;
@@ -121,12 +124,18 @@ function toCodePoints(unicodeSurrogates: string) {
 		points[0] = "00" + points[0];
 	}
 
+	if (points.length == 2 && removeTrailingVs16.indexOf(points[0]) != -1) {
+		points.pop();
+	}
+
+	if (points.length == 1 && addTrailingVs16.indexOf(points[0]) != -1) {
+		points.push("fe0f");
+	}
+
 	return points;
 }
 
-export const toCodePoint = memoize(function toCodePoint(unicodeSurrogates: string) {
-	return encodeEmoji(unicodeSurrogates);
-});
+const toCodePoint = import.meta.env.DEV ? encodeEmoji : memoize(encodeEmoji);
 
 function emojiFromCodePoints(codePoints: string) {
 	return codePoints.split("-").reduce((prev, curr) => prev + String.fromCodePoint(parseInt(curr, 16)), "");

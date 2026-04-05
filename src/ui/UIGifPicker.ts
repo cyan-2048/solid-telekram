@@ -3,8 +3,8 @@
 import { sleep } from "@/helpers";
 import { tg } from "@globals";
 import { Thumbnail, Video } from "@mtcute/core";
-import { toInputPeer, toInputUser } from "@mtcute/core/utils";
-import type { tl } from "@mtcute/tl";
+import { toInputPeer, toInputUser } from "@mtcute/core/utils.js";
+import type { tl } from "@mtcute/core";
 import memoize from "lodash-es/memoize";
 import Queue from "queue";
 
@@ -74,7 +74,7 @@ export default class UIGifPicker {
 			},
 			{
 				floodSleepThreshold: 20_000,
-			}
+			},
 		);
 
 		const _results: GifResult[] = [];
