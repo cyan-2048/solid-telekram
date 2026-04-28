@@ -151,6 +151,9 @@ export interface InputMediaPhoto extends FileMixin, CaptionMixin {
    * Whether this photo should be hidden with a spoiler
    */
   spoiler?: boolean
+
+  /** If this is a live photo, the video representing it */
+  livePhotoVideo?: InputMediaLike
 }
 
 /**
@@ -476,6 +479,9 @@ export interface InputMediaPoll extends CaptionMixin {
    */
   question: InputText
 
+  /** Media attached to the poll */
+  attachedMedia?: InputMediaLike
+
   /**
    * Answers of the poll.
    *
@@ -521,6 +527,18 @@ export interface InputMediaPoll extends CaptionMixin {
    * When `number` is used, UNIX time in ms is expected
    */
   closeDate?: number | Date
+
+  /** Whether participants can suggest new options to the poll */
+  openAnswers?: boolean
+
+  /** Whether retracting the votes should be disabled in the poll */
+  disableRevoting?: boolean
+
+  /** Whether answers to the poll should be shuffled before showing to the user */
+  shuffleAnswers?: boolean
+
+  /** Whether the results of the poll should be hidden until the end of the poll */
+  hideResultsUntilClose?: boolean
 }
 
 /**
@@ -541,6 +559,9 @@ export interface InputMediaQuiz extends Omit<InputMediaPoll, 'type'> {
    * Explanation of the quiz solution
    */
   solution?: InputText
+
+  /** Media attached to the solution */
+  solutionMedia?: InputMediaLike
 }
 
 /**

@@ -4,7 +4,7 @@ import { handleNotificationClick, tg } from "@globals";
 import { telegramPort } from "./index";
 import type { BaseTelegramClient } from "@mtcute/web";
 import { isCloudphone } from "@/config";
-import { NOOP } from "@/helpers";
+import { NOOP } from "@helpers";
 import { encodeBase64Url } from "./pushCrypto";
 
 const cachedDatabase = openDB("solid-telekram", 5, {
