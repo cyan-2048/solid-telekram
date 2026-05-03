@@ -37,7 +37,7 @@ function ChatPhotoWithIcon(props: {
 	createEffect(() => {
 		const src = props.src.thumb;
 		if (src) {
-			const url = URL.createObjectURL(new Blob([src]));
+			const url = URL.createObjectURL(new Blob([src as Uint8Array<ArrayBuffer>]));
 			setPlaceholder(url);
 
 			onCleanup(() => {

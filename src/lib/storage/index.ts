@@ -305,3 +305,14 @@ export function downloadFile(file: FileLocation) {
 
 	return download;
 }
+
+downloadFile.fromCache = function fromCache(file: FileLocation) {
+	const hash = hashFile(file);
+
+	if (hash === null) {
+		console.error("HASH FAILED FOR FILE", file);
+		throw new Error("HASH FAILED");
+	}
+
+	return cacheMap.get(hash);
+};

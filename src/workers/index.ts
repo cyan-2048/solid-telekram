@@ -10,6 +10,9 @@ import type { Exposed as TelegramExposed } from "./telegram.ts";
 import { TelegramWorkerPort } from "@mtcute/web";
 import { apiHash, apiId } from "@/config.ts";
 
+const telegramWorker = new Worker(new URL("./telegram.ts", import.meta.url));
+const telegramWrapped = Comlink.wrap<TelegramExposed>(telegramWorker);
+
 function initTelegramPort() {
 	let useWorker = $proxyMode.get() == "none";
 
@@ -18,9 +21,6 @@ function initTelegramPort() {
 
 	return useWorker ? new TelegramWorkerPort({ worker: telegramWorker }) : null;
 }
-
-const telegramWorker = new Worker(new URL("./telegram.ts", import.meta.url));
-const telegramWrapped = Comlink.wrap<TelegramExposed>(telegramWorker);
 
 telegramWrapped.init({
 	proxyMode: $proxyMode.get(),

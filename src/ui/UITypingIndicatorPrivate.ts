@@ -1,4 +1,4 @@
-import { TypingStatus } from "@mtcute/core";
+import type { TypingStatus } from "@mtcute/core";
 import { atom } from "nanostores";
 
 /**

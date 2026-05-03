@@ -116,6 +116,8 @@ export const tg = new TelegramClient(
 			},
 );
 
+Object.assign(globalThis, { tg });
+
 const refreshDialogsByPeer = UIDialog.refreshDialogsByPeer;
 
 async function refreshDialogs() {
@@ -413,6 +415,16 @@ async function onLoggedIn() {
 			case "updatePinnedDialogs": {
 				// tg.getPeerDialogs seems to be cached
 				refreshDialogs();
+				break;
+			}
+
+			case "updateNotifySettings": {
+				if ("peer" in upd.peer) {
+					const rawPeer = upd.peer.peer;
+					tg.getPeer(rawPeer).then((peer) => {
+						dialogsJar.get(peer.id)?.updateNotifySettings(upd.notifySettings);
+					});
+				}
 				break;
 			}
 		}

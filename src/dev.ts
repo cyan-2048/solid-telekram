@@ -14,6 +14,8 @@ import { BigInteger } from "@modern-dev/jsbn";
 import Long from "long";
 import appVersion from "./lib/appVersion";
 
+import UIDialog from "./ui/UIDialog";
+
 if (import.meta.env.DEV || import.meta.env.CANARY)
 	Object.assign(window, {
 		Long,
@@ -25,6 +27,7 @@ if (import.meta.env.DEV || import.meta.env.CANARY)
 		...stores,
 
 		$: {
+			UIDialog,
 			...globals,
 			nanostores,
 			utils,

@@ -9,7 +9,8 @@
 		"dev": "rsbuild dev",
 		"format": "biome format --write",
 		"preview": "rsbuild preview",
-		"mtcute": "bun ./scripts/update-mtcute.ts"
+		"mtcute": "bun ./scripts/update-mtcute.ts",
+		"screenshot": "bun ./scripts/screenshot.ts"
 	},
 	"dependencies": {
 		"@fuman/io": "0.0.19",
@@ -39,6 +40,7 @@
 		"moment-timezone": "^0.6.1",
 		"nanostores": "^1.2.0",
 		"queue": "^7.0.0",
+		"sanitize-filename": "^1.6.4",
 		"scroll-into-view-if-needed": "^3.1.0",
 		"solid-js": "^1.9.10",
 		"solid-qr-code": "^0.1.11",

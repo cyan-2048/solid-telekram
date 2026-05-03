@@ -5,23 +5,32 @@ export interface HtmlUnparseOptions {
 	/**
 	 * Syntax highlighter to use when un-parsing `pre` tags with language
 	 */
-	syntaxHighlighter?: (code: string, language: string) => ASTNode[];
+	syntaxHighlighter?: (code: string, language: string) => ASTNodeLoose[];
 }
 
 type Tags = keyof HTMLElementTagNameMap | "spoiler";
 
-interface _ASTNode<T extends Tags = Tags, R extends tl.TypeMessageEntity = tl.TypeMessageEntity> {
-	type: R["_"];
-	tag: T;
-	entity: R;
-	children: (ASTNode | string)[];
-	props: Record<string, any>;
-	source: string;
-}
+export type ASTNodeLoose<T extends Tags = Tags, R extends tl.TypeMessageEntity = tl.TypeMessageEntity> =
+	| {
+			type: R["_"];
+			tag: T;
+			entity: R;
+			children: ASTNodeLoose[];
+			props: Record<string, any>;
+			source: string;
+	  }
+	| string;
 
-export type ASTObjectNode = _ASTNode;
+export type ASTNode = Exclude<ASTNodeLoose, string>;
 
-export type ASTNode = _ASTNode | string;
+const tagDict = Object.freeze({
+	messageEntityBold: "strong",
+	messageEntityItalic: "em",
+	messageEntityUnderline: "u",
+	messageEntityStrike: "s",
+	messageEntityCode: "code",
+	messageEntitySpoiler: "spoiler",
+} as const);
 
 // internal function that uses recursion to correctly process nested & overlapping entities
 function _unparse(
@@ -30,8 +39,8 @@ function _unparse(
 	params: HtmlUnparseOptions,
 	entitiesOffset = 0,
 	offset = 0,
-	length = text.length
-): ASTNode[] {
+	length = text.length,
+): ASTNodeLoose[] {
 	if (!text) return [text];
 
 	if (!entities.length || entities.length === entitiesOffset) {
@@ -40,7 +49,7 @@ function _unparse(
 
 	const end = offset + length;
 
-	const html: ASTNode[] = [];
+	const html: ASTNodeLoose[] = [];
 	let lastOffset = 0;
 
 	for (let i = entitiesOffset; i < entities.length; i++) {
@@ -76,7 +85,7 @@ function _unparse(
 
 		const type = entity._;
 
-		let entityText: ASTNode[];
+		let entityText: ASTNodeLoose[];
 
 		if (type === "messageEntityPre") {
 			entityText = [substr];
@@ -92,17 +101,7 @@ function _unparse(
 			case "messageEntityCode":
 			case "messageEntitySpoiler":
 				{
-					const tag = (
-						{
-							messageEntityBold: "b",
-							messageEntityItalic: "i",
-							messageEntityUnderline: "u",
-							messageEntityStrike: "s",
-							messageEntityCode: "code",
-							messageEntitySpoiler: "spoiler",
-						} as const
-					)[type];
-					html.push({ type, entity, tag, children: entityText, props: {}, source: substr });
+					html.push({ type, entity, tag: tagDict[type], children: entityText, props: {}, source: substr });
 				}
 				break;
 			case "messageEntityBlockquote":
@@ -121,8 +120,8 @@ function _unparse(
 					tag: "pre",
 					props: { lang: entity.language },
 					children:
-						params.syntaxHighlighter && entity.language
-							? params.syntaxHighlighter(entityText[0] as string, entity.language)
+						params.syntaxHighlighter && entity.language && typeof entityText[0] == "string"
+							? params.syntaxHighlighter(entityText[0], entity.language)
 							: entityText,
 					entity,
 					source: substr,
@@ -147,7 +146,7 @@ function _unparse(
 						props: { href: entityText[0] },
 						children: entityText,
 						source: substr,
-					}
+					},
 					//  `<a href="${entityText}">${entityText}</a>`
 				);
 				break;
@@ -160,7 +159,7 @@ function _unparse(
 						props: { href: entity.url },
 						children: entityText,
 						source: substr,
-					}
+					},
 					// `<a href="${escape(entity.url, true)}">${entityText}</a>`
 				);
 				break;
@@ -173,7 +172,7 @@ function _unparse(
 						props: { href: `tg://user?id=${entity.userId}` },
 						children: entityText,
 						source: substr,
-					}
+					},
 					//  `<a href="tg://user?id=${entity.userId}">${entityText}</a>`
 				);
 				break;
@@ -186,7 +185,7 @@ function _unparse(
 						props: { href: `javascript:void(0)` },
 						children: entityText,
 						source: substr,
-					}
+					},
 					//  `<a href="tg://user?id=${entity.userId}">${entityText}</a>`
 				);
 				break;
@@ -206,7 +205,7 @@ function _unparse(
 /**
  * Add HTML formatting to the text given the plain text and entities contained in it.
  */
-export function unparse(input: InputText, options?: HtmlUnparseOptions): ASTNode[] {
+export function unparse(input: InputText, options?: HtmlUnparseOptions): ASTNodeLoose[] {
 	if (typeof input === "string") {
 		return _unparse(input, [], options ?? {});
 	}

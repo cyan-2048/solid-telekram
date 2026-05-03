@@ -1,12 +1,12 @@
-import { ComponentProps, Show, splitProps } from "solid-js";
+import { type ComponentProps, Show, splitProps } from "solid-js";
 import * as styles from "./OptionsItem.module.scss";
 
 export default function OptionsItem(
 	props: ComponentProps<"div"> & {
 		arrow?: boolean;
-	}
+	},
 ) {
-	const [local, rest] = splitProps(props, ["classList", "children"]);
+	const [local, rest] = splitProps(props, ["classList", "children", "arrow"]);
 	return (
 		<div {...rest} classList={{ ...local.classList, [styles.item]: true, [styles.tick]: props.arrow }}>
 			{local.children}

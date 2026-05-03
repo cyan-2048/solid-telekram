@@ -1,7 +1,7 @@
 import type { TextWithEntities } from "@mtcute/core";
 import * as styles from "./Markdown.module.scss";
 import { For, Match, Switch, Show, createRenderEffect, type Component, createSignal, type JSXElement } from "solid-js";
-import { type ASTNode, type ASTObjectNode, unparse } from "@/lib/unparse";
+import { type ASTNodeLoose, type ASTNode, unparse } from "@/lib/unparse";
 import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
 import { reconcile } from "solid-js/store";
@@ -11,19 +11,23 @@ import { cloudphone } from "@/config";
 import twemojiMatcher from "@twemoji/parser/dist/lib/regex";
 
 type CustomRenderer = (
-	e: ASTObjectNode,
+	node: ASTNode,
 	_default: () => JSXElement,
 	_children: () => JSXElement,
-) => Component<ASTObjectNode> | null | void;
+) => Component<ASTNode> | null | void;
 
-function EntityChildren(props: { $: ASTNode[]; customRenderer?: CustomRenderer }) {
-	return <For each={props.$}>{(e) => <Entity $={e} customRenderer={props.customRenderer} />}</For>;
+function EntityChildren(props: { $: ASTNode | ASTNodeLoose[]; customRenderer?: CustomRenderer }) {
+	return (
+		<For each={Array.isArray(props.$) ? props.$ : props.$.children}>
+			{(e) => <Entity $={e} customRenderer={props.customRenderer} />}
+		</For>
+	);
 }
 
 export const SPOILER_CLASS = styles.spoiler;
 export const SPOILER_TOGGLE = styles.toggle;
 
-function EntityNode(props: { $: ASTObjectNode; customRenderer?: CustomRenderer }) {
+function EntityNode(props: { $: ASTNode; customRenderer?: CustomRenderer }) {
 	return (
 		<Switch
 			fallback={
@@ -32,7 +36,7 @@ function EntityNode(props: { $: ASTObjectNode; customRenderer?: CustomRenderer }
 					class={props.$.entity._ == "messageEntityMention" ? styles.mention : undefined}
 					{...props.$.props}
 				>
-					<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
+					<EntityChildren {...props} />
 				</Dynamic>
 			}
 		>
@@ -45,17 +49,17 @@ function EntityNode(props: { $: ASTObjectNode; customRenderer?: CustomRenderer }
 							class={props.$.entity._ == "messageEntityMention" ? styles.mention : undefined}
 							{...props.$.props}
 						>
-							<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
+							<EntityChildren {...props} />
 						</Dynamic>
 					),
-					() => <EntityChildren $={props.$.children} customRenderer={props.customRenderer} />,
+					() => <EntityChildren {...props} />,
 				)}
 			>
 				{(e) => <Dynamic {...props.$} component={e()!} />}
 			</Match>
 			<Match when={props.$.tag == "spoiler"}>
 				<span class={styles.spoiler}>
-					<EntityChildren $={props.$.children} customRenderer={props.customRenderer} />
+					<EntityChildren {...props} />
 				</span>
 			</Match>
 		</Switch>
@@ -211,11 +215,11 @@ export function MarkdownText(props: { text: string }) {
 	);
 }
 
-function Entity(props: { $: ASTNode; customRenderer?: CustomRenderer }) {
+function Entity(props: { $: ASTNodeLoose; customRenderer?: CustomRenderer }) {
 	return (
 		<Show
 			when={typeof props.$ == "string"}
-			fallback={<EntityNode $={props.$ as ASTObjectNode} customRenderer={props.customRenderer} />}
+			fallback={<EntityNode $={props.$ as ASTNode} customRenderer={props.customRenderer} />}
 		>
 			<MarkdownText text={props.$ as string} />
 		</Show>
@@ -223,7 +227,7 @@ function Entity(props: { $: ASTNode; customRenderer?: CustomRenderer }) {
 }
 
 export default function Markdown(props: { entities: TextWithEntities; customRenderer?: CustomRenderer }) {
-	const [ast, setAst] = createStore([] as ASTNode[]);
+	const [ast, setAst] = createStore([] as ASTNodeLoose[]);
 
 	createRenderEffect(() => {
 		setAst(

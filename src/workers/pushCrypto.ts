@@ -13,8 +13,6 @@ const IGE_IV_SIZE = 32;
 const ZERO_IV_16 = new Uint8Array(AES_BLOCK_SIZE);
 const PKCS7_FULL_BLOCK = new Uint8Array(AES_BLOCK_SIZE).fill(AES_BLOCK_SIZE);
 
-let subtleCryptoPromise: Promise<SubtleCrypto> | null = null;
-
 function concatBytes(...parts: Uint8Array[]): Uint8Array {
 	let total = 0;
 	for (let i = 0; i < parts.length; i++) total += parts[i].length;
@@ -52,20 +50,6 @@ function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
 	return copy.buffer as ArrayBuffer;
 }
 
-function getSubtleCrypto(): Promise<SubtleCrypto> {
-	if (!subtleCryptoPromise) {
-		subtleCryptoPromise = Promise.resolve().then(() => {
-			const c = crypto;
-			if (!c?.subtle) {
-				throw new Error("WebCrypto subtle API is not available");
-			}
-			return c.subtle;
-		});
-	}
-
-	return subtleCryptoPromise;
-}
-
 export function decodeBase64Url(input: string): Uint8Array {
 	const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
 	const padding = normalized.length % 4 === 0 ? "" : "=".repeat(4 - (normalized.length % 4));
@@ -90,20 +74,17 @@ export function encodeBase64Url(input: Uint8Array): string {
 }
 
 async function sha1(bytes: Uint8Array): Promise<Uint8Array> {
-	const subtle = await getSubtleCrypto();
-	const hash = await subtle.digest("SHA-1", toArrayBuffer(bytes));
+	const hash = await crypto.subtle.digest("SHA-1", toArrayBuffer(bytes));
 	return new Uint8Array(hash);
 }
 
 async function sha256(bytes: Uint8Array): Promise<Uint8Array> {
-	const subtle = await getSubtleCrypto();
-	const hash = await subtle.digest("SHA-256", toArrayBuffer(bytes));
+	const hash = await crypto.subtle.digest("SHA-256", toArrayBuffer(bytes));
 	return new Uint8Array(hash);
 }
 
 async function importAesKey(key: Uint8Array): Promise<CryptoKey> {
-	const subtle = await getSubtleCrypto();
-	return subtle.importKey("raw", toArrayBuffer(key), { name: "AES-CBC" }, false, ["encrypt", "decrypt"]);
+	return crypto.subtle.importKey("raw", toArrayBuffer(key), { name: "AES-CBC" }, false, ["encrypt", "decrypt"]);
 }
 
 async function aesEcbDecryptBlock(key: CryptoKey, block: Uint8Array): Promise<Uint8Array> {
@@ -111,13 +92,11 @@ async function aesEcbDecryptBlock(key: CryptoKey, block: Uint8Array): Promise<Ui
 		throw new Error("AES-ECB block size must be 16 bytes");
 	}
 
-	const subtle = await getSubtleCrypto();
-
 	// WebCrypto AES-CBC decrypt enforces PKCS#7 padding and throws OperationError for arbitrary blocks.
 	// To obtain deterministic ECB decrypt for one block y, decrypt [y, c2] where c2 is crafted so
 	// the second plaintext block is valid full-block padding (0x10 repeated).
 	const xoredPadding = xorBlock(PKCS7_FULL_BLOCK, block);
-	const encryptedXoredPadding = await subtle.encrypt(
+	const encryptedXoredPadding = await crypto.subtle.encrypt(
 		{ name: "AES-CBC", iv: toArrayBuffer(ZERO_IV_16) },
 		key,
 		toArrayBuffer(xoredPadding),
@@ -128,7 +107,7 @@ async function aesEcbDecryptBlock(key: CryptoKey, block: Uint8Array): Promise<Ui
 	composedCiphertext.set(block, 0);
 	composedCiphertext.set(c2, AES_BLOCK_SIZE);
 
-	const out = await subtle.decrypt(
+	const out = await crypto.subtle.decrypt(
 		{ name: "AES-CBC", iv: toArrayBuffer(ZERO_IV_16) },
 		key,
 		toArrayBuffer(composedCiphertext),

@@ -239,7 +239,7 @@ export default function Login() {
 				}));
 
 			// the user may have manually set the value before the tg.call resolves
-			// remember, we no longer simulate a loading screen when doing the very fucking slow authentication proccess
+			// remember, we no longer simulate a loading screen when doing the very slow authentication proccess
 			if (!countrySetViaPicker) {
 				setCountry((countryCache = countries().find((a) => a.c == nearest.country.toUpperCase()) || USA_USA_USA));
 

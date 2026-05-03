@@ -4,17 +4,20 @@ import { MessageItemInner, MessageProvider, today, toMidnight, useMessageContext
 import {
 	type ComponentProps,
 	createEffect,
+	createMemo,
 	createSignal,
 	createUniqueId,
+	For,
 	type JSXElement,
 	lazy,
 	onCleanup,
 	onMount,
 	Show,
+	Switch,
 	untrack,
 } from "solid-js";
 import SpatialNavigation from "@/lib/spatial_navigation";
-import { isToday, setSoftkeys, sleep, toaster } from "@utils";
+import { downloadToFile, isToday, mediaFilename, setSoftkeys, sleep, toaster } from "@utils";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { Wallpaper } from "./Room";
 import Separator from "../components/Separator";
@@ -22,14 +25,18 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { tl } from "@mtcute/core";
-import { cloudphone } from "@/config";
+import type { FileLocation, tl } from "@mtcute/core";
+import { cloudphone, cloudphone_features } from "@/config";
 import once from "lodash-es/once";
 
 import { SPOILER_CLASS, SPOILER_TOGGLE } from "../components/Markdown";
 import type { Photo } from "@mtcute/core";
 import ImageViewer from "./ImageViewer";
 import { setStatusbarColor } from "@/stores";
+import Options from "../components/Options";
+import OptionsItem from "../components/OptionsItem";
+import DownloadPrompt from "./DownloadPrompt";
+import { downloadFile } from "@/lib/storage";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
@@ -72,12 +79,12 @@ function formatDate($: Date) {
 type ProxySettingsProps = ComponentProps<typeof ProxySettings>;
 type InitialProxyURL = ProxySettingsProps["initialMtproto"] | ProxySettingsProps["initialSocks"];
 
-let __viewRef: HTMLDivElement | null = null;
+// let __viewRef: HTMLDivElement | null = null;
 
 function FocusableSpoiler(props: { children: JSXElement }) {
-	onCleanup(() => {
-		__viewRef?.focus();
-	});
+	// onCleanup(() => {
+	// 	__viewRef?.focus();
+	// });
 
 	const [toggle, setToggle] = createSignal(false);
 
@@ -103,9 +110,9 @@ function FocusableLink(props: { children: JSXElement; url: null | URL }) {
 
 	let spanRef!: HTMLSpanElement;
 
-	onCleanup(() => {
-		__viewRef?.focus();
-	});
+	// onCleanup(() => {
+	// 	__viewRef?.focus();
+	// });
 
 	let isSocks: boolean | null = null;
 	let initial: InitialProxyURL = null;
@@ -200,10 +207,15 @@ function MessageInfoProvider(props: { $: UIMessage; dialog: UIDialog; children: 
 	);
 }
 
+enum MessageInfoOptions {
+	Download,
+	JumpToReply,
+}
+
 // my initial idea for MessageInfo is that it would be a view
 // but I think it being a modal makes more sense?
 export default function MessageInfo(props: { onClose: () => void }) {
-	const { message, entities, dialog, edited, isOutgoing, isSticker, isReply } = useMessageContext();
+	const { message, entities, dialog, edited, isOutgoing, isSticker, isReply, reply } = useMessageContext();
 
 	function tail() {
 		const sticker = isSticker();
@@ -217,45 +229,100 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 	let viewRef!: HTMLDivElement;
 
-	let hasFocusable = false;
+	const [hasFocusable, setHasFocusable] = createSignal(false);
 	let isFocusing = false;
 
 	const SN_ID = createUniqueId();
+	const SN_ID_OPTIONS = createUniqueId();
 
 	onMount(() => {
-		hasFocusable = !!viewRef.querySelector(".focusable");
+		setHasFocusable(!!viewRef.querySelector(".focusable"));
 		viewRef.focus();
-		__viewRef = viewRef;
+		// __viewRef = viewRef;
 
 		SpatialNavigation.add(SN_ID, {
 			restrict: "self-only",
 			rememberSource: true,
-			selector: `.${styles.view_message_info} .focusable`,
+			selector: `.${styles.view_message_info}#${SN_ID} .focusable`,
+		});
+
+		SpatialNavigation.add(SN_ID_OPTIONS, {
+			restrict: "self-only",
+			rememberSource: true,
+			selector: `.${SN_ID_OPTIONS}.${styles.option_item}`,
 		});
 	});
 
+	const hasAttachment = createMemo(() => {
+		const media = message().media;
+		return (media && "fileId" in media && media.type != "sticker" && media) || null;
+	});
+
+	const hasReply = createMemo(() => {
+		const repliedMessage = reply();
+		if (typeof repliedMessage == "object") {
+			return repliedMessage;
+		}
+		return null;
+	});
+
+	const optionItems = createMemo(() => {
+		const arr = [];
+
+		if (hasAttachment() && (!cloudphone || cloudphone_features.FileDownload)) {
+			arr.push(MessageInfoOptions.Download);
+		}
+
+		if (hasReply()) {
+			arr.push(MessageInfoOptions.JumpToReply);
+		}
+
+		return arr;
+	});
+	const [showOptions, setShowOptions] = createSignal(false);
+
+	const [showDownloadPrompt, setShowDownloadPrompt] = createSignal(false);
+
+	const [showReply, setShowReply] = createSignal<UIMessage | null>(null);
+
 	function updateSoftkeys() {
-		setSoftkeys("Back", hasFocusable ? "SELECT" : "", "");
+		const _hasFocusable = hasFocusable();
+		const _hasOptionItems = optionItems().length != 0;
+
+		if (showOptions()) {
+			setSoftkeys("", "OK", "");
+			return;
+		}
+
+		setSoftkeys(
+			//
+			"Back",
+			_hasFocusable ? "SELECT" : "",
+			_hasOptionItems ? "Options" : "",
+		);
 	}
 
 	const [photo, setPhoto] = createSignal<Photo | null>(null);
+
+	createEffect(() => {
+		updateSoftkeys();
+	});
 
 	createEffect(() => {
 		entities();
 
 		untrack(() => {
 			sleep(10).then(() => {
-				hasFocusable = !!viewRef.querySelector(".focusable");
+				setHasFocusable(!!viewRef.querySelector(".focusable"));
 				isFocusing = false;
 				viewRef.focus();
-				updateSoftkeys();
 			});
 		});
 	});
 
 	onCleanup(() => {
 		SpatialNavigation.remove(SN_ID);
-		__viewRef = null;
+		// __viewRef = null;
 		onClose();
 	});
 
@@ -266,6 +333,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 					ref={viewRef}
 					tabIndex={0}
 					class={styles.view_message_info}
+					id={SN_ID}
 					onFocus={() => {
 						updateSoftkeys();
 					}}
@@ -289,7 +357,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 							return;
 						}
 
-						if (hasFocusable && !isFocusing && e.key == "Enter") {
+						if (hasFocusable() && !isFocusing && e.key == "Enter") {
 							isFocusing = true;
 							sleep(10).then(() => {
 								SpatialNavigation.focus(SN_ID);
@@ -297,6 +365,11 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 							// console.error("SHOULD BE FOCUSING");
 							return;
+						}
+
+						if (e.key == "SoftRight" && optionItems().length != 0) {
+							setShowOptions(true);
+							SpatialNavigation.focus(SN_ID_OPTIONS);
 						}
 
 						if (e.key == "Backspace" || e.key == "SoftLeft") {
@@ -401,6 +474,79 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						}}
 					></ImageViewer>
 				</Portal>
+			</Show>
+			<Show when={showReply()}>
+				<Portal>
+					<MessageProvider $={showReply()!} dialog={dialog()} last first expanded>
+						<MessageInfo
+							onClose={() => {
+								setShowReply(null);
+								viewRef.focus();
+							}}
+						></MessageInfo>
+					</MessageProvider>
+				</Portal>
+			</Show>
+			<Show when={showOptions()}>
+				<Portal>
+					<Options
+						onClose={() => {
+							setTimeout(() => {
+								setShowOptions(false);
+								viewRef.focus();
+							}, 100);
+						}}
+						title="Options"
+					>
+						<For each={optionItems()}>
+							{(item) => (
+								<OptionsItem
+									tabIndex={-1}
+									classList={{
+										[SN_ID_OPTIONS]: true,
+										[styles.option_item]: true,
+									}}
+									on:keydown={(e) => {
+										if (e.key == "Enter") {
+											viewRef.focus();
+											setShowOptions(false);
+
+											if (item == MessageInfoOptions.Download) {
+												const attachment = hasAttachment()!;
+												const notNecessary = downloadFile.fromCache(attachment);
+												if (notNecessary) {
+													const url = URL.createObjectURL(notNecessary.result);
+													downloadToFile(url, mediaFilename(attachment));
+												} else {
+													setShowDownloadPrompt(true);
+												}
+											}
+
+											if (item == MessageInfoOptions.JumpToReply) {
+												setShowReply(hasReply()!);
+											}
+										}
+									}}
+								>
+									{item == MessageInfoOptions.Download
+										? "Download"
+										: item == MessageInfoOptions.JumpToReply
+											? "Go to Reply"
+											: item}
+								</OptionsItem>
+							)}
+						</For>
+					</Options>
+				</Portal>
+			</Show>
+			<Show when={showDownloadPrompt()}>
+				<DownloadPrompt
+					file={hasAttachment()!}
+					onClose={() => {
+						viewRef.focus();
+						setShowDownloadPrompt(false);
+					}}
+				></DownloadPrompt>
 			</Show>
 		</>
 	);

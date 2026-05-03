@@ -96,7 +96,7 @@ sw.addEventListener("fetch", (event) => {
 sw.addEventListener("push", (event) => {
 	const obj = event.data?.json();
 	if (!obj) return;
-	let hasActiveWindows = false;
+	// let hasActiveWindows = false;
 	console.log("[SW] on push", obj);
 	event.waitUntil(
 		resolvePushPayload(obj).then((resolvedPayload) =>
@@ -104,12 +104,15 @@ sw.addEventListener("push", (event) => {
 				.matchAll({ type: "window" })
 				.then((clientList) => {
 					// console.info("matched clients", clientList);
-					hasActiveWindows = clientList.length > 0;
+					// hasActiveWindows = clientList.length > 0;
 					if (visibilityState !== "visible") {
 						return fireNotification(resolvedPayload);
 					}
-					if (hasActiveWindows) {
-						console.info("Supress notification because some instance is alive");
+					if (
+						// hasActiveWindows
+						clientList.length > 0
+					) {
+						console.info("Supress notification because some instance is alive", resolvedPayload);
 						return;
 					}
 					return fireNotification(resolvedPayload);
@@ -290,8 +293,7 @@ async function fireNotification(data: any) {
 	console.log("[SW] show notify", { title, body, icon }, data);
 
 	sw.registration.showNotification(title, {
-		// we slice so that it doesn't look ugly
-		body: collapse(body).slice(0, 40),
+		body: collapse(body),
 		icon: icon,
 		tag: tag,
 		data: data,

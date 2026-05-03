@@ -4,7 +4,7 @@ import * as softkeyStyles from "../components/Softkeys.module.scss";
 import { createSignal, createEffect, onCleanup, Show, onMount, createUniqueId, batch, createMemo } from "solid-js";
 import ProgressSpinner from "@components/ProgressSpinner";
 import { downloadAsync } from "./MessageMedia";
-import { downloadToFile, niceBytes, NOOP, setSoftkeys, sleep } from "@/utils";
+import { downloadToFile, mediaFilename, niceBytes, NOOP, setSoftkeys, sleep } from "@/utils";
 import { Portal } from "solid-js/web";
 import Zoom, { type ZoomRef } from "@components/zoom";
 import { cloudphone, cloudphone_features } from "@/config";
@@ -18,14 +18,6 @@ import { Transition } from "solid-transition-group";
 const enum State {
 	Initial,
 	Zooming,
-}
-
-// behavior of Telegram Web K
-function generateFilename(photo: Photo) {
-	const best = photo.getThumbnail((photo as any)._bestSize.type);
-	const type = best?.type;
-
-	return `photo_${photo.id.toString()}${type ? "_" + type : ""}.jpg`;
 }
 
 function getBestThumbnail(photo: Photo) {
@@ -67,7 +59,7 @@ function ImageFileInfo(props: { photo: Photo; onClose: () => void }) {
 			>
 				<div class={styles.description}>
 					<div class={styles.detail_title}>Name</div>
-					<div class={styles.detail_description}>{generateFilename(props.photo)}</div>
+					<div class={styles.detail_description}>{mediaFilename(props.photo)}</div>
 					<Show when={best()?.fileSize !== undefined}>
 						<div class={styles.detail_title}>Size</div>
 						<div class={styles.detail_description}>{niceBytes(best()!.fileSize!)}</div>
@@ -368,7 +360,7 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 										if (e.key == "Enter") {
 											const photo = props.photo;
 
-											const fileName = generateFilename(photo);
+											const fileName = mediaFilename(photo);
 											downloadToFile(src(), fileName);
 
 											console.error("HI!!!", fileName);

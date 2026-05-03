@@ -1,4 +1,4 @@
-import { ITcpConnection, TcpEndpoint } from "@fuman/net";
+import type { ITcpConnection, TcpEndpoint } from "@fuman/net";
 import { BaseMtProxyTransport } from "@mtcute/core";
 import { TcpConnection } from "./TcpConnection";
 

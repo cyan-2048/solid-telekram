@@ -1,4 +1,4 @@
-import { Dialog } from "@mtcute/core";
+import type { Dialog } from "@mtcute/core";
 import UIDialog from "./UIDialog";
 import MiniSearch from "minisearch";
 

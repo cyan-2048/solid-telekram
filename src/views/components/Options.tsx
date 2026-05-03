@@ -1,4 +1,4 @@
-import { JSXElement, Show } from "solid-js";
+import { type JSXElement, Show } from "solid-js";
 import * as styles from "./Options.module.scss";
 import Content from "./Content";
 import { cloudphone } from "@/config";

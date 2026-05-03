@@ -1,4 +1,4 @@
-import type { ChatPermissions, Dialog, InputPeerLike, MaybeArray, TextWithEntities } from "@mtcute/core";
+import type { tl, ChatPermissions, Dialog, InputPeerLike, MaybeArray, TextWithEntities } from "@mtcute/core";
 import { atom } from "nanostores";
 import UIMessage from "./UIMessage";
 import Queue from "queue";
@@ -8,6 +8,8 @@ import DialogsJar from "./DialogJar";
 import MessagesJar from "./MessagesJar";
 import { $dialogs } from "@/stores";
 import { getNotifications } from "@/workers/pushNotifications";
+
+const MAX_INT_32 = 2 ** 31 - 1;
 
 // can only mimic text
 // no additional info related to other upload types
@@ -70,6 +72,15 @@ export class UIMessageUploading {
 	abort() {
 		this.$error.set(true);
 	}
+}
+
+export enum UIDialogMuteDuration {
+	OneHour = 3600,
+	FourHours = 14400,
+	EightHours = 28800,
+	OneDay = 86400,
+	ThreeDays = 259200,
+	Forever = -1,
 }
 
 const _instanceof_symbol = Symbol("UIDialog");
@@ -183,6 +194,8 @@ export default class UIDialog {
 	$countMention = atom(0);
 	$countReaction = atom(0);
 
+	private muteUntil: null | number = null;
+
 	constructor(public rawDialog: Dialog) {
 		const peer = rawDialog.peer;
 
@@ -238,9 +251,21 @@ export default class UIDialog {
 					return false;
 				}
 				return true;
-			})
+			}),
 		);
 		return found;
+	}
+
+	/**
+	 * refresh $muted store (run this when really necessary)
+	 */
+	syncMuted() {
+		this.$muted.set(typeof this.muteUntil == "number" && Math.floor(Date.now() / 1000) < this.muteUntil);
+	}
+
+	updateNotifySettings(notifySettings: tl.RawPeerNotifySettings) {
+		this.muteUntil = typeof notifySettings.muteUntil == "number" ? notifySettings.muteUntil : null;
+		this.syncMuted();
 	}
 
 	update(dialog: Dialog) {
@@ -264,7 +289,7 @@ export default class UIDialog {
 		this.$lastMessage.set(dialog.lastMessage ? new UIMessage(dialog.lastMessage) : null);
 
 		this.$pinned.set(dialog.isPinned);
-		this.$muted.set(typeof dialog.raw.notifySettings.muteUntil == "number");
+		this.updateNotifySettings(dialog.raw.notifySettings);
 
 		this.$lastReadOutgoing.set(dialog.lastReadOutgoing);
 		this.$lastReadIngoing.set(dialog.lastReadIngoing);
@@ -298,5 +323,36 @@ export default class UIDialog {
 
 	static is(dialog: unknown): dialog is UIDialog {
 		return typeof dialog == "object" && Boolean(dialog && (dialog as UIDialog)[_instanceof_symbol]);
+	}
+
+	private async updateChatNotifySettings(settings: Omit<tl.RawInputPeerNotifySettings, "_">) {
+		const peer = await tg.resolvePeer(this.rawDialog.peer);
+
+		tg.call({
+			_: "account.updateNotifySettings",
+			peer: { _: "inputNotifyPeer", peer: peer },
+			settings: {
+				_: "inputPeerNotifySettings",
+				...settings,
+			},
+		});
+	}
+
+	async unmute() {
+		// if not muted
+		if (!this.$muted.get()) return;
+		await this.updateChatNotifySettings({});
+		this.$muted.set(false);
+	}
+
+	async mute(duration: UIDialogMuteDuration) {
+		if (this.$muted.get()) return;
+
+		await this.updateChatNotifySettings({
+			muteUntil:
+				duration === UIDialogMuteDuration.Forever ? MAX_INT_32 : Math.floor(Date.now() / 1000) + Number(duration),
+		});
+
+		this.$muted.set(true);
 	}
 }

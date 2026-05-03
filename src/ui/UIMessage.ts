@@ -1,4 +1,4 @@
-import { type MaybePromise, Message, type Peer, type TextWithEntities, tl, User } from "@mtcute/core";
+import type { MaybePromise, Message, Peer, TextWithEntities, tl, User } from "@mtcute/core";
 import { atom } from "nanostores";
 import type UIDialog from "./UIDialog";
 import { tg, dialogsJar } from "@globals";
@@ -265,8 +265,7 @@ export default class UIMessage {
 				case "call":
 					if (action.duration) {
 						newText =
-							($.isOutgoing ? "Outgoing Call" : "Incoming Call") +
-							` (${formatDistance(0, action.duration * 1000)})`;
+							($.isOutgoing ? "Outgoing Call" : "Incoming Call") + ` (${formatDistance(0, action.duration * 1000)})`;
 					} else if (action.reason) {
 						newText = UIMessage.callDiscardReasonFromTl(action.reason);
 					}

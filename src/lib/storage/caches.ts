@@ -1,6 +1,6 @@
 // use window.caches
 
-import { Downloader } from "./types";
+import type { Downloader } from "./types";
 
 const CACHE_NAME = "files-cache-v1";
 const PATH_PREFIX = "/offline-files/";

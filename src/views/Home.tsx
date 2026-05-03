@@ -46,6 +46,8 @@ import { Portal } from "solid-js/web";
 import Settings from "./settings";
 import LazyNewChat from "./LazyNewChat";
 import { useStore as useStore_ } from "@nanostores/solid";
+import { select } from "./modals";
+import { UIDialogMuteDuration } from "@/ui/UIDialog";
 
 // to do more shit
 const enum DialogOptionsSelected {
@@ -87,6 +89,15 @@ function DialogOptions(props: {
 			}}
 			title="Options"
 		>
+			<OptionsItem
+				classList={{ option: true, [styles.item]: true }}
+				tabIndex={-1}
+				on:sn-enter-up={() => {
+					props.onSelect(props.muted ? DialogOptionsSelected.UNMUTE : DialogOptionsSelected.MUTE);
+				}}
+			>
+				{props.muted ? "Unmute" : "Mute..."}
+			</OptionsItem>
 			{/* <OptionsItem
 				classList={{ option: true, [styles.item]: true }}
 				on:sn-enter-down={() => {
@@ -96,15 +107,7 @@ function DialogOptions(props: {
 			>
 				{props.pinned ? "Unpin" : "Pin"}
 			</OptionsItem>
-			<OptionsItem
-				classList={{ option: true, [styles.item]: true }}
-				tabIndex={-1}
-				on:sn-enter-down={() => {
-					props.onSelect(props.muted ? DialogOptionsSelected.UNMUTE : DialogOptionsSelected.MUTE);
-				}}
-			>
-				{props.muted ? "Unmute" : "Mute"}
-			</OptionsItem> */}
+			*/}
 			{/* <OptionsItem
 				classList={{ option: true, [styles.item]: true }}
 				tabIndex={-1}
@@ -269,14 +272,14 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 
 	let divRef!: HTMLDivElement;
 
-	// onMount(() => {
-	// 	if (import.meta.env.DEV) {
-	// 		if (divRef) {
-	// 			// @ts-ignore
-	// 			divRef.__$props = props;
-	// 		}
-	// 	}
-	// });
+	if (import.meta.env.DEV) {
+		onMount(() => {
+			if (divRef) {
+				// @ts-ignore
+				divRef.__props__ = props;
+			}
+		});
+	}
 
 	const text = () => {
 		const lastMsg = lastMessage();
@@ -361,6 +364,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 			<div
 				ref={divRef}
 				onFocus={() => {
+					props.$.syncMuted();
 					setStatusbarColor("#1c96c3");
 					setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
@@ -371,6 +375,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				}}
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
+						props.$.syncMuted();
 						setShowOptions(true);
 					}
 
@@ -455,6 +460,29 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 									});
 
 									return;
+
+								case DialogOptionsSelected.MUTE:
+									const muteOptions: [string, UIDialogMuteDuration][] = [
+										["Mute for 1 hour", UIDialogMuteDuration.OneHour],
+										["Mute for 4 hours", UIDialogMuteDuration.FourHours],
+										["Mute for 8 hours", UIDialogMuteDuration.EightHours],
+										["Mute for 1 day", UIDialogMuteDuration.OneDay],
+										["Mute for 3 days", UIDialogMuteDuration.ThreeDays],
+										["Mute Forever", UIDialogMuteDuration.Forever],
+									];
+
+									SpatialNavigation.focus("dialogs");
+
+									const result = await select(muteOptions, UIDialogMuteDuration.Forever, "Notifications");
+									if (result != null) {
+										props.$.mute(result);
+									}
+
+									return;
+
+								case DialogOptionsSelected.UNMUTE:
+									props.$.unmute();
+									break;
 
 								case DialogOptionsSelected.EXIT:
 									window.close();

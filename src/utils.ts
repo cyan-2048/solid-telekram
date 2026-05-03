@@ -1,14 +1,14 @@
 // this file contains utils that should only be used in the main thread
 
-import { tl } from "@mtcute/web";
+import { type FileLocation, type Photo, type Sticker, tl, type MessageMedia } from "@mtcute/web";
 import { type MaybeDynamic, type MaybePromise, type Peer, type SentCode, type TelegramClient, User } from "@mtcute/web";
 import { normalizePhoneNumber, resolveMaybeDynamic } from "@mtcute/web/utils";
-
+import sanitize from "sanitize-filename";
 import { sleep } from "./helpers";
 
 import type { Store, StoreValue } from "nanostores";
 import type { Accessor } from "solid-js";
-import { createRenderEffect, createSignal, onCleanup } from "solid-js";
+import { createComputed, createMemo, createRenderEffect, createSignal, onCleanup, untrack } from "solid-js";
 import { useStore as _useStore } from "@nanostores/solid";
 import type { TelegramIcons } from "@components/Softkeys";
 import type UIMessage from "./ui/UIMessage";
@@ -484,22 +484,26 @@ toaster.v = async (_text: string, _latency: number) => {};
 /**
  * custom behavior
  *
- * @param store Store instance.
+ * @param _store Store instance.
  * @returns Store value.
  */
 export function useStore<SomeStore extends Store, Value extends StoreValue<SomeStore>>(
-	store: SomeStore | (() => SomeStore | undefined),
+	store: SomeStore | (() => SomeStore | undefined | void),
 ): Accessor<Value> {
 	// if it's a function we do my implementation
 	if (typeof store == "function") {
-		const [state, setState] = createSignal(store()?.value);
+		const _store = createMemo(store);
 
-		createRenderEffect(() => {
-			const unsub = store()?.subscribe((val) => {
-				setState(val);
+		const [state, setState] = createSignal(untrack(_store)?.get());
+
+		createComputed(() => {
+			const unsub = _store()?.subscribe((state) => {
+				setState(state);
 			});
 
-			unsub && onCleanup(unsub);
+			onCleanup(() => {
+				unsub?.();
+			});
 		});
 
 		return state;
@@ -592,9 +596,68 @@ export function downloadToFile(url: string | Blob | URL, fileName?: string) {
 	a.download = fileName ?? "file_" + Date.now() + ".bin";
 	document.body.appendChild(a); // Required for Firefox
 	a.click();
+	console.error("HELLO????", url instanceof Blob);
 	document.body.removeChild(a);
 
 	if (url instanceof Blob) {
 		URL.revokeObjectURL(downloadLink);
 	}
+}
+
+type DownloadableMedia = Extract<
+	Exclude<MessageMedia, null | Sticker>,
+	{ fileId: string; type: string } | FileLocation
+>;
+
+// https://github.com/morethanwords/tweb/blob/8a2c0476c94738d792a894a2d9e60738cf798a3b/src/environment/mimeTypeMap.ts
+const MIME_TYPE_EXTENSION_MAP = Object.freeze({
+	"application/pdf": "pdf",
+	"application/x-tgwallpattern": "tgv",
+	"application/x-tgsticker": "tgs",
+	"application/json": "json",
+	"audio/wav": "wav",
+	"audio/mpeg": "mp3",
+	"audio/ogg": "ogg",
+	"image/jpeg": "jpg",
+	"image/png": "png",
+	"image/gif": "gif",
+	"image/webp": "webp",
+	"video/mp4": "mp4",
+	"video/webm": "webm",
+	"video/quicktime": "mov",
+	"image/svg+xml": "svg",
+	"image/avif": "avif",
+	"image/jxl": "jxl",
+	"image/bmp": "bmp",
+}) as Record<string, string>;
+
+// behavior of Telegram Web K
+function photoFilename(photo: Photo) {
+	const best = photo.getThumbnail((photo as any)._bestSize.type);
+	const type = best?.type;
+
+	return `photo_${photo.id.toString()}${type ? "_" + type : ""}.jpg`;
+}
+
+function _mediaFilename(media: DownloadableMedia): string {
+	const type = media.type;
+	if (type == "photo") return photoFilename(media);
+	if (media.fileName) return media.fileName;
+
+	const inputDocumentId = media.inputDocument.id.toString();
+
+	const mimeType = media.mimeType;
+
+	const fileExtensionByMimeType = MIME_TYPE_EXTENSION_MAP[mimeType];
+
+	if (type == "audio") {
+		const base = media.title || `audio_${inputDocumentId}`;
+		return `${base}.${fileExtensionByMimeType || "mp3"}`;
+	}
+
+	return type + "_" + inputDocumentId + "." + (fileExtensionByMimeType || "bin");
+}
+
+export function mediaFilename(media: DownloadableMedia): string {
+	return sanitize(_mediaFilename(media));
 }

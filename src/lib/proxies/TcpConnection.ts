@@ -101,7 +101,7 @@ export class TcpConnection implements ITcpConnection, ITlsConnection {
 			// https://cyan-2048.github.io/b2g-docs/B2G_OS/API/TCPSocket/send.html
 			// basically if this method returns false
 			// the data wasn't actually sent, and waiting for the drain is necessary
-			const written = this.socket.send(chunk.buffer, chunk.byteOffset, chunk.byteLength);
+			const written = this.socket.send(chunk.buffer as ArrayBuffer, chunk.byteOffset, chunk.byteLength);
 
 			if (!written) {
 				this.#sendBuffer.pushFront([chunk, deferred]);
@@ -140,7 +140,7 @@ export class TcpConnection implements ITcpConnection, ITlsConnection {
 		// https://cyan-2048.github.io/b2g-docs/B2G_OS/API/TCPSocket/send.html
 		// basically if this method returns false
 		// the data wasn't actually sent, and waiting for the drain is necessary
-		const written = this.socket.send(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+		const written = this.socket.send(bytes.buffer as ArrayBuffer, bytes.byteOffset, bytes.byteLength);
 
 		if (!written) {
 			const deferred = new Deferred<void>();

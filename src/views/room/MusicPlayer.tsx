@@ -31,11 +31,12 @@ function fileExtFromMime(mimeType: string): string {
 
 function musicFilename(audio: Audio): string {
 	if (audio.fileName) return audio.fileName;
-	const base = audio.title || "audio";
+	const base = audio.title || `audio_${audio.inputDocument.id.toString()}`;
+
 	return `${base}.${fileExtFromMime(audio.mimeType)}`;
 }
 
-function MusicPlayerShared(props: { music: Audio; onClose: () => void }) {
+export default function MusicPlayer(props: { music: Audio; onClose: () => void }) {
 	let divRef!: HTMLDivElement;
 	let optionDownloadRef!: HTMLDivElement;
 	let audioRef!: HTMLAudioElement;
@@ -403,8 +404,4 @@ function MusicPlayerShared(props: { music: Audio; onClose: () => void }) {
 			</Show>
 		</>
 	);
-}
-
-export default function MusicPlayer(props: { music: Audio; onClose: () => void }) {
-	return <MusicPlayerShared {...props} />;
 }

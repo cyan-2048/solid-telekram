@@ -47,7 +47,7 @@ export const VoiceRecorderWeb = (props: {
 		audioRef.pause();
 		URL.revokeObjectURL(audioRef.src);
 
-		divRef.blur();
+		if (document.activeElement == divRef) divRef.blur();
 		SpatialNavigation.resume();
 	});
 
@@ -110,7 +110,7 @@ export const VoiceRecorderWeb = (props: {
 					props.setAudioBlob(
 						blob,
 						filteredData.map((n) => Math.floor(n * multiplier * 31)),
-						audioBuffer.duration
+						audioBuffer.duration,
 					);
 					changeRecording(false);
 

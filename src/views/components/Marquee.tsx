@@ -1,5 +1,5 @@
 import * as styles from "./Marquee.module.scss";
-import { JSXElement, createEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { type JSXElement, createEffect, createSignal, onCleanup, untrack } from "solid-js";
 
 function isElementOverflowing(element: HTMLElement) {
 	var overflowX = element.offsetWidth < element.scrollWidth,

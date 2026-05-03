@@ -7,7 +7,12 @@ import { sleep } from "@/helpers";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
 
-export default function Select(props: { items: [string, any][]; selected: any; onClose: (val: any) => void }) {
+export default function Select(props: {
+	items: [string, any][];
+	selected: any;
+	onClose: (val: any) => void;
+	title: string;
+}) {
 	let lastFocusedElement!: HTMLElement;
 
 	const SN_ID = createUniqueId();
@@ -34,7 +39,7 @@ export default function Select(props: { items: [string, any][]; selected: any; o
 
 	return (
 		<ModalContainer select>
-			<ModalHeader>Select</ModalHeader>
+			<ModalHeader>{props.title || "Select"}</ModalHeader>
 			<div
 				onKeyDown={(e) => {
 					if (e.key == "Enter" || e.key.startsWith("Arrow")) return;

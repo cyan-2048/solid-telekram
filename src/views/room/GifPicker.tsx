@@ -1,4 +1,4 @@
-import { GifCategories, GifResult } from "@/ui/UIGifPicker";
+import type { GifCategories, GifResult } from "@/ui/UIGifPicker";
 import Options from "../components/Options";
 import * as styles from "./GifPicker.module.scss";
 import {
@@ -485,7 +485,7 @@ function GifSearchItem(props: { video: Video; onSelect: (e: Video | null) => voi
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
 		}
 
 		onCleanup(() => {
@@ -824,7 +824,7 @@ function GifItem(props: { onSelect: (e: Video | null) => void; video: Video }) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
 		}
 
 		onCleanup(() => {

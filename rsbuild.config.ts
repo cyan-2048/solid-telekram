@@ -93,7 +93,7 @@ export default defineConfig({
 				content: "#000",
 			},
 		},
-		tags: [{ tag: "div", attrs: { class: "LOADING" }, append: false }],
+		tags: [{ tag: "div", attrs: { class: "LOADING" }, append: false, head: false }],
 	},
 
 	resolve: {

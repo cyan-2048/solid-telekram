@@ -1,6 +1,6 @@
 import { performSocksHandshake, type SocksProxySettings } from "@fuman/net";
 import { IntermediatePacketCodec, type ITelegramConnection, type TelegramTransport } from "@mtcute/core";
-import type { BasicDcOption } from "@mtcute/core/utils";
+import type { BasicDcOption } from "@mtcute/core/utils.js";
 import { TcpConnection } from "./TcpConnection";
 
 export default class SocksProxyTcpTransport implements TelegramTransport {

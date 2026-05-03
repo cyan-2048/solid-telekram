@@ -8,215 +8,190 @@ import Select from "./Select";
 const NOOP = () => {};
 
 const enum Modal {
-  Alert,
-  Confirm,
-  Prompt,
-  Select,
+	Alert,
+	Confirm,
+	Prompt,
+	Select,
 }
 
 export function alert(text = "", title = "TeleKram") {
-  return alert.v(text, title);
+	return alert.v(text, title);
 }
 
 alert.v = (_text: string, _title: string): Promise<void> => Promise.resolve();
 
-export function confirm(
-  text = "",
-  title = "TeleKram",
-  yes = "OK",
-  no = "Cancel",
-) {
-  return confirm.v(text, title, yes, no);
+export function confirm(text = "", title = "TeleKram", yes = "OK", no = "Cancel") {
+	return confirm.v(text, title, yes, no);
 }
 
-confirm.v = (
-  _text: string,
-  _title: string,
-  _yes: string,
-  _no: string,
-): Promise<boolean> => Promise.resolve(false);
+confirm.v = (_text: string, _title: string, _yes: string, _no: string): Promise<boolean> => Promise.resolve(false);
 
-export function prompt(
-  text = "",
-  defaultValue = "",
-  title = "TeleKram",
-  yes = "OK",
-  no = "Cancel",
-) {
-  return prompt.v(text, defaultValue, title, yes, no);
+export function prompt(text = "", defaultValue = "", title = "TeleKram", yes = "OK", no = "Cancel") {
+	return prompt.v(text, defaultValue, title, yes, no);
 }
 
-prompt.v = (
-  _text: string,
-  _defaultValue: string,
-  _title: string,
-  _yes: string,
-  _no: string,
-): Promise<string | null> => Promise.resolve(null);
+prompt.v = (_text: string, _defaultValue: string, _title: string, _yes: string, _no: string): Promise<string | null> =>
+	Promise.resolve(null);
 
 type SelectItem<T> = [string, T];
 
-export function select<T>(
-  arr: SelectItem<T>[],
-  selected?: T,
-): Promise<T | null>;
-export function select<T>(arr: T[], selected?: T): Promise<T | null>;
-export function select<T>(arr: T[] | SelectItem<T>[], selected?: T) {
-  return select.v(arr, selected);
+export function select<T>(arr: SelectItem<T>[], selected?: T, title?: string): Promise<T | null>;
+export function select<T>(arr: T[], selected?: T, title?: string): Promise<T | null>;
+export function select<T>(arr: T[] | SelectItem<T>[], selected?: T, title = "Select") {
+	return select.v(arr, selected, title);
 }
 
-select.v = <T,>(
-  _arr: T[] | SelectItem<T>[],
-  _selected?: T,
-): Promise<T | null> => Promise.resolve(null);
+select.v = <T,>(_arr: T[] | SelectItem<T>[], _selected?: T, _title?: string): Promise<T | null> =>
+	Promise.resolve(null);
 
 export default function Modals() {
-  const [text, setText] = createSignal("");
-  const [title, setTitle] = createSignal("");
-  const [resolveText, setResolveText] = createSignal("");
-  const [rejectText, setRejectText] = createSignal("");
-  const [promptDefault, setPromptDefault] = createSignal("");
-  const [selected, setSelected] = createSignal<any>(null);
-  const [items, setItems] = createSignal<[string, any][]>([]);
+	const [text, setText] = createSignal("");
+	const [title, setTitle] = createSignal("");
+	const [resolveText, setResolveText] = createSignal("");
+	const [rejectText, setRejectText] = createSignal("");
+	const [promptDefault, setPromptDefault] = createSignal("");
+	const [selected, setSelected] = createSignal<any>(null);
+	const [items, setItems] = createSignal<[string, any][]>([]);
 
-  const [modal, setModal] = createSignal<null | Modal>(null);
+	const [modal, setModal] = createSignal<null | Modal>(null);
 
-  let _callback: (val: any) => void = NOOP;
+	let _callback: (val: any) => void = NOOP;
 
-  select.v = function <T>(_items: T[] | SelectItem<T>[], _selected?: T) {
-    return new Promise((res) => {
-      const normalizedItems = _items.map(
-        (item) =>
-          (Array.isArray(item) ? item : [String(item), item]) as [string, T],
-      );
+	select.v = function <T>(_items: T[] | SelectItem<T>[], _selected?: T, _title?: string) {
+		return new Promise((res) => {
+			const normalizedItems = _items.map((item) => (Array.isArray(item) ? item : [String(item), item]) as [string, T]);
 
-      setSelected(() => _selected);
-      setItems(normalizedItems);
+			setTitle(_title || "");
 
-      setModal(Modal.Select);
+			setSelected(() => _selected);
+			setItems(normalizedItems);
 
-      _callback = res;
-    });
-  };
+			setModal(Modal.Select);
 
-  alert.v = function (_text, _title) {
-    return new Promise((res) => {
-      setText(_text);
-      setTitle(_title);
+			_callback = res;
+		});
+	};
 
-      setModal(Modal.Alert);
+	alert.v = function (_text, _title) {
+		return new Promise((res) => {
+			setText(_text);
+			setTitle(_title);
 
-      _callback = res;
-    });
-  };
+			setModal(Modal.Alert);
 
-  confirm.v = function (_text, _title, yes, no) {
-    return new Promise((res) => {
-      setText(_text);
-      setTitle(_title);
-      setResolveText(yes);
-      setRejectText(no);
+			_callback = res;
+		});
+	};
 
-      setModal(Modal.Confirm);
+	confirm.v = function (_text, _title, yes, no) {
+		return new Promise((res) => {
+			setText(_text);
+			setTitle(_title);
+			setResolveText(yes);
+			setRejectText(no);
 
-      _callback = res;
-    });
-  };
+			setModal(Modal.Confirm);
 
-  prompt.v = function (_text, defaultValue, _title, yes, no) {
-    return new Promise((res) => {
-      setText(_text);
-      setTitle(_title);
-      setResolveText(yes);
-      setRejectText(no);
-      setPromptDefault(defaultValue);
+			_callback = res;
+		});
+	};
 
-      setModal(Modal.Prompt);
+	prompt.v = function (_text, defaultValue, _title, yes, no) {
+		return new Promise((res) => {
+			setText(_text);
+			setTitle(_title);
+			setResolveText(yes);
+			setRejectText(no);
+			setPromptDefault(defaultValue);
 
-      _callback = res;
-    });
-  };
+			setModal(Modal.Prompt);
 
-  return (
-    <Switch>
-      <Match when={modal() == Modal.Select}>
-        <Select
-          items={items()}
-          selected={selected()}
-          onClose={async (result) => {
-            const callback = _callback;
-            _callback = NOOP;
+			_callback = res;
+		});
+	};
 
-            setModal(null);
+	return (
+		<Switch>
+			<Match when={modal() == Modal.Select}>
+				<Select
+					title={title()}
+					items={items()}
+					selected={selected()}
+					onClose={async (result) => {
+						const callback = _callback;
+						_callback = NOOP;
 
-            setSelected(null);
-            setItems([]);
+						setTitle("");
+						setModal(null);
 
-            await sleep(10);
-            callback(result);
-          }}
-        ></Select>
-      </Match>
-      <Match when={modal() == Modal.Alert}>
-        <Alert
-          title={title()}
-          text={text()}
-          onClose={() => {
-            const callback = _callback;
-            _callback = NOOP;
+						setSelected(null);
+						setItems([]);
 
-            setModal(null);
-            setText("");
-            setTitle("");
+						await sleep(10);
+						callback(result);
+					}}
+				></Select>
+			</Match>
+			<Match when={modal() == Modal.Alert}>
+				<Alert
+					title={title()}
+					text={text()}
+					onClose={() => {
+						const callback = _callback;
+						_callback = NOOP;
 
-            sleep(10).then(callback);
-          }}
-        ></Alert>
-      </Match>
-      <Match when={modal() == Modal.Confirm}>
-        <Confirm
-          title={title()}
-          text={text()}
-          reject={rejectText()}
-          resolve={resolveText()}
-          onClose={async (result) => {
-            const callback = _callback;
-            _callback = NOOP;
+						setModal(null);
+						setText("");
+						setTitle("");
 
-            setModal(null);
-            setText("");
-            setTitle("");
-            setRejectText("");
-            setResolveText("");
+						sleep(10).then(callback);
+					}}
+				></Alert>
+			</Match>
+			<Match when={modal() == Modal.Confirm}>
+				<Confirm
+					title={title()}
+					text={text()}
+					reject={rejectText()}
+					resolve={resolveText()}
+					onClose={async (result) => {
+						const callback = _callback;
+						_callback = NOOP;
 
-            await sleep(10);
-            callback(result);
-          }}
-        ></Confirm>
-      </Match>
-      <Match when={modal() == Modal.Prompt}>
-        <Prompt
-          defaultValue={promptDefault()}
-          title={title()}
-          text={text()}
-          reject={rejectText()}
-          resolve={resolveText()}
-          onClose={async (result) => {
-            const callback = _callback;
-            _callback = NOOP;
+						setModal(null);
+						setText("");
+						setTitle("");
+						setRejectText("");
+						setResolveText("");
 
-            setModal(null);
-            setText("");
-            setTitle("");
-            setRejectText("");
-            setResolveText("");
-            setPromptDefault("");
+						await sleep(10);
+						callback(result);
+					}}
+				></Confirm>
+			</Match>
+			<Match when={modal() == Modal.Prompt}>
+				<Prompt
+					defaultValue={promptDefault()}
+					title={title()}
+					text={text()}
+					reject={rejectText()}
+					resolve={resolveText()}
+					onClose={async (result) => {
+						const callback = _callback;
+						_callback = NOOP;
 
-            await sleep(10);
-            callback(result);
-          }}
-        ></Prompt>
-      </Match>
-    </Switch>
-  );
+						setModal(null);
+						setText("");
+						setTitle("");
+						setRejectText("");
+						setResolveText("");
+						setPromptDefault("");
+
+						await sleep(10);
+						callback(result);
+					}}
+				></Prompt>
+			</Match>
+		</Switch>
+	);
 }
