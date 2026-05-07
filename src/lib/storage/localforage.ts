@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import { Downloader } from "./types";
+import type { Downloader } from "./types";
 
 const store = localforage.createInstance({ name: "cache" });
 

@@ -116,8 +116,6 @@ export const tg = new TelegramClient(
 			},
 );
 
-Object.assign(globalThis, { tg });
-
 const refreshDialogsByPeer = UIDialog.refreshDialogsByPeer;
 
 async function refreshDialogs() {

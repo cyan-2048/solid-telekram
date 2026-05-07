@@ -24,11 +24,25 @@ Object.defineProperty(KeyboardEvent.prototype, "key", {
 window.addEventListener("back", (e) => {
 	e.preventDefault();
 
-	document.activeElement?.dispatchEvent(
-		new KeyboardEvent("keydown", {
-			key: "SoftRight",
-			bubbles: true,
-			cancelable: true,
-		})
-	);
+	const activeElement = document.activeElement;
+
+	if (activeElement) {
+		activeElement.dispatchEvent(
+			new KeyboardEvent("keydown", {
+				key: "SoftRight",
+				bubbles: true,
+				cancelable: true,
+			}),
+		);
+
+		setTimeout(() => {
+			activeElement.dispatchEvent(
+				new KeyboardEvent("keyup", {
+					key: "SoftRight",
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+		}, 100);
+	}
 });

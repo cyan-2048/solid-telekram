@@ -1,4 +1,4 @@
-import type { FileLocation } from "@mtcute/core";
+import type { FileLocation, MessageMedia, Sticker } from "@mtcute/core";
 import { simpleHash, sleep } from "@utils";
 import { EventEmitter } from "tseep";
 import * as fromLocalForage from "./localforage";
@@ -12,6 +12,18 @@ import { $storage } from "@stores";
 
 function switchStorage() {
 	const storage = $storage.get();
+
+	if (import.meta.env.CLOUDPHONE) {
+		switch (storage) {
+			case "caches":
+				return fromCaches;
+			case "localforage":
+				return fromLocalForage;
+		}
+
+		throw new Error("DEVICE STORAGE NOT SUPPORTED ON CLOUDPHON!!!");
+	}
+
 	switch (storage) {
 		case "caches":
 			return fromCaches;
@@ -40,7 +52,12 @@ export function clearCache() {
 
 type RpcError = tl.RpcError;
 
-function hashFile(fileLocation: FileLocation) {
+type DownloadableMedia = Extract<
+	Exclude<MessageMedia, null | Sticker>,
+	{ fileId: string; type: string } | FileLocation
+>;
+
+function hashFile(fileLocation: FileLocation | DownloadableMedia) {
 	const location = fileLocation.location;
 	// let's hope this works haha
 	if ("uniqueFileId" in fileLocation) {

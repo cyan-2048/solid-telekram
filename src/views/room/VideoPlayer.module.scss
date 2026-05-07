@@ -1,0 +1,89 @@
+.player {
+	color: #fff;
+	box-sizing: border-box;
+	background-color: #000;
+	background-position: center;
+	background-size: cover;
+	justify-content: center;
+	align-items: center;
+	width: 100vw;
+	height: calc(100vh - 30px);
+	padding: 10px;
+	display: flex;
+	position: fixed;
+	top: 0;
+	left: 0;
+	overflow: hidden;
+}
+
+.backdrop {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+}
+
+.content {
+	width: 92vw;
+	max-width: 480px;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	z-index: 1;
+	align-items: center;
+}
+
+.title {
+	font-size: 17px;
+	font-weight: 600;
+	word-break: break-word;
+	text-align: center;
+}
+
+.downloading {
+	overflow: hidden;
+	font-size: 12px;
+	display: flex;
+	justify-content: center;
+	height: 36px;
+	> span {
+		align-self: end;
+	}
+}
+
+.timeline {
+	margin-top: 9px;
+	width: 100%;
+	height: 6px;
+	border-radius: 3px;
+	background: #8c8c8c;
+	overflow: hidden;
+}
+
+.timeline_fill {
+	height: 100%;
+	background: #e60060;
+	transition: width 120ms linear;
+}
+
+.times {
+	display: flex;
+	justify-content: space-between;
+	font-size: 12px;
+	color: white;
+	line-height: 17px;
+	margin-top: 4px;
+}
+
+.controls {
+	font-size: 12px;
+	opacity: 0.7;
+	margin-top: 4px;
+}
+
+.option_item:focus {
+	background-color: var(--accent);
+	color: white;
+}

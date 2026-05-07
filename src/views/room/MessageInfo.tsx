@@ -25,7 +25,7 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { FileLocation, tl } from "@mtcute/core";
+import type { FileLocation, tl, Video } from "@mtcute/core";
 import { cloudphone, cloudphone_features } from "@/config";
 import once from "lodash-es/once";
 
@@ -37,6 +37,7 @@ import Options from "../components/Options";
 import OptionsItem from "../components/OptionsItem";
 import DownloadPrompt from "./DownloadPrompt";
 import { downloadFile } from "@/lib/storage";
+import VideoPlayer from "./VideoPlayer";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
@@ -303,6 +304,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 	}
 
 	const [photo, setPhoto] = createSignal<Photo | null>(null);
+	const [video, setVideo] = createSignal<Video | null>(null);
 
 	createEffect(() => {
 		updateSoftkeys();
@@ -326,6 +328,8 @@ export default function MessageInfo(props: { onClose: () => void }) {
 		onClose();
 	});
 
+	let _last_inner_focused: HTMLElement | null = null;
+
 	return (
 		<>
 			<Content>
@@ -339,6 +343,8 @@ export default function MessageInfo(props: { onClose: () => void }) {
 					}}
 					oncapture:sn-willfocus={(e) => {
 						const target = e.target;
+
+						_last_inner_focused = target as HTMLElement;
 
 						setSoftkeys("", target.classList.contains(SPOILER_CLASS) ? "TOGGLE" : "VIEW", "");
 						scrollIntoView(target, {
@@ -411,6 +417,9 @@ export default function MessageInfo(props: { onClose: () => void }) {
 												case "photo":
 													setPhoto(media);
 													break;
+												case "video":
+													setVideo(media);
+													break;
 											}
 										}}
 										customRenderer={(e, _default, _children) => {
@@ -471,9 +480,20 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						onClose={() => {
 							setPhoto(null);
 							setStatusbarColor("#1c96c3");
+							_last_inner_focused?.focus();
 						}}
 					></ImageViewer>
 				</Portal>
+			</Show>
+			<Show when={video()}>
+				<VideoPlayer
+					video={video()!}
+					onClose={() => {
+						setVideo(null);
+						setStatusbarColor("#1c96c3");
+						_last_inner_focused?.focus();
+					}}
+				></VideoPlayer>
 			</Show>
 			<Show when={showReply()}>
 				<Portal>

@@ -27,16 +27,10 @@ function getBestThumbnail(photo: Photo) {
 
 function ImageFileInfo(props: { photo: Photo; onClose: () => void }) {
 	let divRef!: HTMLDivElement;
-	let lastFocused!: HTMLElement;
 
 	onMount(() => {
-		lastFocused = document.activeElement as HTMLElement;
 		setSoftkeys("Cancel", "", "", false, false);
 		divRef.focus();
-	});
-
-	onCleanup(() => {
-		lastFocused?.focus();
 	});
 
 	const best = createMemo(() => getBestThumbnail(props.photo));
@@ -99,13 +93,9 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 
 	const [progress, setProgress] = createSignal(0);
 
-	let lastFocused: HTMLElement;
-
 	const SN_ID = createUniqueId();
 
 	onMount(() => {
-		lastFocused = document.activeElement as HTMLElement;
-
 		setStatusbarColor("#000");
 		setSoftkeys("", "", "Options", false, true);
 
@@ -118,7 +108,6 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 	});
 
 	onCleanup(() => {
-		lastFocused?.focus();
 		SpatialNavigation.remove(SN_ID);
 	});
 
