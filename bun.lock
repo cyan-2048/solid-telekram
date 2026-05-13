@@ -10,7 +10,7 @@
         "@fuman/utils": "0.0.19",
         "@modern-dev/jsbn": "^1.2.5",
         "@mtcute/file-id": "0.29.0",
-        "@mtcute/markdown-parser": "0.29.6",
+        "@mtcute/markdown-parser": "0.29.7",
         "@mtcute/tl-runtime": "0.29.0",
         "@mtcute/wasm": "0.19.9",
         "@nanostores/persistent": "^1.3.3",
@@ -192,11 +192,11 @@
 
     "@modern-dev/jsbn": ["@modern-dev/jsbn@1.2.5", "", {}, "sha512-IsUlwNRZTjj6eBNdtGxLwrPbIWIGbuTK+82j/a3KexskL3yPIe6wdXj4sTQe1xjZWb8nLvSuttOcOCUecjBEVQ=="],
 
-    "@mtcute/core": ["@mtcute/core@0.29.6", "", { "dependencies": { "@fuman/io": "0.0.19", "@fuman/net": "0.0.19", "@fuman/utils": "0.0.19", "@mtcute/file-id": "^0.29.0", "@mtcute/tl-runtime": "^0.29.0", "@types/events": "3.0.0", "long": "^5.3.2" } }, "sha512-CYSruSaVOeFvTj51TphoNRyyJAXFsrXH/cYAsTzJx6/m4Ql0rGLfJ0ozOt6c4QVp8ro7v/gCu8bnnnA9UfbUOg=="],
+    "@mtcute/core": ["@mtcute/core@0.29.7", "", { "dependencies": { "@fuman/io": "0.0.19", "@fuman/net": "0.0.19", "@fuman/utils": "0.0.19", "@mtcute/file-id": "^0.29.0", "@mtcute/tl-runtime": "^0.29.0", "@types/events": "3.0.0", "long": "^5.3.2" } }, "sha512-wRPSl4D5JdYQ/8HuTxrQF5NnDL2tgGgVygWnaxs9qhlUwaaG69VNEJZuet2lj7P4tgnjO8K/XAABntApvcuL5w=="],
 
     "@mtcute/file-id": ["@mtcute/file-id@0.29.0", "", { "dependencies": { "@fuman/utils": "0.0.19", "@mtcute/tl-runtime": "^0.29.0", "long": "^5.3.2" } }, "sha512-kfNFKjdfFoo9YIl823EJ068u0djgK6MsqfIHIcb6iwmKOxnCFTLRvBGnJUaO+SbOejg63Tz5lzQxKnt03kEV6A=="],
 
-    "@mtcute/markdown-parser": ["@mtcute/markdown-parser@0.29.6", "", { "dependencies": { "@mtcute/core": "^0.29.6", "long": "^5.3.2" } }, "sha512-ORwNStlFApk5HSDvCo2XfoXmGLp/G0+1HlX1A2U3BZ1ma2RzkBEiWe8ylDWUWP0Qs2ds79H0A2XFIkr6QYSqog=="],
+    "@mtcute/markdown-parser": ["@mtcute/markdown-parser@0.29.7", "", { "dependencies": { "@mtcute/core": "^0.29.7", "long": "^5.3.2" } }, "sha512-V9Nut0V+y43355h3pwi4jpqXMmuqAPPVKNm0yhy4T2I08na8Lhwsem8Ppw/KD4PECkmkihwyrD4nw97whsvJ+g=="],
 
     "@mtcute/tl-runtime": ["@mtcute/tl-runtime@0.29.0", "", { "dependencies": { "@fuman/utils": "0.0.19", "long": "^5.3.2" } }, "sha512-VhDVYKYeC5TypdgzJ/6CtoZgwlR3h1xKatVTnuVcAe1sXrbIwju0EzZlPbUCjH6vgoOXyrJvkhUXdax/oSSjpg=="],
 

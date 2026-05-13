@@ -1,6 +1,6 @@
 import _Long from 'long';
 export declare namespace tl {
-    const LAYER = 224;
+    const LAYER = 225;
 
     type Long = _Long;
     type RawLong = Uint8Array;
@@ -806,6 +806,11 @@ export class RpcError extends Error {
          * Contact's last name
          */
         lastName: string;
+        /**
+         * A private note for this contact, only visible to us; see
+         * <a href="https://corefork.telegram.org/api/contacts#private-notes-for-contacts">here
+         * »</a> for more info on contact notes.
+         */
         note?: tl.TypeTextWithEntities;
     }
     /**
@@ -1894,9 +1899,22 @@ export class RpcError extends Error {
          * Mini App »</a>.
          */
         botHasMainApp?: boolean;
+        /**
+         * If set, this bot supports
+         * <a href="https://corefork.telegram.org/api/forum#bot-forums">bot
+         * forum topics »</a>.
+         */
         botForumView?: boolean;
+        /**
+         * If set, this bot supports
+         * <a href="https://corefork.telegram.org/api/forum#bot-forums">bot
+         * forum topics »</a>, and users (not just the bot!) are
+         * allowed to create and manage bot forum topics in their
+         * private chat with the bot.
+         */
         botForumCanManageTopics?: boolean;
         botCanManageBots?: boolean;
+        botGuestchat?: boolean;
         /**
          * ID of the user, see
          * <a href="https://corefork.telegram.org/api/peers#peer-id">here
@@ -2313,7 +2331,7 @@ export class RpcError extends Error {
         callNotEmpty?: boolean;
         /**
          * Whether this group is
-         * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">protected</a>,
+         * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">protected</a>,
          * thus does not allow forwarding messages from it
          */
         noforwards?: boolean;
@@ -2515,7 +2533,7 @@ export class RpcError extends Error {
         gigagroup?: boolean;
         /**
          * Whether this channel or group is
-         * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">protected</a>,
+         * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">protected</a>,
          * thus does not allow forwarding messages from it
          */
         noforwards?: boolean;
@@ -2761,6 +2779,11 @@ export class RpcError extends Error {
          * Is this a supergroup
          */
         megagroup?: boolean;
+        /**
+         * If set, this is a
+         * <a href="https://corefork.telegram.org/api/monoforum">monoforum
+         * »</a>.
+         */
         monoforum?: boolean;
         /**
          * Channel ID
@@ -2939,8 +2962,9 @@ export class RpcError extends Error {
         canViewStats?: boolean;
         /**
          * Whether any anonymous admin of this supergroup was blocked:
-         * if set, you won't receive messages from anonymous group
-         * admins in
+         * if set, you won't receive messages from
+         * <a href="https://corefork.telegram.org/api/rights#anonymous-admins">anonymous
+         * group admins »</a> in
          * <a href="https://corefork.telegram.org/api/discussion">discussion
          * replies via @replies</a>
          */
@@ -3275,7 +3299,8 @@ export class RpcError extends Error {
         mainTab?: tl.TypeProfileTab;
     }
     /**
-     * Group member.
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">Basic
+     * group</a> member (not usable by supergroups).
      */
     interface RawChatParticipant {
         _: 'chatParticipant';
@@ -3291,10 +3316,16 @@ export class RpcError extends Error {
          * Date added to the group
          */
         date: number;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
-     * Represents the creator of the group
+     * Represents the creator of the
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group »</a>
      */
     interface RawChatParticipantCreator {
         _: 'chatParticipantCreator';
@@ -3302,10 +3333,15 @@ export class RpcError extends Error {
          * ID of the user that created the group
          */
         userId: number;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
-     * Chat admin
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">Basic
+     * group</a> admin (not usable by supergroups).
      */
     interface RawChatParticipantAdmin {
         _: 'chatParticipantAdmin';
@@ -3321,10 +3357,17 @@ export class RpcError extends Error {
          * Date when the user was added
          */
         date: number;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
-     * Info on members is unavailable
+     * The full list of members of
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * groups »</a> is not available to you, because you were
+     * banned.
      */
     interface RawChatParticipantsForbidden {
         _: 'chatParticipantsForbidden';
@@ -3338,7 +3381,10 @@ export class RpcError extends Error {
         selfParticipant?: tl.TypeChatParticipant;
     }
     /**
-     * Group members.
+     * Contains the full list of members of
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * groups »</a>; is <strong>NOT</strong> usable for
+     * supergroups/channels.
      */
     interface RawChatParticipants {
         _: 'chatParticipants';
@@ -3448,7 +3494,7 @@ export class RpcError extends Error {
         pinned?: boolean;
         /**
          * Whether this message is
-         * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">protected</a>
+         * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">protected</a>
          * and thus cannot be forwarded; clients should also prevent
          * users from saving attached media (i.e. videos should only be
          * streamed, photos should be kept in RAM, et cetera).
@@ -3525,6 +3571,15 @@ export class RpcError extends Error {
          * users, even if their boosts have changed.
          */
         fromBoostsApplied?: number;
+        /**
+         * Only in
+         * <a href="https://corefork.telegram.org/api/channel#supergroups">supergroups
+         * »</a> (never basic groups, where this information is
+         * contained
+         * <a href="https://corefork.telegram.org/api/rank">elsewhere
+         * »</a>), contains the sender's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         fromRank?: string;
         /**
          * Peer ID, the chat where this message was sent
@@ -3560,6 +3615,7 @@ export class RpcError extends Error {
          * the user.
          */
         viaBusinessBotId?: number;
+        guestchatViaFrom?: tl.TypePeer;
         /**
          * Reply information
          */
@@ -3678,6 +3734,12 @@ export class RpcError extends Error {
          * full flow.
          */
         suggestedPost?: tl.TypeSuggestedPost;
+        /**
+         * Once sent, this message will be automatically re-scheduled
+         * to be re-sent again this many seconds in the future, see
+         * <a href="https://corefork.telegram.org/api/scheduled-messages#repeating-scheduled-messages">here
+         * »</a> for more info on repeating scheduled messages.
+         */
         scheduleRepeatPeriod?: number;
         summaryFromLanguage?: string;
     }
@@ -5245,6 +5307,11 @@ export class RpcError extends Error {
          * pre-payment for the upgrade of a gift we own</a>.
          */
         upgradeSeparate?: boolean;
+        /**
+         * If set, this gift was acquired in a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gifts auction »</a>.
+         */
         auctionAcquired?: boolean;
         /**
          * Info about the gift
@@ -5401,6 +5468,13 @@ export class RpcError extends Error {
          * the specified unixtime.
          */
         canResellAt?: number;
+        /**
+         * If set, the {@link RawStarGiftAttributeOriginalDetails}
+         * attribute of this gift may be removed by paying the
+         * specified amount of stars, see
+         * <a href="https://corefork.telegram.org/api/gifts#dropping-the-original-details-of-an-upgraded-gift">here
+         * »</a> for the full flow.
+         */
         dropOriginalDetailsStars?: Long;
         canCraftAt?: number;
     }
@@ -5612,8 +5686,17 @@ export class RpcError extends Error {
          */
         transactionId?: string;
     }
+    /**
+     * A new birthday was suggested using
+     * {@link users.RawSuggestBirthdayRequest}, see
+     * <a href="https://corefork.telegram.org/api/profile#birthday">here
+     * »</a> for more info on birthdays in the API.
+     */
     interface RawMessageActionSuggestBirthday {
         _: 'messageActionSuggestBirthday';
+        /**
+         * The suggested birthday.
+         */
         birthday: tl.TypeBirthday;
     }
     interface RawMessageActionStarGiftPurchaseOffer {
@@ -5638,16 +5721,59 @@ export class RpcError extends Error {
         _: 'messageActionChangeCreator';
         newCreatorId: number;
     }
+    /**
+     * Emitted only in private chats when enabling or disabling
+     * <a href="https://corefork.telegram.org/api/content-protection#for-users">content
+     * protection »</a>.
+     */
     interface RawMessageActionNoForwardsToggle {
         _: 'messageActionNoForwardsToggle';
+        /**
+         * Previous protection status (if true, the chat was
+         * protected). May be equal to <code>new_value</code> when
+         * replying to requests, see
+         * <a href="https://corefork.telegram.org/api/content-protection#for-users">here
+         * »</a> for more info on the full flow.
+         */
         prevValue: boolean;
+        /**
+         * New protection status.
+         */
         newValue: boolean;
     }
+    /**
+     * Emitted only in private chats if the other side requested to
+     * disable
+     * <a href="https://corefork.telegram.org/api/content-protection#for-users">content
+     * protection »</a>.
+     */
     interface RawMessageActionNoForwardsRequest {
         _: 'messageActionNoForwardsRequest';
+        /**
+         * If set, this request was accepted or rejected by the other
+         * user and thus cannot be used anymore.
+         */
         expired?: boolean;
+        /**
+         * Previous protection status.
+         */
         prevValue: boolean;
+        /**
+         * New requested protection status.
+         */
         newValue: boolean;
+    }
+    interface RawMessageActionPollAppendAnswer {
+        _: 'messageActionPollAppendAnswer';
+        answer: tl.TypePollAnswer;
+    }
+    interface RawMessageActionPollDeleteAnswer {
+        _: 'messageActionPollDeleteAnswer';
+        answer: tl.TypePollAnswer;
+    }
+    interface RawMessageActionManagedBotCreated {
+        _: 'messageActionManagedBotCreated';
+        botId: number;
     }
     /**
      * Chat
@@ -6502,7 +6628,18 @@ export class RpcError extends Error {
          * Gifts »</a>.
          */
         displayGiftsButton?: boolean;
+        /**
+         * If set,
+         * <a href="https://corefork.telegram.org/api/content-protection#for-users">content
+         * protection »</a> was enabled in this private chat by us.
+         */
         noforwardsMyEnabled?: boolean;
+        /**
+         * If set,
+         * <a href="https://corefork.telegram.org/api/content-protection#for-users">content
+         * protection »</a> was enabled in this private chat by this
+         * user.
+         */
         noforwardsPeerEnabled?: boolean;
         unofficialSecurityRisk?: boolean;
         /**
@@ -6715,6 +6852,11 @@ export class RpcError extends Error {
          * »</a> for more info on the music profile tab.
          */
         savedMusic?: tl.TypeDocument;
+        /**
+         * A private note for this contact, only visible to us; see
+         * <a href="https://corefork.telegram.org/api/contacts#private-notes-for-contacts">here
+         * »</a> for more info on contact notes.
+         */
         note?: tl.TypeTextWithEntities;
         botManagerId?: number;
     }
@@ -6870,6 +7012,9 @@ export class RpcError extends Error {
     interface RawInputMessagesFilterPinned {
         _: 'inputMessagesFilterPinned';
     }
+    interface RawInputMessagesFilterPoll {
+        _: 'inputMessagesFilterPoll';
+    }
     /**
      * New message in a private chat or in a
      * <a href="https://core.telegram.org/api/channel#basic-groups">basic
@@ -6939,6 +7084,11 @@ export class RpcError extends Error {
          * User id
          */
         userId: number;
+        /**
+         * If set, this notification was sent within a
+         * <a href="https://corefork.telegram.org/api/forum#bot-forums">bot
+         * forum topic »</a>.
+         */
         topMsgId?: number;
         /**
          * Action type
@@ -6969,12 +7119,18 @@ export class RpcError extends Error {
         action: tl.TypeSendMessageAction;
     }
     /**
-     * Composition of chat participants changed.
+     * The participants of a
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group »</a> changed.
      */
     interface RawUpdateChatParticipants {
         _: 'updateChatParticipants';
         /**
-         * Updated chat participants
+         * Updated chat participants (also contains the
+         * <code>version</code> used to deduplicate/update outdated
+         * chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>).
          */
         participants: tl.TypeChatParticipants;
     }
@@ -7132,12 +7288,17 @@ export class RpcError extends Error {
          */
         date: number;
         /**
-         * Chat version number
+         * Used similarly to <code>pts</code> values to
+         * deduplicate/update outdated chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>.
          */
         version: number;
     }
     /**
-     * A member has left the group.
+     * A member has left the
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group</a>.
      */
     interface RawUpdateChatParticipantDelete {
         _: 'updateChatParticipantDelete';
@@ -7150,8 +7311,10 @@ export class RpcError extends Error {
          */
         userId: number;
         /**
-         * Used in basic groups to reorder updates and make sure that
-         * all of them was received.
+         * Used similarly to <code>pts</code> values to
+         * deduplicate/update outdated chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>.
          */
         version: number;
     }
@@ -7275,6 +7438,11 @@ export class RpcError extends Error {
          * Peer
          */
         peer: tl.TypePeer;
+        /**
+         * If set, the messages were read only within the specified
+         * <a href="https://corefork.telegram.org/api/forum#bot-forums">bot
+         * forum topic »</a>.
+         */
         topMsgId?: number;
         /**
          * Maximum ID of messages read
@@ -7530,8 +7698,10 @@ export class RpcError extends Error {
          */
         isAdmin: boolean;
         /**
-         * Used in basic groups to reorder updates and make sure that
-         * all of them was received.
+         * Used similarly to <code>pts</code> values to
+         * deduplicate/update outdated chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>.
          */
         version: number;
     }
@@ -8134,8 +8304,8 @@ export class RpcError extends Error {
     }
     /**
      * Default banned rights in a
-     * <a href="https://corefork.telegram.org/api/channel">normal
-     * chat</a> were updated
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group</a> were updated
      */
     interface RawUpdateChatDefaultBannedRights {
         _: 'updateChatDefaultBannedRights';
@@ -8148,7 +8318,10 @@ export class RpcError extends Error {
          */
         defaultBannedRights: tl.TypeChatBannedRights;
         /**
-         * Version
+         * Used similarly to <code>pts</code> values to
+         * deduplicate/update outdated chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>.
          */
         version: number;
     }
@@ -8605,7 +8778,9 @@ export class RpcError extends Error {
         ttlPeriod?: number;
     }
     /**
-     * A user has joined or left a specific chat
+     * A user has joined or left a specific
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group »</a>
      */
     interface RawUpdateChatParticipant {
         _: 'updateChatParticipant';
@@ -9717,15 +9892,42 @@ export class RpcError extends Error {
         fromId: tl.TypePeer;
         encryptedMessage: Uint8Array;
     }
+    /**
+     * A
+     * <a href="https://corefork.telegram.org/api/forum#forum-topics">forum
+     * topic »</a> was pinned or unpinned.
+     */
     interface RawUpdatePinnedForumTopic {
         _: 'updatePinnedForumTopic';
+        /**
+         * Whether the topic was pinned or unpinned
+         */
         pinned?: boolean;
+        /**
+         * The supergroup forum, private chat (for forum-enabled bots)
+         * or bot forum (for users) where the topic is located.
+         */
         peer: tl.TypePeer;
+        /**
+         * The topic ID
+         */
         topicId: number;
     }
+    /**
+     * The
+     * <a href="https://corefork.telegram.org/api/forum#forum-topics">pinned
+     * topics</a> of a forum have changed.
+     */
     interface RawUpdatePinnedForumTopics {
         _: 'updatePinnedForumTopics';
+        /**
+         * The supergroup forum, private chat (for forum-enabled bots)
+         * or bot forum (for users) where the topic is located.
+         */
         peer: tl.TypePeer;
+        /**
+         * Ordered list containing the IDs of all pinned topics.
+         */
         order?: number[];
     }
     interface RawUpdateDeleteGroupCallMessages {
@@ -9733,14 +9935,43 @@ export class RpcError extends Error {
         call: tl.TypeInputGroupCall;
         messages: number[];
     }
+    /**
+     * Contains updates to
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * state, see here »</a> for more info on how to enable these
+     * updates.
+     */
     interface RawUpdateStarGiftAuctionState {
         _: 'updateStarGiftAuctionState';
+        /**
+         * ID of the
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+         * gift »</a> currently being distributed in the auction.
+         */
         giftId: Long;
+        /**
+         * Auction state.
+         */
         state: tl.TypeStarGiftAuctionState;
     }
+    /**
+     * Contains updates to
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * state related to the current user, see here »</a> for more
+     * info on how to enable these updates.
+     */
     interface RawUpdateStarGiftAuctionUserState {
         _: 'updateStarGiftAuctionUserState';
+        /**
+         * ID of the
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+         * gift »</a> currently being distributed in the auction.
+         */
         giftId: Long;
+        /**
+         * Auction state related to the current user (i.e. info about
+         * placed bids, won gifts and so on).
+         */
         userState: tl.TypeStarGiftAuctionUserState;
     }
     interface RawUpdateEmojiGameInfo {
@@ -9750,12 +9981,49 @@ export class RpcError extends Error {
     interface RawUpdateStarGiftCraftFail {
         _: 'updateStarGiftCraftFail';
     }
+    /**
+     * The <a href="https://corefork.telegram.org/api/rank">tag
+     * »</a> of a participant of a
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * group »</a> has changed.
+     */
     interface RawUpdateChatParticipantRank {
         _: 'updateChatParticipantRank';
+        /**
+         * Basic group ID.
+         */
         chatId: number;
+        /**
+         * User ID.
+         */
         userId: number;
+        /**
+         * The new tag.
+         */
         rank: string;
+        /**
+         * Used similarly to <code>pts</code> values to
+         * deduplicate/update outdated chat information as specified
+         * <a href="https://corefork.telegram.org/api/peers#basic-group-updates">here
+         * »</a>.
+         */
         version: number;
+    }
+    interface RawUpdateManagedBot {
+        _: 'updateManagedBot';
+        userId: number;
+        botId: number;
+        qts: number;
+    }
+    interface RawUpdateBotGuestChatQuery {
+        _: 'updateBotGuestChatQuery';
+        queryId: Long;
+        message: tl.TypeMessage;
+        referenceMessages?: tl.TypeMessage[];
+        qts: number;
+    }
+    interface RawUpdateAiComposeTones {
+        _: 'updateAiComposeTones';
     }
     /**
      * Too many updates, it is necessary to execute
@@ -10926,9 +11194,23 @@ export class RpcError extends Error {
          */
         emoticon: string;
     }
+    /**
+     * Used by bots to implement
+     * <a href="https://corefork.telegram.org/api/bots/ai#live-message-streaming">live
+     * message streaming »</a>.
+     */
     interface RawSendMessageTextDraftAction {
         _: 'sendMessageTextDraftAction';
+        /**
+         * Live draft ID: used by graphical clients to slightly change
+         * the rendering behavior, see
+         * <a href="https://corefork.telegram.org/api/bots/ai#live-message-streaming">here
+         * »</a> for more info.
+         */
         randomId: Long;
+        /**
+         * The contents of the live draft.
+         */
         text: tl.TypeTextWithEntities;
     }
     /**
@@ -11033,6 +11315,11 @@ export class RpcError extends Error {
     interface RawInputPrivacyKeyNoPaidMessages {
         _: 'inputPrivacyKeyNoPaidMessages';
     }
+    /**
+     * Whether the user can see the
+     * <a href="https://corefork.telegram.org/api/profile#music">songs
+     * we pinned to our profile »</a>.
+     */
     interface RawInputPrivacyKeySavedMusic {
         _: 'inputPrivacyKeySavedMusic';
     }
@@ -11137,6 +11424,11 @@ export class RpcError extends Error {
     interface RawPrivacyKeyNoPaidMessages {
         _: 'privacyKeyNoPaidMessages';
     }
+    /**
+     * Whether the user can see the
+     * <a href="https://corefork.telegram.org/api/profile#music">songs
+     * we pinned to our profile »</a>.
+     */
     interface RawPrivacyKeySavedMusic {
         _: 'privacyKeySavedMusic';
     }
@@ -11596,8 +11888,8 @@ export class RpcError extends Error {
          */
         hash: number;
         /**
-         * Type of the web page. One of the following: <!-- start type
-         * -->
+         * Type of the web page. One of the following: <!-- start_table
+         * type -->
          * 
          * 
          * 
@@ -11655,6 +11947,8 @@ export class RpcError extends Error {
          * 
          * - <code>telegram_message</code>
          * 
+         * - <code>telegram_newbot</code>
+         * 
          * - <code>telegram_nft</code>
          * 
          * - <code>telegram_stickerset</code>
@@ -11675,7 +11969,7 @@ export class RpcError extends Error {
          * 
          * 
          * 
-         * <!-- end type -->
+         * <!-- end_table type -->
          */
         type?: string;
         /**
@@ -12332,6 +12626,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButton {
         _: 'keyboardButton';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12343,6 +12642,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonUrl {
         _: 'keyboardButtonUrl';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button label
@@ -12372,6 +12676,11 @@ export class RpcError extends Error {
          * of a bot to another user.
          */
         requiresPassword?: boolean;
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12387,6 +12696,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonRequestPhone {
         _: 'keyboardButtonRequestPhone';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12398,6 +12712,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonRequestGeoLocation {
         _: 'keyboardButtonRequestGeoLocation';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12418,6 +12737,11 @@ export class RpcError extends Error {
          * chat's input field.
          */
         samePeer?: boolean;
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button label
@@ -12437,6 +12761,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonGame {
         _: 'keyboardButtonGame';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12448,6 +12777,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonBuy {
         _: 'keyboardButtonBuy';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12478,6 +12812,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonUrlAuth {
         _: 'keyboardButtonUrlAuth';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button label
@@ -12524,6 +12863,11 @@ export class RpcError extends Error {
          * messages to the user.
          */
         requestWriteAccess?: boolean;
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12567,6 +12911,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonRequestPoll {
         _: 'keyboardButtonRequestPoll';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * If set, only quiz polls can be sent
@@ -12582,6 +12931,11 @@ export class RpcError extends Error {
      */
     interface RawInputKeyboardButtonUserProfile {
         _: 'inputKeyboardButtonUserProfile';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12597,6 +12951,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonUserProfile {
         _: 'keyboardButtonUserProfile';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12620,6 +12979,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonWebView {
         _: 'keyboardButtonWebView';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12643,6 +13007,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonSimpleWebView {
         _: 'keyboardButtonSimpleWebView';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12661,6 +13030,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonRequestPeer {
         _: 'keyboardButtonRequestPeer';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12707,6 +13081,11 @@ export class RpcError extends Error {
          * Set this flag to request the peer's photo (if any).
          */
         photoRequested?: boolean;
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Button text
@@ -12739,6 +13118,11 @@ export class RpcError extends Error {
      */
     interface RawKeyboardButtonCopy {
         _: 'keyboardButtonCopy';
+        /**
+         * Button style, see
+         * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+         * »</a> for more info on button styles.
+         */
         style?: tl.TypeKeyboardButtonStyle;
         /**
          * Title of the button
@@ -13320,6 +13704,76 @@ export class RpcError extends Error {
         date: number;
     }
     /**
+     * Represents an diff addition: render it by simply
+     * <u>underlining</u> the specified section and coloring it in
+     * green, see
+     * <a href="https://corefork.telegram.org/api/entities#diff-entities">here
+     * »</a> for more info on how to render diff entities.
+     */
+    interface RawMessageEntityDiffInsert {
+        _: 'messageEntityDiffInsert';
+        /**
+         * Offset of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        offset: number;
+        /**
+         * Length of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        length: number;
+    }
+    /**
+     * Represents an diff replacement, render it as follows:
+     * 
+     * See
+     * <a href="https://corefork.telegram.org/api/entities#diff-entities">here
+     * »</a> for more info on how to render diff entities.
+     */
+    interface RawMessageEntityDiffReplace {
+        _: 'messageEntityDiffReplace';
+        /**
+         * Offset of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        offset: number;
+        /**
+         * Length of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        length: number;
+        /**
+         * The chunk of text that was removed.
+         */
+        oldText: string;
+    }
+    /**
+     * Represents an diff deletion: render it by simply
+     * <u>underlining</u> the specified section and coloring it in
+     * red, see
+     * <a href="https://corefork.telegram.org/api/entities#diff-entities">here
+     * »</a> for more info on how to render diff entities.
+     */
+    interface RawMessageEntityDiffDelete {
+        _: 'messageEntityDiffDelete';
+        /**
+         * Offset of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        offset: number;
+        /**
+         * Length of message entity within message (in
+         * <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16
+         * code units</a>)
+         */
+        length: number;
+    }
+    /**
      * Represents the absence of a channel
      */
     interface RawInputChannelEmpty {
@@ -13414,6 +13868,10 @@ export class RpcError extends Error {
          * participant.
          */
         subscriptionUntilDate?: number;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
@@ -13444,6 +13902,10 @@ export class RpcError extends Error {
          * participant.
          */
         subscriptionUntilDate?: number;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
@@ -13460,8 +13922,9 @@ export class RpcError extends Error {
          */
         adminRights: tl.TypeChatAdminRights;
         /**
-         * The role (rank) of the group creator in the group: just an
-         * arbitrary string, <code>admin</code> by default
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>,
+         * defaults to "Owner" if not set.
          */
         rank?: string;
     }
@@ -13501,8 +13964,9 @@ export class RpcError extends Error {
          */
         adminRights: tl.TypeChatAdminRights;
         /**
-         * The role (rank) of the admin in the group: just an arbitrary
-         * string, <code>admin</code> by default
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>,
+         * defaults to "Admin" if not set.
          */
         rank?: string;
     }
@@ -13532,6 +13996,10 @@ export class RpcError extends Error {
          * <a href="https://corefork.telegram.org/api/rights">rights</a>
          */
         bannedRights: tl.TypeChatBannedRights;
+        /**
+         * The participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         */
         rank?: string;
     }
     /**
@@ -14551,6 +15019,9 @@ export class RpcError extends Error {
      */
     interface RawTopPeerCategoryBotsApp {
         _: 'topPeerCategoryBotsApp';
+    }
+    interface RawTopPeerCategoryBotsGuestChat {
+        _: 'topPeerCategoryBotsGuestChat';
     }
     /**
      * Top peer category
@@ -16174,8 +16645,8 @@ export class RpcError extends Error {
         duration?: number;
     }
     /**
-     * Identifies an endpoint that can be used to connect to the
-     * other user in a phone call
+     * DEPRECATED (libtgvoip): Identifies an endpoint that can be
+     * used to connect to the other user in a phone call
      */
     interface RawPhoneConnection {
         _: 'phoneConnection';
@@ -17100,10 +17571,24 @@ export class RpcError extends Error {
          */
         newValue: boolean;
     }
+    /**
+     * A participant's
+     * <a href="https://corefork.telegram.org/api/rank">tag »</a>
+     * was changed.
+     */
     interface RawChannelAdminLogEventActionParticipantEditRank {
         _: 'channelAdminLogEventActionParticipantEditRank';
+        /**
+         * The user ID.
+         */
         userId: number;
+        /**
+         * The previous tag.
+         */
         prevRank: string;
+        /**
+         * The new tag.
+         */
         newRank: string;
     }
     /**
@@ -18574,6 +19059,11 @@ export class RpcError extends Error {
         addedBy?: tl.TypePeer;
         date?: number;
     }
+    interface RawInputPollAnswer {
+        _: 'inputPollAnswer';
+        text: tl.TypeTextWithEntities;
+        media?: tl.TypeInputMedia;
+    }
     /**
      * Poll
      */
@@ -18607,6 +19097,7 @@ export class RpcError extends Error {
         shuffleAnswers?: boolean;
         hideResultsUntilClose?: boolean;
         creator?: boolean;
+        subscribersOnly?: boolean;
         /**
          * The question of the poll (only
          * <a href="https://corefork.telegram.org/api/premium">Premium</a>
@@ -18633,6 +19124,7 @@ export class RpcError extends Error {
          * close_period.
          */
         closeDate?: number;
+        countriesIso2?: string[];
         hash: Long;
     }
     /**
@@ -18675,6 +19167,7 @@ export class RpcError extends Error {
          */
         min?: boolean;
         hasUnreadVotes?: boolean;
+        canViewStats?: boolean;
         /**
          * Poll results
          */
@@ -18882,23 +19375,22 @@ export class RpcError extends Error {
          */
         sendPolls?: boolean;
         /**
-         * If set, does not allow any user to change the description of
-         * a
+         * If set, does not allow a user to change the description of a
          * <a href="https://corefork.telegram.org/api/channel">supergroup/chat</a>
          */
         changeInfo?: boolean;
         /**
-         * If set, does not allow any user to invite users in a
+         * If set, does not allow a user to invite users in a
          * <a href="https://corefork.telegram.org/api/channel">supergroup/chat</a>
          */
         inviteUsers?: boolean;
         /**
-         * If set, does not allow any user to pin messages in a
+         * If set, does not allow a user to pin messages in a
          * <a href="https://corefork.telegram.org/api/channel">supergroup/chat</a>
          */
         pinMessages?: boolean;
         /**
-         * If set, does not allow any user to create, delete or modify
+         * If set, does not allow a user to create, delete or modify
          * <a href="https://corefork.telegram.org/api/forum#forum-topics">forum
          * topics »</a>.
          */
@@ -18939,6 +19431,7 @@ export class RpcError extends Error {
          */
         sendPlain?: boolean;
         editRank?: boolean;
+        sendReactions?: boolean;
         /**
          * Validity of said permissions (it is considered forever any
          * value less then 30 seconds or more then 366 days).
@@ -19740,10 +20233,28 @@ export class RpcError extends Error {
          */
         icons: tl.TypeDocument[];
     }
+    /**
+     * Contains info about a
+     * <a href="https://corefork.telegram.org/api/auctions">collectible
+     * gift auction »</a> for a {@link RawWebPage} preview of an
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a> (the {@link RawWebPage} will have a <code>type</code>
+     * of <code>telegram_auction</code>).
+     */
     interface RawWebPageAttributeStarGiftAuction {
         _: 'webPageAttributeStarGiftAuction';
+        /**
+         * The gift linked to the auction
+         */
         gift: tl.TypeStarGift;
+        /**
+         * Date when the auction will end (UNIX timestamp)
+         */
         endDate: number;
+    }
+    interface RawWebPageAttributeAiComposeTone {
+        _: 'webPageAttributeAiComposeTone';
+        emojiId: Long;
     }
     /**
      * Credit card info URL provided by the bank
@@ -21809,21 +22320,82 @@ export class RpcError extends Error {
          */
         hash: string;
     }
+    /**
+     * Used to pay for login codes, in case of high cost of SMS
+     * verification codes for the user's country/provider, see
+     * <a href="https://corefork.telegram.org/api/auth#paid-auth">here
+     * »</a> for more info.
+     */
     interface RawInputInvoicePremiumAuthCode {
         _: 'inputInvoicePremiumAuthCode';
+        /**
+         * Must contain an {@link RawInputStorePaymentAuthCode}.
+         */
         purpose: tl.TypeInputStorePaymentPurpose;
     }
+    /**
+     * Used to pay for for the removal of the
+     * {@link RawStarGiftAttributeOriginalDetails} attribute from a
+     * collectible gift, see
+     * <a href="https://corefork.telegram.org/api/gifts#dropping-the-original-details-of-an-upgraded-gift">here
+     * »</a> for the full flow.
+     */
     interface RawInputInvoiceStarGiftDropOriginalDetails {
         _: 'inputInvoiceStarGiftDropOriginalDetails';
+        /**
+         * The collectible gift whose
+         * {@link RawStarGiftAttributeOriginalDetails} attribute should
+         * be removed.
+         */
         stargift: tl.TypeInputSavedStarGift;
     }
+    /**
+     * Used to place a bid in a
+     * <a href="https://corefork.telegram.org/api/auctions">collectible
+     * gift auction »</a>.
+     */
     interface RawInputInvoiceStarGiftAuctionBid {
         _: 'inputInvoiceStarGiftAuctionBid';
+        /**
+         * If set, your name will be hidden if the destination peer
+         * decides to display the gift on their profile (they will
+         * still see that you sent the gift).  
+         * 
+         *   Must not be set when updating an existing bid, as the
+         * value cannot be changed for existing bids.
+         */
         hideName?: boolean;
+        /**
+         * Must be set when increasing an already existing bid.
+         */
         updateBid?: boolean;
+        /**
+         * Identifier of the user or channel (only if
+         * {@link RawChannelFull}.<code>stargifts_available</code> is
+         * set) that will receive the gift.
+         */
         peer?: tl.TypeInputPeer;
+        /**
+         * Identifier of the gift, from
+         * {@link RawStarGift}.<code>id</code>
+         */
         giftId: Long;
+        /**
+         * Total amount of the bid in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a>.
+         */
         bidAmount: Long;
+        /**
+         * Optional message that will be attached with the gift if we
+         * end up winning this round: the maximum length for this field
+         * is specified in the
+         * <a href="https://corefork.telegram.org/api/config#stargifts-message-length-max">stargifts_message_length_max
+         * client configuration value »</a>.  
+         * 
+         *   Must not be set when updating an existing bid, as the
+         * value cannot be changed for existing bids.
+         */
         message?: tl.TypeTextWithEntities;
     }
     /**
@@ -22163,6 +22735,7 @@ export class RpcError extends Error {
          * {@link auth.RawSendCodeRequest}.
          */
         phoneCodeHash: string;
+        premiumDays: number;
         /**
          * Three-letter ISO 4217
          * <a href="https://corefork.telegram.org/bots/payments#supported-currencies">currency</a>
@@ -22621,7 +23194,7 @@ export class RpcError extends Error {
          * log events »</a> and in the
          * {@link messages.RawChannelMessages} constructor: if needed,
          * full information can be fetched using
-         * {@link channels.RawGetForumTopicsByIDRequest}.
+         * {@link messages.RawGetForumTopicsByIDRequest}.
          */
         short?: boolean;
         /**
@@ -22639,6 +23212,10 @@ export class RpcError extends Error {
          * Topic creation date
          */
         date: number;
+        /**
+         * Contains the supergroup/private chat where the topic is
+         * located.
+         */
         peer: tl.TypePeer;
         /**
          * Topic title
@@ -22813,6 +23390,12 @@ export class RpcError extends Error {
          * an admin with at least the specified admin rights.
          */
         botAdminRights?: tl.TypeChatAdminRights;
+    }
+    interface RawRequestPeerTypeCreateBot {
+        _: 'requestPeerTypeCreateBot';
+        botManaged?: boolean;
+        suggestedName?: string;
+        suggestedUsername?: string;
     }
     /**
      * The list of
@@ -23260,7 +23843,7 @@ export class RpcError extends Error {
         min?: boolean;
         /**
          * Whether this story is
-         * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">protected</a>
+         * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">protected</a>
          * and thus cannot be forwarded; clients should also prevent
          * users from saving attached media (i.e. videos should only be
          * streamed, photos should be kept in RAM, et cetera).
@@ -24148,18 +24731,73 @@ export class RpcError extends Error {
          */
         backgroundEmojiId?: Long;
     }
+    /**
+     * Represents a
+     * <a href="https://corefork.telegram.org/api/colors">color
+     * palette »</a> associated to a
+     * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+     * gift »</a>, see
+     * <a href="https://corefork.telegram.org/api/colors#collectible-gift-palettes">here
+     * »</a> for more info.
+     */
     interface RawPeerColorCollectible {
         _: 'peerColorCollectible';
+        /**
+         * ID of the
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+         * gift »</a>.
+         */
         collectibleId: Long;
+        /**
+         * <a href="https://corefork.telegram.org/api/custom-emoji">Custom
+         * emoji ID »</a> of the collectible gift: a single copy of
+         * this custom emoji should be displayed as-is (without
+         * recoloring it, unlike for <code>background_emoji_id</code>)
+         * in the top-right corner of the palette.
+         */
         giftEmojiId: Long;
+        /**
+         * <a href="https://corefork.telegram.org/api/custom-emoji">Custom
+         * emoji ID »</a> used to generate the pattern.
+         */
         backgroundEmojiId: Long;
+        /**
+         * Accent color in RGB24 format, used for reply backgrounds and
+         * the user's name in messages.
+         */
         accentColor: number;
+        /**
+         * 1-3 RGB24 colors to be used in the reply strip.
+         */
         colors: number[];
+        /**
+         * Accent color in RGB24 format, used for reply backgrounds and
+         * the user's name in messages in dark mode (fallback to
+         * <code>accent_color</code> if absent).
+         */
         darkAccentColor?: number;
+        /**
+         * 1-3 RGB24 colors to be used in the reply strip in dark mode
+         * (fallback to <code>colors</code> if absent).
+         */
         darkColors?: number[];
     }
+    /**
+     * Represents a
+     * <a href="https://corefork.telegram.org/api/colors">color
+     * palette »</a> associated to a
+     * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+     * gift »</a>, see
+     * <a href="https://corefork.telegram.org/api/colors#collectible-gift-palettes">here
+     * »</a> for more info.
+     */
     interface RawInputPeerColorCollectible {
         _: 'inputPeerColorCollectible';
+        /**
+         * ID of the
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+         * gift »</a>.
+         */
         collectibleId: Long;
     }
     /**
@@ -25476,8 +26114,20 @@ export class RpcError extends Error {
          * prepaid upgrade of a gift</a>.
          */
         stargiftPrepaidUpgrade?: boolean;
+        /**
+         * Represents payment for the removal of the
+         * {@link RawStarGiftAttributeOriginalDetails} attribute from a
+         * gift, see
+         * <a href="https://corefork.telegram.org/api/gifts#dropping-the-original-details-of-an-upgraded-gift">here
+         * »</a> for the full flow.
+         */
         stargiftDropOriginalDetails?: boolean;
         phonegroupMessage?: boolean;
+        /**
+         * Represents payment for placing a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gift auction bid »</a>.
+         */
         stargiftAuctionBid?: boolean;
         offer?: boolean;
         /**
@@ -25999,6 +26649,12 @@ export class RpcError extends Error {
          */
         limitedPerUser?: boolean;
         peerColorAvailable?: boolean;
+        /**
+         * If set, this is a collectible gift that can only be bought
+         * through a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gift auction »</a>.
+         */
         auction?: boolean;
         /**
          * Identifier of the gift
@@ -26089,8 +26745,28 @@ export class RpcError extends Error {
          * for the full flow.
          */
         lockedUntilDate?: number;
+        /**
+         * Always set for gifts that can be bought on
+         * <a href="https://corefork.telegram.org/api/auctions">auctions
+         * »</a>, contains the
+         * <a href="https://corefork.telegram.org/api/links#auction-links">auction
+         * deep link slug »</a>.
+         */
         auctionSlug?: string;
+        /**
+         * Always set for gifts that can be bought on
+         * <a href="https://corefork.telegram.org/api/auctions">auctions
+         * »</a>, contains the number of gifts of this kind that are
+         * distributed on every round.
+         */
         giftsPerRound?: number;
+        /**
+         * Always set for gifts that can be bought on
+         * <a href="https://corefork.telegram.org/api/auctions">auctions
+         * »</a>, contains the UNIX timestamp indicating when will the
+         * auction start (or when the auction started, if it points to
+         * the past).
+         */
         auctionStartDate?: number;
         upgradeVariants?: number;
         background?: tl.TypeStarGiftBackground;
@@ -26414,11 +27090,11 @@ export class RpcError extends Error {
         amount: Long;
         /**
          * The decimal amount of Telegram Stars, expressed as nanostars
-         * (i.e. 1 nanostar is equal to <code>1/1'000'000'000</code>th
+         * (i.e. 1 nanostar is equal to <code>1/1_000_000_000</code>th
          * (one billionth) of a Telegram Star). 
          * 
-         * This field may also be negative (the allowed range is
-         * -999999999 to 999999999).
+         * This field may also be negative (the allowed range is from
+         * <code>-999_999_999</code> to <code>999_999_999</code>).
          */
         nanos: number;
     }
@@ -26705,6 +27381,13 @@ export class RpcError extends Error {
          * to prepay for a gift upgrade separately »</a>.
          */
         prepaidUpgradeHash?: string;
+        /**
+         * If set, the {@link RawStarGiftAttributeOriginalDetails}
+         * attribute of this gift may be removed by paying the
+         * specified amount of stars, see
+         * <a href="https://corefork.telegram.org/api/gifts#dropping-the-original-details-of-an-upgraded-gift">here
+         * »</a> for the full flow.
+         */
         dropOriginalDetailsStars?: Long;
         giftNum?: number;
         canCraftAt?: number;
@@ -26763,7 +27446,8 @@ export class RpcError extends Error {
     }
     /**
      * Send paid reactions as the specified peer, fetched using
-     * {@link channels.RawGetSendAsRequest}.
+     * {@link channels.RawGetSendAsRequest} with the
+     * <code>for_paid_reactions</code> flag set.
      */
     interface RawPaidReactionPrivacyPeer {
         _: 'paidReactionPrivacyPeer';
@@ -27308,9 +27992,20 @@ export class RpcError extends Error {
          */
         slug: string;
     }
+    /**
+     * Indicates the price for a
+     * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">gift
+     * upgrade »</a> starting from a specific point in time.
+     */
     interface RawStarGiftUpgradePrice {
         _: 'starGiftUpgradePrice';
+        /**
+         * UNIX timestamp indicating when the price will be in effect.
+         */
         date: number;
+        /**
+         * Upgrade price.
+         */
         upgradeStars: Long;
     }
     interface RawGroupCallMessage {
@@ -27334,97 +28029,427 @@ export class RpcError extends Error {
         live?: boolean;
         maxId?: number;
     }
+    /**
+     * Describes a bid in an
+     * <a href="https://corefork.telegram.org/api/auctions">auction</a>.
+     */
     interface RawAuctionBidLevel {
         _: 'auctionBidLevel';
+        /**
+         * Position of the bid.
+         */
         pos: number;
+        /**
+         * Amount of the bid in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a>.
+         */
         amount: Long;
+        /**
+         * Date when the bid was placed.
+         */
         date: number;
     }
+    /**
+     * Returned only by auction methods (never by updates) if the
+     * passed <code>version</code> is equal to the remote
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a>.<code>version</code>, meaning auction information
+     * hasn't changed over the locally cached version.
+     */
     interface RawStarGiftAuctionStateNotModified {
         _: 'starGiftAuctionStateNotModified';
     }
+    /**
+     * Represents an active or pending
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a>.
+     */
     interface RawStarGiftAuctionState {
         _: 'starGiftAuctionState';
+        /**
+         * Only apply incoming {@link RawStarGiftAuctionState}
+         * constructors if the received <code>version</code> is bigger
+         * than the locally cached <code>version</code>.
+         */
         version: number;
+        /**
+         * UNIX timestamp indicating when the auction will start (or
+         * when it started, if it's in the past).
+         */
         startDate: number;
+        /**
+         * UNIX timestamp indicating when the auction will end
+         */
         endDate: number;
+        /**
+         * Minumum allowed bid amount in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a>: only applicable if the user hasn't made a bid
+         * yet, otherwise must be overridden to the value of
+         * {@link RawStarGiftAuctionUserState}.<code>min_bid_amount</code>
+         * (which will be set if and only if the user already made a
+         * bid to this auction).
+         */
         minBidAmount: Long;
+        /**
+         * Contains a sparse list of bids starting from the top bids, a
+         * more detailed description is available in
+         * <a href="https://corefork.telegram.org/api/auctions">the
+         * docs</a>.
+         */
         bidLevels: tl.TypeAuctionBidLevel[];
+        /**
+         * User IDs of the top 3 bidders (the {@link RawUser}
+         * constructors will be returned as
+         * <a href="https://corefork.telegram.org/api/min">min</a>
+         * constructors in the containing object).
+         */
         topBidders: Long[];
+        /**
+         * UNIX timestamp indicating when the current auction round
+         * will end, distributing
+         * {@link RawStarGift}.<code>gifts_per_round</code> gifts to
+         * the top {@link RawStarGift}.<code>gifts_per_round</code>
+         * bidders.
+         */
         nextRoundAt: number;
+        /**
+         * The number of gifts that were distributed in the previous
+         * round (also used to compute the approximated index of the
+         * gift that the current user will receive, <code>last_gift_num
+         * + approx_pos</code>, see
+         * <a href="https://corefork.telegram.org/api/auctions">here
+         * »</a> for more info).
+         */
         lastGiftNum: number;
+        /**
+         * The remaining number of gifts that are yet to be
+         * distributed.
+         */
         giftsLeft: number;
+        /**
+         * The current round number (starting from 1).
+         */
         currentRound: number;
+        /**
+         * The total number of rounds in this auction.
+         */
         totalRounds: number;
+        /**
+         * Detailed round information.
+         */
         rounds: tl.TypeStarGiftAuctionRound[];
     }
+    /**
+     * Represents a finished
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a>.
+     */
     interface RawStarGiftAuctionStateFinished {
         _: 'starGiftAuctionStateFinished';
+        /**
+         * UNIX timestamp indicating when the auction started.
+         */
         startDate: number;
+        /**
+         * UNIX timestamp indicating when the auction ended.
+         */
         endDate: number;
+        /**
+         * Average price of distributed gifts.
+         */
         averagePrice: Long;
+        /**
+         * Number of gifts from the auction currently being resold on
+         * Telegram: if set, when the corresponding element is clicked
+         * in graphical clients,
+         * {@link payments.RawGetResaleStarGiftsRequest} should be
+         * invoked with the ID of the gift associated to this auction,
+         * see
+         * <a href="https://corefork.telegram.org/api/auctions">here
+         * »</a> for more info.
+         */
         listedCount?: number;
+        /**
+         * Number of gifts from the auction currently being resold on
+         * <a href="https://fragment.com/">Fragment</a>.
+         */
         fragmentListedCount?: number;
+        /**
+         * Only set if <code>fragment_listed_count</code> is set. If
+         * set, when the corresponding element is clicked in graphical
+         * clients, this URL should be opened.
+         */
         fragmentListedUrl?: string;
     }
+    /**
+     * Contains information about the current user's state in an
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a>.
+     * 
+     * The <code>bid_amount</code>, <code>bid_date</code>,
+     * <code>bid_peer</code> and <code>min_bid_amount</code> flags
+     * of {@link RawStarGiftAuctionUserState} will all be set if
+     * the user placed a bid in the auction.
+     */
     interface RawStarGiftAuctionUserState {
         _: 'starGiftAuctionUserState';
+        /**
+         * If set, the placed bid was returned to the user, because it
+         * was outbid so much that it fell out of the top
+         * {@link RawStarGiftAuctionState}.<code>gifts_left</code>
+         * positions, meaning that even if no new bids are placed, the
+         * user will never receive any gifts, so the bid was completely
+         * removed from the auction, and in order to participate again
+         * the user must manually make a new bid.
+         */
         returned?: boolean;
+        /**
+         * Contains the amount of the placed bid in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a>.
+         */
         bidAmount?: Long;
+        /**
+         * Contains a UNIX timestamp, indicating when the bid was
+         * placed.
+         */
         bidDate?: number;
+        /**
+         * Contains the minumum allowed bid amount in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a>, if set overrides
+         * {@link RawStarGiftAuctionState}.<code>min_bid_amount</code>
+         * for the current user.
+         */
         minBidAmount?: Long;
+        /**
+         * Contains the peer that will receive the gift, if you end up
+         * winning this round
+         */
         bidPeer?: tl.TypePeer;
+        /**
+         * Contains the number of gifts that were purchased so far in
+         * the auction by the current user.
+         */
         acquiredCount: number;
     }
+    /**
+     * Describes a gift that the current user won in an auction.
+     */
     interface RawStarGiftAuctionAcquiredGift {
         _: 'starGiftAuctionAcquiredGift';
+        /**
+         * If set, your name will be hidden if the destination peer
+         * decides to display the gift on their profile (they will
+         * still see that you sent the gift).
+         */
         nameHidden?: boolean;
+        /**
+         * The peer that received the gift.
+         */
         peer: tl.TypePeer;
+        /**
+         * When was the gift obtained.
+         */
         date: number;
+        /**
+         * The amount in
+         * <a href="https://corefork.telegram.org/api/stars">Telegram
+         * Stars</a> that was bid in order to obtain the gift.
+         */
         bidAmount: Long;
+        /**
+         * The round number where the gift was obtained.
+         */
         round: number;
+        /**
+         * The position of the gift in the auction.
+         */
         pos: number;
+        /**
+         * Optional message that attached with the gift, passed when
+         * making the bid.
+         */
         message?: tl.TypeTextWithEntities;
         giftNum?: number;
     }
+    /**
+     * Contains info about
+     * <a href="https://corefork.telegram.org/api/auctions">an
+     * auction where the user has placed a bid »</a>.
+     */
     interface RawStarGiftActiveAuctionState {
         _: 'starGiftActiveAuctionState';
+        /**
+         * The
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+         * gift »</a> currently being distributed in the auction.
+         */
         gift: tl.TypeStarGift;
+        /**
+         * Auction state
+         */
         state: tl.TypeStarGiftAuctionState;
+        /**
+         * Auction state related to the current user (i.e. info about
+         * placed bids, won gifts and so on).
+         */
         userState: tl.TypeStarGiftAuctionUserState;
     }
+    /**
+     * Used to fetch
+     * <a href="https://corefork.telegram.org/api/auctions">auctions</a>
+     * using the ID of the linked
+     * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">collectible
+     * gift</a>.
+     */
     interface RawInputStarGiftAuction {
         _: 'inputStarGiftAuction';
+        /**
+         * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">Collectible
+         * gift ID</a>
+         */
         giftId: Long;
     }
+    /**
+     * Used to fetch
+     * <a href="https://corefork.telegram.org/api/auctions">auctions</a>
+     * using the
+     * <a href="https://corefork.telegram.org/api/links#auction-links">slug
+     * of an auction deep link »</a>.
+     */
     interface RawInputStarGiftAuctionSlug {
         _: 'inputStarGiftAuctionSlug';
+        /**
+         * <a href="https://corefork.telegram.org/api/links#auction-links">Auction
+         * deep link slug »</a>.
+         */
         slug: string;
     }
+    /**
+     * Human-readable info about a passkey associated to an
+     * account, returned when
+     * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">creating
+     * a passkey »</a> or
+     * <a href="https://corefork.telegram.org/api/passkeys#list-passkeys">listing
+     * passkeys »</a>.
+     */
     interface RawPasskey {
         _: 'passkey';
+        /**
+         * Unique passkey ID, usable for example in
+         * {@link account.RawDeletePasskeyRequest}.
+         */
         id: string;
+        /**
+         * Human-readable passkey name
+         */
         name: string;
+        /**
+         * Creation date of the passkey
+         */
         date: number;
+        /**
+         * ID of the
+         * <a href="https://corefork.telegram.org/api/custom-emoji">custom
+         * emoji</a> used as icon for the software or password manager
+         * that created the passkey
+         */
         softwareEmojiId?: Long;
+        /**
+         * Date when the passkey was last used to log in
+         */
         lastUsageDate?: number;
     }
+    /**
+     * WebAuthn registration response used when registering a new
+     * passkey, see
+     * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">here
+     * »</a> for more info on the full flow.
+     * 
+     * Generated from the
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse">AuthenticatorAttestationResponse</a>
+     * object.
+     */
     interface RawInputPasskeyResponseRegister {
         _: 'inputPasskeyResponseRegister';
+        /**
+         * Base64url-decoded <code>clientDataJSON</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse">AuthenticatorAttestationResponse</a>,
+         * wrapped in {@link RawDataJSON}
+         */
         clientData: tl.TypeDataJSON;
+        /**
+         * Base64url-decoded <code>attestationObject</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse">AuthenticatorAttestationResponse</a>
+         */
         attestationData: Uint8Array;
     }
+    /**
+     * WebAuthn authentication response used when logging in with a
+     * passkey, see
+     * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+     * »</a> for more info on the full flow.
+     * 
+     * Generated from the
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAssertionResponse">AuthenticatorAssertionResponse</a>
+     * object.
+     */
     interface RawInputPasskeyResponseLogin {
         _: 'inputPasskeyResponseLogin';
+        /**
+         * Base64url-decoded <code>clientDataJSON</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAssertionResponse">AuthenticatorAssertionResponse</a>,
+         * wrapped in {@link RawDataJSON}
+         */
         clientData: tl.TypeDataJSON;
+        /**
+         * Base64url-decoded <code>authenticatorData</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAssertionResponse">AuthenticatorAssertionResponse</a>
+         */
         authenticatorData: Uint8Array;
+        /**
+         * Base64url-decoded <code>signature</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAssertionResponse">AuthenticatorAssertionResponse</a>
+         */
         signature: Uint8Array;
+        /**
+         * Base64url-decoded <code>userHandle</code> field of an
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAssertionResponse">AuthenticatorAssertionResponse</a>.
+         * The user handle specified by the server is in
+         * <code><dc_id>:<user_id></code> format.
+         */
         userHandle: string;
     }
+    /**
+     * Public-key passkey credential used both for registration and
+     * for login, see
+     * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">creating
+     * a passkey »</a> and
+     * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">logging
+     * in with a passkey »</a> for the full flows.
+     */
     interface RawInputPasskeyCredentialPublicKey {
         _: 'inputPasskeyCredentialPublicKey';
+        /**
+         * <code>id</code> field of a
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential">PublicKeyCredential</a>,
+         * passed as-is without base64url-decoding when using the JSON
+         * representation
+         */
         id: string;
+        /**
+         * <code>rawId</code> field of a
+         * <a href="https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential">PublicKeyCredential</a>,
+         * passed as-is without base64url-decoding when using the JSON
+         * representation
+         */
         rawId: string;
+        /**
+         * Registration or login response.
+         */
         response: tl.TypeInputPasskeyResponse;
     }
     interface RawInputPasskeyCredentialFirebasePNV {
@@ -27437,16 +28462,54 @@ export class RpcError extends Error {
         edgeColor: number;
         textColor: number;
     }
+    /**
+     * Describes one or more
+     * <a href="https://corefork.telegram.org/api/auctions">collectible
+     * gift auction rounds »</a>.
+     */
     interface RawStarGiftAuctionRound {
         _: 'starGiftAuctionRound';
+        /**
+         * This object describes all rounds starting from
+         * <code>num</code> up until <code>next.num-1</code>
+         * inclusively (<code>next</code> is the next
+         * <a href="https://corefork.telegram.org/type/StarGiftAuctionRound">StarGiftAuctionRound</a>).
+         */
         num: number;
+        /**
+         * Duration in seconds of the round(s).
+         */
         duration: number;
     }
+    /**
+     * Describes one or more extendable
+     * <a href="https://corefork.telegram.org/api/auctions">collectible
+     * gift auction rounds »</a>.
+     */
     interface RawStarGiftAuctionRoundExtendable {
         _: 'starGiftAuctionRoundExtendable';
+        /**
+         * This object describes all rounds starting from
+         * <code>num</code> up until <code>next.num-1</code>
+         * inclusively (<code>next</code> is the next
+         * <a href="https://corefork.telegram.org/type/StarGiftAuctionRound">StarGiftAuctionRound</a>).
+         */
         num: number;
+        /**
+         * Duration in seconds of the round(s).
+         */
         duration: number;
+        /**
+         * The round(s) will be extended by <code>extend_window</code>
+         * if a bid changes the composition/order of the top
+         * <code>extend_top</code> bidders.
+         */
         extendTop: number;
+        /**
+         * The round(s) will be extended by this many seconds if a bid
+         * changes the composition/order of the top
+         * <code>extend_top</code> bidders.
+         */
         extendWindow: number;
     }
     interface RawStarGiftAttributeRarity {
@@ -27465,60 +28528,32 @@ export class RpcError extends Error {
     interface RawStarGiftAttributeRarityLegendary {
         _: 'starGiftAttributeRarityLegendary';
     }
+    /**
+     * This constructor allows setting a custom background color
+     * and custom emoji label for a button, see
+     * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+     * »</a> for more info.
+     */
     interface RawKeyboardButtonStyle {
         _: 'keyboardButtonStyle';
+        /**
+         * A dark blue color, recommended for main actions.
+         */
         bgPrimary?: boolean;
+        /**
+         * A red color, recommended for destructive actions.
+         */
         bgDanger?: boolean;
+        /**
+         * A green color, recommended for positive actions.
+         */
         bgSuccess?: boolean;
+        /**
+         * The ID of a
+         * <a href="https://corefork.telegram.org/api/custom-emoji">custom
+         * emoji</a> to be displayed before the button's label.
+         */
         icon?: Long;
-    }
-    interface RawMessageActionPollAppendAnswer {
-        _: 'messageActionPollAppendAnswer';
-        answer: tl.TypePollAnswer;
-    }
-    interface RawMessageActionPollDeleteAnswer {
-        _: 'messageActionPollDeleteAnswer';
-        answer: tl.TypePollAnswer;
-    }
-    interface RawMessageActionManagedBotCreated {
-        _: 'messageActionManagedBotCreated';
-        botId: number;
-    }
-    interface RawInputMessagesFilterPoll {
-        _: 'inputMessagesFilterPoll';
-    }
-    interface RawUpdateManagedBot {
-        _: 'updateManagedBot';
-        userId: number;
-        botId: number;
-        qts: number;
-    }
-    interface RawMessageEntityDiffInsert {
-        _: 'messageEntityDiffInsert';
-        offset: number;
-        length: number;
-    }
-    interface RawMessageEntityDiffReplace {
-        _: 'messageEntityDiffReplace';
-        offset: number;
-        length: number;
-        oldText: string;
-    }
-    interface RawMessageEntityDiffDelete {
-        _: 'messageEntityDiffDelete';
-        offset: number;
-        length: number;
-    }
-    interface RawInputPollAnswer {
-        _: 'inputPollAnswer';
-        text: tl.TypeTextWithEntities;
-        media?: tl.TypeInputMedia;
-    }
-    interface RawRequestPeerTypeCreateBot {
-        _: 'requestPeerTypeCreateBot';
-        botManaged?: boolean;
-        suggestedName?: string;
-        suggestedUsername?: string;
     }
     interface RawInputMessageReadMetric {
         _: 'inputMessageReadMetric';
@@ -27528,6 +28563,43 @@ export class RpcError extends Error {
         activeTimeInViewMs: number;
         heightToViewportRatioPermille: number;
         seenRangeRatioPermille: number;
+    }
+    interface RawInputAiComposeToneDefault {
+        _: 'inputAiComposeToneDefault';
+        tone: string;
+    }
+    interface RawInputAiComposeToneID {
+        _: 'inputAiComposeToneID';
+        id: Long;
+        accessHash: Long;
+    }
+    interface RawInputAiComposeToneSlug {
+        _: 'inputAiComposeToneSlug';
+        slug: string;
+    }
+    interface RawAiComposeTone {
+        _: 'aiComposeTone';
+        creator?: boolean;
+        id: Long;
+        accessHash: Long;
+        slug: string;
+        title: string;
+        emojiId?: Long;
+        prompt?: string;
+        installsCount?: number;
+        authorId?: number;
+        exampleEnglish?: tl.TypeAiComposeToneExample;
+    }
+    interface RawAiComposeToneDefault {
+        _: 'aiComposeToneDefault';
+        tone: string;
+        emojiId: Long;
+        title: string;
+    }
+    interface RawAiComposeToneExample {
+        _: 'aiComposeToneExample';
+        from: tl.TypeTextWithEntities;
+        to: tl.TypeTextWithEntities;
     }
     /**
      * A
@@ -27789,7 +28861,7 @@ export class RpcError extends Error {
          */
         query: X;
     }
-    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn {
+    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, aicompose.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn {
         'invokeAfterMsg': any
         'invokeAfterMsgs': any
         'initConnection': any
@@ -27896,7 +28968,10 @@ export class RpcError extends Error {
     type TypeChatParticipant = tl.RawChatParticipant | tl.RawChatParticipantCreator | tl.RawChatParticipantAdmin
     function isAnyChatParticipant(o: object): o is TypeChatParticipant
     /**
-     * Object contains info on group members.
+     * Contains the full list of members of
+     * <a href="https://corefork.telegram.org/api/channel#basic-groups">basic
+     * groups »</a>; is <strong>NOT</strong> usable for
+     * supergroups/channels.
      */
     type TypeChatParticipants = tl.RawChatParticipantsForbidden | tl.RawChatParticipants
     function isAnyChatParticipants(o: object): o is TypeChatParticipants
@@ -28001,7 +29076,7 @@ export class RpcError extends Error {
     /**
      * Object contains info on events occurred.
      */
-    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
+    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
     function isAnyUpdate(o: object): o is TypeUpdate
     /**
      * Object which is perceived by the client without a call on
@@ -28288,7 +29363,7 @@ export class RpcError extends Error {
     /**
      * Top peer category
      */
-    type TypeTopPeerCategory = tl.RawTopPeerCategoryBotsPM | tl.RawTopPeerCategoryBotsInline | tl.RawTopPeerCategoryCorrespondents | tl.RawTopPeerCategoryGroups | tl.RawTopPeerCategoryChannels | tl.RawTopPeerCategoryPhoneCalls | tl.RawTopPeerCategoryForwardUsers | tl.RawTopPeerCategoryForwardChats | tl.RawTopPeerCategoryBotsApp
+    type TypeTopPeerCategory = tl.RawTopPeerCategoryBotsPM | tl.RawTopPeerCategoryBotsInline | tl.RawTopPeerCategoryCorrespondents | tl.RawTopPeerCategoryGroups | tl.RawTopPeerCategoryChannels | tl.RawTopPeerCategoryPhoneCalls | tl.RawTopPeerCategoryForwardUsers | tl.RawTopPeerCategoryForwardChats | tl.RawTopPeerCategoryBotsApp | tl.RawTopPeerCategoryBotsGuestChat
     function isAnyTopPeerCategory(o: object): o is TypeTopPeerCategory
     /**
      * Top peers by top peer category
@@ -28840,7 +29915,7 @@ export class RpcError extends Error {
     /**
      * Webpage attributes
      */
-    type TypeWebPageAttribute = tl.RawWebPageAttributeTheme | tl.RawWebPageAttributeStory | tl.RawWebPageAttributeStickerSet | tl.RawWebPageAttributeUniqueStarGift | tl.RawWebPageAttributeStarGiftCollection | tl.RawWebPageAttributeStarGiftAuction
+    type TypeWebPageAttribute = tl.RawWebPageAttributeTheme | tl.RawWebPageAttributeStory | tl.RawWebPageAttributeStickerSet | tl.RawWebPageAttributeUniqueStarGift | tl.RawWebPageAttributeStarGiftCollection | tl.RawWebPageAttributeStarGiftAuction | tl.RawWebPageAttributeAiComposeTone
     function isAnyWebPageAttribute(o: object): o is TypeWebPageAttribute
     /**
      * Credit card info URL provided by the bank
@@ -29927,6 +31002,11 @@ export class RpcError extends Error {
      */
     type TypeInputChatTheme = tl.RawInputChatThemeEmpty | tl.RawInputChatTheme | tl.RawInputChatThemeUniqueGift
     function isAnyInputChatTheme(o: object): o is TypeInputChatTheme
+    /**
+     * Indicates the price for a
+     * <a href="https://corefork.telegram.org/api/gifts#collectible-gifts">gift
+     * upgrade »</a> starting from a specific point in time.
+     */
     type TypeStarGiftUpgradePrice = tl.RawStarGiftUpgradePrice
     function isAnyStarGiftUpgradePrice(o: object): o is TypeStarGiftUpgradePrice
     type TypeGroupCallMessage = tl.RawGroupCallMessage
@@ -29935,18 +31015,48 @@ export class RpcError extends Error {
     function isAnyGroupCallDonor(o: object): o is TypeGroupCallDonor
     type TypeRecentStory = tl.RawRecentStory
     function isAnyRecentStory(o: object): o is TypeRecentStory
+    /**
+     * Describes a bid in an
+     * <a href="https://corefork.telegram.org/api/auctions">auction</a>.
+     */
     type TypeAuctionBidLevel = tl.RawAuctionBidLevel
     function isAnyAuctionBidLevel(o: object): o is TypeAuctionBidLevel
     type TypeStarGiftAuctionState = tl.RawStarGiftAuctionStateNotModified | tl.RawStarGiftAuctionState | tl.RawStarGiftAuctionStateFinished
     function isAnyStarGiftAuctionState(o: object): o is TypeStarGiftAuctionState
+    /**
+     * Contains information about the current user's state in an
+     * <a href="https://corefork.telegram.org/api/auctions">auction
+     * »</a>.
+     * 
+     * The <code>bid_amount</code>, <code>bid_date</code>,
+     * <code>bid_peer</code> and <code>min_bid_amount</code> flags
+     * of {@link RawStarGiftAuctionUserState} will all be set if
+     * the user placed a bid in the auction.
+     */
     type TypeStarGiftAuctionUserState = tl.RawStarGiftAuctionUserState
     function isAnyStarGiftAuctionUserState(o: object): o is TypeStarGiftAuctionUserState
+    /**
+     * Describes a gift that the current user won in an auction.
+     */
     type TypeStarGiftAuctionAcquiredGift = tl.RawStarGiftAuctionAcquiredGift
     function isAnyStarGiftAuctionAcquiredGift(o: object): o is TypeStarGiftAuctionAcquiredGift
+    /**
+     * Contains info about
+     * <a href="https://corefork.telegram.org/api/auctions">an
+     * auction where the user has placed a bid »</a>.
+     */
     type TypeStarGiftActiveAuctionState = tl.RawStarGiftActiveAuctionState
     function isAnyStarGiftActiveAuctionState(o: object): o is TypeStarGiftActiveAuctionState
     type TypeInputStarGiftAuction = tl.RawInputStarGiftAuction | tl.RawInputStarGiftAuctionSlug
     function isAnyInputStarGiftAuction(o: object): o is TypeInputStarGiftAuction
+    /**
+     * Human-readable info about a passkey associated to an
+     * account, returned when
+     * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">creating
+     * a passkey »</a> or
+     * <a href="https://corefork.telegram.org/api/passkeys#list-passkeys">listing
+     * passkeys »</a>.
+     */
     type TypePasskey = tl.RawPasskey
     function isAnyPasskey(o: object): o is TypePasskey
     type TypeInputPasskeyResponse = tl.RawInputPasskeyResponseRegister | tl.RawInputPasskeyResponseLogin
@@ -29959,10 +31069,22 @@ export class RpcError extends Error {
     function isAnyStarGiftAuctionRound(o: object): o is TypeStarGiftAuctionRound
     type TypeStarGiftAttributeRarity = tl.RawStarGiftAttributeRarity | tl.RawStarGiftAttributeRarityUncommon | tl.RawStarGiftAttributeRarityRare | tl.RawStarGiftAttributeRarityEpic | tl.RawStarGiftAttributeRarityLegendary
     function isAnyStarGiftAttributeRarity(o: object): o is TypeStarGiftAttributeRarity
+    /**
+     * This constructor allows setting a custom background color
+     * and custom emoji label for a button, see
+     * <a href="https://corefork.telegram.org/api/bots/buttons#button-styles">here
+     * »</a> for more info.
+     */
     type TypeKeyboardButtonStyle = tl.RawKeyboardButtonStyle
     function isAnyKeyboardButtonStyle(o: object): o is TypeKeyboardButtonStyle
     type TypeInputMessageReadMetric = tl.RawInputMessageReadMetric
     function isAnyInputMessageReadMetric(o: object): o is TypeInputMessageReadMetric
+    type TypeInputAiComposeTone = tl.RawInputAiComposeToneDefault | tl.RawInputAiComposeToneID | tl.RawInputAiComposeToneSlug
+    function isAnyInputAiComposeTone(o: object): o is TypeInputAiComposeTone
+    type TypeAiComposeTone = tl.RawAiComposeTone | tl.RawAiComposeToneDefault
+    function isAnyAiComposeTone(o: object): o is TypeAiComposeTone
+    type TypeAiComposeToneExample = tl.RawAiComposeToneExample
+    function isAnyAiComposeToneExample(o: object): o is TypeAiComposeToneExample
 
     namespace storage {
         /**
@@ -30078,12 +31200,15 @@ export class RpcError extends Error {
          * user's country/provider, the user must purchase a
          * <a href="https://corefork.telegram.org/api/premium">Telegram
          * Premium</a> subscription in order to proceed with the
-         * login/signup.
+         * login/signup, see
+         * <a href="https://corefork.telegram.org/api/auth#paid-auth">here
+         * »</a> for more info.
          */
         interface RawSentCodePaymentRequired {
             _: 'auth.sentCodePaymentRequired';
             /**
-             * Store identifier of the Telegram Premium subscription.
+             * For official apps, tore identifier of the Telegram Premium
+             * subscription.
              */
             storeProduct: string;
             /**
@@ -30100,7 +31225,22 @@ export class RpcError extends Error {
              * The mandatory subject for the email.
              */
             supportEmailSubject: string;
+            premiumDays: number;
+            /**
+             * Three-letter ISO 4217
+             * <a href="https://corefork.telegram.org/bots/payments#supported-currencies">currency</a>
+             * code.
+             */
             currency: string;
+            /**
+             * Total price in the smallest units of the currency (integer,
+             * not float/double). For example, for a price of <code>US$
+             * 1.45</code> pass <code>amount = 145</code>. See the exp
+             * parameter in
+             * <a href="https://corefork.telegram.org/bots/payments/currencies.json">currencies.json</a>,
+             * it shows the number of digits past the decimal point for
+             * each currency (2 for the majority of currencies).
+             */
             amount: Long;
         }
         /**
@@ -30468,8 +31608,19 @@ export class RpcError extends Error {
              */
             futureAuthToken?: Uint8Array;
         }
+        /**
+         * Passkey login options, see
+         * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+         * »</a> for more info on the full flow.
+         */
         interface RawPasskeyLoginOptions {
             _: 'auth.passkeyLoginOptions';
+            /**
+             * JSON-encoded object whose <code>publicKey</code> field
+             * contains a
+             * <a href="https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialRequestOptions"><code>PublicKeyCredentialRequestOptions</code></a>
+             * object.
+             */
             options: tl.TypeDataJSON;
         }
         /**
@@ -30967,29 +32118,85 @@ export class RpcError extends Error {
             mnc: string;
         }
         /**
+         * Checks the status of a
+         * <a href="https://corefork.telegram.org/api/auth#paid-auth">login
+         * payment</a>.
+         * 
          * RPC method returns {@link tl.auth.TypeSentCode}
          */
         interface RawCheckPaidAuthRequest {
             _: 'auth.checkPaidAuth';
+            /**
+             * Phone number
+             */
             phoneNumber: string;
+            /**
+             * The phone code hash obtained from
+             * {@link auth.RawSendCodeRequest}
+             */
             phoneCodeHash: string;
+            /**
+             * The payment form ID passed to
+             * {@link payments.RawSendPaymentFormRequest}.
+             */
             formId: Long;
         }
         /**
+         * Initialize login with a passkey over an unauthenticated
+         * connection, see
+         * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+         * »</a> for more info.
+         * 
          * RPC method returns {@link tl.auth.TypePasskeyLoginOptions}
          */
         interface RawInitPasskeyLoginRequest {
             _: 'auth.initPasskeyLogin';
+            /**
+             * Application identifier (see
+             * <a href="https://corefork.telegram.org/myapp">App
+             * configuration</a>)
+             */
             apiId: number;
+            /**
+             * Application identifier hash (see
+             * <a href="https://corefork.telegram.org/myapp">App
+             * configuration</a>)
+             */
             apiHash: string;
         }
         /**
+         * Complete login with a passkey over an unauthenticated
+         * connection, see
+         * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+         * »</a> for more info.
+         * 
+         * Must be sent to the user's native DC, as specified by the
+         * <code>user_handle</code> (<code>dcId:userId</code>) returned
+         * in the passkey assertion, see
+         * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+         * »</a> for the full flow.
+         * 
          * RPC method returns {@link tl.auth.TypeAuthorization}
          */
         interface RawFinishPasskeyLoginRequest {
             _: 'auth.finishPasskeyLogin';
+            /**
+             * Passkey assertion result.
+             */
             credential: tl.TypeInputPasskeyCredential;
+            /**
+             * DC ID used for the initial
+             * {@link auth.RawInitPasskeyLoginRequest} request; set only if
+             * the user's DC is different from the DC used for the initial
+             * {@link auth.RawInitPasskeyLoginRequest}.
+             */
             fromDcId?: number;
+            /**
+             * Auth key ID for the connection to <code>from_dc_id</code>
+             * (use the permanent auth key ID if PFS is enabled); set only
+             * if the user's DC is different from the DC used for the
+             * initial {@link auth.RawInitPasskeyLoginRequest}.
+             */
             fromAuthKeyId?: Long;
         }
         interface RpcCallReturn {
@@ -31067,6 +32274,11 @@ export class RpcError extends Error {
          */
         type TypeLoggedOut = tl.auth.RawLoggedOut
         function isAnyLoggedOut(o: object): o is TypeLoggedOut
+        /**
+         * Passkey login options, see
+         * <a href="https://corefork.telegram.org/api/passkeys#logging-in-with-a-passkey">here
+         * »</a> for more info on the full flow.
+         */
         type TypePasskeyLoginOptions = tl.auth.RawPasskeyLoginOptions
         function isAnyPasskeyLoginOptions(o: object): o is TypePasskeyLoginOptions
 }
@@ -31506,6 +32718,7 @@ export class RpcError extends Error {
              * Mini Bot Apps</a>.
              */
             botsApp?: boolean;
+            botsGuestchat?: boolean;
             /**
              * Offset for
              * <a href="https://corefork.telegram.org/api/offsets">pagination</a>
@@ -31604,6 +32817,11 @@ export class RpcError extends Error {
              * to the contact list, without a phone number.
              */
             phone: string;
+            /**
+             * A private note for this contact, only visible to us; see
+             * <a href="https://corefork.telegram.org/api/contacts#private-notes-for-contacts">here
+             * »</a> for more info on contact notes.
+             */
             note?: tl.TypeTextWithEntities;
         }
         /**
@@ -31682,6 +32900,9 @@ export class RpcError extends Error {
         /**
          * Resolve a phone number to get user info, if their privacy
          * settings allow it.
+         * 
+         * Make sure to implement client-side ratelimiting/debounce for
+         * this method, allowing at most 1 call every 3 seconds.
          * 
          * RPC method returns {@link tl.contacts.TypeResolvedPeer}
          */
@@ -31794,11 +33015,21 @@ export class RpcError extends Error {
             q: string;
         }
         /**
+         * Update the private note associated to a contact; see
+         * <a href="https://corefork.telegram.org/api/contacts#private-notes-for-contacts">here
+         * »</a> for more info.
+         * 
          * RPC method returns boolean
          */
         interface RawUpdateContactNoteRequest {
             _: 'contacts.updateContactNote';
+            /**
+             * The contact.
+             */
             id: tl.TypeInputUser;
+            /**
+             * The note.
+             */
             note: tl.TypeTextWithEntities;
         }
         interface RpcCallReturn {
@@ -33561,9 +34792,24 @@ export class RpcError extends Error {
             params: number[];
             playsLeft?: number;
         }
+        /**
+         * Represents a message modified by AI.
+         */
         interface RawComposedMessageWithAI {
             _: 'messages.composedMessageWithAI';
+            /**
+             * The modified message.
+             */
             resultText: tl.TypeTextWithEntities;
+            /**
+             * If <strong>only</strong> the proofreading mode
+             * ({@link messages.RawComposeMessageWithAIRequest}.<code>proofread</code>)
+             * is enabled, this field will be populated with a
+             * "pre-rendered" diff between the old and the new message text
+             * using <strong>only</strong>
+             * <a href="https://corefork.telegram.org/api/entities#diff-entities">diff
+             * entities »</a>.
+             */
             diffText?: tl.TypeTextWithEntities;
         }
         /**
@@ -33885,7 +35131,7 @@ export class RpcError extends Error {
             /**
              * Only for bots, disallows forwarding and saving of the
              * messages, even if the destination chat doesn't have
-             * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">content
+             * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">content
              * protection</a> enabled
              */
             noforwards?: boolean;
@@ -33944,6 +35190,12 @@ export class RpcError extends Error {
              * messages</a>
              */
             scheduleDate?: number;
+            /**
+             * Once sent, this message will be automatically re-scheduled
+             * to be re-sent again this many seconds in the future, see
+             * <a href="https://corefork.telegram.org/api/scheduled-messages#repeating-scheduled-messages">here
+             * »</a> for more info on repeating scheduled messages.
+             */
             scheduleRepeatPeriod?: number;
             /**
              * Send this message as the specified peer
@@ -34000,7 +35252,7 @@ export class RpcError extends Error {
             /**
              * Only for bots, disallows forwarding and saving of the
              * messages, even if the destination chat doesn't have
-             * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">content
+             * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">content
              * protection</a> enabled
              */
             noforwards?: boolean;
@@ -34060,6 +35312,12 @@ export class RpcError extends Error {
              * messages</a>
              */
             scheduleDate?: number;
+            /**
+             * Once sent, this message will be automatically re-scheduled
+             * to be re-sent again this many seconds in the future, see
+             * <a href="https://corefork.telegram.org/api/scheduled-messages#repeating-scheduled-messages">here
+             * »</a> for more info on repeating scheduled messages.
+             */
             scheduleRepeatPeriod?: number;
             /**
              * Send this message as the specified peer
@@ -34127,7 +35385,7 @@ export class RpcError extends Error {
             /**
              * Only for bots, disallows further re-forwarding and saving of
              * the messages, even if the destination chat doesn't have
-             * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">content
+             * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">content
              * protection</a> enabled
              */
             noforwards?: boolean;
@@ -34172,6 +35430,12 @@ export class RpcError extends Error {
              * Scheduled message date for scheduled messages
              */
             scheduleDate?: number;
+            /**
+             * Once sent, this message will be automatically re-scheduled
+             * to be re-sent again this many seconds in the future, see
+             * <a href="https://corefork.telegram.org/api/scheduled-messages#repeating-scheduled-messages">here
+             * »</a> for more info on repeating scheduled messages.
+             */
             scheduleRepeatPeriod?: number;
             /**
              * Forward the messages as the specified peer
@@ -34183,6 +35447,11 @@ export class RpcError extends Error {
              * reply shortcut »</a>, instead.
              */
             quickReplyShortcut?: tl.TypeInputQuickReplyShortcut;
+            /**
+             * Specifies a
+             * <a href="https://corefork.telegram.org/api/effects">message
+             * effect »</a> to use for the message.
+             */
             effect?: Long;
             /**
              * Start playing the video at the specified timestamp
@@ -35242,6 +36511,12 @@ export class RpcError extends Error {
              * messages</a>
              */
             scheduleDate?: number;
+            /**
+             * Once sent, this message will be automatically re-scheduled
+             * to be re-sent again this many seconds in the future, see
+             * <a href="https://corefork.telegram.org/api/scheduled-messages#repeating-scheduled-messages">here
+             * »</a> for more info on repeating scheduled messages.
+             */
             scheduleRepeatPeriod?: number;
             /**
              * If specified, edits a
@@ -36023,7 +37298,7 @@ export class RpcError extends Error {
             /**
              * Only for bots, disallows forwarding and saving of the
              * messages, even if the destination chat doesn't have
-             * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">content
+             * <a href="https://telegram.org/blog/content-protection-delete-by-date-and-more">content
              * protection</a> enabled
              */
             noforwards?: boolean;
@@ -37352,8 +38627,8 @@ export class RpcError extends Error {
         }
         /**
          * Enable or disable
-         * <a href="https://telegram.org/blog/protected-content-delete-by-date-and-more">content
-         * protection</a> on a channel or chat
+         * <a href="https://corefork.telegram.org/api/content-protection">content
+         * protection</a> on a channel, group or private chat.
          * 
          * RPC method returns {@link tl.TypeUpdates}
          */
@@ -37367,6 +38642,12 @@ export class RpcError extends Error {
              * Enable or disable content protection
              */
             enabled: boolean;
+            /**
+             * Used only inside private chats to accept or refuse a request
+             * to disable content protection, see
+             * <a href="https://corefork.telegram.org/api/content-protection#for-users">here
+             * »</a> for more info on the full flow.
+             */
             requestMsgId?: number;
         }
         /**
@@ -39139,15 +40420,11 @@ export class RpcError extends Error {
             count: number;
             /**
              * Unique client message ID required to prevent message
-             * resending. 
-             * 
-             * <strong>Note</strong>: this argument <strong>must</strong>
-             * be composed of a 64-bit integer where the lower 32 bits are
-             * random, and the higher 32 bits <strong>are equal to the
-             * current unixtime</strong>, i.e. <code>uint64_t random_id =
-             * (time() << 32) | ((uint64_t)random_uint32_t())</code>: this
-             * differs from the <code>random_id</code> format of all other
-             * methods in the API, which just take 64 random bits.
+             * resending. <strong>Note</strong>: this argument
+             * <strong>must</strong> be composed of a 64-bit integer where
+             * the lower 32 bits are random, and the higher 32 bits
+             * <strong>are equal to the current unixtime</strong>, i.e.
+             * `uint64_t random_id = (time() << 32)
              */
             randomId: Long;
             /**
@@ -39538,87 +40815,230 @@ export class RpcError extends Error {
             rejectComment?: string;
         }
         /**
+         * Get <a href="https://corefork.telegram.org/api/forum">topics
+         * of a forum</a>
+         * 
          * RPC method returns {@link tl.messages.TypeForumTopics}
          */
         interface RawGetForumTopicsRequest {
             _: 'messages.getForumTopics';
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Search query
+             */
             q?: string;
             /**
              * <a href="https://corefork.telegram.org/api/offsets">Offsets
-             * for pagination, for more info click here</a>
+             * for pagination, for more info click here</a>, date of the
+             * last message of the last found topic. Use 0 or any date in
+             * the future to get results from the last topic.
              */
             offsetDate: number;
             /**
              * <a href="https://corefork.telegram.org/api/offsets">Offsets
-             * for pagination, for more info click here</a>
+             * for pagination, for more info click here</a>, ID of the last
+             * message of the last found topic (or initially
+             * <code>0</code>).
              */
             offsetId: number;
+            /**
+             * <a href="https://corefork.telegram.org/api/offsets">Offsets
+             * for pagination, for more info click here</a>, ID of the last
+             * found topic (or initially <code>0</code>).
+             */
             offsetTopic: number;
             /**
              * Maximum number of results to return,
              * <a href="https://corefork.telegram.org/api/offsets">see
-             * pagination</a>
+             * pagination</a>. For optimal performance, the number of
+             * returned topics is chosen by the server and can be smaller
+             * than the specified limit.
              */
             limit: number;
         }
         /**
+         * Get forum topics by their ID
+         * 
          * RPC method returns {@link tl.messages.TypeForumTopics}
          */
         interface RawGetForumTopicsByIDRequest {
             _: 'messages.getForumTopicsByID';
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Topic IDs
+             */
             topics: number[];
         }
         /**
+         * Edit <a href="https://corefork.telegram.org/api/forum">forum
+         * topic</a>.
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawEditForumTopicRequest {
             _: 'messages.editForumTopic';
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Topic ID
+             */
             topicId: number;
+            /**
+             * If present, will update the topic title (maximum UTF-8
+             * length: 128).
+             */
             title?: string;
+            /**
+             * If present, updates the
+             * <a href="https://corefork.telegram.org/api/custom-emoji">custom
+             * emoji</a> used as topic icon.
+             * <a href="https://corefork.telegram.org/api/premium">Telegram
+             * Premium</a> users can use any custom emoji, other users can
+             * only use the custom emojis contained in the
+             * {@link RawInputStickerSetEmojiDefaultTopicIcons} emoji pack.
+             * Pass 0 to switch to the fallback topic icon.
+             */
             iconEmojiId?: Long;
+            /**
+             * If present, will update the open/closed status of the topic.
+             */
             closed?: boolean;
+            /**
+             * If present, will hide/unhide the topic (only valid for the
+             * "General" topic, <code>id=1</code>).
+             */
             hidden?: boolean;
         }
         /**
+         * Pin or unpin
+         * <a href="https://corefork.telegram.org/api/forum">forum
+         * topics</a>
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawUpdatePinnedForumTopicRequest {
             _: 'messages.updatePinnedForumTopic';
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * <a href="https://corefork.telegram.org/api/forum">Forum
+             * topic ID</a>
+             */
             topicId: number;
+            /**
+             * Whether to pin or unpin the topic
+             */
             pinned: boolean;
         }
         /**
+         * Reorder pinned forum topics
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawReorderPinnedForumTopicsRequest {
             _: 'messages.reorderPinnedForumTopics';
+            /**
+             * If not set, the order of only the topics present both
+             * server-side and in <code>order</code> will be changed (i.e.
+             * mentioning topics not pinned server-side in
+             * <code>order</code> will not pin them, and not mentioning
+             * topics pinned server-side will not unpin them).  
+             * 
+             * If set, the entire server-side pinned topic list will be
+             * replaced with <code>order</code> (i.e. mentioning topics not
+             * pinned server-side in <code>order</code> will pin them, and
+             * not mentioning topics pinned server-side will unpin them)
+             */
             force?: boolean;
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * <a href="https://corefork.telegram.org/api/forum">Topic IDs
+             * »</a>
+             */
             order: number[];
         }
         /**
+         * Create a
+         * <a href="https://corefork.telegram.org/api/forum">forum
+         * topic</a>.
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawCreateForumTopicRequest {
             _: 'messages.createForumTopic';
             titleMissing?: boolean;
+            /**
+             * The supergroup, private chat (for forum-enabled bots) or
+             * forum bot (for users) where to create the topic.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Topic title (maximum UTF-8 length: 128)
+             */
             title: string;
+            /**
+             * If no custom emoji icon is specified, specifies the color of
+             * the fallback topic icon (RGB), one of <code>0x6FB9F0</code>,
+             * <code>0xFFD67E</code>, <code>0xCB86DB</code>,
+             * <code>0x8EEE98</code>, <code>0xFF93B2</code>, or
+             * <code>0xFB6F5F</code>.
+             */
             iconColor?: number;
+            /**
+             * ID of the
+             * <a href="https://corefork.telegram.org/api/custom-emoji">custom
+             * emoji</a> used as topic icon.
+             * <a href="https://corefork.telegram.org/api/premium">Telegram
+             * Premium</a> users can use any custom emoji, other users can
+             * only use the custom emojis contained in the
+             * {@link RawInputStickerSetEmojiDefaultTopicIcons} emoji pack.
+             */
             iconEmojiId?: Long;
+            /**
+             * Unique client message ID to prevent duplicate sending of the
+             * same event
+             */
             randomId: Long;
+            /**
+             * Create the topic as the specified peer
+             */
             sendAs?: tl.TypeInputPeer;
         }
         /**
+         * Delete message history of a
+         * <a href="https://corefork.telegram.org/api/forum">forum
+         * topic</a>
+         * 
          * RPC method returns {@link tl.messages.TypeAffectedHistory}
          */
         interface RawDeleteTopicHistoryRequest {
             _: 'messages.deleteTopicHistory';
+            /**
+             * The supergroup forum, private chat (for forum-enabled bots)
+             * or bot forum (for users) where the topic is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Topic ID
+             */
             topMsgId: number;
         }
         /**
@@ -39628,11 +41048,21 @@ export class RpcError extends Error {
             _: 'messages.getEmojiGameInfo';
         }
         /**
+         * Summarize the contents of a message with AI, see
+         * <a href="https://corefork.telegram.org/api/ai#summarize-messages">here
+         * »</a> for more info.
+         * 
          * RPC method returns {@link tl.TypeTextWithEntities}
          */
         interface RawSummarizeTextRequest {
             _: 'messages.summarizeText';
+            /**
+             * The peer where the message is located.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * Message ID.
+             */
             id: number;
             toLang?: string;
             tone?: string;
@@ -39654,12 +41084,24 @@ export class RpcError extends Error {
             peer: tl.TypeInputPeer;
         }
         /**
+         * Edit a group participant's
+         * <a href="https://corefork.telegram.org/api/rank">tag »</a>.
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawEditChatParticipantRankRequest {
             _: 'messages.editChatParticipantRank';
+            /**
+             * The basic group/supergroup.
+             */
             peer: tl.TypeInputPeer;
+            /**
+             * The participant.
+             */
             participant: tl.TypeInputPeer;
+            /**
+             * The new tag.
+             */
             rank: string;
         }
         /**
@@ -39678,16 +41120,37 @@ export class RpcError extends Error {
             matchCode: string;
         }
         /**
+         * Invokes telegram's AI Editor that can translate, transform,
+         * fixup and/or emojify your message in a number of different
+         * ways, privately powered by
+         * <a href="https://cocoon.org/">Cocoon</a>, see
+         * <a href="https://corefork.telegram.org/api/ai#compose-messages">here
+         * »</a> for more info!
+         * 
+         * All of the modes specified below can be combined.
+         * 
          * RPC method returns
          * {@link tl.messages.TypeComposedMessageWithAI}
          */
         interface RawComposeMessageWithAIRequest {
             _: 'messages.composeMessageWithAI';
+            /**
+             * If set, proofreads and fixes mistakes in the message
+             */
             proofread?: boolean;
+            /**
+             * If set, adds emojis to the message
+             */
             emojify?: boolean;
+            /**
+             * The message
+             */
             text: tl.TypeTextWithEntities;
+            /**
+             * If set, translates the message to the specified language
+             */
             translateToLang?: string;
-            changeTone?: string;
+            tone?: tl.TypeInputAiComposeTone;
         }
         /**
          * RPC method returns boolean
@@ -39730,8 +41193,21 @@ export class RpcError extends Error {
             _: 'messages.getUnreadPollVotes';
             peer: tl.TypeInputPeer;
             topMsgId?: number;
+            /**
+             * <a href="https://corefork.telegram.org/api/offsets">Offsets
+             * for pagination, for more info click here</a>
+             */
             offsetId: number;
+            /**
+             * <a href="https://corefork.telegram.org/api/offsets">Offsets
+             * for pagination, for more info click here</a>
+             */
             addOffset: number;
+            /**
+             * Maximum number of results to return,
+             * <a href="https://corefork.telegram.org/api/offsets">see
+             * pagination</a>
+             */
             limit: number;
             maxId: number;
             minId: number;
@@ -39743,6 +41219,42 @@ export class RpcError extends Error {
             _: 'messages.readPollVotes';
             peer: tl.TypeInputPeer;
             topMsgId?: number;
+        }
+        /**
+         * RPC method returns {@link tl.TypeInputBotInlineMessageID}
+         */
+        interface RawSetBotGuestChatResultRequest {
+            _: 'messages.setBotGuestChatResult';
+            queryId: Long;
+            result: tl.TypeInputBotInlineResult;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteParticipantReactionsRequest {
+            _: 'messages.deleteParticipantReactions';
+            peer: tl.TypeInputPeer;
+            participant: tl.TypeInputPeer;
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawDeleteParticipantReactionRequest {
+            _: 'messages.deleteParticipantReaction';
+            peer: tl.TypeInputPeer;
+            msgId: number;
+            participant: tl.TypeInputPeer;
+        }
+        /**
+         * RPC method returns {@link tl.messages.TypeMessages}
+         */
+        interface RawGetPersonalChannelHistoryRequest {
+            _: 'messages.getPersonalChannelHistory';
+            userId: tl.TypeInputUser;
+            limit: number;
+            maxId: number;
+            minId: number;
+            hash: Long;
         }
         interface RpcCallReturn {
             'messages.getMessages': tl.messages.TypeMessages
@@ -39996,6 +41508,10 @@ export class RpcError extends Error {
             'messages.deletePollAnswer': tl.TypeUpdates
             'messages.getUnreadPollVotes': tl.messages.TypeMessages
             'messages.readPollVotes': tl.messages.TypeAffectedHistory
+            'messages.setBotGuestChatResult': tl.TypeInputBotInlineMessageID
+            'messages.deleteParticipantReactions': boolean
+            'messages.deleteParticipantReaction': tl.TypeUpdates
+            'messages.getPersonalChannelHistory': tl.messages.TypeMessages
         }
         /**
          * Object contains a list of chats with messages and auxiliary
@@ -40350,6 +41866,9 @@ export class RpcError extends Error {
         function isAnyEmojiGameOutcome(o: object): o is TypeEmojiGameOutcome
         type TypeEmojiGameInfo = tl.messages.RawEmojiGameUnavailable | tl.messages.RawEmojiGameDiceInfo
         function isAnyEmojiGameInfo(o: object): o is TypeEmojiGameInfo
+        /**
+         * Represents a message modified by AI.
+         */
         type TypeComposedMessageWithAI = tl.messages.RawComposedMessageWithAI
         function isAnyComposedMessageWithAI(o: object): o is TypeComposedMessageWithAI
 }
@@ -41742,9 +43261,9 @@ export class RpcError extends Error {
              * inclusive, in which case a palette containing a single color
              * from the following colors should be used: red, orange,
              * violet, green, cyan, blue, pink for indexes 0 to 6 (i.e. the
-             * same colors used for randomized fallback
-             * <a href="https://corefork.telegram.org/api/colors">message
-             * accent colors</a>).
+             * same colors used for the
+             * <a href="https://corefork.telegram.org/api/colors#randomized-fallback-color-palette">randomized
+             * fallback color palette</a>).
              */
             colors?: tl.help.TypePeerColorSet;
             /**
@@ -42913,12 +44432,32 @@ export class RpcError extends Error {
              */
             ids: Long[];
         }
+        /**
+         * List of
+         * <a href="https://corefork.telegram.org/api/passkeys#list-passkeys">passkeys
+         * »</a> associated to the current account.
+         */
         interface RawPasskeys {
             _: 'account.passkeys';
+            /**
+             * List of passkeys that can be used to log into the current
+             * account
+             */
             passkeys: tl.TypePasskey[];
         }
+        /**
+         * Passkey registration options, see
+         * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">here
+         * »</a> for more info on the full flow.
+         */
         interface RawPasskeyRegistrationOptions {
             _: 'account.passkeyRegistrationOptions';
+            /**
+             * JSON-encoded object whose <code>publicKey</code> field
+             * contains a
+             * <a href="https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialCreationOptions"><code>PublicKeyCredentialCreationOptions</code></a>
+             * object.
+             */
             options: tl.TypeDataJSON;
         }
         /**
@@ -45029,13 +46568,20 @@ export class RpcError extends Error {
             _: 'account.getUniqueGiftChatThemes';
             /**
              * Offset for
-             * <a href="https://corefork.telegram.org/api/offsets">pagination</a>.
+             * <a href="https://corefork.telegram.org/api/offsets">pagination</a>,
+             * intially an empty string, then equal the value of the last
+             * returned
+             * {@link account.RawChatThemes}.<code>next_offset</code> (if
+             * set).
              */
             offset: string;
             /**
              * Maximum number of results to return,
              * <a href="https://corefork.telegram.org/api/offsets">see
-             * pagination</a>
+             * pagination</a>. Note that the server may return less than
+             * <code>limit</code> results, even if the actual number of
+             * remaining results is <code>>= limit</code>, paginate to
+             * fetch them all.
              */
             limit: number;
             /**
@@ -45046,6 +46592,10 @@ export class RpcError extends Error {
             hash: Long;
         }
         /**
+         * Initialize passkey registration for the current account, see
+         * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">here
+         * »</a> for more info on the full flow.
+         * 
          * RPC method returns
          * {@link tl.account.TypePasskeyRegistrationOptions}
          */
@@ -45053,23 +46603,44 @@ export class RpcError extends Error {
             _: 'account.initPasskeyRegistration';
         }
         /**
+         * Complete passkey registration for the current account, see
+         * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">here
+         * »</a> for more info on the full flow.
+         * 
          * RPC method returns {@link tl.TypePasskey}
          */
         interface RawRegisterPasskeyRequest {
             _: 'account.registerPasskey';
+            /**
+             * Registration result.
+             */
             credential: tl.TypeInputPasskeyCredential;
         }
         /**
+         * List the passkeys associated to the current account that can
+         * be used to log in, see
+         * <a href="https://corefork.telegram.org/api/passkeys#list-passkeys">here
+         * »</a> for more info on passkeys.
+         * 
          * RPC method returns {@link tl.account.TypePasskeys}
          */
         interface RawGetPasskeysRequest {
             _: 'account.getPasskeys';
         }
         /**
+         * Delete a passkey associated to the current account, see
+         * <a href="https://corefork.telegram.org/api/passkeys#delete-passkeys">here
+         * »</a> for more info.
+         * 
          * RPC method returns boolean
          */
         interface RawDeletePasskeyRequest {
             _: 'account.deletePasskey';
+            /**
+             * Identifier of the passkey to delete, taken from
+             * {@link RawPasskey}.<code>id</code>, usually obtained using
+             * {@link account.RawGetPasskeysRequest}.
+             */
             id: string;
         }
         interface RpcCallReturn {
@@ -45349,8 +46920,18 @@ export class RpcError extends Error {
          */
         type TypeSavedMusicIds = tl.account.RawSavedMusicIdsNotModified | tl.account.RawSavedMusicIds
         function isAnySavedMusicIds(o: object): o is TypeSavedMusicIds
+        /**
+         * List of
+         * <a href="https://corefork.telegram.org/api/passkeys#list-passkeys">passkeys
+         * »</a> associated to the current account.
+         */
         type TypePasskeys = tl.account.RawPasskeys
         function isAnyPasskeys(o: object): o is TypePasskeys
+        /**
+         * Passkey registration options, see
+         * <a href="https://corefork.telegram.org/api/passkeys#creating-a-passkey">here
+         * »</a> for more info on the full flow.
+         */
         type TypePasskeyRegistrationOptions = tl.account.RawPasskeyRegistrationOptions
         function isAnyPasskeyRegistrationOptions(o: object): o is TypePasskeyRegistrationOptions
 }
@@ -45710,7 +47291,8 @@ export class RpcError extends Error {
             adminRights: tl.TypeChatAdminRights;
             /**
              * Indicates the role (rank) of the admin in the group: just an
-             * arbitrary string
+             * arbitrary string. If the flag is not set, the rank is left
+             * unchanged.
              */
             rank?: string;
         }
@@ -46770,9 +48352,7 @@ export class RpcError extends Error {
         /**
          * Create a
          * <a href="https://corefork.telegram.org/api/forum">forum
-         * topic</a>; requires
-         * <a href="https://corefork.telegram.org/api/rights"><code>manage_topics</code>
-         * rights</a>.
+         * topic</a>.
          * 
          * RPC method returns {@link tl.TypeUpdates}
          */
@@ -46878,9 +48458,7 @@ export class RpcError extends Error {
         }
         /**
          * Edit <a href="https://corefork.telegram.org/api/forum">forum
-         * topic</a>; requires
-         * <a href="https://corefork.telegram.org/api/rights"><code>manage_topics</code>
-         * rights</a>.
+         * topic</a>.
          * 
          * RPC method returns {@link tl.TypeUpdates}
          */
@@ -47780,7 +49358,21 @@ export class RpcError extends Error {
              * Possible gift attributes
              */
             sampleAttributes: tl.TypeStarGiftAttribute[];
+            /**
+             * Contains a similar list of upgrade prices and timestamps,
+             * not as granular as in <code>next_prices</code> (i.e. prices
+             * are approximately 1 month apart), to be used mainly to scale
+             * the price graph, and to show a more general future overview
+             * of the upgrade price.
+             */
             prices: tl.TypeStarGiftUpgradePrice[];
+            /**
+             * Contains the current upgrade price and a list of future
+             * prices, each associated to a UNIX timestamp that indicates
+             * when the price comes in effect (the current price is valid
+             * only until the next one comes into effect, and so on for all
+             * prices in the list).
+             */
             nextPrices: tl.TypeStarGiftUpgradePrice[];
         }
         /**
@@ -48026,28 +49618,91 @@ export class RpcError extends Error {
              */
             reason: tl.TypeTextWithEntities;
         }
+        /**
+         * Describes a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gift auction »</a>.
+         */
         interface RawStarGiftAuctionState {
             _: 'payments.starGiftAuctionState';
+            /**
+             * The gift currently being distributed in the auction.
+             */
             gift: tl.TypeStarGift;
+            /**
+             * Auction state.
+             */
             state: tl.TypeStarGiftAuctionState;
+            /**
+             * Auction state related to the current user (i.e. info about
+             * placed bids, won gifts, and so on).
+             */
             userState: tl.TypeStarGiftAuctionUserState;
+            /**
+             * Re-invoke the
+             * {@link payments.RawGetStarGiftAuctionStateRequest} method
+             * after <code>timeout</code> seconds to keep receiving auction
+             * updates, see
+             * <a href="https://corefork.telegram.org/api/auctions">here
+             * »</a> for more info on the full flow.
+             */
             timeout: number;
+            /**
+             * Mentioned users
+             */
             users: tl.TypeUser[];
+            /**
+             * Mentioned chats
+             */
             chats: tl.TypeChat[];
         }
+        /**
+         * Describes all the gifts that the current user won in an
+         * <a href="https://corefork.telegram.org/api/auctions">auction</a>.
+         */
         interface RawStarGiftAuctionAcquiredGifts {
             _: 'payments.starGiftAuctionAcquiredGifts';
+            /**
+             * The gifts
+             */
             gifts: tl.TypeStarGiftAuctionAcquiredGift[];
+            /**
+             * Mentioned users
+             */
             users: tl.TypeUser[];
+            /**
+             * Mentioned chats
+             */
             chats: tl.TypeChat[];
         }
+        /**
+         * The list of currently active
+         * <a href="https://corefork.telegram.org/api/auctions">gift
+         * auctions</a> <strong>where the user has placed a
+         * bid</strong> hasn't changed.
+         */
         interface RawStarGiftActiveAuctionsNotModified {
             _: 'payments.starGiftActiveAuctionsNotModified';
         }
+        /**
+         * Describes all currently active
+         * <a href="https://corefork.telegram.org/api/auctions">gift
+         * auctions</a> <strong>where the user has placed a
+         * bid</strong>.
+         */
         interface RawStarGiftActiveAuctions {
             _: 'payments.starGiftActiveAuctions';
+            /**
+             * Auctions where the user has placed a bid
+             */
             auctions: tl.TypeStarGiftActiveAuctionState[];
+            /**
+             * Mentioned users
+             */
             users: tl.TypeUser[];
+            /**
+             * Mentioned chats
+             */
             chats: tl.TypeChat[];
         }
         interface RawStarGiftUpgradeAttributes {
@@ -48331,7 +49986,7 @@ export class RpcError extends Error {
          * <a href="https://corefork.telegram.org/api/stars">Telegram
          * Stars balance</a> of the current account (with
          * peer={@link RawInputPeerSelf}), or the stars balance of the
-         * bot specified in <code>peer</code>.
+         * bot or channel specified in <code>peer</code>.
          * 
          * RPC method returns {@link tl.payments.TypeStarsStatus}
          */
@@ -49143,6 +50798,7 @@ export class RpcError extends Error {
              */
             sortByNum?: boolean;
             forCraft?: boolean;
+            starsOnly?: boolean;
             /**
              * If a previous call to the method was made and
              * {@link payments.RawResaleStarGifts}.<code>attributes_hash</code>
@@ -49168,7 +50824,6 @@ export class RpcError extends Error {
              * of that type are allowed.
              */
             attributes?: tl.TypeStarGiftAttributeId[];
-            starsOnly?: boolean;
             /**
              * Offset for pagination. If not equal to an empty string,
              * {@link payments.RawResaleStarGifts}.<code>counters</code>
@@ -49353,28 +51008,61 @@ export class RpcError extends Error {
             giftId: Long;
         }
         /**
+         * Returns info about a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gift auction »</a>; also subscribes the user to auction
+         * updates, see
+         * <a href="https://corefork.telegram.org/api/auctions">here
+         * »</a> for more info on the full flow.
+         * 
          * RPC method returns
          * {@link tl.payments.TypeStarGiftAuctionState}
          */
         interface RawGetStarGiftAuctionStateRequest {
             _: 'payments.getStarGiftAuctionState';
+            /**
+             * Either the ID of the gift linked to the auction, or an
+             * <a href="https://corefork.telegram.org/api/links#auction-links">auction
+             * deep link slug »</a>.
+             */
             auction: tl.TypeInputStarGiftAuction;
+            /**
+             * Initially <code>0</code>, then set to the returned
+             * {@link RawStarGiftAuctionState}.<code>version</code>, to
+             * avoid refetching results if they haven't changed.
+             */
             version: number;
         }
         /**
+         * Fetches all the gifts that the current user won in an
+         * <a href="https://corefork.telegram.org/api/auctions">auction</a>.
+         * 
          * RPC method returns
          * {@link tl.payments.TypeStarGiftAuctionAcquiredGifts}
          */
         interface RawGetStarGiftAuctionAcquiredGiftsRequest {
             _: 'payments.getStarGiftAuctionAcquiredGifts';
+            /**
+             * The gift ID linked to the auction.
+             */
             giftId: Long;
         }
         /**
+         * Fetches all currently active
+         * <a href="https://corefork.telegram.org/api/auctions">gift
+         * auctions</a> <strong>where the user has placed a
+         * bid</strong>.
+         * 
          * RPC method returns
          * {@link tl.payments.TypeStarGiftActiveAuctions}
          */
         interface RawGetStarGiftActiveAuctionsRequest {
             _: 'payments.getStarGiftActiveAuctions';
+            /**
+             * Hash generated
+             * <a href="https://corefork.telegram.org/api/auctions">as
+             * specified here »</a>
+             */
             hash: Long;
         }
         /**
@@ -49651,8 +51339,17 @@ export class RpcError extends Error {
          */
         type TypeCheckCanSendGiftResult = tl.payments.RawCheckCanSendGiftResultOk | tl.payments.RawCheckCanSendGiftResultFail
         function isAnyCheckCanSendGiftResult(o: object): o is TypeCheckCanSendGiftResult
+        /**
+         * Describes a
+         * <a href="https://corefork.telegram.org/api/auctions">collectible
+         * gift auction »</a>.
+         */
         type TypeStarGiftAuctionState = tl.payments.RawStarGiftAuctionState
         function isAnyStarGiftAuctionState(o: object): o is TypeStarGiftAuctionState
+        /**
+         * Describes all the gifts that the current user won in an
+         * <a href="https://corefork.telegram.org/api/auctions">auction</a>.
+         */
         type TypeStarGiftAuctionAcquiredGifts = tl.payments.RawStarGiftAuctionAcquiredGifts
         function isAnyStarGiftAuctionAcquiredGifts(o: object): o is TypeStarGiftAuctionAcquiredGifts
         type TypeStarGiftActiveAuctions = tl.payments.RawStarGiftActiveAuctionsNotModified | tl.payments.RawStarGiftActiveAuctions
@@ -49798,8 +51495,8 @@ export class RpcError extends Error {
             users: tl.TypeUser[];
         }
         /**
-         * Get phone call configuration to be passed to libtgvoip's
-         * shared config
+         * DEPRECATED: Get phone call configuration to be passed to the
+         * libtgvoip (deprecated) shared config.
          * 
          * RPC method returns {@link tl.TypeDataJSON}
          */
@@ -49807,7 +51504,9 @@ export class RpcError extends Error {
             _: 'phone.getCallConfig';
         }
         /**
-         * Start a telegram phone call
+         * Start a telegram phone call, see
+         * <a href="https://corefork.telegram.org/api/calls#one-to-one-calls">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns {@link tl.phone.TypePhoneCall}
          */
@@ -49836,7 +51535,9 @@ export class RpcError extends Error {
             protocol: tl.TypePhoneCallProtocol;
         }
         /**
-         * Accept incoming call
+         * Accept incoming call, see
+         * <a href="https://corefork.telegram.org/api/calls#one-to-one-calls">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns {@link tl.phone.TypePhoneCall}
          */
@@ -49858,7 +51559,9 @@ export class RpcError extends Error {
         }
         /**
          * <a href="https://corefork.telegram.org/api/end-to-end/voice-calls">Complete
-         * phone call E2E encryption key exchange »</a>
+         * phone call E2E encryption key exchange »</a>, see
+         * <a href="https://corefork.telegram.org/api/calls#one-to-one-calls">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns {@link tl.phone.TypePhoneCall}
          */
@@ -49885,7 +51588,9 @@ export class RpcError extends Error {
         /**
          * Optional: notify the server that the user is currently busy
          * in a call: this will automatically refuse all incoming phone
-         * calls until the current phone call is ended.
+         * calls until the current phone call is ended, see
+         * <a href="https://corefork.telegram.org/api/calls#one-to-one-calls">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns boolean
          */
@@ -49897,7 +51602,9 @@ export class RpcError extends Error {
             peer: tl.TypeInputPhoneCall;
         }
         /**
-         * Refuse or end running call
+         * Refuse or end running call, see
+         * <a href="https://corefork.telegram.org/api/calls#one-to-one-calls">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns {@link tl.TypeUpdates}
          */
@@ -49926,7 +51633,9 @@ export class RpcError extends Error {
         }
         /**
          * Rate a call, returns info about the rating message sent to
-         * the official VoIP bot.
+         * the official VoIP bot, see
+         * <a href="https://corefork.telegram.org/api/calls#call-rating">here
+         * »</a> for more info on the full flow.
          * 
          * RPC method returns {@link tl.TypeUpdates}
          */
@@ -49934,7 +51643,8 @@ export class RpcError extends Error {
             _: 'phone.setCallRating';
             /**
              * Whether the user decided on their own initiative to rate the
-             * call
+             * call, must NOT be set if rating was requested by the server
+             * with {@link RawPhoneCallDiscarded}.<code>need_rating</code>.
              */
             userInitiative?: boolean;
             /**
@@ -49946,7 +51656,9 @@ export class RpcError extends Error {
              */
             rating: number;
             /**
-             * An additional comment
+             * An additional comment with problem hashtags, see
+             * <a href="https://corefork.telegram.org/api/calls#call-rating">here
+             * »</a> for more info on the full flow.
              */
             comment: string;
         }
@@ -49962,7 +51674,7 @@ export class RpcError extends Error {
              */
             peer: tl.TypeInputPhoneCall;
             /**
-             * Debug statistics obtained from libtgvoip
+             * Debug statistics obtained from tgcalls
              */
             debug: tl.TypeDataJSON;
         }
@@ -50457,7 +52169,7 @@ export class RpcError extends Error {
             revoke: boolean;
         }
         /**
-         * Save phone call debug information
+         * Deprecated: send libtgvoip phone call debug information
          * 
          * RPC method returns boolean
          */
@@ -50468,7 +52180,7 @@ export class RpcError extends Error {
              */
             peer: tl.TypeInputPhoneCall;
             /**
-             * Logs
+             * Libtgvoip logs
              */
             file: tl.TypeInputFile;
         }
@@ -51050,6 +52762,10 @@ export class RpcError extends Error {
              */
             users: tl.TypeUser[];
         }
+        interface RawPollStats {
+            _: 'stats.pollStats';
+            votesGraph: tl.TypeStatsGraph;
+        }
         /**
          * Get
          * <a href="https://corefork.telegram.org/api/stats">channel
@@ -51216,6 +52932,15 @@ export class RpcError extends Error {
              */
             limit: number;
         }
+        /**
+         * RPC method returns {@link tl.stats.TypePollStats}
+         */
+        interface RawGetPollStatsRequest {
+            _: 'stats.getPollStats';
+            dark?: boolean;
+            peer: tl.TypeInputPeer;
+            msgId: number;
+        }
         interface RpcCallReturn {
             'stats.getBroadcastStats': tl.stats.TypeBroadcastStats
             'stats.loadAsyncGraph': tl.TypeStatsGraph
@@ -51224,6 +52949,7 @@ export class RpcError extends Error {
             'stats.getMessageStats': tl.stats.TypeMessageStats
             'stats.getStoryStats': tl.stats.TypeStoryStats
             'stats.getStoryPublicForwards': tl.stats.TypePublicForwards
+            'stats.getPollStats': tl.stats.TypePollStats
         }
         /**
          * Channel statistics
@@ -51255,6 +52981,8 @@ export class RpcError extends Error {
          */
         type TypePublicForwards = tl.stats.RawPublicForwards
         function isAnyPublicForwards(o: object): o is TypePublicForwards
+        type TypePollStats = tl.stats.RawPollStats
+        function isAnyPollStats(o: object): o is TypePollStats
 }
 
     namespace stickers {
@@ -51723,11 +53451,21 @@ export class RpcError extends Error {
             documents: tl.TypeInputDocument[];
         }
         /**
+         * Suggest a birthday to another user, see
+         * <a href="https://corefork.telegram.org/api/profile#birthday">here
+         * »</a> for more info on birthdays in the API.
+         * 
          * RPC method returns {@link tl.TypeUpdates}
          */
         interface RawSuggestBirthdayRequest {
             _: 'users.suggestBirthday';
+            /**
+             * The user that will receive the suggested birthday date.
+             */
             id: tl.TypeInputUser;
+            /**
+             * The birthday to suggest.
+             */
             birthday: tl.TypeBirthday;
         }
         interface RpcCallReturn {
@@ -52211,6 +53949,11 @@ export class RpcError extends Error {
         interface RawRequestedButton {
             _: 'bots.requestedButton';
             webappReqId: string;
+        }
+        interface RawAccessSettings {
+            _: 'bots.accessSettings';
+            restricted?: boolean;
+            addUsers?: tl.TypeUser[];
         }
         /**
          * Sends a custom request; for bots only
@@ -52909,6 +54652,22 @@ export class RpcError extends Error {
             bot: tl.TypeInputUser;
             webappReqId: string;
         }
+        /**
+         * RPC method returns {@link tl.bots.TypeAccessSettings}
+         */
+        interface RawGetAccessSettingsRequest {
+            _: 'bots.getAccessSettings';
+            bot: tl.TypeInputUser;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawEditAccessSettingsRequest {
+            _: 'bots.editAccessSettings';
+            restricted?: boolean;
+            bot: tl.TypeInputUser;
+            addUsers?: tl.TypeInputUser[];
+        }
         interface RpcCallReturn {
             'bots.sendCustomRequest': tl.TypeDataJSON
             'bots.answerWebhookJSONQuery': boolean
@@ -52945,6 +54704,8 @@ export class RpcError extends Error {
             'bots.exportBotToken': tl.bots.TypeExportedBotToken
             'bots.requestWebViewButton': tl.bots.TypeRequestedButton
             'bots.getRequestedWebViewButton': tl.TypeKeyboardButton
+            'bots.getAccessSettings': tl.bots.TypeAccessSettings
+            'bots.editAccessSettings': boolean
         }
         /**
          * Localized name, about text and description of a bot.
@@ -52971,6 +54732,8 @@ export class RpcError extends Error {
         function isAnyExportedBotToken(o: object): o is TypeExportedBotToken
         type TypeRequestedButton = tl.bots.RawRequestedButton
         function isAnyRequestedButton(o: object): o is TypeRequestedButton
+        type TypeAccessSettings = tl.bots.RawAccessSettings
+        function isAnyAccessSettings(o: object): o is TypeAccessSettings
 }
 
     namespace stories {
@@ -54641,6 +56404,87 @@ export class RpcError extends Error {
         function isAnyCollectibleInfo(o: object): o is TypeCollectibleInfo
 }
 
+    namespace aicompose {
+        interface RawTonesNotModified {
+            _: 'aicompose.tonesNotModified';
+        }
+        interface RawTones {
+            _: 'aicompose.tones';
+            hash: Long;
+            tones: tl.TypeAiComposeTone[];
+            users: tl.TypeUser[];
+        }
+        /**
+         * RPC method returns {@link tl.TypeAiComposeTone}
+         */
+        interface RawCreateToneRequest {
+            _: 'aicompose.createTone';
+            displayAuthor?: boolean;
+            emojiId: Long;
+            title: string;
+            prompt: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeAiComposeTone}
+         */
+        interface RawUpdateToneRequest {
+            _: 'aicompose.updateTone';
+            tone: tl.TypeInputAiComposeTone;
+            displayAuthor?: boolean;
+            emojiId?: Long;
+            title?: string;
+            prompt?: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawSaveToneRequest {
+            _: 'aicompose.saveTone';
+            tone: tl.TypeInputAiComposeTone;
+            unsave: boolean;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteToneRequest {
+            _: 'aicompose.deleteTone';
+            tone: tl.TypeInputAiComposeTone;
+        }
+        /**
+         * RPC method returns {@link tl.aicompose.TypeTones}
+         */
+        interface RawGetToneRequest {
+            _: 'aicompose.getTone';
+            tone: tl.TypeInputAiComposeTone;
+        }
+        /**
+         * RPC method returns {@link tl.aicompose.TypeTones}
+         */
+        interface RawGetTonesRequest {
+            _: 'aicompose.getTones';
+            hash: Long;
+        }
+        /**
+         * RPC method returns {@link tl.TypeAiComposeToneExample}
+         */
+        interface RawGetToneExampleRequest {
+            _: 'aicompose.getToneExample';
+            tone: tl.TypeInputAiComposeTone;
+            num: number;
+        }
+        interface RpcCallReturn {
+            'aicompose.createTone': tl.TypeAiComposeTone
+            'aicompose.updateTone': tl.TypeAiComposeTone
+            'aicompose.saveTone': boolean
+            'aicompose.deleteTone': boolean
+            'aicompose.getTone': tl.aicompose.TypeTones
+            'aicompose.getTones': tl.aicompose.TypeTones
+            'aicompose.getToneExample': tl.TypeAiComposeToneExample
+        }
+        type TypeTones = tl.aicompose.RawTonesNotModified | tl.aicompose.RawTones
+        function isAnyTones(o: object): o is TypeTones
+}
+
     namespace mtcute {
         interface RawDummyUpdate {
             _: 'mtcute.dummyUpdate';
@@ -54671,7 +56515,7 @@ export class RpcError extends Error {
         /**
          * Object contains info on events occurred.
          */
-        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
+        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
         function isAnyUpdate(o: object): o is TypeUpdate
         /**
          * Peer
@@ -55250,6 +57094,17 @@ export class RpcError extends Error {
         | tl.messages.RawEditChatParticipantRankRequest
         | tl.messages.RawDeclineUrlAuthRequest
         | tl.messages.RawCheckUrlAuthMatchCodeRequest
+        | tl.messages.RawComposeMessageWithAIRequest
+        | tl.messages.RawReportReadMetricsRequest
+        | tl.messages.RawReportMusicListenRequest
+        | tl.messages.RawAddPollAnswerRequest
+        | tl.messages.RawDeletePollAnswerRequest
+        | tl.messages.RawGetUnreadPollVotesRequest
+        | tl.messages.RawReadPollVotesRequest
+        | tl.messages.RawSetBotGuestChatResultRequest
+        | tl.messages.RawDeleteParticipantReactionsRequest
+        | tl.messages.RawDeleteParticipantReactionRequest
+        | tl.messages.RawGetPersonalChannelHistoryRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -55379,6 +57234,13 @@ export class RpcError extends Error {
         | tl.bots.RawUpdateStarRefProgramRequest
         | tl.bots.RawSetCustomVerificationRequest
         | tl.bots.RawGetBotRecommendationsRequest
+        | tl.bots.RawCheckUsernameRequest
+        | tl.bots.RawCreateBotRequest
+        | tl.bots.RawExportBotTokenRequest
+        | tl.bots.RawRequestWebViewButtonRequest
+        | tl.bots.RawGetRequestedWebViewButtonRequest
+        | tl.bots.RawGetAccessSettingsRequest
+        | tl.bots.RawEditAccessSettingsRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -55511,6 +57373,7 @@ export class RpcError extends Error {
         | tl.stats.RawGetMessageStatsRequest
         | tl.stats.RawGetStoryStatsRequest
         | tl.stats.RawGetStoryPublicForwardsRequest
+        | tl.stats.RawGetPollStatsRequest
         | tl.chatlists.RawExportChatlistInviteRequest
         | tl.chatlists.RawDeleteExportedInviteRequest
         | tl.chatlists.RawEditExportedInviteRequest
@@ -55568,18 +57431,13 @@ export class RpcError extends Error {
         | tl.smsjobs.RawGetSmsJobRequest
         | tl.smsjobs.RawFinishJobRequest
         | tl.fragment.RawGetCollectibleInfoRequest
-        | tl.messages.RawComposeMessageWithAIRequest
-        | tl.messages.RawReportReadMetricsRequest
-        | tl.messages.RawReportMusicListenRequest
-        | tl.messages.RawAddPollAnswerRequest
-        | tl.messages.RawDeletePollAnswerRequest
-        | tl.messages.RawGetUnreadPollVotesRequest
-        | tl.messages.RawReadPollVotesRequest
-        | tl.bots.RawCheckUsernameRequest
-        | tl.bots.RawCreateBotRequest
-        | tl.bots.RawExportBotTokenRequest
-        | tl.bots.RawRequestWebViewButtonRequest
-        | tl.bots.RawGetRequestedWebViewButtonRequest
+        | tl.aicompose.RawCreateToneRequest
+        | tl.aicompose.RawUpdateToneRequest
+        | tl.aicompose.RawSaveToneRequest
+        | tl.aicompose.RawDeleteToneRequest
+        | tl.aicompose.RawGetToneRequest
+        | tl.aicompose.RawGetTonesRequest
+        | tl.aicompose.RawGetToneExampleRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -55769,6 +57627,9 @@ export class RpcError extends Error {
         | tl.RawMessageActionChangeCreator
         | tl.RawMessageActionNoForwardsToggle
         | tl.RawMessageActionNoForwardsRequest
+        | tl.RawMessageActionPollAppendAnswer
+        | tl.RawMessageActionPollDeleteAnswer
+        | tl.RawMessageActionManagedBotCreated
         | tl.RawDialog
         | tl.RawDialogFolder
         | tl.RawPhotoEmpty
@@ -55844,6 +57705,7 @@ export class RpcError extends Error {
         | tl.RawInputMessagesFilterGeo
         | tl.RawInputMessagesFilterContacts
         | tl.RawInputMessagesFilterPinned
+        | tl.RawInputMessagesFilterPoll
         | tl.RawUpdateNewMessage
         | tl.RawUpdateMessageID
         | tl.RawUpdateDeleteMessages
@@ -55997,6 +57859,9 @@ export class RpcError extends Error {
         | tl.RawUpdateEmojiGameInfo
         | tl.RawUpdateStarGiftCraftFail
         | tl.RawUpdateChatParticipantRank
+        | tl.RawUpdateManagedBot
+        | tl.RawUpdateBotGuestChatQuery
+        | tl.RawUpdateAiComposeTones
         | tl.updates.RawState
         | tl.updates.RawDifferenceEmpty
         | tl.updates.RawDifference
@@ -56214,6 +58079,9 @@ export class RpcError extends Error {
         | tl.RawMessageEntityCustomEmoji
         | tl.RawMessageEntityBlockquote
         | tl.RawMessageEntityFormattedDate
+        | tl.RawMessageEntityDiffInsert
+        | tl.RawMessageEntityDiffReplace
+        | tl.RawMessageEntityDiffDelete
         | tl.RawInputChannelEmpty
         | tl.RawInputChannel
         | tl.RawInputChannelFromMessage
@@ -56300,6 +58168,7 @@ export class RpcError extends Error {
         | tl.RawTopPeerCategoryForwardUsers
         | tl.RawTopPeerCategoryForwardChats
         | tl.RawTopPeerCategoryBotsApp
+        | tl.RawTopPeerCategoryBotsGuestChat
         | tl.RawTopPeerCategoryPeers
         | tl.contacts.RawTopPeersNotModified
         | tl.contacts.RawTopPeers
@@ -56578,6 +58447,7 @@ export class RpcError extends Error {
         | tl.help.RawUserInfoEmpty
         | tl.help.RawUserInfo
         | tl.RawPollAnswer
+        | tl.RawInputPollAnswer
         | tl.RawPoll
         | tl.RawPollAnswerVoters
         | tl.RawPollResults
@@ -56634,6 +58504,7 @@ export class RpcError extends Error {
         | tl.RawWebPageAttributeUniqueStarGift
         | tl.RawWebPageAttributeStarGiftCollection
         | tl.RawWebPageAttributeStarGiftAuction
+        | tl.RawWebPageAttributeAiComposeTone
         | tl.messages.RawVotesList
         | tl.RawBankCardOpenUrl
         | tl.payments.RawBankCardData
@@ -56823,6 +58694,7 @@ export class RpcError extends Error {
         | tl.RawRequestPeerTypeUser
         | tl.RawRequestPeerTypeChat
         | tl.RawRequestPeerTypeBroadcast
+        | tl.RawRequestPeerTypeCreateBot
         | tl.RawEmojiListNotModified
         | tl.RawEmojiList
         | tl.RawEmojiGroup
@@ -57134,20 +59006,20 @@ export class RpcError extends Error {
         | tl.RawStarGiftAttributeRarityEpic
         | tl.RawStarGiftAttributeRarityLegendary
         | tl.RawKeyboardButtonStyle
-        | tl.RawMessageActionPollAppendAnswer
-        | tl.RawMessageActionPollDeleteAnswer
-        | tl.RawMessageActionManagedBotCreated
-        | tl.RawInputMessagesFilterPoll
-        | tl.RawUpdateManagedBot
-        | tl.RawMessageEntityDiffInsert
-        | tl.RawMessageEntityDiffReplace
-        | tl.RawMessageEntityDiffDelete
-        | tl.RawInputPollAnswer
-        | tl.RawRequestPeerTypeCreateBot
         | tl.RawInputMessageReadMetric
         | tl.bots.RawExportedBotToken
         | tl.bots.RawRequestedButton
         | tl.messages.RawComposedMessageWithAI
+        | tl.stats.RawPollStats
+        | tl.RawInputAiComposeToneDefault
+        | tl.RawInputAiComposeToneID
+        | tl.RawInputAiComposeToneSlug
+        | tl.RawAiComposeTone
+        | tl.RawAiComposeToneDefault
+        | tl.aicompose.RawTonesNotModified
+        | tl.aicompose.RawTones
+        | tl.RawAiComposeToneExample
+        | tl.bots.RawAccessSettings
         | tl.RawUpdateChannelPinnedTopic
         | tl.RawUpdateChannelPinnedTopics
         | tl.mtcute.RawDummyUpdate
@@ -57592,6 +59464,17 @@ export class RpcError extends Error {
         | tl.messages.RawEditChatParticipantRankRequest
         | tl.messages.RawDeclineUrlAuthRequest
         | tl.messages.RawCheckUrlAuthMatchCodeRequest
+        | tl.messages.RawComposeMessageWithAIRequest
+        | tl.messages.RawReportReadMetricsRequest
+        | tl.messages.RawReportMusicListenRequest
+        | tl.messages.RawAddPollAnswerRequest
+        | tl.messages.RawDeletePollAnswerRequest
+        | tl.messages.RawGetUnreadPollVotesRequest
+        | tl.messages.RawReadPollVotesRequest
+        | tl.messages.RawSetBotGuestChatResultRequest
+        | tl.messages.RawDeleteParticipantReactionsRequest
+        | tl.messages.RawDeleteParticipantReactionRequest
+        | tl.messages.RawGetPersonalChannelHistoryRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -57721,6 +59604,13 @@ export class RpcError extends Error {
         | tl.bots.RawUpdateStarRefProgramRequest
         | tl.bots.RawSetCustomVerificationRequest
         | tl.bots.RawGetBotRecommendationsRequest
+        | tl.bots.RawCheckUsernameRequest
+        | tl.bots.RawCreateBotRequest
+        | tl.bots.RawExportBotTokenRequest
+        | tl.bots.RawRequestWebViewButtonRequest
+        | tl.bots.RawGetRequestedWebViewButtonRequest
+        | tl.bots.RawGetAccessSettingsRequest
+        | tl.bots.RawEditAccessSettingsRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -57853,6 +59743,7 @@ export class RpcError extends Error {
         | tl.stats.RawGetMessageStatsRequest
         | tl.stats.RawGetStoryStatsRequest
         | tl.stats.RawGetStoryPublicForwardsRequest
+        | tl.stats.RawGetPollStatsRequest
         | tl.chatlists.RawExportChatlistInviteRequest
         | tl.chatlists.RawDeleteExportedInviteRequest
         | tl.chatlists.RawEditExportedInviteRequest
@@ -57910,18 +59801,13 @@ export class RpcError extends Error {
         | tl.smsjobs.RawGetSmsJobRequest
         | tl.smsjobs.RawFinishJobRequest
         | tl.fragment.RawGetCollectibleInfoRequest
-        | tl.messages.RawComposeMessageWithAIRequest
-        | tl.messages.RawReportReadMetricsRequest
-        | tl.messages.RawReportMusicListenRequest
-        | tl.messages.RawAddPollAnswerRequest
-        | tl.messages.RawDeletePollAnswerRequest
-        | tl.messages.RawGetUnreadPollVotesRequest
-        | tl.messages.RawReadPollVotesRequest
-        | tl.bots.RawCheckUsernameRequest
-        | tl.bots.RawCreateBotRequest
-        | tl.bots.RawExportBotTokenRequest
-        | tl.bots.RawRequestWebViewButtonRequest
-        | tl.bots.RawGetRequestedWebViewButtonRequest
+        | tl.aicompose.RawCreateToneRequest
+        | tl.aicompose.RawUpdateToneRequest
+        | tl.aicompose.RawSaveToneRequest
+        | tl.aicompose.RawDeleteToneRequest
+        | tl.aicompose.RawGetToneRequest
+        | tl.aicompose.RawGetTonesRequest
+        | tl.aicompose.RawGetToneExampleRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -58306,6 +60192,9 @@ export declare function isAnyStarGiftAuctionRound(o: object): o is tl.TypeStarGi
 export declare function isAnyStarGiftAttributeRarity(o: object): o is tl.TypeStarGiftAttributeRarity
 export declare function isAnyKeyboardButtonStyle(o: object): o is tl.TypeKeyboardButtonStyle
 export declare function isAnyInputMessageReadMetric(o: object): o is tl.TypeInputMessageReadMetric
+export declare function isAnyInputAiComposeTone(o: object): o is tl.TypeInputAiComposeTone
+export declare function isAnyAiComposeTone(o: object): o is tl.TypeAiComposeTone
+export declare function isAnyAiComposeToneExample(o: object): o is tl.TypeAiComposeToneExample
 export declare function isAnyStorage_FileType(o: object): o is tl.storage.TypeFileType
 export declare function isAnyAuth_SentCode(o: object): o is tl.auth.TypeSentCode
 export declare function isAnyAuth_Authorization(o: object): o is tl.auth.TypeAuthorization
@@ -58489,6 +60378,7 @@ export declare function isAnyStats_MegagroupStats(o: object): o is tl.stats.Type
 export declare function isAnyStats_MessageStats(o: object): o is tl.stats.TypeMessageStats
 export declare function isAnyStats_StoryStats(o: object): o is tl.stats.TypeStoryStats
 export declare function isAnyStats_PublicForwards(o: object): o is tl.stats.TypePublicForwards
+export declare function isAnyStats_PollStats(o: object): o is tl.stats.TypePollStats
 export declare function isAnyStickers_SuggestedShortName(o: object): o is tl.stickers.TypeSuggestedShortName
 export declare function isAnyUsers_UserFull(o: object): o is tl.users.TypeUserFull
 export declare function isAnyUsers_Users(o: object): o is tl.users.TypeUsers
@@ -58502,6 +60392,7 @@ export declare function isAnyBots_PopularAppBots(o: object): o is tl.bots.TypePo
 export declare function isAnyBots_PreviewInfo(o: object): o is tl.bots.TypePreviewInfo
 export declare function isAnyBots_ExportedBotToken(o: object): o is tl.bots.TypeExportedBotToken
 export declare function isAnyBots_RequestedButton(o: object): o is tl.bots.TypeRequestedButton
+export declare function isAnyBots_AccessSettings(o: object): o is tl.bots.TypeAccessSettings
 export declare function isAnyStories_AllStories(o: object): o is tl.stories.TypeAllStories
 export declare function isAnyStories_Stories(o: object): o is tl.stories.TypeStories
 export declare function isAnyStories_StoryViewsList(o: object): o is tl.stories.TypeStoryViewsList
@@ -58517,6 +60408,7 @@ export declare function isAnyPremium_BoostsStatus(o: object): o is tl.premium.Ty
 export declare function isAnySmsjobs_EligibilityToJoin(o: object): o is tl.smsjobs.TypeEligibilityToJoin
 export declare function isAnySmsjobs_Status(o: object): o is tl.smsjobs.TypeStatus
 export declare function isAnyFragment_CollectibleInfo(o: object): o is tl.fragment.TypeCollectibleInfo
+export declare function isAnyAicompose_Tones(o: object): o is tl.aicompose.TypeTones
 export declare function isAnyMtcute_Update(o: object): o is tl.mtcute.TypeUpdate
 export declare function isAnyMtcute_InputPeer(o: object): o is tl.mtcute.TypeInputPeer
 

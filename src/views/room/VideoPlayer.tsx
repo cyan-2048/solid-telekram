@@ -1,7 +1,7 @@
 import type { Video } from "@mtcute/core";
 import { batch, createEffect, createMemo, createSignal, createUniqueId, onCleanup, onMount, Show } from "solid-js";
 import { Portal } from "solid-js/web";
-import { formatTime } from "@/helpers";
+import { formatTime, sleep } from "@/helpers";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { setStatusbarColor } from "@/stores";
 import { downloadToFile, mediaFilename, setSoftkeys } from "@/utils";
@@ -15,6 +15,7 @@ import * as styles from "./VideoPlayer.module.scss";
 import type { Download } from "@/lib/storage";
 
 import { toaster } from "@/utils";
+import { volumeDown, volumeUp } from "@/lib/volumeManager";
 
 function willFocusScrollIfNeeded(e: { currentTarget: HTMLElement }) {
 	scrollIntoView(e.currentTarget, {
@@ -22,6 +23,56 @@ function willFocusScrollIfNeeded(e: { currentTarget: HTMLElement }) {
 		block: "nearest",
 		inline: "nearest",
 	});
+}
+
+async function rotateScreen(horizontal: boolean) {
+	if ("orientation" in window.screen) {
+		try {
+			if (horizontal) {
+				// @ts-ignore
+				await window.screen.orientation.lock("landscape-primary");
+			} else {
+				// @ts-ignore
+				await window.screen.orientation.lock("portrait-primary");
+			}
+			return true;
+		} catch {}
+	}
+	return false;
+}
+
+async function exitFullscreen() {
+	// rotateScreen(false);
+
+	try {
+		if ("exitFullscreen" in document) {
+			await document.exitFullscreen();
+		} else if ("mozCancelFullScreen" in document) {
+			// @ts-ignore
+			await document.mozCancelFullScreen();
+		}
+	} catch {}
+}
+
+async function toggleFullScreen(element?: Element) {
+	if (
+		// @ts-ignore
+		!document.mozFullScreenElement
+	) {
+		try {
+			// current working methods
+			if ("requestFullscreen" in document.body) {
+				await ((import.meta.env.DEV ? document.body : element) || document.body).requestFullscreen();
+			} else if ("mozRequestFullScreen" in document.body) {
+				// @ts-ignore
+				await ((import.meta.env.DEV ? document.body : element) || document.body).mozRequestFullScreen();
+			}
+		} catch {}
+		return true;
+	} else {
+		await exitFullscreen();
+		return false;
+	}
 }
 
 export default function VideoPlayer(props: { video: Video; onClose: () => void }) {
@@ -41,11 +92,7 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 	const [currentTime, setCurrentTime] = createSignal(0);
 	const [duration, setDuration] = createSignal(props.video.duration || 0);
 
-	const title = createMemo(() => props.video.fileName || "Unknown Video");
-	const backgroundImage = createMemo(() => {
-		if (cover()) return `url(${cover()})`;
-		return undefined;
-	});
+	const [isFullscreen, setIsFullscreen] = createSignal(false);
 
 	const progress = createMemo(() => {
 		const total = duration();
@@ -82,6 +129,8 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 	};
 
 	const disposePlayerResources = () => {
+		rotateScreen(false);
+		exitFullscreen();
 		videoRef?.pause();
 		videoRef?.removeAttribute("src");
 		videoRef?.load();
@@ -157,9 +206,8 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 			);
 		}
 
-		// Try to get a video cover/thumbnail
-		const coverThumb =
-			(props.video as any).videoCover?.getThumbnail?.("m") || (props.video as any).videoCover?.getThumbnail?.("i");
+		const coverThumb = props.video.getThumbnail("m");
+
 		if (coverThumb) {
 			downloadAsync(coverThumb, "url", setCover);
 		}
@@ -167,13 +215,26 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 
 	onCleanup(() => {
 		disposePlayerResources();
-		downloadRef?.abort();
+
+		if (downloadRef) {
+			downloadRef.abort();
+
+			if (
+				downloadRef.listenerCount("state") > 1 ||
+				downloadRef.listenerCount("progress") > 1 ||
+				downloadRef.listenerCount("done") > 1
+			) {
+				// if there are other places downloading this file
+			} else {
+				downloadRef.abort();
+			}
+		}
 	});
 
 	createEffect(() => {
 		if (!showOptions()) return;
 		SpatialNavigation.add(optionsSnId, {
-			selector: ".option",
+			selector: "." + styles.option_item,
 			restrict: "self-only",
 		});
 		SpatialNavigation.focus(optionsSnId);
@@ -188,7 +249,17 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 			queueMicrotask(() => optionDownloadRef?.focus());
 			return;
 		}
-		setSoftkeys("Back", loading() ? "" : playing() ? "Pause" : "Play", loading() ? "" : "Options", false, true);
+		setSoftkeys(
+			"Full Screen",
+			loading() ? "" : playing() ? "tg:pause" : "tg:play",
+			loading() ? "" : "Options",
+			false,
+			false,
+		);
+	});
+
+	createEffect(() => {
+		console.log("fullscreen", isFullscreen());
 	});
 
 	return (
@@ -198,42 +269,63 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 				onKeyDown={(e) => {
 					if (showOptions()) return;
 					const key = e.key;
-					if (key == "Backspace" || key == "SoftLeft") {
-						e.preventDefault();
-						setTimeout(() => {
-							closePlayer();
-						}, 100);
-						return;
-					}
-					if (key == "SoftRight") {
-						e.preventDefault();
-						if (loading()) return;
-						setShowOptions(true);
-						return;
-					}
-					if (key == "Enter") {
-						e.preventDefault();
-						togglePlay();
-						return;
-					}
-					if (key == "ArrowLeft") {
-						e.preventDefault();
-						seekBy(-1);
-						return;
-					}
-					if (key == "ArrowRight") {
-						e.preventDefault();
-						seekBy(1);
-						return;
+					switch (key) {
+						case "Backspace":
+							e.preventDefault();
+
+							if (isFullscreen()) {
+								toggleFullScreen(divRef).then((fullscreen) => {
+									setIsFullscreen(fullscreen);
+								});
+
+								return;
+							}
+
+							setTimeout(() => {
+								closePlayer();
+							}, 100);
+							break;
+						case "SoftLeft":
+							toggleFullScreen(divRef).then((fullscreen) => {
+								setIsFullscreen(fullscreen);
+							});
+
+							break;
+						case "SoftRight":
+							e.preventDefault();
+							if (loading()) break;
+							exitFullscreen();
+							setIsFullscreen(false);
+							setShowOptions(true);
+							break;
+						case "Enter":
+							e.preventDefault();
+							togglePlay();
+							break;
+						case "ArrowLeft":
+							e.preventDefault();
+							seekBy(-1);
+							break;
+						case "ArrowRight":
+							e.preventDefault();
+							seekBy(1);
+							break;
+
+						case "ArrowUp":
+							volumeUp();
+							break;
+						case "ArrowDown":
+							volumeDown();
+							break;
+
+						default:
+							break;
 					}
 				}}
 				tabIndex={-1}
-				class={styles.player}
-				style={{ "background-image": backgroundImage() }}
+				classList={{ [styles.player]: true, [styles.fullscreen]: isFullscreen() }}
 			>
-				<div class={styles.backdrop}></div>
-				<div class={styles.content}>
-					<div class={styles.title}>{title()}</div>
+				<div classList={{ [styles.content]: true, [styles.hide]: isFullscreen() }}>
 					<Show
 						when={!loading()}
 						fallback={
@@ -248,7 +340,7 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 							</div>
 							<div class={styles.times}>
 								<span>{formatTime(currentTime())}</span>
-								<span>{formatTime(Math.max(duration() - currentTime(), 0))}</span>
+								<span>-{formatTime(Math.max(duration() - currentTime(), 0))}</span>
 							</div>
 						</>
 					</Show>
@@ -256,10 +348,10 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 
 				<Show when={src()}>
 					<video
+						poster={cover() || undefined}
 						ref={videoRef}
 						src={src()}
 						tabIndex={-1}
-						style={{ width: "100%", "max-height": "60vh", background: "black" }}
 						controls={false}
 						onLoadedMetadata={(e) => {
 							const value = Number.isFinite(e.currentTarget.duration)
@@ -280,7 +372,9 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 							setPlaying(false);
 							setCurrentTime(0);
 						}}
-						onError={(evt) => {
+						// @ts-ignore
+						prop:mozAudioChannelType="content"
+						on:error={(evt) => {
 							const error = evt.currentTarget.error;
 							if (!error) return;
 							switch (error.code) {
@@ -310,11 +404,22 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 							<OptionsItem
 								ref={optionDownloadRef}
 								on:sn-willfocus={willFocusScrollIfNeeded}
-								classList={{ option: true, [styles.option_item]: true }}
+								classList={{ [styles.option_item]: true }}
 								tabIndex={-1}
 								on:sn-enter-down={handleDownload}
 							>
 								Download
+							</OptionsItem>
+							<OptionsItem
+								on:sn-willfocus={willFocusScrollIfNeeded}
+								classList={{ [styles.option_item]: true }}
+								tabIndex={-1}
+								on:sn-enter-down={() => {
+									closeOptions();
+									rotateScreen(screen.orientation.type.startsWith("portrait"));
+								}}
+							>
+								Rotate
 							</OptionsItem>
 						</OptionsMenuMaxHeight>
 					</Options>

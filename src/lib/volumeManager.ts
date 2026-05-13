@@ -60,6 +60,12 @@ const loadScripts = (() => {
 
 loadScripts.then((polyfill) => {
 	if (polyfill) startVolumeManager();
+
+	// @ts-ignore
+	if (navigator.mozAudioChannelManager) {
+		// @ts-ignore
+		navigator.mozAudioChannelManager.volumeControlChannel = "content";
+	}
 });
 
 export function volumeUp() {

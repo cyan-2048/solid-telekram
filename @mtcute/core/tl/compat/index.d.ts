@@ -332,6 +332,7 @@ export declare namespace tlCompat {
      *     bot_forum_view: flags2.16?true
      *     bot_forum_can_manage_topics: flags2.17?true
      *     bot_can_manage_bots: flags2.18?true
+     *     bot_guestchat: flags2.19?true
      *     send_paid_messages_stars: flags2.15?long
      * Changed arguments:
      *     stories_max_id: flags2.5?int => flags2.5?RecentStory
@@ -449,6 +450,7 @@ export declare namespace tlCompat {
      *     paid_suggested_post_stars: flags2.8?true
      *     paid_suggested_post_ton: flags2.9?true
      *     from_rank: flags2.12?string
+     *     guestchat_via_from: flags2.19?Peer
      *     paid_message_stars: flags2.6?long
      *     suggested_post: flags2.7?SuggestedPost
      *     schedule_repeat_period: flags2.10?int
@@ -845,6 +847,7 @@ export declare namespace tlCompat {
      *     paid_suggested_post_stars: flags2.8?true
      *     paid_suggested_post_ton: flags2.9?true
      *     from_rank: flags2.12?string
+     *     guestchat_via_from: flags2.19?Peer
      *     suggested_post: flags2.7?SuggestedPost
      *     schedule_repeat_period: flags2.10?int
      *     summary_from_language: flags2.11?string
@@ -1757,6 +1760,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     bot_forum_can_manage_topics: flags2.17?true
      *     bot_can_manage_bots: flags2.18?true
+     *     bot_guestchat: flags2.19?true
      * Changed arguments:
      *     stories_max_id: flags2.5?int => flags2.5?RecentStory
      */
@@ -1879,6 +1883,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     from_rank: flags2.12?string
+     *     guestchat_via_from: flags2.19?Peer
      *     schedule_repeat_period: flags2.10?int
      *     summary_from_language: flags2.11?string
      */
@@ -2059,6 +2064,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     from_rank: flags2.12?string
+     *     guestchat_via_from: flags2.19?Peer
      *     summary_from_language: flags2.11?string
      */
     interface RawMessage_layer220 {
@@ -2478,6 +2484,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     from_rank: flags2.12?string
+     *     guestchat_via_from: flags2.19?Peer
      */
     interface RawMessage_layer222 {
         _: 'message_layer222';
@@ -2642,6 +2649,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     has_unread_votes: flags.6?true
+     *     can_view_stats: flags.7?true
      *     solution_media: flags.5?MessageMedia
      */
     interface RawPollResults_layer223 {
@@ -2677,6 +2685,8 @@ export declare namespace tlCompat {
      *     shuffle_answers: flags.8?true
      *     hide_results_until_close: flags.9?true
      *     creator: flags.10?true
+     *     subscribers_only: flags.11?true
+     *     countries_iso2: flags.12?Vector<string>
      *     hash: long
      */
     interface RawPoll_layer223 {
@@ -2739,6 +2749,87 @@ export declare namespace tlCompat {
         quoteOffset?: number;
         todoItemId?: number;
     }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     subscribers_only: flags.11?true
+     *     countries_iso2: flags.12?Vector<string>
+     */
+    interface RawPoll_layer224 {
+        _: 'poll_layer224';
+        id: Long;
+        closed?: boolean;
+        publicVoters?: boolean;
+        multipleChoice?: boolean;
+        quiz?: boolean;
+        openAnswers?: boolean;
+        revotingDisabled?: boolean;
+        shuffleAnswers?: boolean;
+        hideResultsUntilClose?: boolean;
+        creator?: boolean;
+        question: tl.TypeTextWithEntities;
+        answers: tlCompat.TypePollAnswer[];
+        closePeriod?: number;
+        closeDate?: number;
+        hash: Long;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     guestchat_via_from: flags2.19?Peer
+     */
+    interface RawMessage_layer224 {
+        _: 'message_layer224';
+        out?: boolean;
+        mentioned?: boolean;
+        mediaUnread?: boolean;
+        silent?: boolean;
+        post?: boolean;
+        fromScheduled?: boolean;
+        legacy?: boolean;
+        editHide?: boolean;
+        pinned?: boolean;
+        noforwards?: boolean;
+        invertMedia?: boolean;
+        offline?: boolean;
+        videoProcessingPending?: boolean;
+        paidSuggestedPostStars?: boolean;
+        paidSuggestedPostTon?: boolean;
+        id: number;
+        fromId?: tl.TypePeer;
+        fromBoostsApplied?: number;
+        fromRank?: string;
+        peerId: tl.TypePeer;
+        savedPeerId?: tl.TypePeer;
+        fwdFrom?: tl.TypeMessageFwdHeader;
+        viaBotId?: number;
+        viaBusinessBotId?: number;
+        replyTo?: tlCompat.TypeMessageReplyHeader;
+        date: number;
+        message: string;
+        media?: tlCompat.TypeMessageMedia;
+        replyMarkup?: tl.TypeReplyMarkup;
+        entities?: tl.TypeMessageEntity[];
+        views?: number;
+        forwards?: number;
+        replies?: tl.TypeMessageReplies;
+        editDate?: number;
+        postAuthor?: string;
+        groupedId?: Long;
+        reactions?: tl.TypeMessageReactions;
+        restrictionReason?: tl.TypeRestrictionReason[];
+        ttlPeriod?: number;
+        quickReplyShortcutId?: number;
+        effect?: Long;
+        factcheck?: tl.TypeFactCheck;
+        reportDeliveryUntilDate?: number;
+        paidMessageStars?: Long;
+        suggestedPost?: tl.TypeSuggestedPost;
+        scheduleRepeatPeriod?: number;
+        summaryFromLanguage?: string;
+    }
     interface RpcCallReturn {
     }
     type TypeStarGift = tlCompat.RawStarGiftUnique_layer197 | tlCompat.RawStarGiftUnique_layer198 | tlCompat.RawStarGiftUnique_layer202 | tlCompat.RawStarGift_layer202 | tlCompat.RawStarGiftUnique_layer206 | tlCompat.RawStarGift_layer206 | tlCompat.RawStarGift_layer209 | tlCompat.RawStarGiftUnique_layer210 | tlCompat.RawStarGiftUnique_layer211 | tlCompat.RawStarGift_layer211 | tlCompat.RawStarGiftUnique_layer214 | tlCompat.RawStarGift_layer216 | tlCompat.RawStarGiftUnique_layer218 | tlCompat.RawStarGift_layer218 | tlCompat.RawStarGiftUnique_layer221 | tl.TypeStarGift
@@ -2750,7 +2841,7 @@ export declare namespace tlCompat {
     type TypePremiumGiftOption = tlCompat.RawPremiumGiftOption_layer199
     type TypeUser = tlCompat.RawUser_layer199 | tlCompat.RawUser_layer216 | tl.TypeUser
     type TypeChat = tlCompat.RawChannel_layer199 | tlCompat.RawChannel_layer203 | tlCompat.RawChannel_layer216 | tl.TypeChat
-    type TypeMessage = tlCompat.RawMessage_layer199 | tlCompat.RawMessageService_layer204 | tlCompat.RawMessage_layer204 | tlCompat.RawMessage_layer216 | tlCompat.RawMessage_layer220 | tlCompat.RawMessage_layer222 | tl.TypeMessage
+    type TypeMessage = tlCompat.RawMessage_layer199 | tlCompat.RawMessageService_layer204 | tlCompat.RawMessage_layer204 | tlCompat.RawMessage_layer216 | tlCompat.RawMessage_layer220 | tlCompat.RawMessage_layer222 | tlCompat.RawMessage_layer224 | tl.TypeMessage
     type TypePhoneCallDiscardReason = tlCompat.RawPhoneCallDiscardReasonAllowGroupCall_layer202 | tl.TypePhoneCallDiscardReason
     type TypeMessageReplyHeader = tlCompat.RawMessageReplyHeader_layer206 | tlCompat.RawMessageReplyHeader_layer223 | tl.TypeMessageReplyHeader
     type TypeStoryItem = tlCompat.RawStoryItem_layer210 | tlCompat.RawStoryItem_layer223 | tl.TypeStoryItem
@@ -2761,7 +2852,7 @@ export declare namespace tlCompat {
     type TypeChatParticipant = tlCompat.RawChatParticipantAdmin_layer222 | tlCompat.RawChatParticipantCreator_layer222 | tlCompat.RawChatParticipant_layer222 | tl.TypeChatParticipant
     type TypePollResults = tlCompat.RawPollResults_layer223 | tl.TypePollResults
     type TypePollAnswerVoters = tlCompat.RawPollAnswerVoters_layer223 | tl.TypePollAnswerVoters
-    type TypePoll = tlCompat.RawPoll_layer223 | tl.TypePoll
+    type TypePoll = tlCompat.RawPoll_layer223 | tlCompat.RawPoll_layer224 | tl.TypePoll
     type TypePollAnswer = tlCompat.RawPollAnswer_layer223 | tl.TypePollAnswer
 
     type TlObject =
@@ -2856,5 +2947,7 @@ export declare namespace tlCompat {
         | tlCompat.RawPollAnswer_layer223
         | tlCompat.RawMessageMediaPhoto_layer223
         | tlCompat.RawMessageReplyHeader_layer223
+        | tlCompat.RawPoll_layer224
+        | tlCompat.RawMessage_layer224
         | tl.TlObject
 }

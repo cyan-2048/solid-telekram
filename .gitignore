@@ -42,3 +42,6 @@ builds
 *.module.styl.d.ts
 *.module.stylus.d.ts
 *.test.ts
+
+# vibe code reference files
+*_reference.*
