@@ -163,23 +163,27 @@ export default function InsertMenu(props: { onSelect: (e: InsertMenuSelected | n
 					color="#00aa5a"
 					name="Contacts"
 				/> */}
-				<GridItem
-					value={InsertMenuSelected.AUDIO}
-					onSelect={props.onSelect}
-					icon={
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							height="24px"
-							viewBox="0 -960 960 960"
-							width="24px"
-							fill="currentColor"
-						>
-							<path d="M401.15-143.85q-57.75 0-98.87-41.12-41.12-41.13-41.12-98.88 0-57.75 41.12-98.87 41.12-41.12 98.87-41.12 23 0 43.08 6.84 20.08 6.85 36.92 20.54v-419.69h217.69v130.76H541.15v401.54q0 57.75-41.12 98.88-41.13 41.12-98.88 41.12Z" />
-						</svg>
-					}
-					color="#ff57d5"
-					name="Audio"
-				/>
+
+				<Show when={!cloudphone || cloudphone_features.FileUpload}>
+					<GridItem
+						value={InsertMenuSelected.AUDIO}
+						onSelect={props.onSelect}
+						icon={
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								height="24px"
+								viewBox="0 -960 960 960"
+								width="24px"
+								fill="currentColor"
+							>
+								<path d="M401.15-143.85q-57.75 0-98.87-41.12-41.12-41.13-41.12-98.88 0-57.75 41.12-98.87 41.12-41.12 98.87-41.12 23 0 43.08 6.84 20.08 6.85 36.92 20.54v-419.69h217.69v130.76H541.15v401.54q0 57.75-41.12 98.88-41.13 41.12-98.88 41.12Z" />
+							</svg>
+						}
+						color="#ff57d5"
+						name="Audio"
+					/>
+				</Show>
+
 				<Show when={!cloudphone || cloudphone_features.AudioCapture}>
 					<GridItem
 						value={/*@once*/ InsertMenuSelected.VOICE}

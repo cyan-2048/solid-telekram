@@ -920,6 +920,12 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 									input.onchange = () => {
 										const file = input.files![0];
+
+										if (file.type.startsWith("audio")) {
+											sendAudio(file);
+											return;
+										}
+
 										sendFile(file);
 									};
 
@@ -931,6 +937,10 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 									const input = document.createElement("input");
 
 									input.type = "file";
+
+									if (!cloudphone) {
+										input.accept = "audio/*";
+									}
 
 									input.onchange = () => {
 										const file = input.files![0];
