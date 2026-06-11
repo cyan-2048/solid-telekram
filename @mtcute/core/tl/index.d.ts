@@ -1,6 +1,6 @@
 import _Long from 'long';
 export declare namespace tl {
-    const LAYER = 225;
+    const LAYER = 227;
 
     type Long = _Long;
     type RawLong = Uint8Array;
@@ -1915,6 +1915,7 @@ export class RpcError extends Error {
         botForumCanManageTopics?: boolean;
         botCanManageBots?: boolean;
         botGuestchat?: boolean;
+        botGuard?: boolean;
         /**
          * ID of the user, see
          * <a href="https://corefork.telegram.org/api/peers#peer-id">here
@@ -3297,6 +3298,7 @@ export class RpcError extends Error {
          * »</a> for more info.
          */
         mainTab?: tl.TypeProfileTab;
+        guardBotId?: number;
     }
     /**
      * <a href="https://corefork.telegram.org/api/channel#basic-groups">Basic
@@ -3742,6 +3744,7 @@ export class RpcError extends Error {
          */
         scheduleRepeatPeriod?: number;
         summaryFromLanguage?: string;
+        richMessage?: tl.TypeRichMessage;
     }
     /**
      * Indicates a service message
@@ -8987,6 +8990,7 @@ export class RpcError extends Error {
          * event sequence identifier
          */
         qts: number;
+        queryId?: Long;
     }
     /**
      * New
@@ -15102,6 +15106,7 @@ export class RpcError extends Error {
          * full flow.
          */
         suggestedPost?: tl.TypeSuggestedPost;
+        richMessage?: tl.TypeRichMessage;
     }
     /**
      * Stickerset with a single sticker as preview
@@ -15663,6 +15668,7 @@ export class RpcError extends Error {
          * ID of preview of the page the photo leads to when clicked
          */
         webpageId?: Long;
+        spoiler?: boolean;
     }
     /**
      * Video
@@ -15677,6 +15683,7 @@ export class RpcError extends Error {
          * Whether the video is set to loop
          */
         loop?: boolean;
+        spoiler?: boolean;
         /**
          * Video ID
          */
@@ -15858,10 +15865,13 @@ export class RpcError extends Error {
      */
     interface RawPageBlockOrderedList {
         _: 'pageBlockOrderedList';
+        reversed?: boolean;
         /**
          * List items
          */
         items: tl.TypePageListOrderedItem[];
+        start?: number;
+        type?: string;
     }
     /**
      * A collapsible details block
@@ -18915,6 +18925,8 @@ export class RpcError extends Error {
      */
     interface RawPageListItemText {
         _: 'pageListItemText';
+        checkbox?: boolean;
+        checked?: boolean;
         /**
          * Text
          */
@@ -18925,6 +18937,8 @@ export class RpcError extends Error {
      */
     interface RawPageListItemBlocks {
         _: 'pageListItemBlocks';
+        checkbox?: boolean;
+        checked?: boolean;
         /**
          * Blocks
          */
@@ -18935,14 +18949,18 @@ export class RpcError extends Error {
      */
     interface RawPageListOrderedItemText {
         _: 'pageListOrderedItemText';
+        checkbox?: boolean;
+        checked?: boolean;
         /**
          * Number of element within ordered list
          */
-        num: string;
+        num?: string;
         /**
          * Text
          */
         text: tl.TypeRichText;
+        value?: number;
+        type?: string;
     }
     /**
      * Ordered list of
@@ -18950,14 +18968,18 @@ export class RpcError extends Error {
      */
     interface RawPageListOrderedItemBlocks {
         _: 'pageListOrderedItemBlocks';
+        checkbox?: boolean;
+        checked?: boolean;
         /**
          * Number of element within ordered list
          */
-        num: string;
+        num?: string;
         /**
          * Item contents
          */
         blocks: tl.TypePageBlock[];
+        value?: number;
+        type?: string;
     }
     /**
      * Related article
@@ -20782,6 +20804,7 @@ export class RpcError extends Error {
          * Whether this message is quoting a part of another message.
          */
         quote?: boolean;
+        replyToEphemeral?: boolean;
         /**
          * ID of message to which this message is replying
          */
@@ -21944,6 +21967,7 @@ export class RpcError extends Error {
          * menu mini apps</a>).
          */
         queryId?: Long;
+        sameOrigin?: boolean;
         /**
          * Webview URL to open
          */
@@ -25372,6 +25396,9 @@ export class RpcError extends Error {
          * Business bot rights.
          */
         rights: tl.TypeBusinessBotRights;
+        device?: string;
+        date?: number;
+        location?: string;
     }
     /**
      * <a href="https://corefork.telegram.org/api/profile#birthday">Birthday</a>
@@ -28601,6 +28628,212 @@ export class RpcError extends Error {
         from: tl.TypeTextWithEntities;
         to: tl.TypeTextWithEntities;
     }
+    interface RawUpdateJoinChatWebViewDecision {
+        _: 'updateJoinChatWebViewDecision';
+        peer: tl.TypePeer;
+        queryId: Long;
+        result: tl.TypeJoinChatBotResult;
+    }
+    interface RawUpdateNewBotConnection {
+        _: 'updateNewBotConnection';
+        confirmed?: boolean;
+        botId: number;
+        date?: number;
+        device?: string;
+        location?: string;
+    }
+    interface RawUpdateWebBrowserSettings {
+        _: 'updateWebBrowserSettings';
+        openExternalBrowser?: boolean;
+        displayCloseButton?: boolean;
+    }
+    interface RawUpdateWebBrowserException {
+        _: 'updateWebBrowserException';
+        delete?: boolean;
+        openExternalBrowser?: boolean;
+        exception: tl.TypeWebDomainException;
+    }
+    interface RawInputSendMessageRichMessageDraftAction {
+        _: 'inputSendMessageRichMessageDraftAction';
+        randomId: Long;
+        richMessage: tl.TypeInputRichMessage;
+    }
+    interface RawSendMessageRichMessageDraftAction {
+        _: 'sendMessageRichMessageDraftAction';
+        randomId: Long;
+        richMessage: tl.TypeRichMessage;
+    }
+    interface RawInputBotInlineMessageRichMessage {
+        _: 'inputBotInlineMessageRichMessage';
+        replyMarkup?: tl.TypeReplyMarkup;
+        richMessage: tl.TypeInputRichMessage;
+    }
+    interface RawBotInlineMessageRichMessage {
+        _: 'botInlineMessageRichMessage';
+        replyMarkup?: tl.TypeReplyMarkup;
+        richMessage: tl.TypeRichMessage;
+    }
+    interface RawTextMath {
+        _: 'textMath';
+        source: string;
+    }
+    interface RawTextCustomEmoji {
+        _: 'textCustomEmoji';
+        documentId: Long;
+        alt: string;
+    }
+    interface RawTextSpoiler {
+        _: 'textSpoiler';
+        text: tl.TypeRichText;
+    }
+    interface RawTextMention {
+        _: 'textMention';
+        text: tl.TypeRichText;
+    }
+    interface RawTextHashtag {
+        _: 'textHashtag';
+        text: tl.TypeRichText;
+    }
+    interface RawTextBotCommand {
+        _: 'textBotCommand';
+        text: tl.TypeRichText;
+    }
+    interface RawTextCashtag {
+        _: 'textCashtag';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoUrl {
+        _: 'textAutoUrl';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoEmail {
+        _: 'textAutoEmail';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoPhone {
+        _: 'textAutoPhone';
+        text: tl.TypeRichText;
+    }
+    interface RawTextBankCard {
+        _: 'textBankCard';
+        text: tl.TypeRichText;
+    }
+    interface RawTextMentionName {
+        _: 'textMentionName';
+        text: tl.TypeRichText;
+        userId: number;
+    }
+    interface RawTextDate {
+        _: 'textDate';
+        relative?: boolean;
+        shortTime?: boolean;
+        longTime?: boolean;
+        shortDate?: boolean;
+        longDate?: boolean;
+        dayOfWeek?: boolean;
+        text: tl.TypeRichText;
+        date: number;
+    }
+    interface RawPageBlockHeading1 {
+        _: 'pageBlockHeading1';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading2 {
+        _: 'pageBlockHeading2';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading3 {
+        _: 'pageBlockHeading3';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading4 {
+        _: 'pageBlockHeading4';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading5 {
+        _: 'pageBlockHeading5';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading6 {
+        _: 'pageBlockHeading6';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockMath {
+        _: 'pageBlockMath';
+        source: string;
+    }
+    interface RawPageBlockThinking {
+        _: 'pageBlockThinking';
+        text: tl.TypeRichText;
+    }
+    interface RawInputPageBlockMap {
+        _: 'inputPageBlockMap';
+        geo: tl.TypeInputGeoPoint;
+        zoom: number;
+        w: number;
+        h: number;
+        caption: tl.TypePageCaption;
+    }
+    interface RawPageBlockBlockquoteBlocks {
+        _: 'pageBlockBlockquoteBlocks';
+        blocks: tl.TypePageBlock[];
+        caption: tl.TypeRichText;
+    }
+    interface RawJoinChatBotResultApproved {
+        _: 'joinChatBotResultApproved';
+    }
+    interface RawJoinChatBotResultDeclined {
+        _: 'joinChatBotResultDeclined';
+    }
+    interface RawJoinChatBotResultQueued {
+        _: 'joinChatBotResultQueued';
+    }
+    interface RawJoinChatBotResultWebView {
+        _: 'joinChatBotResultWebView';
+        url: string;
+    }
+    interface RawWebDomainException {
+        _: 'webDomainException';
+        domain: string;
+        url: string;
+        title: string;
+        favicon?: Long;
+    }
+    interface RawRichMessage {
+        _: 'richMessage';
+        rtl?: boolean;
+        part?: boolean;
+        blocks: tl.TypePageBlock[];
+        photos: tl.TypePhoto[];
+        documents: tl.TypeDocument[];
+    }
+    interface RawInputRichMessage {
+        _: 'inputRichMessage';
+        rtl?: boolean;
+        noautolink?: boolean;
+        blocks: tl.TypePageBlock[];
+        photos?: tl.TypeInputPhoto[];
+        documents?: tl.TypeInputDocument[];
+        users?: tl.TypeInputUser[];
+    }
+    interface RawInputRichMessageHTML {
+        _: 'inputRichMessageHTML';
+        rtl?: boolean;
+        noautolink?: boolean;
+        html: string;
+        photos?: tl.TypeInputPhoto[];
+        documents?: tl.TypeInputDocument[];
+        users?: tl.TypeInputUser[];
+    }
+    interface RawInputRichMessageMarkdown {
+        _: 'inputRichMessageMarkdown';
+        rtl?: boolean;
+        noautolink?: boolean;
+        markdown: string;
+        photos?: tl.TypeInputPhoto[];
+        documents?: tl.TypeInputDocument[];
+        users?: tl.TypeInputUser[];
+    }
     /**
      * A
      * <a href="https://corefork.telegram.org/api/forum#forum-topics">forum
@@ -29076,7 +29309,7 @@ export class RpcError extends Error {
     /**
      * Object contains info on events occurred.
      */
-    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
+    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
     function isAnyUpdate(o: object): o is TypeUpdate
     /**
      * Object which is perceived by the client without a call on
@@ -29145,7 +29378,7 @@ export class RpcError extends Error {
      * about their chat partner's actions: typing or sending
      * attachments of all kinds.
      */
-    type TypeSendMessageAction = tl.RawSendMessageTypingAction | tl.RawSendMessageCancelAction | tl.RawSendMessageRecordVideoAction | tl.RawSendMessageUploadVideoAction | tl.RawSendMessageRecordAudioAction | tl.RawSendMessageUploadAudioAction | tl.RawSendMessageUploadPhotoAction | tl.RawSendMessageUploadDocumentAction | tl.RawSendMessageGeoLocationAction | tl.RawSendMessageChooseContactAction | tl.RawSendMessageGamePlayAction | tl.RawSendMessageRecordRoundAction | tl.RawSendMessageUploadRoundAction | tl.RawSpeakingInGroupCallAction | tl.RawSendMessageHistoryImportAction | tl.RawSendMessageChooseStickerAction | tl.RawSendMessageEmojiInteraction | tl.RawSendMessageEmojiInteractionSeen | tl.RawSendMessageTextDraftAction
+    type TypeSendMessageAction = tl.RawSendMessageTypingAction | tl.RawSendMessageCancelAction | tl.RawSendMessageRecordVideoAction | tl.RawSendMessageUploadVideoAction | tl.RawSendMessageRecordAudioAction | tl.RawSendMessageUploadAudioAction | tl.RawSendMessageUploadPhotoAction | tl.RawSendMessageUploadDocumentAction | tl.RawSendMessageGeoLocationAction | tl.RawSendMessageChooseContactAction | tl.RawSendMessageGamePlayAction | tl.RawSendMessageRecordRoundAction | tl.RawSendMessageUploadRoundAction | tl.RawSpeakingInGroupCallAction | tl.RawSendMessageHistoryImportAction | tl.RawSendMessageChooseStickerAction | tl.RawSendMessageEmojiInteraction | tl.RawSendMessageEmojiInteractionSeen | tl.RawSendMessageTextDraftAction | tl.RawInputSendMessageRichMessageDraftAction | tl.RawSendMessageRichMessageDraftAction
     function isAnySendMessageAction(o: object): o is TypeSendMessageAction
     /**
      * Privacy <strong>keys</strong> together with
@@ -29317,7 +29550,7 @@ export class RpcError extends Error {
      * Represents a sent inline message from the perspective of a
      * bot
      */
-    type TypeInputBotInlineMessage = tl.RawInputBotInlineMessageMediaAuto | tl.RawInputBotInlineMessageText | tl.RawInputBotInlineMessageMediaGeo | tl.RawInputBotInlineMessageMediaVenue | tl.RawInputBotInlineMessageMediaContact | tl.RawInputBotInlineMessageGame | tl.RawInputBotInlineMessageMediaInvoice | tl.RawInputBotInlineMessageMediaWebPage
+    type TypeInputBotInlineMessage = tl.RawInputBotInlineMessageMediaAuto | tl.RawInputBotInlineMessageText | tl.RawInputBotInlineMessageMediaGeo | tl.RawInputBotInlineMessageMediaVenue | tl.RawInputBotInlineMessageMediaContact | tl.RawInputBotInlineMessageGame | tl.RawInputBotInlineMessageMediaInvoice | tl.RawInputBotInlineMessageMediaWebPage | tl.RawInputBotInlineMessageRichMessage
     function isAnyInputBotInlineMessage(o: object): o is TypeInputBotInlineMessage
     /**
      * Inline bot result
@@ -29327,7 +29560,7 @@ export class RpcError extends Error {
     /**
      * Inline message
      */
-    type TypeBotInlineMessage = tl.RawBotInlineMessageMediaAuto | tl.RawBotInlineMessageText | tl.RawBotInlineMessageMediaGeo | tl.RawBotInlineMessageMediaVenue | tl.RawBotInlineMessageMediaContact | tl.RawBotInlineMessageMediaInvoice | tl.RawBotInlineMessageMediaWebPage
+    type TypeBotInlineMessage = tl.RawBotInlineMessageMediaAuto | tl.RawBotInlineMessageText | tl.RawBotInlineMessageMediaGeo | tl.RawBotInlineMessageMediaVenue | tl.RawBotInlineMessageMediaContact | tl.RawBotInlineMessageMediaInvoice | tl.RawBotInlineMessageMediaWebPage | tl.RawBotInlineMessageRichMessage
     function isAnyBotInlineMessage(o: object): o is TypeBotInlineMessage
     /**
      * Results of an inline query
@@ -29410,14 +29643,14 @@ export class RpcError extends Error {
     /**
      * Rich text
      */
-    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor
+    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor | tl.RawTextMath | tl.RawTextCustomEmoji | tl.RawTextSpoiler | tl.RawTextMention | tl.RawTextHashtag | tl.RawTextBotCommand | tl.RawTextCashtag | tl.RawTextAutoUrl | tl.RawTextAutoEmail | tl.RawTextAutoPhone | tl.RawTextBankCard | tl.RawTextMentionName | tl.RawTextDate
     function isAnyRichText(o: object): o is TypeRichText
     /**
      * Represents an
      * <a href="https://instantview.telegram.org/">instant view
      * page element</a>
      */
-    type TypePageBlock = tl.RawPageBlockUnsupported | tl.RawPageBlockTitle | tl.RawPageBlockSubtitle | tl.RawPageBlockAuthorDate | tl.RawPageBlockHeader | tl.RawPageBlockSubheader | tl.RawPageBlockParagraph | tl.RawPageBlockPreformatted | tl.RawPageBlockFooter | tl.RawPageBlockDivider | tl.RawPageBlockAnchor | tl.RawPageBlockList | tl.RawPageBlockBlockquote | tl.RawPageBlockPullquote | tl.RawPageBlockPhoto | tl.RawPageBlockVideo | tl.RawPageBlockCover | tl.RawPageBlockEmbed | tl.RawPageBlockEmbedPost | tl.RawPageBlockCollage | tl.RawPageBlockSlideshow | tl.RawPageBlockChannel | tl.RawPageBlockAudio | tl.RawPageBlockKicker | tl.RawPageBlockTable | tl.RawPageBlockOrderedList | tl.RawPageBlockDetails | tl.RawPageBlockRelatedArticles | tl.RawPageBlockMap
+    type TypePageBlock = tl.RawPageBlockUnsupported | tl.RawPageBlockTitle | tl.RawPageBlockSubtitle | tl.RawPageBlockAuthorDate | tl.RawPageBlockHeader | tl.RawPageBlockSubheader | tl.RawPageBlockParagraph | tl.RawPageBlockPreformatted | tl.RawPageBlockFooter | tl.RawPageBlockDivider | tl.RawPageBlockAnchor | tl.RawPageBlockList | tl.RawPageBlockBlockquote | tl.RawPageBlockPullquote | tl.RawPageBlockPhoto | tl.RawPageBlockVideo | tl.RawPageBlockCover | tl.RawPageBlockEmbed | tl.RawPageBlockEmbedPost | tl.RawPageBlockCollage | tl.RawPageBlockSlideshow | tl.RawPageBlockChannel | tl.RawPageBlockAudio | tl.RawPageBlockKicker | tl.RawPageBlockTable | tl.RawPageBlockOrderedList | tl.RawPageBlockDetails | tl.RawPageBlockRelatedArticles | tl.RawPageBlockMap | tl.RawPageBlockHeading1 | tl.RawPageBlockHeading2 | tl.RawPageBlockHeading3 | tl.RawPageBlockHeading4 | tl.RawPageBlockHeading5 | tl.RawPageBlockHeading6 | tl.RawPageBlockMath | tl.RawPageBlockThinking | tl.RawInputPageBlockMap | tl.RawPageBlockBlockquoteBlocks
     function isAnyPageBlock(o: object): o is TypePageBlock
     /**
      * Why was the phone call discarded?
@@ -31085,6 +31318,14 @@ export class RpcError extends Error {
     function isAnyAiComposeTone(o: object): o is TypeAiComposeTone
     type TypeAiComposeToneExample = tl.RawAiComposeToneExample
     function isAnyAiComposeToneExample(o: object): o is TypeAiComposeToneExample
+    type TypeJoinChatBotResult = tl.RawJoinChatBotResultApproved | tl.RawJoinChatBotResultDeclined | tl.RawJoinChatBotResultQueued | tl.RawJoinChatBotResultWebView
+    function isAnyJoinChatBotResult(o: object): o is TypeJoinChatBotResult
+    type TypeWebDomainException = tl.RawWebDomainException
+    function isAnyWebDomainException(o: object): o is TypeWebDomainException
+    type TypeRichMessage = tl.RawRichMessage
+    function isAnyRichMessage(o: object): o is TypeRichMessage
+    type TypeInputRichMessage = tl.RawInputRichMessage | tl.RawInputRichMessageHTML | tl.RawInputRichMessageMarkdown
+    function isAnyInputRichMessage(o: object): o is TypeInputRichMessage
 
     namespace storage {
         /**
@@ -32647,6 +32888,8 @@ export class RpcError extends Error {
          */
         interface RawSearchRequest {
             _: 'contacts.search';
+            broadcasts?: boolean;
+            bots?: boolean;
             /**
              * Target substring
              */
@@ -34812,6 +35055,16 @@ export class RpcError extends Error {
              */
             diffText?: tl.TypeTextWithEntities;
         }
+        interface RawChatInviteJoinResultOk {
+            _: 'messages.chatInviteJoinResultOk';
+            updates: tl.TypeUpdates;
+        }
+        interface RawChatInviteJoinResultWebView {
+            _: 'messages.chatInviteJoinResultWebView';
+            botId: number;
+            webview: tl.TypeWebViewResult;
+            users: tl.TypeUser[];
+        }
         /**
          * Returns the list of messages by their IDs.
          * 
@@ -35229,6 +35482,7 @@ export class RpcError extends Error {
              * full flow.
              */
             suggestedPost?: tl.TypeSuggestedPost;
+            richMessage?: tl.TypeInputRichMessage;
         }
         /**
          * Send a media
@@ -36010,7 +36264,8 @@ export class RpcError extends Error {
          * Import a chat invite and join a private
          * chat/supergroup/channel
          * 
-         * RPC method returns {@link tl.TypeUpdates}
+         * RPC method returns
+         * {@link tl.messages.TypeChatInviteJoinResult}
          */
         interface RawImportChatInviteRequest {
             _: 'messages.importChatInvite';
@@ -36524,6 +36779,7 @@ export class RpcError extends Error {
              * reply shortcut message, instead »</a>.
              */
             quickReplyShortcutId?: number;
+            richMessage?: tl.TypeInputRichMessage;
         }
         /**
          * Edit an inline bot message
@@ -36562,6 +36818,7 @@ export class RpcError extends Error {
              * entities for styled text</a>
              */
             entities?: tl.TypeMessageEntity[];
+            richMessage?: tl.TypeInputRichMessage;
         }
         /**
          * Press an inline callback button and get a callback answer
@@ -36689,6 +36946,7 @@ export class RpcError extends Error {
              * full flow.
              */
             suggestedPost?: tl.TypeSuggestedPost;
+            richMessage?: tl.TypeInputRichMessage;
         }
         /**
          * Return all message
@@ -41256,6 +41514,14 @@ export class RpcError extends Error {
             minId: number;
             hash: Long;
         }
+        /**
+         * RPC method returns {@link tl.messages.TypeMessages}
+         */
+        interface RawGetRichMessageRequest {
+            _: 'messages.getRichMessage';
+            peer: tl.TypeInputPeer;
+            id: number;
+        }
         interface RpcCallReturn {
             'messages.getMessages': tl.messages.TypeMessages
             'messages.getDialogs': tl.messages.TypeDialogs
@@ -41296,7 +41562,7 @@ export class RpcError extends Error {
             'messages.getWebPagePreview': tl.messages.TypeWebPagePreview
             'messages.exportChatInvite': tl.TypeExportedChatInvite
             'messages.checkChatInvite': tl.TypeChatInvite
-            'messages.importChatInvite': tl.TypeUpdates
+            'messages.importChatInvite': tl.messages.TypeChatInviteJoinResult
             'messages.getStickerSet': tl.messages.TypeStickerSet
             'messages.installStickerSet': tl.messages.TypeStickerSetInstallResult
             'messages.uninstallStickerSet': boolean
@@ -41512,6 +41778,7 @@ export class RpcError extends Error {
             'messages.deleteParticipantReactions': boolean
             'messages.deleteParticipantReaction': tl.TypeUpdates
             'messages.getPersonalChannelHistory': tl.messages.TypeMessages
+            'messages.getRichMessage': tl.messages.TypeMessages
         }
         /**
          * Object contains a list of chats with messages and auxiliary
@@ -41871,6 +42138,8 @@ export class RpcError extends Error {
          */
         type TypeComposedMessageWithAI = tl.messages.RawComposedMessageWithAI
         function isAnyComposedMessageWithAI(o: object): o is TypeComposedMessageWithAI
+        type TypeChatInviteJoinResult = tl.messages.RawChatInviteJoinResultOk | tl.messages.RawChatInviteJoinResultWebView
+        function isAnyChatInviteJoinResult(o: object): o is TypeChatInviteJoinResult
 }
 
     namespace updates {
@@ -44460,6 +44729,17 @@ export class RpcError extends Error {
              */
             options: tl.TypeDataJSON;
         }
+        interface RawWebBrowserSettingsNotModified {
+            _: 'account.webBrowserSettingsNotModified';
+        }
+        interface RawWebBrowserSettings {
+            _: 'account.webBrowserSettings';
+            openExternalBrowser?: boolean;
+            displayCloseButton?: boolean;
+            externalExceptions: tl.TypeWebDomainException[];
+            inappExceptions: tl.TypeWebDomainException[];
+            hash: Long;
+        }
         /**
          * Register device to receive
          * <a href="https://corefork.telegram.org/api/push-updates">PUSH
@@ -46643,6 +46923,43 @@ export class RpcError extends Error {
              */
             id: string;
         }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawConfirmBotConnectionRequest {
+            _: 'account.confirmBotConnection';
+            botId: tl.TypeInputUser;
+        }
+        /**
+         * RPC method returns {@link tl.account.TypeWebBrowserSettings}
+         */
+        interface RawGetWebBrowserSettingsRequest {
+            _: 'account.getWebBrowserSettings';
+            hash: Long;
+        }
+        /**
+         * RPC method returns {@link tl.account.TypeWebBrowserSettings}
+         */
+        interface RawUpdateWebBrowserSettingsRequest {
+            _: 'account.updateWebBrowserSettings';
+            openExternalBrowser?: boolean;
+            displayCloseButton?: boolean;
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawToggleWebBrowserSettingsExceptionRequest {
+            _: 'account.toggleWebBrowserSettingsException';
+            delete?: boolean;
+            openExternalBrowser?: boolean;
+            url: string;
+        }
+        /**
+         * RPC method returns {@link tl.account.TypeWebBrowserSettings}
+         */
+        interface RawDeleteWebBrowserSettingsExceptionsRequest {
+            _: 'account.deleteWebBrowserSettingsExceptions';
+        }
         interface RpcCallReturn {
             'account.registerDevice': boolean
             'account.unregisterDevice': boolean
@@ -46767,6 +47084,11 @@ export class RpcError extends Error {
             'account.registerPasskey': tl.TypePasskey
             'account.getPasskeys': tl.account.TypePasskeys
             'account.deletePasskey': boolean
+            'account.confirmBotConnection': boolean
+            'account.getWebBrowserSettings': tl.account.TypeWebBrowserSettings
+            'account.updateWebBrowserSettings': tl.account.TypeWebBrowserSettings
+            'account.toggleWebBrowserSettingsException': tl.TypeUpdates
+            'account.deleteWebBrowserSettingsExceptions': tl.account.TypeWebBrowserSettings
         }
         /**
          * Privacy rules
@@ -46934,6 +47256,8 @@ export class RpcError extends Error {
          */
         type TypePasskeyRegistrationOptions = tl.account.RawPasskeyRegistrationOptions
         function isAnyPasskeyRegistrationOptions(o: object): o is TypePasskeyRegistrationOptions
+        type TypeWebBrowserSettings = tl.account.RawWebBrowserSettingsNotModified | tl.account.RawWebBrowserSettings
+        function isAnyWebBrowserSettings(o: object): o is TypeWebBrowserSettings
 }
 
     namespace channels {
@@ -47368,7 +47692,8 @@ export class RpcError extends Error {
         /**
          * Join a channel/supergroup
          * 
-         * RPC method returns {@link tl.TypeUpdates}
+         * RPC method returns
+         * {@link tl.messages.TypeChatInviteJoinResult}
          */
         interface RawJoinChannelRequest {
             _: 'channels.joinChannel';
@@ -47835,6 +48160,7 @@ export class RpcError extends Error {
          */
         interface RawToggleJoinRequestRequest {
             _: 'channels.toggleJoinRequest';
+            applyToInvites?: boolean;
             /**
              * Group
              */
@@ -47843,6 +48169,7 @@ export class RpcError extends Error {
              * Toggle
              */
             enabled: boolean;
+            guardBot?: tl.TypeInputUser;
         }
         /**
          * Reorder active usernames
@@ -48584,7 +48911,7 @@ export class RpcError extends Error {
             'channels.editPhoto': tl.TypeUpdates
             'channels.checkUsername': boolean
             'channels.updateUsername': boolean
-            'channels.joinChannel': tl.TypeUpdates
+            'channels.joinChannel': tl.messages.TypeChatInviteJoinResult
             'channels.leaveChannel': tl.TypeUpdates
             'channels.inviteToChannel': tl.messages.TypeInvitedUsers
             'channels.deleteChannel': tl.TypeUpdates
@@ -54668,6 +54995,14 @@ export class RpcError extends Error {
             bot: tl.TypeInputUser;
             addUsers?: tl.TypeInputUser[];
         }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawSetJoinChatResultsRequest {
+            _: 'bots.setJoinChatResults';
+            queryId: Long;
+            result: tl.TypeJoinChatBotResult;
+        }
         interface RpcCallReturn {
             'bots.sendCustomRequest': tl.TypeDataJSON
             'bots.answerWebhookJSONQuery': boolean
@@ -54706,6 +55041,7 @@ export class RpcError extends Error {
             'bots.getRequestedWebViewButton': tl.TypeKeyboardButton
             'bots.getAccessSettings': tl.bots.TypeAccessSettings
             'bots.editAccessSettings': boolean
+            'bots.setJoinChatResults': boolean
         }
         /**
          * Localized name, about text and description of a bot.
@@ -56515,7 +56851,7 @@ export class RpcError extends Error {
         /**
          * Object contains info on events occurred.
          */
-        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
+        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateChannelPinnedTopic | tl.RawUpdateChannelPinnedTopics | tl.mtcute.RawDummyUpdate
         function isAnyUpdate(o: object): o is TypeUpdate
         /**
          * Peer
@@ -57438,6 +57774,13 @@ export class RpcError extends Error {
         | tl.aicompose.RawGetToneRequest
         | tl.aicompose.RawGetTonesRequest
         | tl.aicompose.RawGetToneExampleRequest
+        | tl.account.RawConfirmBotConnectionRequest
+        | tl.account.RawGetWebBrowserSettingsRequest
+        | tl.account.RawUpdateWebBrowserSettingsRequest
+        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
+        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
+        | tl.messages.RawGetRichMessageRequest
+        | tl.bots.RawSetJoinChatResultsRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -59020,6 +59363,50 @@ export class RpcError extends Error {
         | tl.aicompose.RawTones
         | tl.RawAiComposeToneExample
         | tl.bots.RawAccessSettings
+        | tl.RawUpdateJoinChatWebViewDecision
+        | tl.RawUpdateNewBotConnection
+        | tl.RawUpdateWebBrowserSettings
+        | tl.RawUpdateWebBrowserException
+        | tl.RawInputSendMessageRichMessageDraftAction
+        | tl.RawSendMessageRichMessageDraftAction
+        | tl.RawInputBotInlineMessageRichMessage
+        | tl.RawBotInlineMessageRichMessage
+        | tl.RawTextMath
+        | tl.RawTextCustomEmoji
+        | tl.RawTextSpoiler
+        | tl.RawTextMention
+        | tl.RawTextHashtag
+        | tl.RawTextBotCommand
+        | tl.RawTextCashtag
+        | tl.RawTextAutoUrl
+        | tl.RawTextAutoEmail
+        | tl.RawTextAutoPhone
+        | tl.RawTextBankCard
+        | tl.RawTextMentionName
+        | tl.RawTextDate
+        | tl.RawPageBlockHeading1
+        | tl.RawPageBlockHeading2
+        | tl.RawPageBlockHeading3
+        | tl.RawPageBlockHeading4
+        | tl.RawPageBlockHeading5
+        | tl.RawPageBlockHeading6
+        | tl.RawPageBlockMath
+        | tl.RawPageBlockThinking
+        | tl.RawInputPageBlockMap
+        | tl.RawPageBlockBlockquoteBlocks
+        | tl.messages.RawChatInviteJoinResultOk
+        | tl.messages.RawChatInviteJoinResultWebView
+        | tl.RawJoinChatBotResultApproved
+        | tl.RawJoinChatBotResultDeclined
+        | tl.RawJoinChatBotResultQueued
+        | tl.RawJoinChatBotResultWebView
+        | tl.RawWebDomainException
+        | tl.account.RawWebBrowserSettingsNotModified
+        | tl.account.RawWebBrowserSettings
+        | tl.RawRichMessage
+        | tl.RawInputRichMessage
+        | tl.RawInputRichMessageHTML
+        | tl.RawInputRichMessageMarkdown
         | tl.RawUpdateChannelPinnedTopic
         | tl.RawUpdateChannelPinnedTopics
         | tl.mtcute.RawDummyUpdate
@@ -59808,6 +60195,13 @@ export class RpcError extends Error {
         | tl.aicompose.RawGetToneRequest
         | tl.aicompose.RawGetTonesRequest
         | tl.aicompose.RawGetToneExampleRequest
+        | tl.account.RawConfirmBotConnectionRequest
+        | tl.account.RawGetWebBrowserSettingsRequest
+        | tl.account.RawUpdateWebBrowserSettingsRequest
+        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
+        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
+        | tl.messages.RawGetRichMessageRequest
+        | tl.bots.RawSetJoinChatResultsRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -60195,6 +60589,10 @@ export declare function isAnyInputMessageReadMetric(o: object): o is tl.TypeInpu
 export declare function isAnyInputAiComposeTone(o: object): o is tl.TypeInputAiComposeTone
 export declare function isAnyAiComposeTone(o: object): o is tl.TypeAiComposeTone
 export declare function isAnyAiComposeToneExample(o: object): o is tl.TypeAiComposeToneExample
+export declare function isAnyJoinChatBotResult(o: object): o is tl.TypeJoinChatBotResult
+export declare function isAnyWebDomainException(o: object): o is tl.TypeWebDomainException
+export declare function isAnyRichMessage(o: object): o is tl.TypeRichMessage
+export declare function isAnyInputRichMessage(o: object): o is tl.TypeInputRichMessage
 export declare function isAnyStorage_FileType(o: object): o is tl.storage.TypeFileType
 export declare function isAnyAuth_SentCode(o: object): o is tl.auth.TypeSentCode
 export declare function isAnyAuth_Authorization(o: object): o is tl.auth.TypeAuthorization
@@ -60276,6 +60674,7 @@ export declare function isAnyMessages_WebPagePreview(o: object): o is tl.message
 export declare function isAnyMessages_EmojiGameOutcome(o: object): o is tl.messages.TypeEmojiGameOutcome
 export declare function isAnyMessages_EmojiGameInfo(o: object): o is tl.messages.TypeEmojiGameInfo
 export declare function isAnyMessages_ComposedMessageWithAI(o: object): o is tl.messages.TypeComposedMessageWithAI
+export declare function isAnyMessages_ChatInviteJoinResult(o: object): o is tl.messages.TypeChatInviteJoinResult
 export declare function isAnyUpdates_State(o: object): o is tl.updates.TypeState
 export declare function isAnyUpdates_Difference(o: object): o is tl.updates.TypeDifference
 export declare function isAnyUpdates_ChannelDifference(o: object): o is tl.updates.TypeChannelDifference
@@ -60332,6 +60731,7 @@ export declare function isAnyAccount_PaidMessagesRevenue(o: object): o is tl.acc
 export declare function isAnyAccount_SavedMusicIds(o: object): o is tl.account.TypeSavedMusicIds
 export declare function isAnyAccount_Passkeys(o: object): o is tl.account.TypePasskeys
 export declare function isAnyAccount_PasskeyRegistrationOptions(o: object): o is tl.account.TypePasskeyRegistrationOptions
+export declare function isAnyAccount_WebBrowserSettings(o: object): o is tl.account.TypeWebBrowserSettings
 export declare function isAnyChannels_ChannelParticipants(o: object): o is tl.channels.TypeChannelParticipants
 export declare function isAnyChannels_ChannelParticipant(o: object): o is tl.channels.TypeChannelParticipant
 export declare function isAnyChannels_AdminLogResults(o: object): o is tl.channels.TypeAdminLogResults

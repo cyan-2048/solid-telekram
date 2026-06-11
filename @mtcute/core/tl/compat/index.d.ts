@@ -89,6 +89,7 @@ export declare namespace tlCompat {
      *     stargifts_count: flags2.18?int
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
+     *     guard_bot_id: flags2.23?int53
      */
     interface RawChannelFull_layer197 {
         _: 'channelFull_layer197';
@@ -333,6 +334,7 @@ export declare namespace tlCompat {
      *     bot_forum_can_manage_topics: flags2.17?true
      *     bot_can_manage_bots: flags2.18?true
      *     bot_guestchat: flags2.19?true
+     *     bot_guard: flags2.20?true
      *     send_paid_messages_stars: flags2.15?long
      * Changed arguments:
      *     stories_max_id: flags2.5?int => flags2.5?RecentStory
@@ -455,6 +457,7 @@ export declare namespace tlCompat {
      *     suggested_post: flags2.7?SuggestedPost
      *     schedule_repeat_period: flags2.10?int
      *     summary_from_language: flags2.11?string
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer199 {
         _: 'message_layer199';
@@ -748,6 +751,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
+     *     guard_bot_id: flags2.23?int53
      */
     interface RawChannelFull_layer204 {
         _: 'channelFull_layer204';
@@ -851,6 +855,7 @@ export declare namespace tlCompat {
      *     suggested_post: flags2.7?SuggestedPost
      *     schedule_repeat_period: flags2.10?int
      *     summary_from_language: flags2.11?string
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer204 {
         _: 'message_layer204';
@@ -973,6 +978,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     reply_to_ephemeral: flags.13?true
      *     todo_item_id: flags.11?int
      *     poll_option: flags.12?bytes
      */
@@ -1332,6 +1338,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     main_tab: flags2.22?ProfileTab
+     *     guard_bot_id: flags2.23?int53
      */
     interface RawChannelFull_layer211 {
         _: 'channelFull_layer211';
@@ -1761,6 +1768,7 @@ export declare namespace tlCompat {
      *     bot_forum_can_manage_topics: flags2.17?true
      *     bot_can_manage_bots: flags2.18?true
      *     bot_guestchat: flags2.19?true
+     *     bot_guard: flags2.20?true
      * Changed arguments:
      *     stories_max_id: flags2.5?int => flags2.5?RecentStory
      */
@@ -1886,6 +1894,7 @@ export declare namespace tlCompat {
      *     guestchat_via_from: flags2.19?Peer
      *     schedule_repeat_period: flags2.10?int
      *     summary_from_language: flags2.11?string
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer216 {
         _: 'message_layer216';
@@ -2066,6 +2075,7 @@ export declare namespace tlCompat {
      *     from_rank: flags2.12?string
      *     guestchat_via_from: flags2.19?Peer
      *     summary_from_language: flags2.11?string
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer220 {
         _: 'message_layer220';
@@ -2485,6 +2495,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     from_rank: flags2.12?string
      *     guestchat_via_from: flags2.19?Peer
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer222 {
         _: 'message_layer222';
@@ -2732,6 +2743,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     reply_to_ephemeral: flags.13?true
      *     poll_option: flags.12?bytes
      */
     interface RawMessageReplyHeader_layer223 {
@@ -2779,6 +2791,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     guestchat_via_from: flags2.19?Peer
+     *     rich_message: flags2.13?RichMessage
      */
     interface RawMessage_layer224 {
         _: 'message_layer224';
@@ -2830,18 +2843,221 @@ export declare namespace tlCompat {
         scheduleRepeatPeriod?: number;
         summaryFromLanguage?: string;
     }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     reversed: flags.2?true
+     *     start: flags.0?int
+     *     type: flags.1?string
+     */
+    interface RawPageBlockOrderedList_layer225 {
+        _: 'pageBlockOrderedList_layer225';
+        items: tlCompat.TypePageListOrderedItem[];
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     checkbox: flags.0?true
+     *     checked: flags.1?true
+     *     value: flags.3?int
+     *     type: flags.4?string
+     * Changed arguments:
+     *     num: string => flags.2?string
+     */
+    interface RawPageListOrderedItemBlocks_layer225 {
+        _: 'pageListOrderedItemBlocks_layer225';
+        num: string;
+        blocks: tlCompat.TypePageBlock[];
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     checkbox: flags.0?true
+     *     checked: flags.1?true
+     */
+    interface RawPageListItemBlocks_layer225 {
+        _: 'pageListItemBlocks_layer225';
+        blocks: tlCompat.TypePageBlock[];
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     checkbox: flags.0?true
+     *     checked: flags.1?true
+     */
+    interface RawPageListItemText_layer225 {
+        _: 'pageListItemText_layer225';
+        text: tl.TypeRichText;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     checkbox: flags.0?true
+     *     checked: flags.1?true
+     *     value: flags.3?int
+     *     type: flags.4?string
+     * Changed arguments:
+     *     num: string => flags.2?string
+     */
+    interface RawPageListOrderedItemText_layer225 {
+        _: 'pageListOrderedItemText_layer225';
+        num: string;
+        text: tl.TypeRichText;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     guard_bot_id: flags2.23?int53
+     */
+    interface RawChannelFull_layer225 {
+        _: 'channelFull_layer225';
+        canViewParticipants?: boolean;
+        canSetUsername?: boolean;
+        canSetStickers?: boolean;
+        hiddenPrehistory?: boolean;
+        canSetLocation?: boolean;
+        hasScheduled?: boolean;
+        canViewStats?: boolean;
+        blocked?: boolean;
+        canDeleteChannel?: boolean;
+        antispam?: boolean;
+        participantsHidden?: boolean;
+        translationsDisabled?: boolean;
+        storiesPinnedAvailable?: boolean;
+        viewForumAsMessages?: boolean;
+        restrictedSponsored?: boolean;
+        canViewRevenue?: boolean;
+        paidMediaAllowed?: boolean;
+        canViewStarsRevenue?: boolean;
+        paidReactionsAvailable?: boolean;
+        stargiftsAvailable?: boolean;
+        paidMessagesAvailable?: boolean;
+        id: number;
+        about: string;
+        participantsCount?: number;
+        adminsCount?: number;
+        kickedCount?: number;
+        bannedCount?: number;
+        onlineCount?: number;
+        readInboxMaxId: number;
+        readOutboxMaxId: number;
+        unreadCount: number;
+        chatPhoto: tl.TypePhoto;
+        notifySettings: tl.TypePeerNotifySettings;
+        exportedInvite?: tl.TypeExportedChatInvite;
+        botInfo: tl.TypeBotInfo[];
+        migratedFromChatId?: Long;
+        migratedFromMaxId?: number;
+        pinnedMsgId?: number;
+        stickerset?: tl.TypeStickerSet;
+        availableMinId?: number;
+        folderId?: number;
+        linkedChatId?: number;
+        location?: tl.TypeChannelLocation;
+        slowmodeSeconds?: number;
+        slowmodeNextSendDate?: number;
+        statsDc?: number;
+        pts: number;
+        call?: tl.TypeInputGroupCall;
+        ttlPeriod?: number;
+        pendingSuggestions?: string[];
+        groupcallDefaultJoinAs?: tl.TypePeer;
+        themeEmoticon?: string;
+        requestsPending?: number;
+        recentRequesters?: number[];
+        defaultSendAs?: tl.TypePeer;
+        availableReactions?: tl.TypeChatReactions;
+        reactionsLimit?: number;
+        stories?: tl.TypePeerStories;
+        wallpaper?: tl.TypeWallPaper;
+        boostsApplied?: number;
+        boostsUnrestrict?: number;
+        emojiset?: tl.TypeStickerSet;
+        botVerification?: tl.TypeBotVerification;
+        stargiftsCount?: number;
+        sendPaidMessagesStars?: Long;
+        mainTab?: tl.TypeProfileTab;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     rich_message: flags2.13?RichMessage
+     */
+    interface RawMessage_layer225 {
+        _: 'message_layer225';
+        out?: boolean;
+        mentioned?: boolean;
+        mediaUnread?: boolean;
+        silent?: boolean;
+        post?: boolean;
+        fromScheduled?: boolean;
+        legacy?: boolean;
+        editHide?: boolean;
+        pinned?: boolean;
+        noforwards?: boolean;
+        invertMedia?: boolean;
+        offline?: boolean;
+        videoProcessingPending?: boolean;
+        paidSuggestedPostStars?: boolean;
+        paidSuggestedPostTon?: boolean;
+        id: number;
+        fromId?: tl.TypePeer;
+        fromBoostsApplied?: number;
+        fromRank?: string;
+        peerId: tl.TypePeer;
+        savedPeerId?: tl.TypePeer;
+        fwdFrom?: tl.TypeMessageFwdHeader;
+        viaBotId?: number;
+        viaBusinessBotId?: number;
+        guestchatViaFrom?: tl.TypePeer;
+        replyTo?: tlCompat.TypeMessageReplyHeader;
+        date: number;
+        message: string;
+        media?: tlCompat.TypeMessageMedia;
+        replyMarkup?: tl.TypeReplyMarkup;
+        entities?: tl.TypeMessageEntity[];
+        views?: number;
+        forwards?: number;
+        replies?: tl.TypeMessageReplies;
+        editDate?: number;
+        postAuthor?: string;
+        groupedId?: Long;
+        reactions?: tl.TypeMessageReactions;
+        restrictionReason?: tl.TypeRestrictionReason[];
+        ttlPeriod?: number;
+        quickReplyShortcutId?: number;
+        effect?: Long;
+        factcheck?: tl.TypeFactCheck;
+        reportDeliveryUntilDate?: number;
+        paidMessageStars?: Long;
+        suggestedPost?: tl.TypeSuggestedPost;
+        scheduleRepeatPeriod?: number;
+        summaryFromLanguage?: string;
+    }
     interface RpcCallReturn {
     }
     type TypeStarGift = tlCompat.RawStarGiftUnique_layer197 | tlCompat.RawStarGiftUnique_layer198 | tlCompat.RawStarGiftUnique_layer202 | tlCompat.RawStarGift_layer202 | tlCompat.RawStarGiftUnique_layer206 | tlCompat.RawStarGift_layer206 | tlCompat.RawStarGift_layer209 | tlCompat.RawStarGiftUnique_layer210 | tlCompat.RawStarGiftUnique_layer211 | tlCompat.RawStarGift_layer211 | tlCompat.RawStarGiftUnique_layer214 | tlCompat.RawStarGift_layer216 | tlCompat.RawStarGiftUnique_layer218 | tlCompat.RawStarGift_layer218 | tlCompat.RawStarGiftUnique_layer221 | tl.TypeStarGift
     type TypeEmojiStatus = tlCompat.RawEmojiStatus_layer197 | tlCompat.RawEmojiStatusUntil_layer214 | tl.TypeEmojiStatus
     type TypeMessageMedia = tlCompat.RawMessageMediaDocument_layer197 | tlCompat.RawMessageMediaDice_layer220 | tlCompat.RawMessageMediaPoll_layer223 | tlCompat.RawMessageMediaPhoto_layer223 | tl.TypeMessageMedia
-    type TypeChatFull = tlCompat.RawChannelFull_layer197 | tlCompat.RawChannelFull_layer204 | tlCompat.RawChannelFull_layer211 | tl.TypeChatFull
+    type TypeChatFull = tlCompat.RawChannelFull_layer197 | tlCompat.RawChannelFull_layer204 | tlCompat.RawChannelFull_layer211 | tlCompat.RawChannelFull_layer225 | tl.TypeChatFull
     type TypeMessageAction = tlCompat.RawMessageActionStarGiftUnique_layer197 | tlCompat.RawMessageActionStarGift_layer197 | tlCompat.RawMessageActionStarGiftUnique_layer202 | tlCompat.RawMessageActionPaidMessagesPrice_layer203 | tlCompat.RawMessageActionStarGiftUnique_layer210 | tlCompat.RawMessageActionStarGift_layer211 | tlCompat.RawMessageActionSetChatTheme_layer211 | tlCompat.RawMessageActionStarGiftUnique_layer214 | tlCompat.RawMessageActionStarGift_layer216 | tlCompat.RawMessageActionGiftCode_layer216 | tlCompat.RawMessageActionGiftPremium_layer216 | tlCompat.RawMessageActionStarGift_layer218 | tlCompat.RawMessageActionStarGiftUnique_layer221 | tl.TypeMessageAction
     type TypeUserFull = tlCompat.RawUserFull_layer199 | tlCompat.RawUserFull_layer200 | tlCompat.RawUserFull_layer209 | tlCompat.RawUserFull_layer210 | tlCompat.RawUserFull_layer211 | tlCompat.RawUserFull_layer214 | tlCompat.RawUserFull_layer223 | tl.TypeUserFull
     type TypePremiumGiftOption = tlCompat.RawPremiumGiftOption_layer199
     type TypeUser = tlCompat.RawUser_layer199 | tlCompat.RawUser_layer216 | tl.TypeUser
     type TypeChat = tlCompat.RawChannel_layer199 | tlCompat.RawChannel_layer203 | tlCompat.RawChannel_layer216 | tl.TypeChat
-    type TypeMessage = tlCompat.RawMessage_layer199 | tlCompat.RawMessageService_layer204 | tlCompat.RawMessage_layer204 | tlCompat.RawMessage_layer216 | tlCompat.RawMessage_layer220 | tlCompat.RawMessage_layer222 | tlCompat.RawMessage_layer224 | tl.TypeMessage
+    type TypeMessage = tlCompat.RawMessage_layer199 | tlCompat.RawMessageService_layer204 | tlCompat.RawMessage_layer204 | tlCompat.RawMessage_layer216 | tlCompat.RawMessage_layer220 | tlCompat.RawMessage_layer222 | tlCompat.RawMessage_layer224 | tlCompat.RawMessage_layer225 | tl.TypeMessage
     type TypePhoneCallDiscardReason = tlCompat.RawPhoneCallDiscardReasonAllowGroupCall_layer202 | tl.TypePhoneCallDiscardReason
     type TypeMessageReplyHeader = tlCompat.RawMessageReplyHeader_layer206 | tlCompat.RawMessageReplyHeader_layer223 | tl.TypeMessageReplyHeader
     type TypeStoryItem = tlCompat.RawStoryItem_layer210 | tlCompat.RawStoryItem_layer223 | tl.TypeStoryItem
@@ -2854,6 +3070,9 @@ export declare namespace tlCompat {
     type TypePollAnswerVoters = tlCompat.RawPollAnswerVoters_layer223 | tl.TypePollAnswerVoters
     type TypePoll = tlCompat.RawPoll_layer223 | tlCompat.RawPoll_layer224 | tl.TypePoll
     type TypePollAnswer = tlCompat.RawPollAnswer_layer223 | tl.TypePollAnswer
+    type TypePageBlock = tlCompat.RawPageBlockOrderedList_layer225 | tl.TypePageBlock
+    type TypePageListOrderedItem = tlCompat.RawPageListOrderedItemBlocks_layer225 | tlCompat.RawPageListOrderedItemText_layer225 | tl.TypePageListOrderedItem
+    type TypePageListItem = tlCompat.RawPageListItemBlocks_layer225 | tlCompat.RawPageListItemText_layer225 | tl.TypePageListItem
 
     type TlObject =
         | tlCompat.RawStarGiftUnique_layer197
@@ -2949,5 +3168,12 @@ export declare namespace tlCompat {
         | tlCompat.RawMessageReplyHeader_layer223
         | tlCompat.RawPoll_layer224
         | tlCompat.RawMessage_layer224
+        | tlCompat.RawPageBlockOrderedList_layer225
+        | tlCompat.RawPageListOrderedItemBlocks_layer225
+        | tlCompat.RawPageListItemBlocks_layer225
+        | tlCompat.RawPageListItemText_layer225
+        | tlCompat.RawPageListOrderedItemText_layer225
+        | tlCompat.RawChannelFull_layer225
+        | tlCompat.RawMessage_layer225
         | tl.TlObject
 }

@@ -39,7 +39,9 @@ function Preview(props: { id: number; onFocus: () => void; onCancel: () => void;
 				if (e.key == "Backspace") e.preventDefault();
 
 				if (e.key == "SoftLeft" || e.key == "Backspace") {
-					props.onCancel();
+					setTimeout(() => {
+						props.onCancel();
+					}, 100);
 				}
 
 				if (e.key == "SoftRight") {

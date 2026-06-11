@@ -374,22 +374,25 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 						}}
 						// @ts-ignore
 						prop:mozAudioChannelType="content"
-						on:error={(evt) => {
-							const error = evt.currentTarget.error;
-							if (!error) return;
-							switch (error.code) {
-								case error.MEDIA_ERR_ABORTED:
-									// User-initiated abort, ignore
+						onError={function (evt) {
+							switch (evt.currentTarget.error?.code) {
+								case MediaError.MEDIA_ERR_ABORTED:
+									// This aborted error should be triggered by the user
+									// so we don't have to show any error messages
+									return;
+								case MediaError.MEDIA_ERR_NETWORK:
+									toaster("Network error occured when loading the video");
 									break;
-								case error.MEDIA_ERR_NETWORK:
-									toaster("Network error occurred when loading the video");
-									break;
-								case error.MEDIA_ERR_DECODE:
-								case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+								case MediaError.MEDIA_ERR_DECODE:
+								case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+									// If users tap some video link in an offline page
+									// the error code will be MEDIA_ERR_SRC_NOT_SUPPORTED
+									// we also prompt the unsupported error message for it
 									toaster("Video file type is unsupported");
 									break;
+								// Is it possible to be unknown errors?
 								default:
-									toaster("Unknown error occurred when loading the video");
+									toaster("Unknown error occured when loading the video");
 									break;
 							}
 						}}

@@ -86,6 +86,7 @@ export default defineConfig({
 	},
 
 	html: {
+		inject: "body",
 		title: "TeleKram",
 		meta: {
 			"theme-color": {
@@ -146,7 +147,7 @@ export default defineConfig({
 		},
 
 		cssModules: {
-			localIdentName: isProd ? "[hash:base64:6]" : "[path][name]-[local]",
+			localIdentName: isProd ? "[hash:base64:6]" : "[local]-[hash:base64:6]",
 			namedExport: true,
 		},
 	},

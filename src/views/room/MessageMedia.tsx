@@ -1,3 +1,5 @@
+import * as styles from "./MessageItem.module.scss";
+
 import {
 	batch,
 	createEffect,
@@ -35,7 +37,6 @@ import { rlottie, getOptimizedSticker, gunzip, processWebpToCanvas } from "@work
 import { EE } from "@globals";
 import { useMessageContext } from "./MessageItem";
 
-import * as styles from "./MessageItem.module.scss";
 import { LRUCache } from "lru-cache";
 import MarqueeOrNot from "@components/MarqueeOrNot";
 import { cloudphone } from "@/config";

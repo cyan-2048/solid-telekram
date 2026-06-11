@@ -470,6 +470,128 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 	//#endregion
 
+	async function sendFile(blob: Blob) {
+		await sleep(0);
+		textboxRef()?.focus();
+
+		const replying = replyingMessage();
+		const _interacting = interacting();
+
+		batch(() => {
+			$editingMessage.set(null);
+			$replyingMessage.set(null);
+		});
+
+		const dialog = props.dialog;
+
+		tg.setTyping({
+			status: "upload_document",
+			peerId: dialog.peer,
+			progress: 0.5,
+		});
+
+		const upload = dialog.createUpload();
+
+		upload.setFileSize(blob.size);
+
+		const additionalProps = replying ? { replyTo: replying.id } : {};
+
+		if (_interacting) {
+			await focusNonFloatingTextbox();
+		}
+
+		tg.sendMedia(dialog.peer, InputMedia.document(blob, {}), {
+			...additionalProps,
+			shouldDispatch: true,
+			abortSignal: upload.abortSignal,
+			progressCallback(uploaded, total) {
+				upload.setFileSize(total);
+				upload.setUploaded(uploaded);
+				const progress = Math.ceil((uploaded / total) * 100);
+				upload.setProgress(progress);
+			},
+		})
+			.then((msg) => {
+				dialog.removeUpload(upload);
+				dialog.$lastMessage.set(dialog.messages.add(msg));
+				sortDialogs();
+			})
+			.catch((err) => {
+				console.error("UPLOAD FILE ERROR", err);
+				upload.abort();
+				sleep(3000).then(() => {
+					dialog.removeUpload(upload);
+				});
+			})
+			.finally(() => {
+				tg.setTyping({
+					status: "cancel",
+					peerId: dialog.peer,
+				});
+			});
+	}
+
+	async function sendAudio(blob: Blob) {
+		await sleep(0);
+		textboxRef()?.focus();
+
+		const replying = replyingMessage();
+		const _interacting = interacting();
+
+		batch(() => {
+			$editingMessage.set(null);
+			$replyingMessage.set(null);
+		});
+
+		const dialog = props.dialog;
+
+		tg.setTyping({
+			status: "upload_document",
+			peerId: dialog.peer,
+			progress: 0.5,
+		});
+
+		const upload = dialog.createUpload();
+
+		upload.setFileSize(blob.size);
+
+		const additionalProps = replying ? { replyTo: replying.id } : {};
+
+		if (_interacting) {
+			await focusNonFloatingTextbox();
+		}
+
+		tg.sendMedia(dialog.peer, InputMedia.audio(blob, {}), {
+			...additionalProps,
+			shouldDispatch: true,
+			abortSignal: upload.abortSignal,
+			progressCallback(uploaded, total) {
+				upload.setFileSize(total);
+				upload.setUploaded(uploaded);
+				const progress = Math.ceil((uploaded / total) * 100);
+				upload.setProgress(progress);
+			},
+		})
+			.then((msg) => {
+				dialog.removeUpload(upload);
+				dialog.$lastMessage.set(dialog.messages.add(msg));
+				sortDialogs();
+			})
+			.catch((err) => {
+				console.error("UPLOAD MUSIC ERROR", err);
+				upload.abort();
+				sleep(3000).then(() => {
+					dialog.removeUpload(upload);
+				});
+			})
+			.finally(() => {
+				tg.setTyping({
+					status: "cancel",
+					peerId: dialog.peer,
+				});
+			});
+	}
+
 	return (
 		<>
 			<div
@@ -790,6 +912,35 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 									break;
 								}
+
+								case InsertMenuSelected.FILE: {
+									const input = document.createElement("input");
+
+									input.type = "file";
+
+									input.onchange = () => {
+										const file = input.files![0];
+										sendFile(file);
+									};
+
+									input.click();
+									break;
+								}
+
+								case InsertMenuSelected.AUDIO: {
+									const input = document.createElement("input");
+
+									input.type = "file";
+
+									input.onchange = () => {
+										const file = input.files![0];
+										sendAudio(file);
+									};
+
+									input.click();
+									break;
+								}
+
 								case InsertMenuSelected.VOICE:
 									resetTextbox(false);
 									setText("");

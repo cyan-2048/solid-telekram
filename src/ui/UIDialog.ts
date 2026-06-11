@@ -90,7 +90,7 @@ export default class UIDialog {
 
 	private static _queue = new Queue({
 		autostart: true,
-		concurrency: 1,
+		concurrency: 2,
 	});
 
 	private static async _readHistory(dialog: UIDialog) {

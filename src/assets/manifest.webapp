@@ -45,9 +45,6 @@
 			"description": "To play audio in background"
 		}
 	},
-	"dependencies": {
-		"ads-sdk": "1.5.8"
-	},
 	"messages": [
 		{
 			"serviceworker-notification": "/index.html"

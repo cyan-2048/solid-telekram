@@ -63,6 +63,7 @@ export async function getNotificationClickData(): Promise<object | null> {
 }
 
 export async function getNotifications() {
+	if (import.meta.env.DEV) return [];
 	const registration = await navigator.serviceWorker.ready;
 	return Promise.resolve(registration.getNotifications());
 }
