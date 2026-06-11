@@ -175,8 +175,10 @@ export default function Settings(props: { onClose: () => void }) {
 							Send by Enter
 						</CheckboxInput>
 						<ListItem
-							on:sn-enter-down={() => {
-								setShowNotificationsSettings(true);
+							on:sn-enter-up={() => {
+								setTimeout(() => {
+									setShowNotificationsSettings(true);
+								}, 100);
 							}}
 							on:sn-focused={() => {
 								NotificationsSettings.preload();

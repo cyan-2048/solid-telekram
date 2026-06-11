@@ -37,6 +37,8 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 	const [loading, setLoading] = createSignal(true);
 	const [enabled, setEnabled] = createSignal(cachedIsEnabled);
 
+	let canUseKeyboard = false;
+
 	onMount(() => {
 		SpatialNavigation.add(SN_ID, {
 			selector: `.notif-settings [tabindex]`,
@@ -51,6 +53,10 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 				setEnabled((cachedIsEnabled = enabled));
 			}),
 		);
+
+		setTimeout(() => {
+			canUseKeyboard = true;
+		}, 100);
 	});
 
 	onCleanup(() => {
@@ -74,6 +80,8 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 					onKeyDown={(e) => {
 						e.preventDefault();
 
+						if (!canUseKeyboard) return;
+
 						if (e.key == "Backspace" || e.key == "SoftLeft") {
 							props.onClose();
 						}
@@ -81,6 +89,8 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 				>
 					<CheckboxInput
 						on:sn-enter-down={async () => {
+							if (!canUseKeyboard) return;
+
 							if (loading()) return;
 
 							setLoading(true);
