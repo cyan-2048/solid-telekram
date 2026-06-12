@@ -40,9 +40,11 @@ require("core-js/modules/es.set.difference.v2.js");
 require("./event-target.js");
 require("./abort-controller.js");
 
-globalThis.onerror = (...args) => {
-	globalThis.console.error(...args);
-};
+if (typeof self != "undefined") {
+	self.onerror = (...args) => {
+		globalThis.console.error(...args);
+	};
+}
 
 globalThis.addEventListener("unhandledrejection", (ev: any) => {
 	globalThis.console.error("Uncaught (in promise)", ev.reason);

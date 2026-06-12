@@ -82,6 +82,12 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 
 						if (!canUseKeyboard) return;
 
+						if (e.key == "ArrowUp" || e.key == "ArrowDown") {
+							const parent = e.currentTarget.parentElement!;
+
+							parent.scrollTop += e.key == "ArrowUp" ? -50 : 50;
+						}
+
 						if (e.key == "Backspace" || e.key == "SoftLeft") {
 							props.onClose();
 						}
@@ -122,8 +128,8 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 						Push Notifications
 					</CheckboxInput>
 					<KaiDescriptionItem>
-						To ensure push notifications are delivered reliably, try turning notifications off and back on occasionally.
-						This forces the app to re-register for notifications.
+						If notifications stop working or the app updates, you must toggle notifications off and on. This forces the
+						app to re-register for push notifications.
 					</KaiDescriptionItem>
 				</div>
 			</Content>

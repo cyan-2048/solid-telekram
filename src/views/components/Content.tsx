@@ -1,4 +1,4 @@
-import { ComponentProps, JSXElement } from "solid-js";
+import type { ComponentProps, JSXElement } from "solid-js";
 import * as styles from "./Content.module.scss";
 
 export default function Content(props: {

@@ -14,6 +14,7 @@ import Options from "../components/Options";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { setStatusbarColor } from "@/stores";
 import { Transition } from "solid-transition-group";
+import TelegramIcon from "../components/TelegramIcon";
 
 const enum State {
 	Initial,
@@ -85,8 +86,6 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 
 	const [showOptions, setShowOptions] = createSignal(false);
 	const [showFileInfo, setShowFileInfo] = createSignal(false);
-
-	const [scaleValue, setScaleValue] = createSignal(1);
 
 	let divRef!: HTMLDivElement;
 	let zoomRef!: ZoomRef;
@@ -293,27 +292,17 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 							zoomRef = ref;
 
 							console.error(ref.scaleValue);
-
-							setScaleValue(Math.round(ref.scaleValue));
 						}}
 						src={src()}
 					></Zoom>
 					<div class={softkeyStyles.softkeys}>
 						<div class={softkeyStyles.current + " " + softkeyStyles.black + " " + styles.softkeys}>
-							<div
-								style={{
-									opacity: scaleValue() == 1 ? 0 : 1,
-								}}
-							>
-								Zoom Out
+							<div>
+								<TelegramIcon name="zoomout" />
 							</div>
 							<div></div>
-							<div
-								style={{
-									opacity: scaleValue() >= 10 ? 0 : 1,
-								}}
-							>
-								Zoom In
+							<div>
+								<TelegramIcon name="zoomin" />
 							</div>
 						</div>
 					</div>
