@@ -48,28 +48,74 @@ Telegram client for KaiOS.
 
 ## Developing
 
-Install NodeJS (latest LTS) and [bun](https://bun.sh/).
+### Prerequisites
 
-Please create a `.env.local` file and add the values in `.env` replacing the APP_ID and APP_HASH with your own.
+Install the latest **LTS version of Node.js** and **Bun**:
 
-You **must** use bun!
+- Node.js (Latest LTS)
+- Bun: https://bun.sh/
 
-Dev Mode:
+### Environment Setup
 
+Create a `.env.local` file and copy the contents of `.env` into it.
+
+Replace the following values with your own Telegram API credentials:
+
+```env
+APP_ID=your_app_id
+APP_HASH=your_app_hash
 ```
+
+### Development
+
+> [!NOTE]  
+> **Bun is required.** npm, pnpm, and yarn are not supported.
+
+#### KaiOS 2.5
+
+```bash
 bun run dev
 ```
 
-Build:
+#### KaiOS 3.0
 
+```bash
+bun run dev:v3
 ```
+
+#### KaiOS 4.0
+
+```bash
+bun run dev:v4
+```
+
+### Building for Production
+
+#### KaiOS 2.5
+
+```bash
 bun run build
 ```
 
-After building, you can now sideload the dist folder using WebIDE.
+#### KaiOS 3.0
 
-add the `:v3` suffix for KaiOS 3.0 (example: `bun run dev:v3`)
-add the `:v4` suffix for KaiOS 4.0 (example: `bun run dev:v4`)
+```bash
+bun run build:v3
+```
+
+#### KaiOS 4.0
+
+```bash
+bun run build:v4
+```
+
+### Deployment
+
+After the build completes, the generated files will be available in their respective directories:
+
+- **KaiOS 2.5:** `dist`
+- **KaiOS 3.0:** `dist-v3`
+- **KaiOS 4.0:** `dist-v4`
 
 ## GIVE ME MONEY
 
