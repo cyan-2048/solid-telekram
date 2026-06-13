@@ -3,6 +3,7 @@ import type { tl } from '../../../../tl/index.js'
 import type { ITelegramClient } from '../../../client.types.js'
 import type { InputText } from '../../../types/misc/entities.js'
 import type { InputMediaGeoLive } from '../../media/index.js'
+import type { InputRichMessage } from '../../messages/rich/types.js'
 import type {
   InputInlineMessage,
   InputInlineMessageContact,
@@ -10,13 +11,15 @@ import type {
   InputInlineMessageGeo,
   InputInlineMessageGeoLive,
   InputInlineMessageMedia,
+  InputInlineMessageRich,
   InputInlineMessageText,
   InputInlineMessageVenue,
   InputInlineMessageWebpage,
 } from './types.js'
 import { assertNever } from '../../../../types/utils.js'
-import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
 
+import { _normalizeInputRichMessage } from '../../../methods/messages/normalize-rich-message.js'
+import { _normalizeInputText } from '../../../methods/misc/normalize-text.js'
 import { BotKeyboard } from '../keyboards/index.js'
 
 /**
@@ -32,6 +35,23 @@ export function text(
   const ret = params as tl.Mutable<InputInlineMessageText>
   ret.type = 'text'
   ret.text = text
+
+  return ret
+}
+
+/**
+ * Create a rich inline message
+ *
+ * @param rich  Input rich message
+ * @param params
+ */
+export function rich(
+  rich: tl.TypeInputRichMessage | InputRichMessage,
+  params: Omit<InputInlineMessageRich, 'type' | 'content'> = {},
+): InputInlineMessageRich {
+  const ret = params as tl.Mutable<InputInlineMessageRich>
+  ret.type = 'rich'
+  ret.content = rich
 
   return ret
 }
@@ -129,6 +149,12 @@ export async function _convertToTl(
         invertMedia: obj.invertMedia,
       }
     }
+    case 'rich':
+      return {
+        _: 'inputBotInlineMessageRichMessage',
+        replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        richMessage: '_' in obj.content ? obj.content : await _normalizeInputRichMessage(client, { _: 'inputPeerEmpty' }, obj.content, {}),
+      }
     case 'media': {
       const [message, entities] = await _normalizeInputText(client, obj.text)
 

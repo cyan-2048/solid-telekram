@@ -10029,6 +10029,31 @@ export class RpcError extends Error {
     interface RawUpdateAiComposeTones {
         _: 'updateAiComposeTones';
     }
+    interface RawUpdateJoinChatWebViewDecision {
+        _: 'updateJoinChatWebViewDecision';
+        peer: tl.TypePeer;
+        queryId: Long;
+        result: tl.TypeJoinChatBotResult;
+    }
+    interface RawUpdateNewBotConnection {
+        _: 'updateNewBotConnection';
+        confirmed?: boolean;
+        botId: number;
+        date?: number;
+        device?: string;
+        location?: string;
+    }
+    interface RawUpdateWebBrowserSettings {
+        _: 'updateWebBrowserSettings';
+        openExternalBrowser?: boolean;
+        displayCloseButton?: boolean;
+    }
+    interface RawUpdateWebBrowserException {
+        _: 'updateWebBrowserException';
+        delete?: boolean;
+        openExternalBrowser?: boolean;
+        exception: tl.TypeWebDomainException;
+    }
     /**
      * Too many updates, it is necessary to execute
      * {@link updates.RawGetDifferenceRequest}.
@@ -11216,6 +11241,16 @@ export class RpcError extends Error {
          * The contents of the live draft.
          */
         text: tl.TypeTextWithEntities;
+    }
+    interface RawInputSendMessageRichMessageDraftAction {
+        _: 'inputSendMessageRichMessageDraftAction';
+        randomId: Long;
+        richMessage: tl.TypeInputRichMessage;
+    }
+    interface RawSendMessageRichMessageDraftAction {
+        _: 'sendMessageRichMessageDraftAction';
+        randomId: Long;
+        richMessage: tl.TypeRichMessage;
     }
     /**
      * Whether people will be able to see our exact last online
@@ -14346,6 +14381,11 @@ export class RpcError extends Error {
          */
         replyMarkup?: tl.TypeReplyMarkup;
     }
+    interface RawInputBotInlineMessageRichMessage {
+        _: 'inputBotInlineMessageRichMessage';
+        replyMarkup?: tl.TypeReplyMarkup;
+        richMessage: tl.TypeInputRichMessage;
+    }
     /**
      * An inline bot result
      */
@@ -14704,6 +14744,11 @@ export class RpcError extends Error {
          * Reply markup for sending bot buttons
          */
         replyMarkup?: tl.TypeReplyMarkup;
+    }
+    interface RawBotInlineMessageRichMessage {
+        _: 'botInlineMessageRichMessage';
+        replyMarkup?: tl.TypeReplyMarkup;
+        richMessage: tl.TypeRichMessage;
     }
     /**
      * Generic result
@@ -15498,6 +15543,67 @@ export class RpcError extends Error {
          */
         name: string;
     }
+    interface RawTextMath {
+        _: 'textMath';
+        source: string;
+    }
+    interface RawTextCustomEmoji {
+        _: 'textCustomEmoji';
+        documentId: Long;
+        alt: string;
+    }
+    interface RawTextSpoiler {
+        _: 'textSpoiler';
+        text: tl.TypeRichText;
+    }
+    interface RawTextMention {
+        _: 'textMention';
+        text: tl.TypeRichText;
+    }
+    interface RawTextHashtag {
+        _: 'textHashtag';
+        text: tl.TypeRichText;
+    }
+    interface RawTextBotCommand {
+        _: 'textBotCommand';
+        text: tl.TypeRichText;
+    }
+    interface RawTextCashtag {
+        _: 'textCashtag';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoUrl {
+        _: 'textAutoUrl';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoEmail {
+        _: 'textAutoEmail';
+        text: tl.TypeRichText;
+    }
+    interface RawTextAutoPhone {
+        _: 'textAutoPhone';
+        text: tl.TypeRichText;
+    }
+    interface RawTextBankCard {
+        _: 'textBankCard';
+        text: tl.TypeRichText;
+    }
+    interface RawTextMentionName {
+        _: 'textMentionName';
+        text: tl.TypeRichText;
+        userId: number;
+    }
+    interface RawTextDate {
+        _: 'textDate';
+        relative?: boolean;
+        shortTime?: boolean;
+        longTime?: boolean;
+        shortDate?: boolean;
+        longDate?: boolean;
+        dayOfWeek?: boolean;
+        text: tl.TypeRichText;
+        date: number;
+    }
     /**
      * Unsupported IV element
      */
@@ -15652,6 +15758,7 @@ export class RpcError extends Error {
      */
     interface RawPageBlockPhoto {
         _: 'pageBlockPhoto';
+        spoiler?: boolean;
         /**
          * Photo ID
          */
@@ -15668,7 +15775,6 @@ export class RpcError extends Error {
          * ID of preview of the page the photo leads to when clicked
          */
         webpageId?: Long;
-        spoiler?: boolean;
     }
     /**
      * Video
@@ -15930,6 +16036,51 @@ export class RpcError extends Error {
          * Caption
          */
         caption: tl.TypePageCaption;
+    }
+    interface RawPageBlockHeading1 {
+        _: 'pageBlockHeading1';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading2 {
+        _: 'pageBlockHeading2';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading3 {
+        _: 'pageBlockHeading3';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading4 {
+        _: 'pageBlockHeading4';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading5 {
+        _: 'pageBlockHeading5';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockHeading6 {
+        _: 'pageBlockHeading6';
+        text: tl.TypeRichText;
+    }
+    interface RawPageBlockMath {
+        _: 'pageBlockMath';
+        source: string;
+    }
+    interface RawPageBlockThinking {
+        _: 'pageBlockThinking';
+        text: tl.TypeRichText;
+    }
+    interface RawInputPageBlockMap {
+        _: 'inputPageBlockMap';
+        geo: tl.TypeInputGeoPoint;
+        zoom: number;
+        w: number;
+        h: number;
+        caption: tl.TypePageCaption;
+    }
+    interface RawPageBlockBlockquoteBlocks {
+        _: 'pageBlockBlockquoteBlocks';
+        blocks: tl.TypePageBlock[];
+        caption: tl.TypeRichText;
     }
     /**
      * The phone call was missed
@@ -20804,7 +20955,6 @@ export class RpcError extends Error {
          * Whether this message is quoting a part of another message.
          */
         quote?: boolean;
-        replyToEphemeral?: boolean;
         /**
          * ID of message to which this message is replying
          */
@@ -20858,6 +21008,7 @@ export class RpcError extends Error {
          */
         todoItemId?: number;
         pollOption?: Uint8Array;
+        replyToEphemeral?: boolean;
     }
     /**
      * Represents a reply to a
@@ -21957,6 +22108,7 @@ export class RpcError extends Error {
          * If set, the app must be opened in fullscreen
          */
         fullscreen?: boolean;
+        sameOrigin?: boolean;
         /**
          * Webview session ID (only returned by
          * <a href="https://corefork.telegram.org/api/bots/webapps#inline-button-mini-apps">inline
@@ -21967,7 +22119,6 @@ export class RpcError extends Error {
          * menu mini apps</a>).
          */
         queryId?: Long;
-        sameOrigin?: boolean;
         /**
          * Webview URL to open
          */
@@ -28628,157 +28779,6 @@ export class RpcError extends Error {
         from: tl.TypeTextWithEntities;
         to: tl.TypeTextWithEntities;
     }
-    interface RawUpdateJoinChatWebViewDecision {
-        _: 'updateJoinChatWebViewDecision';
-        peer: tl.TypePeer;
-        queryId: Long;
-        result: tl.TypeJoinChatBotResult;
-    }
-    interface RawUpdateNewBotConnection {
-        _: 'updateNewBotConnection';
-        confirmed?: boolean;
-        botId: number;
-        date?: number;
-        device?: string;
-        location?: string;
-    }
-    interface RawUpdateWebBrowserSettings {
-        _: 'updateWebBrowserSettings';
-        openExternalBrowser?: boolean;
-        displayCloseButton?: boolean;
-    }
-    interface RawUpdateWebBrowserException {
-        _: 'updateWebBrowserException';
-        delete?: boolean;
-        openExternalBrowser?: boolean;
-        exception: tl.TypeWebDomainException;
-    }
-    interface RawInputSendMessageRichMessageDraftAction {
-        _: 'inputSendMessageRichMessageDraftAction';
-        randomId: Long;
-        richMessage: tl.TypeInputRichMessage;
-    }
-    interface RawSendMessageRichMessageDraftAction {
-        _: 'sendMessageRichMessageDraftAction';
-        randomId: Long;
-        richMessage: tl.TypeRichMessage;
-    }
-    interface RawInputBotInlineMessageRichMessage {
-        _: 'inputBotInlineMessageRichMessage';
-        replyMarkup?: tl.TypeReplyMarkup;
-        richMessage: tl.TypeInputRichMessage;
-    }
-    interface RawBotInlineMessageRichMessage {
-        _: 'botInlineMessageRichMessage';
-        replyMarkup?: tl.TypeReplyMarkup;
-        richMessage: tl.TypeRichMessage;
-    }
-    interface RawTextMath {
-        _: 'textMath';
-        source: string;
-    }
-    interface RawTextCustomEmoji {
-        _: 'textCustomEmoji';
-        documentId: Long;
-        alt: string;
-    }
-    interface RawTextSpoiler {
-        _: 'textSpoiler';
-        text: tl.TypeRichText;
-    }
-    interface RawTextMention {
-        _: 'textMention';
-        text: tl.TypeRichText;
-    }
-    interface RawTextHashtag {
-        _: 'textHashtag';
-        text: tl.TypeRichText;
-    }
-    interface RawTextBotCommand {
-        _: 'textBotCommand';
-        text: tl.TypeRichText;
-    }
-    interface RawTextCashtag {
-        _: 'textCashtag';
-        text: tl.TypeRichText;
-    }
-    interface RawTextAutoUrl {
-        _: 'textAutoUrl';
-        text: tl.TypeRichText;
-    }
-    interface RawTextAutoEmail {
-        _: 'textAutoEmail';
-        text: tl.TypeRichText;
-    }
-    interface RawTextAutoPhone {
-        _: 'textAutoPhone';
-        text: tl.TypeRichText;
-    }
-    interface RawTextBankCard {
-        _: 'textBankCard';
-        text: tl.TypeRichText;
-    }
-    interface RawTextMentionName {
-        _: 'textMentionName';
-        text: tl.TypeRichText;
-        userId: number;
-    }
-    interface RawTextDate {
-        _: 'textDate';
-        relative?: boolean;
-        shortTime?: boolean;
-        longTime?: boolean;
-        shortDate?: boolean;
-        longDate?: boolean;
-        dayOfWeek?: boolean;
-        text: tl.TypeRichText;
-        date: number;
-    }
-    interface RawPageBlockHeading1 {
-        _: 'pageBlockHeading1';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockHeading2 {
-        _: 'pageBlockHeading2';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockHeading3 {
-        _: 'pageBlockHeading3';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockHeading4 {
-        _: 'pageBlockHeading4';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockHeading5 {
-        _: 'pageBlockHeading5';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockHeading6 {
-        _: 'pageBlockHeading6';
-        text: tl.TypeRichText;
-    }
-    interface RawPageBlockMath {
-        _: 'pageBlockMath';
-        source: string;
-    }
-    interface RawPageBlockThinking {
-        _: 'pageBlockThinking';
-        text: tl.TypeRichText;
-    }
-    interface RawInputPageBlockMap {
-        _: 'inputPageBlockMap';
-        geo: tl.TypeInputGeoPoint;
-        zoom: number;
-        w: number;
-        h: number;
-        caption: tl.TypePageCaption;
-    }
-    interface RawPageBlockBlockquoteBlocks {
-        _: 'pageBlockBlockquoteBlocks';
-        blocks: tl.TypePageBlock[];
-        caption: tl.TypeRichText;
-    }
     interface RawJoinChatBotResultApproved {
         _: 'joinChatBotResultApproved';
     }
@@ -28799,13 +28799,15 @@ export class RpcError extends Error {
         title: string;
         favicon?: Long;
     }
-    interface RawRichMessage {
-        _: 'richMessage';
-        rtl?: boolean;
-        part?: boolean;
-        blocks: tl.TypePageBlock[];
-        photos: tl.TypePhoto[];
-        documents: tl.TypeDocument[];
+    interface RawInputRichFilePhoto {
+        _: 'inputRichFilePhoto';
+        id: string;
+        photo: tl.TypeInputPhoto;
+    }
+    interface RawInputRichFileDocument {
+        _: 'inputRichFileDocument';
+        id: string;
+        document: tl.TypeInputDocument;
     }
     interface RawInputRichMessage {
         _: 'inputRichMessage';
@@ -28821,18 +28823,22 @@ export class RpcError extends Error {
         rtl?: boolean;
         noautolink?: boolean;
         html: string;
-        photos?: tl.TypeInputPhoto[];
-        documents?: tl.TypeInputDocument[];
-        users?: tl.TypeInputUser[];
+        files?: tl.TypeInputRichFile[];
     }
     interface RawInputRichMessageMarkdown {
         _: 'inputRichMessageMarkdown';
         rtl?: boolean;
         noautolink?: boolean;
         markdown: string;
-        photos?: tl.TypeInputPhoto[];
-        documents?: tl.TypeInputDocument[];
-        users?: tl.TypeInputUser[];
+        files?: tl.TypeInputRichFile[];
+    }
+    interface RawRichMessage {
+        _: 'richMessage';
+        rtl?: boolean;
+        part?: boolean;
+        blocks: tl.TypePageBlock[];
+        photos: tl.TypePhoto[];
+        documents: tl.TypeDocument[];
     }
     /**
      * A
@@ -31322,10 +31328,12 @@ export class RpcError extends Error {
     function isAnyJoinChatBotResult(o: object): o is TypeJoinChatBotResult
     type TypeWebDomainException = tl.RawWebDomainException
     function isAnyWebDomainException(o: object): o is TypeWebDomainException
-    type TypeRichMessage = tl.RawRichMessage
-    function isAnyRichMessage(o: object): o is TypeRichMessage
+    type TypeInputRichFile = tl.RawInputRichFilePhoto | tl.RawInputRichFileDocument
+    function isAnyInputRichFile(o: object): o is TypeInputRichFile
     type TypeInputRichMessage = tl.RawInputRichMessage | tl.RawInputRichMessageHTML | tl.RawInputRichMessageMarkdown
     function isAnyInputRichMessage(o: object): o is TypeInputRichMessage
+    type TypeRichMessage = tl.RawRichMessage
+    function isAnyRichMessage(o: object): o is TypeRichMessage
 
     namespace storage {
         /**
@@ -57151,6 +57159,11 @@ export class RpcError extends Error {
         | tl.account.RawRegisterPasskeyRequest
         | tl.account.RawGetPasskeysRequest
         | tl.account.RawDeletePasskeyRequest
+        | tl.account.RawConfirmBotConnectionRequest
+        | tl.account.RawGetWebBrowserSettingsRequest
+        | tl.account.RawUpdateWebBrowserSettingsRequest
+        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
+        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
         | tl.users.RawGetUsersRequest
         | tl.users.RawGetFullUserRequest
         | tl.users.RawSetSecureValueErrorsRequest
@@ -57441,6 +57454,7 @@ export class RpcError extends Error {
         | tl.messages.RawDeleteParticipantReactionsRequest
         | tl.messages.RawDeleteParticipantReactionRequest
         | tl.messages.RawGetPersonalChannelHistoryRequest
+        | tl.messages.RawGetRichMessageRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -57577,6 +57591,7 @@ export class RpcError extends Error {
         | tl.bots.RawGetRequestedWebViewButtonRequest
         | tl.bots.RawGetAccessSettingsRequest
         | tl.bots.RawEditAccessSettingsRequest
+        | tl.bots.RawSetJoinChatResultsRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -57774,13 +57789,6 @@ export class RpcError extends Error {
         | tl.aicompose.RawGetToneRequest
         | tl.aicompose.RawGetTonesRequest
         | tl.aicompose.RawGetToneExampleRequest
-        | tl.account.RawConfirmBotConnectionRequest
-        | tl.account.RawGetWebBrowserSettingsRequest
-        | tl.account.RawUpdateWebBrowserSettingsRequest
-        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
-        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
-        | tl.messages.RawGetRichMessageRequest
-        | tl.bots.RawSetJoinChatResultsRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -58205,6 +58213,10 @@ export class RpcError extends Error {
         | tl.RawUpdateManagedBot
         | tl.RawUpdateBotGuestChatQuery
         | tl.RawUpdateAiComposeTones
+        | tl.RawUpdateJoinChatWebViewDecision
+        | tl.RawUpdateNewBotConnection
+        | tl.RawUpdateWebBrowserSettings
+        | tl.RawUpdateWebBrowserException
         | tl.updates.RawState
         | tl.updates.RawDifferenceEmpty
         | tl.updates.RawDifference
@@ -58275,6 +58287,8 @@ export class RpcError extends Error {
         | tl.RawSendMessageEmojiInteraction
         | tl.RawSendMessageEmojiInteractionSeen
         | tl.RawSendMessageTextDraftAction
+        | tl.RawInputSendMessageRichMessageDraftAction
+        | tl.RawSendMessageRichMessageDraftAction
         | tl.contacts.RawFound
         | tl.RawInputPrivacyKeyStatusTimestamp
         | tl.RawInputPrivacyKeyChatInvite
@@ -58463,6 +58477,7 @@ export class RpcError extends Error {
         | tl.RawInputBotInlineMessageGame
         | tl.RawInputBotInlineMessageMediaInvoice
         | tl.RawInputBotInlineMessageMediaWebPage
+        | tl.RawInputBotInlineMessageRichMessage
         | tl.RawInputBotInlineResult
         | tl.RawInputBotInlineResultPhoto
         | tl.RawInputBotInlineResultDocument
@@ -58474,6 +58489,7 @@ export class RpcError extends Error {
         | tl.RawBotInlineMessageMediaContact
         | tl.RawBotInlineMessageMediaInvoice
         | tl.RawBotInlineMessageMediaWebPage
+        | tl.RawBotInlineMessageRichMessage
         | tl.RawBotInlineResult
         | tl.RawBotInlineMediaResult
         | tl.messages.RawBotResults
@@ -58553,6 +58569,19 @@ export class RpcError extends Error {
         | tl.RawTextPhone
         | tl.RawTextImage
         | tl.RawTextAnchor
+        | tl.RawTextMath
+        | tl.RawTextCustomEmoji
+        | tl.RawTextSpoiler
+        | tl.RawTextMention
+        | tl.RawTextHashtag
+        | tl.RawTextBotCommand
+        | tl.RawTextCashtag
+        | tl.RawTextAutoUrl
+        | tl.RawTextAutoEmail
+        | tl.RawTextAutoPhone
+        | tl.RawTextBankCard
+        | tl.RawTextMentionName
+        | tl.RawTextDate
         | tl.RawPageBlockUnsupported
         | tl.RawPageBlockTitle
         | tl.RawPageBlockSubtitle
@@ -58582,6 +58611,16 @@ export class RpcError extends Error {
         | tl.RawPageBlockDetails
         | tl.RawPageBlockRelatedArticles
         | tl.RawPageBlockMap
+        | tl.RawPageBlockHeading1
+        | tl.RawPageBlockHeading2
+        | tl.RawPageBlockHeading3
+        | tl.RawPageBlockHeading4
+        | tl.RawPageBlockHeading5
+        | tl.RawPageBlockHeading6
+        | tl.RawPageBlockMath
+        | tl.RawPageBlockThinking
+        | tl.RawInputPageBlockMap
+        | tl.RawPageBlockBlockquoteBlocks
         | tl.RawPhoneCallDiscardReasonMissed
         | tl.RawPhoneCallDiscardReasonDisconnect
         | tl.RawPhoneCallDiscardReasonHangup
@@ -59363,37 +59402,6 @@ export class RpcError extends Error {
         | tl.aicompose.RawTones
         | tl.RawAiComposeToneExample
         | tl.bots.RawAccessSettings
-        | tl.RawUpdateJoinChatWebViewDecision
-        | tl.RawUpdateNewBotConnection
-        | tl.RawUpdateWebBrowserSettings
-        | tl.RawUpdateWebBrowserException
-        | tl.RawInputSendMessageRichMessageDraftAction
-        | tl.RawSendMessageRichMessageDraftAction
-        | tl.RawInputBotInlineMessageRichMessage
-        | tl.RawBotInlineMessageRichMessage
-        | tl.RawTextMath
-        | tl.RawTextCustomEmoji
-        | tl.RawTextSpoiler
-        | tl.RawTextMention
-        | tl.RawTextHashtag
-        | tl.RawTextBotCommand
-        | tl.RawTextCashtag
-        | tl.RawTextAutoUrl
-        | tl.RawTextAutoEmail
-        | tl.RawTextAutoPhone
-        | tl.RawTextBankCard
-        | tl.RawTextMentionName
-        | tl.RawTextDate
-        | tl.RawPageBlockHeading1
-        | tl.RawPageBlockHeading2
-        | tl.RawPageBlockHeading3
-        | tl.RawPageBlockHeading4
-        | tl.RawPageBlockHeading5
-        | tl.RawPageBlockHeading6
-        | tl.RawPageBlockMath
-        | tl.RawPageBlockThinking
-        | tl.RawInputPageBlockMap
-        | tl.RawPageBlockBlockquoteBlocks
         | tl.messages.RawChatInviteJoinResultOk
         | tl.messages.RawChatInviteJoinResultWebView
         | tl.RawJoinChatBotResultApproved
@@ -59403,10 +59411,12 @@ export class RpcError extends Error {
         | tl.RawWebDomainException
         | tl.account.RawWebBrowserSettingsNotModified
         | tl.account.RawWebBrowserSettings
-        | tl.RawRichMessage
+        | tl.RawInputRichFilePhoto
+        | tl.RawInputRichFileDocument
         | tl.RawInputRichMessage
         | tl.RawInputRichMessageHTML
         | tl.RawInputRichMessageMarkdown
+        | tl.RawRichMessage
         | tl.RawUpdateChannelPinnedTopic
         | tl.RawUpdateChannelPinnedTopics
         | tl.mtcute.RawDummyUpdate
@@ -59572,6 +59582,11 @@ export class RpcError extends Error {
         | tl.account.RawRegisterPasskeyRequest
         | tl.account.RawGetPasskeysRequest
         | tl.account.RawDeletePasskeyRequest
+        | tl.account.RawConfirmBotConnectionRequest
+        | tl.account.RawGetWebBrowserSettingsRequest
+        | tl.account.RawUpdateWebBrowserSettingsRequest
+        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
+        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
         | tl.users.RawGetUsersRequest
         | tl.users.RawGetFullUserRequest
         | tl.users.RawSetSecureValueErrorsRequest
@@ -59862,6 +59877,7 @@ export class RpcError extends Error {
         | tl.messages.RawDeleteParticipantReactionsRequest
         | tl.messages.RawDeleteParticipantReactionRequest
         | tl.messages.RawGetPersonalChannelHistoryRequest
+        | tl.messages.RawGetRichMessageRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -59998,6 +60014,7 @@ export class RpcError extends Error {
         | tl.bots.RawGetRequestedWebViewButtonRequest
         | tl.bots.RawGetAccessSettingsRequest
         | tl.bots.RawEditAccessSettingsRequest
+        | tl.bots.RawSetJoinChatResultsRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -60195,13 +60212,6 @@ export class RpcError extends Error {
         | tl.aicompose.RawGetToneRequest
         | tl.aicompose.RawGetTonesRequest
         | tl.aicompose.RawGetToneExampleRequest
-        | tl.account.RawConfirmBotConnectionRequest
-        | tl.account.RawGetWebBrowserSettingsRequest
-        | tl.account.RawUpdateWebBrowserSettingsRequest
-        | tl.account.RawToggleWebBrowserSettingsExceptionRequest
-        | tl.account.RawDeleteWebBrowserSettingsExceptionsRequest
-        | tl.messages.RawGetRichMessageRequest
-        | tl.bots.RawSetJoinChatResultsRequest
         | tl.channels.RawEditCreatorRequest
         | tl.channels.RawCreateForumTopicRequest
         | tl.channels.RawGetForumTopicsRequest
@@ -60591,8 +60601,9 @@ export declare function isAnyAiComposeTone(o: object): o is tl.TypeAiComposeTone
 export declare function isAnyAiComposeToneExample(o: object): o is tl.TypeAiComposeToneExample
 export declare function isAnyJoinChatBotResult(o: object): o is tl.TypeJoinChatBotResult
 export declare function isAnyWebDomainException(o: object): o is tl.TypeWebDomainException
-export declare function isAnyRichMessage(o: object): o is tl.TypeRichMessage
+export declare function isAnyInputRichFile(o: object): o is tl.TypeInputRichFile
 export declare function isAnyInputRichMessage(o: object): o is tl.TypeInputRichMessage
+export declare function isAnyRichMessage(o: object): o is tl.TypeRichMessage
 export declare function isAnyStorage_FileType(o: object): o is tl.storage.TypeFileType
 export declare function isAnyAuth_SentCode(o: object): o is tl.auth.TypeSentCode
 export declare function isAnyAuth_Authorization(o: object): o is tl.auth.TypeAuthorization

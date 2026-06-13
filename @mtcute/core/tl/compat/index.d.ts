@@ -978,9 +978,9 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
-     *     reply_to_ephemeral: flags.13?true
      *     todo_item_id: flags.11?int
      *     poll_option: flags.12?bytes
+     *     reply_to_ephemeral: flags.13?true
      */
     interface RawMessageReplyHeader_layer206 {
         _: 'messageReplyHeader_layer206';
@@ -2743,8 +2743,8 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
-     *     reply_to_ephemeral: flags.13?true
      *     poll_option: flags.12?bytes
+     *     reply_to_ephemeral: flags.13?true
      */
     interface RawMessageReplyHeader_layer223 {
         _: 'messageReplyHeader_layer223';

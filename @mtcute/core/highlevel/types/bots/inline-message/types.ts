@@ -1,3 +1,4 @@
+import type { tl } from '../../../../tl/index.js'
 import type {
   InputMediaContact,
   InputMediaGeo,
@@ -5,6 +6,7 @@ import type {
   InputMediaVenue,
   InputMediaWebpage,
 } from '../../media/index.js'
+import type { InputRichMessage } from '../../messages/rich/index.js'
 import type { InputText } from '../../misc/entities.js'
 import type { ReplyMarkup } from '../index.js'
 
@@ -36,6 +38,23 @@ export interface InputInlineMessageText {
    * client render the preview above the caption and not below.
    */
   invertMedia?: boolean
+}
+
+/**
+ * Inline message containing a rich message
+ */
+export interface InputInlineMessageRich {
+  type: 'rich'
+
+  /**
+   * Contents of the message
+   */
+  content: tl.TypeInputRichMessage | InputRichMessage
+
+  /**
+   * Message reply markup
+   */
+  replyMarkup?: ReplyMarkup
 }
 
 /**
@@ -145,3 +164,4 @@ export type InputInlineMessage
     | InputInlineMessageGame
     | InputInlineMessageContact
     | InputInlineMessageWebpage
+    | InputInlineMessageRich
