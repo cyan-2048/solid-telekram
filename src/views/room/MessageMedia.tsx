@@ -12,7 +12,7 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
-import { formatTime, niceBytes, setSoftkeys, sleep, useMessageChecks, useStore } from "@utils";
+import { downloadToFile, formatTime, niceBytes, setSoftkeys, sleep, useMessageChecks, useStore } from "@utils";
 import {
 	type MessageMediaType,
 	type Photo,
@@ -26,6 +26,8 @@ import {
 	type Audio,
 	type MessageMedia,
 	type MaybePromise,
+	Dice,
+	type StickerSet,
 } from "@mtcute/core";
 
 import { type Download, downloadFile } from "@/lib/storage";
@@ -34,13 +36,18 @@ import TelegramIcon from "@components/TelegramIcon";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import ProgressSpinner from "@components/ProgressSpinner";
 import { rlottie, getOptimizedSticker, gunzip, processWebpToCanvas } from "@workers";
-import { EE } from "@globals";
+import { EE, tg } from "@globals";
 import { useMessageContext } from "./MessageItem";
 
 import { LRUCache } from "lru-cache";
 import MarqueeOrNot from "@components/MarqueeOrNot";
 import { cloudphone } from "@/config";
 import { Transition } from "solid-transition-group";
+
+interface FocusableMediaProps {
+	focusable?: boolean;
+	onSelect?: (m: NonNullable<MessageMedia>) => void;
+}
 
 function StickerThumbnail() {
 	const { media } = useMessageContext();
@@ -345,34 +352,36 @@ export function StickerMedia(props: FocusableMediaProps) {
 		});
 	});
 
-	createEffect(async () => {
+	createEffect(() => {
 		const isRlottie = isLottie();
 		const canvas = rlottieCanvasRef();
 		const data = rLottieData();
 		const sticker = media() as Sticker;
 
-		if (!isRlottie) return;
-		if (!canvas) return;
-		if (!data) return;
+		(async () => {
+			if (!isRlottie) return;
+			if (!canvas) return;
+			if (!data) return;
 
-		await rlottie.loadRlottie();
+			await rlottie.loadRlottie();
 
-		const cached = await rlottie.isCached(sticker.uniqueFileId);
+			const cached = await rlottie.isCached(sticker.uniqueFileId);
 
-		if (cached === false) {
-			frames = await rlottie.loadAnimation(sticker.uniqueFileId, data);
-		} else {
-			frames = cached;
-		}
+			if (cached === false) {
+				frames = await rlottie.loadAnimation(sticker.uniqueFileId, data);
+			} else {
+				frames = cached;
+			}
 
-		const clampedBuffer = await rlottie.requestFrame(sticker.uniqueFileId, 0, 128, 128);
-		// console.timeEnd("TEST");
-		const imageData = new ImageData(clampedBuffer, 128, 128);
+			const clampedBuffer = await rlottie.requestFrame(sticker.uniqueFileId, 0, 128, 128);
+			// console.timeEnd("TEST");
+			const imageData = new ImageData(clampedBuffer, 128, 128);
 
-		setRlottieFirstFrame(imageData);
-		// console.error(imageData);
+			setRlottieFirstFrame(imageData);
+			// console.error(imageData);
 
-		setRlottieReady(true);
+			setRlottieReady(true);
+		})();
 	});
 
 	createEffect(() => {
@@ -526,9 +535,227 @@ export function StickerMedia(props: FocusableMediaProps) {
 	);
 }
 
-interface FocusableMediaProps {
-	focusable?: boolean;
-	onSelect?: (m: NonNullable<MessageMedia>) => void;
+const diceStickerSetCache: Record<string, Promise<StickerSet>> = {};
+const diceImageDataCache: Record<string, Promise<ImageData>> = {};
+const slotMachineImageBitmapCache: Record<string, Promise<ImageBitmap>> = {};
+
+function getAllStickerIndices(value: number) {
+	// Extract the individual slot values (0: BAR, 1: BERRIES, 2: LEMON, 3: SEVEN)
+	const leftVal = ((value - 1) >> 0) & 0x03;
+	const middleVal = ((value - 1) >> 2) & 0x03;
+	const rightVal = ((value - 1) >> 4) & 0x03;
+
+	const isJackpot = value === 64;
+
+	// Helper to map the extracted value to its sticker offset
+	const getOffset = (symbolVal: number) => {
+		if (symbolVal === 3 && isJackpot) return 0; // WIN_SEVEN
+		if (symbolVal === 3) return 1; // SEVEN
+		if (symbolVal === 0) return 2; // BAR
+		if (symbolVal === 1) return 3; // BERRIES
+		return 4; // LEMON
+	};
+
+	// Add the slot's base shift to the calculated offset
+	return [3 + getOffset(leftVal), 9 + getOffset(middleVal), 15 + getOffset(rightVal)] as const;
+}
+
+export function DiceMedia(props: FocusableMediaProps) {
+	const { message, media } = useMessageContext();
+	const [diceSticker, setDiceSticker] = createSignal<null | Sticker>(null);
+
+	let rlottieCanvasRef!: HTMLCanvasElement;
+
+	const [rLottieReady, setRlottieReady] = createSignal(false);
+	const [rLottieData, setRlottieData] = createSignal("");
+	const [slotMachineStickers, setSlotMachineStickers] = createSignal<
+		| null
+		| [
+				// background
+				Sticker,
+				// left
+				Sticker,
+				// middle
+				Sticker,
+				// right
+				Sticker,
+				// handle
+				Sticker,
+		  ]
+	>(null);
+
+	const [slotData, setSlotMachineData] = createSignal<null | string[]>(null);
+
+	createEffect(() => {
+		const dice = media() as Dice;
+		const emoji = dice.emoji;
+
+		(async () => {
+			const stickerSet = await (diceStickerSetCache[emoji] ||= tg.getStickerSet({ dice: emoji }));
+
+			const isSlot = emoji === Dice.TYPE_SLOTS;
+
+			if (isSlot) {
+				setSlotMachineStickers([
+					stickerSet.stickers[0].sticker,
+					...(getAllStickerIndices(dice.value).map((i) => stickerSet.stickers[i].sticker) as [
+						Sticker,
+						Sticker,
+						Sticker,
+					]),
+					stickerSet.stickers[2].sticker,
+				]);
+
+				// setDiceSticker(stickerSet.stickers[getAllStickerIndices(dice.value)[1]].sticker);
+
+				// setDiceSticker(stickerSet.stickers[2].sticker);
+			} else {
+				setDiceSticker(stickerSet.stickers[dice.value].sticker);
+			}
+		})();
+	});
+
+	// download sticker
+	createEffect(() => {
+		const media = diceSticker();
+
+		if (!media) return;
+		// if (media.mimeType != "application/x-tgsticker") return;
+
+		downloadAsync(media, "buffer", async (buffer) => {
+			const data = await gunzip(new Uint8Array(buffer));
+			setRlottieData(decoder.decode(data));
+		});
+	});
+
+	// prepare rlottie
+	createEffect(() => {
+		const canvas = rlottieCanvasRef;
+		const data = rLottieData();
+		const slotMachineData = slotData();
+
+		(async () => {
+			if (!canvas) return;
+
+			if (slotMachineData || data) {
+				await rlottie.loadRlottie();
+
+				setRlottieReady(true);
+			}
+		})();
+	});
+
+	// when rlottie ready, render last frame
+	createEffect(() => {
+		const ready = rLottieReady();
+		const data = rLottieData();
+		const canvas = rlottieCanvasRef;
+
+		if (!ready) return;
+		if (!data) return;
+		if (!canvas) return;
+
+		const dice = untrack(() => media() as Dice);
+
+		const context = canvas.getContext("2d")!;
+
+		(async () => {
+			const imageData = await (diceImageDataCache[dice.emoji + "-" + dice.value] ||= rlottie
+				.getLastFrame(data, 128, 128)
+				.then((buffer) => {
+					return new ImageData(buffer, 128, 128);
+				}));
+
+			context.putImageData(imageData, 0, 0);
+		})();
+	});
+
+	// special treatement for slot machine, download all 5 stickers
+	createEffect(() => {
+		const stickers = slotMachineStickers();
+		if (!stickers) return;
+
+		const downloaded: string[] = [];
+
+		function callback() {
+			if (downloaded[0] && downloaded[1] && downloaded[2] && downloaded[3] && downloaded[4]) {
+				setSlotMachineData(downloaded);
+				// console.log("SLOT MACHINE DATA DOWNLOADED");
+			}
+		}
+
+		for (let i = 0; i < stickers.length; i++) {
+			const sticker = stickers[i];
+
+			downloadAsync(sticker, "buffer", async (buffer) => {
+				const data = await gunzip(new Uint8Array(buffer));
+				downloaded[i] = decoder.decode(data);
+				callback();
+			});
+		}
+	});
+
+	createEffect(() => {
+		const ready = rLottieReady();
+		const stickers = slotMachineStickers();
+		const slotMachineRawData = slotData();
+		const canvas = rlottieCanvasRef;
+
+		if (!ready) return;
+		if (!slotMachineRawData) return;
+		if (!stickers) return;
+		if (!canvas) return;
+
+		// console.error("SLOT MAACHINEEE");
+
+		const context = canvas.getContext("2d")!;
+
+		(async () => {
+			for (let i = 0; i < slotMachineRawData.length; i++) {
+				const sticker = stickers[i];
+				const data = slotMachineRawData[i];
+
+				const imageBitmap = await (slotMachineImageBitmapCache[sticker.uniqueFileId] ||= rlottie
+					.getLastFrame(data, 128, 128)
+					.then((buffer) => {
+						return createImageBitmap(new ImageData(buffer, 128, 128));
+					}));
+
+				// console.error("imagebitmapready");
+
+				context.drawImage(imageBitmap, 0, 0);
+			}
+		})();
+	});
+
+	// let temp_url = "";
+
+	return (
+		<div class={styles.sticker}>
+			{/* dice: {message().dice!.emoji} */}
+			<canvas ref={rlottieCanvasRef} width={128} height={128}></canvas>
+			{/* <button
+				style={{ "z-index": 999 }}
+				onClick={(e) => {
+					if (temp_url) downloadToFile(temp_url, "sticker.json");
+
+					const emoji = message().dice!.emoji;
+					tg.getStickerSet({ dice: emoji }).then((set) => {
+						const sticker = set.stickers[1].sticker;
+						tg.downloadAsBuffer(sticker).then(async (buffer) => {
+							const data = await gunzip(new Uint8Array(buffer));
+
+							temp_url = URL.createObjectURL(new Blob([decoder.decode(data)]));
+
+							console.error("DONE");
+						});
+					});
+				}}
+			>
+				Download sticker set
+			</button> */}
+		</div>
+	);
 }
 
 function PhotoMedia(props: FocusableMediaProps) {
@@ -1326,6 +1553,8 @@ export function switchMessageMedia(mediaType: MessageMediaType | undefined) {
 			return PhotoMedia;
 		case "document":
 			return DocumentMedia;
+		case "dice":
+			return DiceMedia;
 	}
 	return UnsupportedMedia;
 }

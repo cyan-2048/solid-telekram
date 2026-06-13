@@ -32,7 +32,7 @@ import {
 	createUniqueId,
 	batch,
 } from "solid-js";
-import { StickerMedia, switchMessageMedia } from "./MessageMedia";
+import { DiceMedia, StickerMedia, switchMessageMedia } from "./MessageMedia";
 import type { TextWithEntities, MessageMediaType, MessageMedia, Message, User, Peer, Audio } from "@mtcute/core";
 import { md } from "@mtcute/markdown-parser";
 import type { TelegramClient } from "@mtcute/web";
@@ -200,6 +200,7 @@ export const MessageContext = createContext<{
 	rawMessage: () => Message;
 
 	isSticker: () => boolean;
+	isDice: () => boolean;
 	isOutgoing: () => boolean;
 	isReply: () => boolean;
 
@@ -339,7 +340,8 @@ export function MessageProvider(props: {
 				isOutgoing: () => props.$.isOutgoing,
 				rawMessage: () => props.$.raw,
 				message: () => props.$,
-				isSticker: () => props.$.isSticker,
+				isSticker: () => props.$.isSticker || props.$.media?.type == "dice",
+				isDice: () => props.$.media?.type == "dice",
 				isReply: () => props.$.isReply(),
 
 				first: () => props.first,
@@ -976,6 +978,11 @@ function MessageContainer(props: { children: JSXElement }) {
 				ref={divRef}
 				tabIndex={-1}
 				onFocus={(e) => {
+					if (import.meta.env.DEV) {
+						// @ts-ignore
+						e.currentTarget["__props__"] = message();
+					}
+
 					if (actualLast()) {
 						dialog().readHistory();
 					}
@@ -1379,7 +1386,7 @@ export function MessageItemInner(props: {
 	customRenderer?: ComponentProps<typeof Markdown>["customRenderer"];
 	onSelect?: (media: NonNullable<MessageMedia>) => void;
 }) {
-	const { text, entities, reply, mediaType, showUsername, message, isReply, isSticker, isExpanded } =
+	const { text, entities, reply, mediaType, showUsername, message, isReply, isSticker, isDice, isExpanded } =
 		useMessageContext();
 
 	const [isOverflowing, setOverflowing] = createSignal(false);
@@ -1475,7 +1482,10 @@ export function MessageItemInner(props: {
 						</Match>
 					</Switch>
 				</div>
-				<StickerMedia />
+
+				<Show when={isDice()} fallback={<StickerMedia />}>
+					<DiceMedia />
+				</Show>
 			</Show>
 			<MessageAdditionalInfo setWidth={setInfoWidth} />
 		</>

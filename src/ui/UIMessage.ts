@@ -44,6 +44,11 @@ export default class UIMessage {
 	) {
 		this.id = raw.id;
 		this.isOutgoing = raw.isOutgoing;
+
+		if (!raw.isOutgoing && isUser(raw.chat) && isUser(raw.sender) && raw.chat.isSelf && raw.sender.isSelf) {
+			this.isOutgoing = true;
+		}
+
 		this.date = raw.date;
 		this.update(raw);
 	}
@@ -88,9 +93,14 @@ export default class UIMessage {
 	}
 
 	update($: Message) {
-		this.raw = $;
+		const raw = (this.raw = $);
 		this.$entities.set($.textWithEntities);
 		this.isOutgoing = this.raw.isOutgoing;
+
+		if (!raw.isOutgoing && isUser(raw.chat) && isUser(raw.sender) && raw.chat.isSelf && raw.sender.isSelf) {
+			this.isOutgoing = true;
+		}
+
 		this.#updateText($);
 
 		this.$editDate.set($.hideEditMark ? null : $.editDate);
@@ -337,19 +347,39 @@ export default class UIMessage {
 				case "voice":
 					newText = `🎤 Voice (${formatTime($.media.duration)})`;
 					break;
-				case "audio":
+				case "audio": {
 					const audio = $.media;
-					newText = `🎧 ${
-						$.text || (audio.performer && audio.title) ? audio.title + " — " + audio.performer : audio.fileName
-					}`;
-					break;
 
-				case "document":
+					let text = "🎧 ";
+
+					if ($.text) {
+						text += $.text;
+					} else if (audio.performer && audio.title) {
+						text += `${audio.performer} — ${audio.title}`;
+					} else if (audio.fileName) {
+						text += audio.fileName;
+					} else {
+						text += "Audio";
+					}
+
+					newText = text;
+
+					break;
+				}
+
+				case "document": {
 					newText = $.media.fileName || "File";
 					if ($.text) {
 						newText += ", " + $.text;
 					}
 					break;
+				}
+
+				case "dice": {
+					newText = $.media.emoji;
+
+					break;
+				}
 
 				default: {
 					console.log("unsupported media type:", $.media.type, $);

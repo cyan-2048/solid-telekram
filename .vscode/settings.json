@@ -17,5 +17,8 @@
 	"prettier.useTabs": true,
 	"[javascript]": {
 		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

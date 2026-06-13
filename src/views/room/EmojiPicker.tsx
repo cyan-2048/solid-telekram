@@ -176,7 +176,7 @@ const map: Record<string, number> = {
 	"#": 11,
 };
 
-const indexedKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
+const INDEXED_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"];
 
 export default function EmojiPicker(props: { onSelect: (e: null | string) => void }) {
 	const [selected, setSelected] = createSignal<null | EmojiCategory>(null);
@@ -377,7 +377,7 @@ export default function EmojiPicker(props: { onSelect: (e: null | string) => voi
 						}
 					}}
 				>
-					{indexedKeys.map((num, index) => (
+					{INDEXED_KEYS.map((num, index) => (
 						<EmojiItem onSelect={onSelect} emoji={emojis()[index]} num={num} />
 					))}
 				</div>

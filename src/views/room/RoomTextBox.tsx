@@ -22,7 +22,7 @@ import NonResizeTextarea from "@components/NonResizeTextarea";
 import { md } from "@mtcute/markdown-parser";
 import { Portal } from "solid-js/web";
 import { VoiceRecorderWeb } from "@components/VoiceRecorder";
-import { InputMedia } from "@mtcute/web";
+import { Dice, InputMedia } from "@mtcute/web";
 import Options from "@components/Options";
 import OptionsMenuMaxHeight from "@components/OptionsMenuMaxHeight";
 import OptionsItem from "@components/OptionsItem";
@@ -190,6 +190,21 @@ function TextboxOptions(props: {
 			</OptionsMenuMaxHeight>
 		</Options>
 	);
+}
+
+const DICE_EMOJIS = Object.freeze([
+	Dice.TYPE_BASKETBALL,
+	Dice.TYPE_BOWLING,
+	Dice.TYPE_DART,
+	Dice.TYPE_DICE,
+	Dice.TYPE_FOOTBALL,
+	Dice.TYPE_SLOTS,
+] as const);
+
+type ValidDiceEmoji = (typeof DICE_EMOJIS)[number];
+
+function isValidDiceEmoji(emoji: string): emoji is ValidDiceEmoji {
+	return DICE_EMOJIS.includes(emoji as any);
 }
 
 export default function RoomTextBox(props: { message?: UIMessage; floating?: boolean; dialog: UIDialog }) {
@@ -383,6 +398,21 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 	function sendMessage() {
 		const dialog = props.dialog;
+
+		const couldBeDice = text().trim();
+
+		if (!interacting() && isValidDiceEmoji(couldBeDice)) {
+			// console.error("SHOULD ROLL DICE");
+
+			tg.sendMedia(dialog.peer, InputMedia.dice(couldBeDice, {})).then((msg) => {
+				dialog.$lastMessage.set(dialog.messages.add(msg));
+				sortDialogs();
+			});
+
+			resetTextbox();
+
+			return;
+		}
 
 		const replying = replyingMessage();
 

@@ -596,7 +596,7 @@ export function downloadToFile(url: string | Blob | URL, fileName?: string) {
 	a.download = fileName ?? "file_" + Date.now() + ".bin";
 	document.body.appendChild(a); // Required for Firefox
 	a.click();
-	console.error("HELLO????", url instanceof Blob);
+	//console.error("HELLO????", url instanceof Blob);
 	document.body.removeChild(a);
 
 	if (url instanceof Blob) {

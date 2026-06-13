@@ -14,3 +14,4 @@ export function loadRlottie() {
 export const isCached = wrapped.isCached;
 export const loadAnimation = wrapped.loadAnimation;
 export const requestFrame = wrapped.requestFrame;
+export const getLastFrame = wrapped.getLastFrame;

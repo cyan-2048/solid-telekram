@@ -51,6 +51,12 @@ if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
 	console.warn("Service Worker not supported");
 }
 
+export async function setNotoColorEmojiFix(needsFix: boolean) {
+	const db = await cachedDatabase;
+	await db.put("appPreferences", needsFix, "notoColorEmojiFix");
+	navigator.serviceWorker.controller?.postMessage({ type: 3, needsFix });
+}
+
 export async function getNotificationClickData(): Promise<object | null> {
 	const db = await cachedDatabase;
 	const data = await db.get("appPreferences", "notificationClickData");

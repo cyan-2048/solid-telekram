@@ -49,6 +49,7 @@ export const rlottie = {
 	isCached: wrapped.isCached,
 	loadAnimation: wrapped.loadAnimation,
 	requestFrame: wrapped.requestFrame,
+	getLastFrame: wrapped.getLastFrame,
 };
 
 export const enum EmojiCategory {

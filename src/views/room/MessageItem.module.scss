@@ -91,6 +91,10 @@
 			overflow: hidden;
 			float: left;
 			margin-right: 2px;
+
+			:global(.tgico) {
+				font-size: 12px !important;
+			}
 		}
 	}
 }

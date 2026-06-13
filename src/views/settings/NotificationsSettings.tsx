@@ -9,6 +9,7 @@ import {
 	checkState,
 	manuallyUnsubscribePushNotification,
 	manuallySubscribePushNotification,
+	setNotoColorEmojiFix,
 } from "@/workers/pushNotifications";
 
 const SN_ID = "settings-notif";
@@ -36,6 +37,8 @@ async function forceEnable() {
 export default function NotificationsSettings(props: { onClose: () => void }) {
 	const [loading, setLoading] = createSignal(true);
 	const [enabled, setEnabled] = createSignal(cachedIsEnabled);
+
+	let spanRef!: HTMLSpanElement;
 
 	let canUseKeyboard = false;
 
@@ -76,6 +79,19 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 				before={<Header>Notifications</Header>}
 			>
 				<div
+					style={{
+						"pointer-events": "none",
+						position: "fixed",
+						top: 0,
+						left: 0,
+						opacity: 0,
+					}}
+				>
+					<span ref={spanRef} style={{ "font-family": "KaiOS Emoji" }}>
+						💎
+					</span>
+				</div>
+				<div
 					class="notif-settings"
 					onKeyDown={(e) => {
 						e.preventDefault();
@@ -100,6 +116,20 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 							if (loading()) return;
 
 							setLoading(true);
+
+							// on KaiOS 2.5.4+ Noto Color Emoji is broken
+							// not sure if needed for KaiOS 3.0+
+							spanRef.style.fontFamily = "KaiOS Emoji";
+							const fontSizeA = spanRef.offsetHeight;
+							// globalThis.console.log("[1]", fontSizeA);
+							spanRef.style.fontFamily = "Noto Color Emoji";
+							const fontSizeB = spanRef.offsetHeight;
+							// globalThis.console.log("[2]", fontSizeB);
+							const notoColorEmojiDetected = fontSizeB != fontSizeA;
+							// globalThis.console.log("[3] Noto Color Emoji detected?", notoColorEmojiDetected);
+							spanRef.style.fontFamily = "KaiOS Emoji";
+
+							await setNotoColorEmojiFix(notoColorEmojiDetected);
 
 							if (import.meta.env.DEV) {
 								promise = sleep(2000);

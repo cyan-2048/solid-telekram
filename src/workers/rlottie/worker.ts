@@ -79,6 +79,23 @@ async function loadAnimation(id: string, data: string) {
 }
 
 /**
+ * get last frame of an animation, does not cache the animation
+ */
+async function getLastFrame(data: string, width: number, height: number) {
+	const instance = new RlottieWasm();
+
+	instance.load(data);
+	const frames = instance.frames() as number;
+
+	const buffer = instance.render(frames - 1, width, height);
+	const result = Uint8ClampedArray.from(buffer);
+
+	instance.delete();
+
+	return Comlink.transfer(result, [result.buffer]);
+}
+
+/**
  * requests an animation frame given the ID
  */
 function requestFrame(id: string, frame: number, width: number, height: number) {
@@ -92,7 +109,7 @@ function requestFrame(id: string, frame: number, width: number, height: number) 
 	return Comlink.transfer(result, [result.buffer]);
 }
 
-export { loadRlottie, isCached, loadAnimation, requestFrame };
+export { loadRlottie, isCached, loadAnimation, requestFrame, getLastFrame };
 
 // export type Exposed = typeof exposed;
 
