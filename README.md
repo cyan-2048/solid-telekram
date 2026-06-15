@@ -109,6 +109,16 @@ bun run build:v3
 bun run build:v4
 ```
 
+#### CloudPhone
+
+```bash
+bun run build:cloudphhone
+```
+
+> [!NOTE]  
+> CloudPhone support is highly experimental and only works on QVGA devices.
+> `https://telekram.netlify.app/#cloudphone=1&api_id=<INSERT YOUR APP ID HERE>&api_hash=<INSERT YOUR APP HASH HERE>`
+
 ### Deployment
 
 After the build completes, the generated files will be available in their respective directories:
@@ -116,6 +126,7 @@ After the build completes, the generated files will be available in their respec
 - **KaiOS 2.5:** `dist`
 - **KaiOS 3.0:** `dist-v3`
 - **KaiOS 4.0:** `dist-v4`
+- **CloudPhone:** `dist-v3`
 
 ## GIVE ME MONEY
 
