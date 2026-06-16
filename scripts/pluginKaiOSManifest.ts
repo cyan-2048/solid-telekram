@@ -61,7 +61,7 @@ export function pluginKaiOSManifest(): RsbuildPlugin {
 					}
 
 					if (isKai3 || isKai4) {
-						manifest.manifest.b2g_features.version = (isKai3 ? "3" : "4") + appVersion.slice(1);
+						manifest.b2g_features.version = (isKai3 ? "3" : "4") + appVersion.slice(1);
 					}
 
 					const manifestJSON = JSON.stringify(manifest);
