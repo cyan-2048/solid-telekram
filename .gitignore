@@ -14,7 +14,7 @@ lerna-debug.log*
 
 node_modules
 dist
-dist-v3
+dist-*
 dist-ssr
 *.local
 .env.*

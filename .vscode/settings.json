@@ -20,5 +20,6 @@
 	},
 	"[markdown]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
-	}
+	},
+	"git.addAICoAuthor": "off"
 }
