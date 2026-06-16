@@ -35,7 +35,6 @@
 
 	"b2g_features": {
 		"display": "Telegram",
-		"version": "3.3.0",
 		"type": "privileged",
 		"default_locale": "en-US",
 		"developer": {

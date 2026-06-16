@@ -15,45 +15,26 @@ function getManifestFileName() {
 	return isKai3 || isKai4 ? "manifest.webmanifest" : "manifest.webapp";
 }
 
-function readManifest() {
-	const manifestFileName = getManifestFileName();
-	const manifest = JSON.parse(fs.readFileSync(resolve("src", "assets", manifestFileName), "utf8"));
-
-	if (isKai4) {
-		const version = manifest.b2g_features.version;
-		manifest.b2g_features.version = version.replace(/^3\./, "4.");
+function getAppVersion() {
+	try {
+		const manifest = JSON.parse(fs.readFileSync(resolve("src", "assets", "manifest.webapp"), "utf8"));
+		return manifest.version as string;
+	} catch {
+		return null;
 	}
+}
 
+function getManifest() {
+	const manifest = JSON.parse(
+		fs.readFileSync(resolve("src", "assets", isKai3 || isKai4 ? "manifest.webmanifest" : "manifest.webapp"), "utf8"),
+	);
 	return manifest;
 }
 
-function resolveManifestVersion(manifest: any) {
-	return isKai3 || isKai4 ? manifest.b2g_features.version : manifest.version;
-}
-
-function getCommitMessage() {
-	try {
-		const message = execSync("git log -1 --pretty=%B", { stdio: "ignore" }).toString().trim();
-		return message;
-	} catch (err) {}
-	return null;
-}
-
-function getCommitHash() {
-	try {
-		return execSync('git log -1 --pretty=format:"%H"', { stdio: "ignore" }).toString().trim();
-	} catch {}
-
-	return null;
-}
-
 export function pluginKaiOSManifest(): RsbuildPlugin {
-	try {
-		const manifest = readManifest();
-		process.env.APP_VERSION = resolveManifestVersion(manifest);
-	} catch {
-		// Keep existing APP_VERSION fallback if manifest read fails during config evaluation.
-	}
+	const appVersion = getAppVersion() ?? "1.0.0";
+
+	process.env.APP_VERSION = appVersion;
 
 	return {
 		name: "kai-manifest-plugin",
@@ -73,12 +54,14 @@ export function pluginKaiOSManifest(): RsbuildPlugin {
 
 					const asmjsAssets = api.useExposed<string[]>("GET_ASM_ASSETS") || [];
 
-					const manifest = readManifest();
+					const manifest = getManifest();
 
 					if (isKai2 && asmjsAssets.length) {
-						// I should probably split up the asm.js files hmmm
-						// (actually did do that already lol)
 						manifest.precompile = asmjsAssets;
+					}
+
+					if (isKai3 || isKai4) {
+						manifest.manifest.b2g_features.version = (isKai3 ? "3" : "4") + appVersion.slice(1);
 					}
 
 					const manifestJSON = JSON.stringify(manifest);
@@ -86,26 +69,6 @@ export function pluginKaiOSManifest(): RsbuildPlugin {
 					compilation.emitAsset(
 						manifestFileName,
 						new compiler.webpack.sources.RawSource(Buffer.from(manifestJSON, "utf8")),
-					);
-
-					if (!isProd) return;
-					if (!fs.existsSync(resolve("builds"))) fs.mkdirSync(resolve("builds"));
-
-					const buildsManifestPath = resolve("builds", manifestFileName);
-					const buildsVersionPath = resolve(
-						"builds",
-						isKai3 ? "version3.json" : isKai4 ? "version4.json" : "version.json",
-					);
-
-					fs.writeFileSync(buildsManifestPath, manifestJSON);
-					fs.writeFileSync(
-						buildsVersionPath,
-						JSON.stringify({
-							version: resolveManifestVersion(manifest),
-							build: Date.now(),
-							description: getCommitMessage(),
-							hash: getCommitHash(),
-						}),
 					);
 				},
 			);
