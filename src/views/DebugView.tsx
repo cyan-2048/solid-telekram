@@ -233,6 +233,7 @@ export default function DebugView() {
 					Cloudphone Mode
 				</CheckboxInput>
 				<Separator>Telegram Icons</Separator>
+				<div>!!</div>
 				<TestAllIcons></TestAllIcons>
 			</div>
 		</Content>
