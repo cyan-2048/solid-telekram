@@ -6,7 +6,7 @@ import Header from "@components/Header";
 import KaiButton, { ButtonContainer } from "@components/KaiButton";
 import RadioInput from "@components/RadioInput";
 import TextInput from "@components/TextInput";
-import { createSignal, For, onCleanup, onMount } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 import ListItem from "@components/ListItem";
 import { toaster } from "@/utils";
 import { $previousView, $proxyMode, $view, setStatusbarColor } from "@/stores";
