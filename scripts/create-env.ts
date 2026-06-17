@@ -19,6 +19,8 @@ const HEADERS = `/*
 
 const local = resolve(__dirname, "../.env.local");
 
+// hmm
+
 // @ts-ignore
 // only write if it doesn't exist
 if (!(await Bun.file(local).exists())) Bun.write(local, TEXT);
