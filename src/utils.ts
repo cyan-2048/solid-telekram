@@ -8,7 +8,7 @@ import { sleep } from "./helpers";
 
 import type { Store, StoreValue } from "nanostores";
 import type { Accessor } from "solid-js";
-import { createComputed, createMemo, createRenderEffect, createSignal, onCleanup, untrack } from "solid-js";
+import { createComputed, createMemo, createSignal, onCleanup, untrack } from "solid-js";
 import { useStore as _useStore } from "@nanostores/solid";
 import type { TelegramIcons } from "@components/Softkeys";
 import type UIMessage from "./ui/UIMessage";
