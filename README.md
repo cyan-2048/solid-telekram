@@ -117,6 +117,7 @@ bun run build:cloudphhone
 
 > [!NOTE]  
 > CloudPhone support is highly experimental and only works on QVGA devices.
+>
 > `https://telekram.netlify.app/#cloudphone=1&api_id=<INSERT YOUR APP ID HERE>&api_hash=<INSERT YOUR APP HASH HERE>`
 
 ### Deployment
