@@ -13,7 +13,9 @@
 		"format": "biome format --write",
 		"preview": "rsbuild preview",
 		"mtcute": "bun ./scripts/update-mtcute.ts",
-		"screenshot": "bun ./scripts/screenshot.ts"
+		"screenshot": "bun ./scripts/screenshot.ts",
+		"deploy": "bun ./scripts/deploy.ts",
+		"deploy:preview": "bun ./scripts/deploy.ts --preview"
 	},
 	"dependencies": {
 		"@fuman/io": "0.0.19",
