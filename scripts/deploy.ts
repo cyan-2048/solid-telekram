@@ -32,7 +32,7 @@ try {
 	await Bun.$`bun run build:v3`;
 	await Bun.$`bun run build:v4`;
 
-	await Bun.$`git switch gh-pages`;
+	let appVersion = "";
 
 	if (IS_PREVIEW) {
 		for (let i = 2; i < 5; i++) {
@@ -43,7 +43,7 @@ try {
 		}
 	} else {
 		const manifestFile = resolve(__dirname, "..", "src", "assets", "manifest.webapp");
-		const appVersion = (await Bun.file(manifestFile).json()).version as string;
+		appVersion = (await Bun.file(manifestFile).json()).version as string;
 
 		for (let i = 2; i < 5; i++) {
 			const zipFile = resolve(__dirname, "..", "builds", `telekram4kai${i}.zip`);
@@ -52,6 +52,15 @@ try {
 			await Bun.write(destination, Bun.file(zipFile));
 		}
 	}
+
+	await Bun.$`git switch gh-pages`;
+	await Bun.$`git add .`;
+	if (appVersion) {
+		await Bun.$`git commit -m "Publish v${appVersion}"`;
+	} else {
+		await Bun.$`git commit -m "update preview build"`;
+	}
+	await Bun.$`git push gh-pages`;
 } finally {
 	await Bun.$`git switch latest`;
 
