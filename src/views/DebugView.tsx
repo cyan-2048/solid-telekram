@@ -137,7 +137,7 @@ export default function DebugView() {
 						tabIndex={0}
 						classList={{ debug: true }}
 					>
-						Test Prompt
+						Test Prompt!
 					</KaiButton>
 					<KaiButton
 						on:sn-enter-down={() => {

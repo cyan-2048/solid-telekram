@@ -252,7 +252,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 	const [isTyping, setIsTyping] = createSignal(false);
 
-	let typingTimeout!: NodeJS.Timeout;
+	let typingTimeout!: number;
 
 	createEffect(
 		on(
