@@ -1,6 +1,6 @@
 # Telegram4KaiOS
 
-Telegram client for KaiOS.
+Unofficial Telegram client for KaiOS.
 
 ### Made with
 
@@ -131,6 +131,8 @@ After the build completes, the generated files will be available in their respec
 ## GIVE ME MONEY
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/H2H7LIPNW)
+
+mtcute developer: https://tei.su/donate
 
 ## Discord Server
 
