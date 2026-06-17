@@ -1,7 +1,7 @@
 import { atom } from "nanostores";
 import UIMessage from "./UIMessage";
-import UIDialog from "./UIDialog";
-import type { GetHistoryOffset } from "@mtcute/core/methods";
+import type UIDialog from "./UIDialog";
+import type { GetHistoryOffset } from "@mtcute/core/methods.js";
 import type { Message } from "@mtcute/core";
 import { tg } from "@globals";
 import { toaster } from "@utils";
@@ -11,7 +11,7 @@ import { LRUCache } from "lru-cache";
 const lru = new LRUCache<number, MessagesJar>({
 	max: 3,
 	dispose(
-		value
+		value,
 		//	, key, reason
 	) {
 		// console.log("[MessagesJar] LRU reason: ", reason, value, lru);
