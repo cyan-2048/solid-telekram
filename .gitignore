@@ -1,0 +1,47 @@
+# Local
+.DS_Store
+*.local
+*.log*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-*
+dist-ssr
+*.local
+.env.*
+private
+*.test.ts
+builds
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignore auto generated CSS declarations
+*.module.css.d.ts
+*.module.sass.d.ts
+*.module.scss.d.ts
+*.module.less.d.ts
+*.module.styl.d.ts
+*.module.stylus.d.ts
+*.test.ts
+
+# vibe code reference files
+*_reference.*
