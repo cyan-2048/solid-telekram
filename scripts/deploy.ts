@@ -20,8 +20,6 @@ VITE_APP_HASH="${RANDOM_STRING}"`;
 
 const IS_PREVIEW = Bun.argv[2] === "--preview";
 
-console.log(IS_PREVIEW);
-
 try {
 	await Bun.write(local, TEXT);
 
