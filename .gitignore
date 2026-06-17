@@ -20,7 +20,7 @@ dist-ssr
 .env.*
 private
 *.test.ts
-builds
+builds/
 
 # Editor directories and files
 .vscode/*
@@ -45,3 +45,7 @@ builds
 
 # vibe code reference files
 *_reference.*
+
+# builds
+v/
+preview/

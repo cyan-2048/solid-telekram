@@ -46,5 +46,5 @@
 			"@components/*": ["./src/views/components/*"]
 		}
 	},
-	"include": ["src", "scripts/**/*"]
+	"include": ["src"]
 }
