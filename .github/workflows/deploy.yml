@@ -10,10 +10,13 @@ jobs:
     name: deploy-preview
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
       # run any `bun` or `bunx` command
       - run: bun install --frozen-lockfile
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: bun run deploy:preview
