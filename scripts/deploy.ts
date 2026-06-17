@@ -60,7 +60,7 @@ try {
 	} else {
 		await Bun.$`git commit -m "update preview build"`;
 	}
-	await Bun.$`git push gh-pages`;
+	await Bun.$`git push origin gh-pages`;
 } finally {
 	await Bun.$`git switch latest`;
 
