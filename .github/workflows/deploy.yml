@@ -1,22 +1,26 @@
-name: deploy-preview
+name: deploy
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  deploy-preview:
-    name: deploy-preview
+  deploy:
+    name: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
-      # run any `bun` or `bunx` command
+      
       - run: bun install --frozen-lockfile
+
       - run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - run: bun run deploy:preview
+      - name: Deploy Release
+        if: github.event_name == 'push' && contains(toLower(github.event.head_commit.message), 'release')
+        run: bun run deploy
