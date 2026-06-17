@@ -55,12 +55,21 @@ try {
 
 	await Bun.$`git switch gh-pages`;
 	await Bun.$`git add .`;
-	if (appVersion) {
-		await Bun.$`git commit -m "Publish v${appVersion}"`;
+
+	// Check if there is anything staged
+	const { exitCode } = await Bun.$`git diff --cached --quiet`.nothrow();
+
+	if (exitCode !== 0) {
+		if (appVersion) {
+			await Bun.$`git commit -m "Publish v${appVersion}"`;
+		} else {
+			await Bun.$`git commit -m "update preview build"`;
+		}
+
+		await Bun.$`git push origin gh-pages`;
 	} else {
-		await Bun.$`git commit -m "update preview build"`;
+		console.log("No changes to publish");
 	}
-	await Bun.$`git push origin gh-pages`;
 } finally {
 	await Bun.$`git switch latest`;
 
