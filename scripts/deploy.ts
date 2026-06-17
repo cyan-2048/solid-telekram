@@ -32,9 +32,9 @@ try {
 
 	let appVersion = "";
 
-	await Bun.$`git switch gh-pages`;
-
 	if (IS_PREVIEW) {
+		await Bun.$`git switch gh-pages`;
+
 		for (let i = 2; i < 5; i++) {
 			const zipFile = resolve(__dirname, "..", "builds", `telekram4kai${i}.zip`);
 			const destination = resolve(__dirname, "..", "preview", `telekram4kai${i}.zip`);
@@ -44,6 +44,8 @@ try {
 	} else {
 		const manifestFile = resolve(__dirname, "..", "src", "assets", "manifest.webapp");
 		appVersion = (await Bun.file(manifestFile).json()).version as string;
+
+		await Bun.$`git switch gh-pages`;
 
 		for (let i = 2; i < 5; i++) {
 			const zipFile = resolve(__dirname, "..", "builds", `telekram4kai${i}.zip`);
