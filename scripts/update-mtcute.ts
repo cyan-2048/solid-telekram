@@ -78,6 +78,10 @@ function copyAndMergeFolder(src: string, dest: string) {
 		const srcPath = path.join(src, entry.name);
 		const destPath = path.join(dest, entry.name);
 
+		if (entry.isFile() && entry.name.endsWith(".test.ts")) {
+			continue;
+		}
+
 		if (srcPath === path.resolve(upstreamCore, "tl", ".gitignore")) {
 			continue;
 		}
