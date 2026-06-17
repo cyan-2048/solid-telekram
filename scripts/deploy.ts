@@ -32,6 +32,8 @@ try {
 
 	let appVersion = "";
 
+	await Bun.$`git switch gh-pages`;
+
 	if (IS_PREVIEW) {
 		for (let i = 2; i < 5; i++) {
 			const zipFile = resolve(__dirname, "..", "builds", `telekram4kai${i}.zip`);
@@ -51,7 +53,6 @@ try {
 		}
 	}
 
-	await Bun.$`git switch gh-pages`;
 	await Bun.$`git add .`;
 
 	// Check if there is anything staged
