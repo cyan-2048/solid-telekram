@@ -6,7 +6,7 @@ Unofficial Telegram client for KaiOS.
 
 - [mtcute](https://github.com/mtcute/mtcute) (amazing mtproto library)
 - solid.js
-- 👀🙌
+- 👀🙌🤖
 
 ## Screenshots
 

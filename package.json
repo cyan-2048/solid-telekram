@@ -55,7 +55,7 @@
 		"web-streams-polyfill": "^4.3.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.10",
+		"@biomejs/biome": "2.4.16",
 		"@rsbuild/core": "^2.0.12",
 		"@rsbuild/plugin-babel": "^1.2.1",
 		"@rsbuild/plugin-sass": "^1.5.3",

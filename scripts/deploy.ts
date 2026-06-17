@@ -23,7 +23,7 @@ const IS_PREVIEW = Bun.argv[2] === "--preview";
 try {
 	await Bun.write(local, TEXT);
 
-	await Bun.$`git switch latest`;
+	await Bun.$`git switch main`;
 
 	// build files
 	await Bun.$`bun run build`;
@@ -69,7 +69,7 @@ try {
 		console.log("No changes to publish");
 	}
 } finally {
-	await Bun.$`git switch latest`;
+	await Bun.$`git switch main`;
 
 	if (localFileContent) {
 		await Bun.write(local, localFileContent);
