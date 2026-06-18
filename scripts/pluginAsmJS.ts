@@ -65,7 +65,7 @@ export function pluginAsmJS(): RsbuildPlugin {
 			api.transform({ test: /\.asm\.js$/ }, ({ resourcePath }) => {
 				resources.push(resourcePath);
 
-				return `var Module=__LOAD_ASM_("${resourcePath}");export default Module;`;
+				return `var Module=__LOAD_ASM_(${JSON.stringify(resourcePath)});export default Module;`;
 			});
 
 			const asmAssetsFinal: string[] = [];
@@ -122,7 +122,7 @@ export function pluginAsmJS(): RsbuildPlugin {
 							// yes confusing, but it works with Buffer
 							const insertBuffer = Buffer.from(text, "utf-8");
 
-							const marker = `__LOAD_ASM_("${resource}")`;
+							const marker = `__LOAD_ASM_(${JSON.stringify(resource)})`;
 							const markerBuffer = Buffer.from(marker, "utf-8");
 
 							const markerIndex = mainBuffer.indexOf(markerBuffer);

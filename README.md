@@ -66,6 +66,12 @@ APP_ID=your_app_id
 APP_HASH=your_app_hash
 ```
 
+And then install dependencies
+
+```bash
+bun install --frozen-lockfile
+```
+
 ### Development
 
 > [!NOTE]  
