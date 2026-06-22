@@ -29,6 +29,7 @@
 		"video-capture": {
 			"description": "Reading Codes using the Camera"
 		},
+		"push": {},
 		"serviceworker": {
 			"description": "Needed for assocating service worker"
 		},
