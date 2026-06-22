@@ -195,6 +195,7 @@ export async function registerDevice(subscription: any) {
 		otherUids: [],
 		appSandbox: false,
 		secret: authKey,
+		noMuted: true,
 	});
 
 	await (await cachedDatabase).put("appPreferences", subscription, "pushSubscription");
