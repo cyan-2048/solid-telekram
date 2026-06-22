@@ -14,6 +14,24 @@ const cachedDatabase = openDB("solid-telekram", 5, {
 	},
 });
 
+const APP_VERSION_STORAGE_KEY = "sw_version";
+
+async function handleAppUpdateIfNeeded() {
+	/*
+	const currentVersion = import.meta.env.APP_VERSION + ServiceWorkerURL;
+	const storedVersion = localStorage.getItem(APP_VERSION_STORAGE_KEY);
+
+	if (storedVersion === currentVersion) return;
+
+	if (storedVersion != null) {
+		await manuallyUnsubscribePushNotification().catch(() => null);
+		await manuallySubscribePushNotification().catch(() => null);
+	}
+
+	localStorage.setItem(APP_VERSION_STORAGE_KEY, currentVersion);
+	*/
+}
+
 if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
 	console.log("START SERVICE WORKER", ServiceWorkerURL);
 
@@ -44,6 +62,8 @@ if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
 				await registerDevice(updatedPushSubscription);
 				// console.log('registerDevice result:', result);
 				db.delete("appPreferences", "updatedPushSubscription");
+			} else {
+				await handleAppUpdateIfNeeded();
 			}
 		}
 	});
@@ -186,6 +206,8 @@ export async function registerDevice(subscription: any) {
 }
 
 export async function unregisterDevice(subscription: any) {
+	const db = await cachedDatabase;
+
 	console.error("UNREGISTER DEVICE", subscription);
 	const result = await tg.call({
 		_: "account.unregisterDevice",
@@ -194,8 +216,8 @@ export async function unregisterDevice(subscription: any) {
 		otherUids: [],
 	});
 
-	await (await cachedDatabase).delete("appPreferences", "pushSubscription");
-	await (await cachedDatabase).delete("appPreferences", "pushAuthKey");
+	await db.delete("appPreferences", "pushSubscription");
+	await db.delete("appPreferences", "pushAuthKey");
 	return result;
 }
 
@@ -205,12 +227,13 @@ export async function checkState() {
 
 export async function manuallyUnsubscribePushNotification() {
 	try {
-		const pushSubscription = await (await cachedDatabase).get("appPreferences", "pushSubscription");
+		const db = await cachedDatabase;
+		const pushSubscription = await db.get("appPreferences", "pushSubscription");
 		if (pushSubscription) {
 			await unregisterDevice(pushSubscription).catch(() => null);
 		}
-		await (await cachedDatabase).delete("appPreferences", "pushSubscription");
-		await (await cachedDatabase).delete("appPreferences", "pushAuthKey");
+		await db.delete("appPreferences", "pushSubscription");
+		await db.delete("appPreferences", "pushAuthKey");
 
 		await unsubscribePush().catch(() => null);
 		return true;
@@ -221,8 +244,9 @@ export async function manuallyUnsubscribePushNotification() {
 
 export async function manuallySubscribePushNotification() {
 	try {
-		await (await cachedDatabase).delete("appPreferences", "updatedPushSubscription");
-		let pushSubscription = await (await cachedDatabase).get("appPreferences", "pushSubscription");
+		const db = await cachedDatabase;
+		await db.delete("appPreferences", "updatedPushSubscription");
+		let pushSubscription = await db.get("appPreferences", "pushSubscription");
 		if (pushSubscription) {
 			await unregisterDevice(pushSubscription);
 		}

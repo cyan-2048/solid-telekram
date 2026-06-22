@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 
 import { defineConfig } from "@rsbuild/core";
 import { pluginBabel } from "@rsbuild/plugin-babel";
@@ -22,6 +23,28 @@ const bigintFolder = path.resolve(__dirname, "@mtcute", "core", "utils", "bigint
 const kai3Alias = {
 	[path.resolve(bigintFolder, "BigInteger.ts")]: path.resolve(bigintFolder, "NativeBigInteger.ts"),
 };
+
+function generateIncludedFolders() {
+	const source = path.resolve(__dirname, "node_modules");
+
+	const devDeps = new Set(
+		Object.keys(
+			JSON.parse(fs.readFileSync(path.resolve(__dirname, "package.json")).toString("utf-8")).devDependencies,
+		).map((a) => a.split("/")[0]),
+	);
+
+	// console.log(devDeps);
+
+	const folderNames = fs
+		.readdirSync(source, { withFileTypes: true })
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name)
+		.filter((a) => !a.includes(".") && !devDeps.has(a) && !a.includes("babel") && !a.includes("swc"));
+
+	return folderNames.map((a) => new RegExp(`node_modules[\\\\/]${a}[\\\\/]`));
+}
+
+// console.log(generateIncludedFolders());
 
 export default defineConfig({
 	plugins: [
@@ -59,22 +82,27 @@ export default defineConfig({
 
 	source: {
 		// ehhh
-		include: [
-			/node_modules[\\/]solid-js[\\/]/,
-			/node_modules[\\/]nanostores[\\/]/,
-			/node_modules[\\/]@nanostores[\\/]/,
-			/node_modules[\\/]solid-transition-group[\\/]/,
-			/node_modules[\\/]@solid-primitives[\\/]/,
-			/node_modules[\\/]lru-cache[\\/]/,
-			/node_modules[\\/]date-fns[\\/]/,
-			/node_modules[\\/]solid-qr-code[\\/]/,
-			/node_modules[\\/]uuid[\\/]/,
-			/node_modules[\\/]@fuman[\\/]/,
-			/node_modules[\\/]@mtcute[\\/]/,
-			/node_modules[\\/]long[\\/]/,
-			/node_modules[\\/]idb[\\/]/,
-			/node_modules[\\/]minisearch[\\/]/,
-		],
+		// include: [
+		// 	/node_modules[\\/]solid-js[\\/]/,
+		// 	/node_modules[\\/]nanostores[\\/]/,
+		// 	/node_modules[\\/]@nanostores[\\/]/,
+		// 	/node_modules[\\/]solid-transition-group[\\/]/,
+		// 	/node_modules[\\/]@solid-primitives[\\/]/,
+		// 	/node_modules[\\/]lru-cache[\\/]/,
+		// 	/node_modules[\\/]date-fns[\\/]/,
+		// 	/node_modules[\\/]solid-qr-code[\\/]/,
+		// 	/node_modules[\\/]uuid[\\/]/,
+		// 	/node_modules[\\/]@fuman[\\/]/,
+		// 	/node_modules[\\/]@mtcute[\\/]/,
+		// 	/node_modules[\\/]long[\\/]/,
+		// 	/node_modules[\\/]idb[\\/]/,
+		// 	/node_modules[\\/]minisearch[\\/]/,
+		// 	/node_modules[\\/]moment-timezone[\\/]/,
+		// 	/node_modules[\\/]moment[\\/]/,
+		// 	/node_modules[\\/]countries-and-timezones[\\/]/,
+		// ],
+
+		include: generateIncludedFolders(),
 
 		define: {
 			"import.meta.env.KAIOS": isKai3 ? 3 : isKai4 ? 4 : 2,
@@ -139,6 +167,7 @@ export default defineConfig({
 				},
 			},
 		},
+		// minify: false,
 
 		dataUriLimit: 0,
 
