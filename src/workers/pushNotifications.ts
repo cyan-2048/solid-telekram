@@ -17,7 +17,6 @@ const cachedDatabase = openDB("solid-telekram", 5, {
 const APP_VERSION_STORAGE_KEY = "sw_version";
 
 async function handleAppUpdateIfNeeded() {
-	/*
 	const currentVersion = import.meta.env.APP_VERSION + ServiceWorkerURL;
 	const storedVersion = localStorage.getItem(APP_VERSION_STORAGE_KEY);
 
@@ -29,7 +28,6 @@ async function handleAppUpdateIfNeeded() {
 	}
 
 	localStorage.setItem(APP_VERSION_STORAGE_KEY, currentVersion);
-	*/
 }
 
 if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
