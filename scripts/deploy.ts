@@ -61,7 +61,7 @@ try {
 		folderNames.sort(new Intl.Collator(undefined, { numeric: true }).compare);
 		const versionsJSON = JSON.stringify(folderNames);
 
-		await Bun.write(resolve(__dirname, "..", "versions.json"), versionsJSON);
+		await Bun.write(resolve(__dirname, "..", "v", "versions.json"), versionsJSON);
 	}
 
 	await Bun.$`git add .`;
