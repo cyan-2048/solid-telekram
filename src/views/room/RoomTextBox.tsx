@@ -1176,7 +1176,6 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 							}
 
 							if (!interacting()) {
-								// TODO: don't focus if show info
 								SpatialNavigation.focus("room");
 							}
 

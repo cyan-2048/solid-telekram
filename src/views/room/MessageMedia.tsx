@@ -260,7 +260,6 @@ async function requestFrame(id: string, frame: number) {
 }
 
 export function StickerMedia(props: FocusableMediaProps) {
-	// TODO: only play video sticker when focused to lessen memory usage
 	const { message, focused, media } = useMessageContext();
 
 	let canvasRef!: HTMLCanvasElement;

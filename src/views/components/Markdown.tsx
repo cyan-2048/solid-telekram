@@ -172,7 +172,7 @@ function Twemoji(props: { text: string }) {
 							setShow(true);
 						}}
 						class={styles.emoji}
-						src={"https://cyan-2048.github.io/kaigram-assets/emoji2/" + toCodePoint(props.text) + ".png"}
+						src={"/emoji/" + toCodePoint(props.text) + ".png"}
 						alt={props.text}
 					/>
 				}
