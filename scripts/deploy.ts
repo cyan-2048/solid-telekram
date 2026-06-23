@@ -53,6 +53,15 @@ try {
 
 			await Bun.write(destination, Bun.file(zipFile));
 		}
+
+		const source = resolve(__dirname, "..", "v");
+		const folderNames = (await fs.readdir(source, { withFileTypes: true }))
+			.filter((dirent) => dirent.isDirectory())
+			.map((dirent) => dirent.name);
+		folderNames.sort(new Intl.Collator(undefined, { numeric: true }).compare);
+		const versionsJSON = JSON.stringify(folderNames);
+
+		await Bun.write(resolve(__dirname, "..", "versions.json"), versionsJSON);
 	}
 
 	await Bun.$`git add .`;
