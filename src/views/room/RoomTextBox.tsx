@@ -270,10 +270,14 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 	onCleanup(() => {
 		setIsTyping(false);
-		tg.setTyping({
-			peerId: props.dialog.peer,
-			status: "cancel",
-		});
+
+		if (props.dialog.peer.type == "chat" && props.dialog.peer.chatType == "channel") {
+		} else {
+			tg.setTyping({
+				peerId: props.dialog.peer,
+				status: "cancel",
+			});
+		}
 	});
 
 	const setTyping = () => {

@@ -355,4 +355,47 @@ export default class UIDialog {
 
 		this.$muted.set(true);
 	}
+
+	private _cached_sponsoredMessages: tl.messages.TypeSponsoredMessages | null = null;
+	private _lastRequest_sponsoredMessages = 0;
+
+	$postsBetweenSponsoredMessages = atom(0);
+
+	async getSponsoredMessages() {
+		const peer = this.peer;
+		// return null for now, we don't support bots anyways
+		// Telegram ToS requires channels only
+		if (peer.type == "user" && peer.isBot) {
+			return null;
+		}
+
+		if (
+			// if cached
+			this._cached_sponsoredMessages != null &&
+			// and 5 minutes have not passed
+			!(performance.now() - this._lastRequest_sponsoredMessages >= 5 * 60 * 1000)
+		) {
+			return this._cached_sponsoredMessages;
+		}
+
+		if (peer.type == "chat" && peer.chatType == "channel") {
+			const sponsoredMessages = await tg.call({ _: "messages.getSponsoredMessages", peer: peer.inputPeer });
+
+			this._cached_sponsoredMessages = sponsoredMessages;
+			this._lastRequest_sponsoredMessages = performance.now();
+
+			if (sponsoredMessages._ == "messages.sponsoredMessagesEmpty") {
+				return null;
+			}
+
+			const postsBetween = sponsoredMessages.postsBetween;
+			if (postsBetween != undefined && postsBetween > 0) {
+				this.$postsBetweenSponsoredMessages.set(postsBetween);
+			}
+
+			console.error("HANDLE SPONSORED MESSAGES", sponsoredMessages);
+		}
+
+		return null;
+	}
 }
