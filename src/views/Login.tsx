@@ -15,12 +15,15 @@ import { cloudphone } from "@/config";
 import TextInput from "@components/TextInput";
 import { manuallyUnsubscribePushNotification } from "@/workers/pushNotifications";
 import { Portal } from "solid-js/web";
+import Deferred from "@/lib/Deffered";
 
 const CountryCodePicker = lazy(() => import("@components/CountryCodePicker"));
 const QRCodeSVG = lazy(() => import("@components/QRCodeSVG"));
 const ProxySettings = lazy(() => import("./settings/ProxySettings"));
 
 let countryCache: null | Country = null;
+
+const nearestDcReady = new Deferred<void>();
 
 const SN_ID = "login";
 const SN_ID_OPTIONS = "options";
@@ -31,7 +34,10 @@ function QRCode(props: { onCancel: () => void }) {
 	onMount(() => {
 		setSoftkeys("Cancel", "", "");
 		blur();
-		startQr();
+
+		nearestDcReady.promise.then(() => {
+			startQr();
+		});
 	});
 
 	const qrLink = useStore($qrLink);
@@ -45,8 +51,8 @@ function QRCode(props: { onCancel: () => void }) {
 	// });
 
 	function onKeyPress(e: KeyboardEvent) {
+		e.preventDefault();
 		if (e.key == "SoftLeft" || e.key == "Backspace") {
-			e.preventDefault();
 			props.onCancel();
 			EE.emit("abortQR");
 		}
@@ -199,6 +205,23 @@ export default function Login() {
 	const loginPhase = useStore($loginPhase);
 
 	onMount(async () => {
+		const nearestDc = (async () => {
+			const result = await tg.call({
+				_: "help.getNearestDc",
+			});
+
+			if (result.nearestDc != result.thisDc) {
+				tg.call({ _: "help.getConfig" }, { dcId: result.nearestDc }).then((e) => {
+					console.log("help.getConfig", e);
+					nearestDcReady.resolve();
+				});
+			} else {
+				nearestDcReady.resolve();
+			}
+
+			return result;
+		})();
+
 		if (countryCache) return setCountry(countryCache);
 
 		const cachedCountryFromLS = $cachedPhoneNumber.get().iso2;
@@ -232,11 +255,7 @@ export default function Login() {
 		// if we are using a proxy,
 		// most likely the country would be wrong
 		if ((!cachedCountryFromLS || !country()) && ($proxyMode.get() == "none" || $proxyMode.get() == "sync")) {
-			const nearest =
-				(await getCountryCodeViaHTTP()) ||
-				(await tg.call({
-					_: "help.getNearestDc",
-				}));
+			const nearest = (await getCountryCodeViaHTTP()) || (await nearestDc);
 
 			// the user may have manually set the value before the tg.call resolves
 			// remember, we no longer simulate a loading screen when doing the very slow authentication proccess
