@@ -93,12 +93,21 @@ function Messages(props: { dialog: UIDialog }) {
 		});
 	});
 
+	const sponsoredMessagesRaw = useStore_(() => props.dialog.$sponsoredMessages);
+
+	const sponsoredMessages = createMemo(() => {
+		messages();
+		sponsoredMessagesRaw();
+		return props.dialog.getSponsoredMessages();
+	});
+
 	const view = useStore($view);
 
 	createEffect(() => {
 		const inView = view() == "room";
 
 		if (inView && !loading()) {
+			props.dialog.getSponsoredMessages();
 			sleep(100).then(() => SpatialNavigation.focus("room"));
 		}
 	});
@@ -130,17 +139,33 @@ function Messages(props: { dialog: UIDialog }) {
 				>
 					<For each={messages()}>
 						{(e, index) => (
-							<MessageProvider
-								first={index() == 0}
-								last={index() == messages().length - 1}
-								dialog={props.dialog}
-								$={e}
-								before={messages()[index() - 1]}
-							>
-								<MessageItem />
-							</MessageProvider>
+							<>
+								<Show when={sponsoredMessages()?.getByIndex(index())}>
+									{(sponsor) => (
+										<div>
+											{sponsor().message} {sponsor().url}
+										</div>
+									)}
+								</Show>
+								<MessageProvider
+									first={index() == 0}
+									last={index() == messages().length - 1}
+									dialog={props.dialog}
+									$={e}
+									before={messages()[index() - 1]}
+								>
+									<MessageItem />
+								</MessageProvider>
+							</>
 						)}
 					</For>
+					<Show when={sponsoredMessages()?.getLast()}>
+						{(sponsor) => (
+							<div>
+								{sponsor().message} {sponsor().url}
+							</div>
+						)}
+					</Show>
 				</WhenMounted>
 				<For each={uploading()}>{(upload) => <UploadingMessageItem upload={upload} />}</For>
 				<Show when={props.dialog.chatType !== "channel"}>

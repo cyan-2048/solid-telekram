@@ -356,17 +356,19 @@ export default class UIDialog {
 		this.$muted.set(true);
 	}
 
-	private _cached_sponsoredMessages: tl.messages.TypeSponsoredMessages | null = null;
+	private _cached_sponsoredMessages: tl.messages.RawSponsoredMessages | null = null;
 	private _lastRequest_sponsoredMessages = 0;
 
-	$postsBetweenSponsoredMessages = atom(0);
+	$sponsoredMessages = atom<tl.messages.RawSponsoredMessages | null>(null);
 
-	async getSponsoredMessages() {
+	private _getSponsoredMessagesPromise = Promise.resolve();
+
+	private async _getSponsoredMessages() {
 		const peer = this.peer;
 		// return null for now, we don't support bots anyways
 		// Telegram ToS requires channels only
 		if (peer.type == "user" && peer.isBot) {
-			return null;
+			return this.$sponsoredMessages.set(null);
 		}
 
 		if (
@@ -375,27 +377,118 @@ export default class UIDialog {
 			// and 5 minutes have not passed
 			!(performance.now() - this._lastRequest_sponsoredMessages >= 5 * 60 * 1000)
 		) {
-			return this._cached_sponsoredMessages;
+			return this.$sponsoredMessages.set(this._cached_sponsoredMessages);
 		}
 
 		if (peer.type == "chat" && peer.chatType == "channel") {
 			const sponsoredMessages = await tg.call({ _: "messages.getSponsoredMessages", peer: peer.inputPeer });
 
-			this._cached_sponsoredMessages = sponsoredMessages;
 			this._lastRequest_sponsoredMessages = performance.now();
 
 			if (sponsoredMessages._ == "messages.sponsoredMessagesEmpty") {
-				return null;
+				this._cached_sponsoredMessages = null;
+				return this.$sponsoredMessages.set(null);
 			}
 
-			const postsBetween = sponsoredMessages.postsBetween;
-			if (postsBetween != undefined && postsBetween > 0) {
-				this.$postsBetweenSponsoredMessages.set(postsBetween);
-			}
+			this._cached_sponsoredMessages = sponsoredMessages;
 
 			console.error("HANDLE SPONSORED MESSAGES", sponsoredMessages);
+			return this.$sponsoredMessages.set(sponsoredMessages);
+		}
+
+		return this.$sponsoredMessages.set(null);
+	}
+
+	getSponsoredMessages() {
+		const peer = this.peer;
+
+		// return null for now, we don't support bots anyways
+		// Telegram ToS requires channels only
+		if (peer.type == "user" && peer.isBot) {
+			return null;
+		}
+
+		if (peer.type == "chat" && peer.chatType == "channel") {
+			this._getSponsoredMessagesPromise = this._getSponsoredMessagesPromise.then(() => this._getSponsoredMessages());
+
+			const sponsoredMessages = this.$sponsoredMessages.get();
+
+			if (!sponsoredMessages) return null;
+
+			return new UISponsoredMessages(sponsoredMessages, this.messages.$sorted.get().length);
 		}
 
 		return null;
+	}
+}
+
+function fastShuffle<T>(array: T[]) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+	return array;
+}
+
+export class UISponsoredMessages {
+	sponsoredMessages: tl.RawSponsoredMessage[] = [];
+
+	constructor(
+		private raw: tl.messages.RawSponsoredMessages,
+		private messagesLength: number,
+	) {
+		this.sponsoredMessages = raw.messages.slice(0);
+
+		fastShuffle(this.sponsoredMessages);
+	}
+
+	get postsBetween() {
+		return this.raw.postsBetween || 0;
+	}
+
+	getByIndex(index: number) {
+		const postsBetween = this.postsBetween;
+		const sponsoredMessages = this.sponsoredMessages;
+		const messagesLength = this.messagesLength;
+
+		if (postsBetween == 0) {
+			return null;
+		}
+
+		const totalPossibleIntervals = postsBetween > 0 ? Math.max(0, Math.floor(messagesLength / postsBetween) - 1) : 0;
+
+		// 2. We MUST reserve 1 sponsor for the very end.
+		const maxSponsorsForLoop = Math.max(0, sponsoredMessages.length - 1);
+
+		// 3. How many top intervals do we skip so the sponsors land at the bottom?
+		// If we have 9 intervals but only 2 loop sponsors, we skip the first 7.
+		const intervalsToSkip = Math.max(0, totalPossibleIntervals - maxSponsorsForLoop);
+
+		const isEligibleInterval = postsBetween > 0 && index > 0 && index % postsBetween === 0;
+		const hasEnoughMessagesLeft = messagesLength - index >= postsBetween;
+
+		// Which interval number is this? (e.g., 0, 1, 2, 3...)
+		const currentIntervalIndex = index / postsBetween - 1;
+
+		// 4. We only show the sponsor if we have passed the skipped intervals
+		const showSponsor = isEligibleInterval && hasEnoughMessagesLeft && currentIntervalIndex >= intervalsToSkip;
+
+		// 5. Shift the sponsor index back down to 0 so we don't grab undefined array items.
+		// E.g., if we skipped 7 intervals, interval 7 grabs sponsoredMessages[0].
+		const sponsorIndex = currentIntervalIndex - intervalsToSkip;
+
+		return showSponsor ? sponsoredMessages[sponsorIndex] : null;
+	}
+
+	getLast() {
+		const postsBetween = this.postsBetween;
+		const messagesLength = this.messagesLength;
+		const sponsoredMessages = this.sponsoredMessages;
+
+		const totalPossibleIntervals = postsBetween > 0 ? Math.max(0, Math.floor(messagesLength / postsBetween) - 1) : 0;
+
+		const maxSponsorsForLoop = Math.max(0, sponsoredMessages.length - 1);
+
+		return sponsoredMessages[Math.min(totalPossibleIntervals, maxSponsorsForLoop)];
 	}
 }
