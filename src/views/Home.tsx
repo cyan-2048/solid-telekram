@@ -398,6 +398,12 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 						// currently this one is so confusing
 						toaster("Forum supergroups are currently unstable!");
 					}
+
+					const peer = props.$.peer;
+
+					if ("isBot" in peer && peer.isBot) {
+						toaster("Bots are currently not supported!");
+					}
 				}}
 				tabIndex={-1}
 				classList={{ [styles.dialog]: true, focusable }}
