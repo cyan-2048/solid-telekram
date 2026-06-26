@@ -63,14 +63,14 @@ export const DEFAULT_WALLPAPER = 20;
 export const $wallpaper = persistentAtom<number | "custom" | "color" | "brat">(
 	"wallpaper",
 	DEFAULT_WALLPAPER,
-	intOrString
+	intOrString,
 );
 
 $wallpaper.subscribe((wallpaper) => {
 	if (typeof wallpaper == "number") {
 		document.body.style.setProperty(
 			"--wallpaper",
-			`url(https://cyan-2048.github.io/kaigram-assets/wallpapers/${wallpaper}.jpg)`
+			`url(https://cyan-2048.github.io/kaigram-assets/wallpapers/${wallpaper}.jpg)`,
 		);
 	}
 });
@@ -90,7 +90,7 @@ export const $wallpaper_brat = persistentMap(
 		fontSize: "",
 		text: "",
 	},
-	noListen
+	noListen,
 );
 
 export const DEFAULT_WALLPAPER_COLOR = "#b2cee1";
@@ -111,7 +111,7 @@ export const $mtproxyConfig = persistentMap(
 		port: "",
 		secret: "",
 	},
-	noListen
+	noListen,
 );
 
 export const $socksConfig = persistentMap(
@@ -122,7 +122,7 @@ export const $socksConfig = persistentMap(
 		user: "",
 		password: "",
 	},
-	noListen
+	noListen,
 );
 
 // people seem to prefer the whatsapp way of sending messages
@@ -144,7 +144,13 @@ export const $cachedPhoneNumber = persistentMap("phone:", { number: "", iso2: ""
  */
 export type ProxyModes = "none" | "mtproto" | "socks" | "tcp" | "sync";
 
-export const $proxyMode = persistentAtom<ProxyModes>("proxyMode", "none", noListen);
+export const $proxyMode = persistentAtom<ProxyModes>(
+	"proxyMode",
+	// sync gives better error handling
+	// no bridge to worker, stacktrace much more readable
+	import.meta.env.DEV ? "sync" : "none",
+	noListen,
+);
 
 export const $emojiHistory = persistentAtom<string[]>("EMOJI_HISTORY", [], json);
 
