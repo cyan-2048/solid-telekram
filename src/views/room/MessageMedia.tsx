@@ -180,23 +180,23 @@ function StickerRlottieFirstFrame(props: { data: ImageData }) {
 	return <canvas ref={canvasRef} width={128} height={128}></canvas>;
 }
 
-function StickerRlottieFirstFrameWebp() {
+function StickerFirstFrameWebp() {
 	let canvasRef!: HTMLCanvasElement;
 
-	const { message } = useMessageContext();
+	const { media } = useMessageContext();
 
 	const [src, setSrc] = createSignal("");
 	const [loading, setLoading] = createSignal(true);
 
 	createEffect(() => {
-		const media = message().media as Sticker;
-		if (!media) return;
-		if (media.mimeType != "application/x-tgsticker") return;
+		const sticker = media() as Sticker;
+		if (!sticker) return;
+		// if (media.mimeType != "application/x-tgsticker" && media.mimeType != "") return;
 
 		// console.error("STICKEERRRR", media, media.thumbnails);
 
 		// use media preview instead of actual file if available
-		const file = media.getThumbnail("m");
+		const file = sticker.getThumbnail("m");
 
 		if (!file) return;
 
@@ -208,7 +208,7 @@ function StickerRlottieFirstFrameWebp() {
 
 		downloadAsync(file, "buffer", (buffer) => {
 			return new Promise((res) => {
-				processWebpToCanvas(canvasRef, new Uint8Array(buffer), media.width, media.height).then((blob) => {
+				processWebpToCanvas(canvasRef, new Uint8Array(buffer), sticker.width, sticker.height).then((blob) => {
 					if (blob != null) {
 						const url = URL.createObjectURL(blob);
 						setSrc(url);
@@ -403,7 +403,7 @@ export function StickerMedia(props: FocusableMediaProps) {
 	});
 
 	createEffect(() => {
-		const media = message().media;
+		const media = message().media as Sticker;
 
 		if (!media) return;
 
@@ -413,6 +413,8 @@ export function StickerMedia(props: FocusableMediaProps) {
 
 		if (media.mimeType.includes("webm")) {
 			downloadAsync(media, "url", setVideo);
+
+			media;
 
 			return;
 		}
@@ -501,28 +503,30 @@ export function StickerMedia(props: FocusableMediaProps) {
 							</>
 						}
 					>
-						<video
-							x-puffin-playsinline={cloudphone || undefined}
-							ref={setVideoRef}
-							muted
-							onError={(e) => {
-								const err = [
-									"Unknown",
-									"MEDIA_ERR_ABORTED",
-									"MEDIA_ERR_NETWORK",
-									"MEDIA_ERR_DECODE",
-									"MEDIA_ERR_SRC_NOT_SUPPORTED",
-								][e.currentTarget.error?.code || 0];
-								console.error("STICKER VIDEO ERROR", err, e.target);
-							}}
-							loop
-							src={video()}
-						></video>
+						<Show when={focused()} fallback={<StickerFirstFrameWebp />}>
+							<video
+								x-puffin-playsinline={cloudphone || undefined}
+								ref={setVideoRef}
+								muted
+								onError={(e) => {
+									const err = [
+										"Unknown",
+										"MEDIA_ERR_ABORTED",
+										"MEDIA_ERR_NETWORK",
+										"MEDIA_ERR_DECODE",
+										"MEDIA_ERR_SRC_NOT_SUPPORTED",
+									][e.currentTarget.error?.code || 0];
+									console.error("STICKER VIDEO ERROR", err, e.target);
+								}}
+								loop
+								src={video()}
+							></video>
+						</Show>
 					</Show>
 				}
 			>
 				<Show when={!focused()}>
-					<Show when={rLottieFirstFrame()} fallback={<StickerRlottieFirstFrameWebp />}>
+					<Show when={rLottieFirstFrame()} fallback={<StickerFirstFrameWebp />}>
 						{(d) => <StickerRlottieFirstFrame data={d()} />}
 					</Show>
 				</Show>
@@ -843,11 +847,11 @@ function MediaChecks() {
 function VideoMedia(props: FocusableMediaProps) {
 	const { message, focused, showChecks, media } = useMessageContext();
 
-	const round = () => (message().media as Video).isRound;
+	// const round = () => (message().media as Video).isRound;
 
 	const [src, setSrc] = createSignal("");
-	const [loading, setLoading] = createSignal(true);
-	const [showUnsupported, setShowUnsupported] = createSignal(false);
+	// const [loading, setLoading] = createSignal(true);
+	// const [showUnsupported, setShowUnsupported] = createSignal(false);
 	const [thumb, setThumb] = createSignal("");
 	const [preview, setPreview] = createSignal("");
 
@@ -907,7 +911,7 @@ function VideoMedia(props: FocusableMediaProps) {
 		}
 
 		downloadAsync(media, "url", (url) => {
-			setLoading(false);
+			// setLoading(false);
 			setSrc(url);
 		});
 	});
@@ -950,13 +954,6 @@ function VideoMedia(props: FocusableMediaProps) {
 							}
 						>
 							<img
-								style={
-									round()
-										? {
-												"border-radius": "50%",
-											}
-										: undefined
-								}
 								onLoad={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
@@ -1010,13 +1007,9 @@ function VideoMedia(props: FocusableMediaProps) {
 							<video
 								muted
 								x-puffin-playsinline={cloudphone || undefined}
-								style={
-									width()
-										? {
-												width: width() + "px",
-											}
-										: undefined
-								}
+								style={{
+									width: width() ? width() + "px" : undefined,
+								}}
 								onLoadedMetadata={(e) => {
 									setWidth(e.currentTarget.clientWidth);
 								}}
@@ -1027,13 +1020,9 @@ function VideoMedia(props: FocusableMediaProps) {
 						}
 					>
 						<img
-							style={
-								width()
-									? {
-											width: width() + "px",
-										}
-									: undefined
-							}
+							style={{
+								width: width() ? width() + "px" : undefined,
+							}}
 							onLoad={(e) => {
 								setWidth(e.currentTarget.clientWidth);
 							}}
