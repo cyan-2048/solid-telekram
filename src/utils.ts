@@ -14,6 +14,8 @@ import type { TelegramIcons } from "@components/Softkeys";
 import type UIMessage from "./ui/UIMessage";
 import type UIDialog from "./ui/UIDialog";
 
+import { signInQr } from "@mtcute/core/methods.js";
+
 export * from "./helpers";
 
 const countriesURL = new URL("@/assets/country_dial_info.json", import.meta.url).href;
@@ -251,10 +253,7 @@ async function startLogin_(
 	throw new Error("Failed to log in with provided credentials");
 }
 
-export async function startLogin(
-	tg: TelegramClient,
-	params: Parameters<typeof startLogin_>[1],
-): ReturnType<typeof startLogin_> {
+export async function startLogin(tg: TelegramClient, params: Parameters<typeof startLogin_>[1]): Promise<User> {
 	return new Promise((resolve, reject) => {
 		const signal = params.abortSignal;
 
@@ -343,7 +342,7 @@ export async function startLoginQr(
 		}
 	}
 
-	return tg.signInQr(params);
+	return signInQr(tg, params);
 }
 
 // #endregion tg.start methods

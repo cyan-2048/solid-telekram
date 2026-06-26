@@ -11,7 +11,6 @@ const TABLE_TEMP_AUTH_KEYS = 'tempAuthKeys'
 // declare type IDBObjectStore = any
 // declare type IDBValidKey = any
 // declare type IDBRequest<T> = { result: T }
-// declare type IDBCursorWithValue = { key: IDBValidKey, delete: () => void, continue: () => void }
 // </deno-insert>
 
 interface AuthKeyDto {
@@ -39,7 +38,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
     const os = this.os('readwrite')
 
     if (key === null) {
-      return reqToPromise(os.delete(dc)).then(() => {})
+      return reqToPromise(os.delete(dc))
     }
 
     return reqToPromise(os.put({ dc, key } satisfies AuthKeyDto)).then(() => {})
@@ -64,7 +63,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
     const os = this.osTemp('readwrite')
 
     if (!key) {
-      return reqToPromise(os.delete([dc, idx])).then(() => {})
+      return reqToPromise(os.delete([dc, idx]))
     }
 
     return reqToPromise(os.put({ dc, idx, key, expiresAt: expires } satisfies TempAuthKeyDto)).then(() => {})
@@ -89,7 +88,7 @@ export class IdbAuthKeysRepository implements IAuthKeysRepository {
     const cursorReq = tempOs.openCursor()
 
     cursorReq.onsuccess = () => {
-      const cursor = cursorReq.result as IDBCursorWithValue | null
+      const cursor = cursorReq.result
       if (!cursor) return
 
       if ((cursor.key as [number, number])[0] === dc) {

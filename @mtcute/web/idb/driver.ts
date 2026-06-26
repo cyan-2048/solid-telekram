@@ -1,5 +1,7 @@
 import { BaseStorageDriver, MtUnsupportedError } from '@mtcute/core'
 
+import { txToPromise } from './utils.js'
+
 export type PostMigrationFunction = (db: IDBDatabase) => Promise<void>
 type MigrationFunction = (db: IDBDatabase) => void | PostMigrationFunction
 
@@ -11,13 +13,6 @@ type MigrationFunction = (db: IDBDatabase) => void | PostMigrationFunction
 
 const REPO_VERSION_PREFIX = '__version:'
 const V2_MIGRATIONS_EPOCH = 2000000000000 // 18-05-2033, i sure hope that by then everyone will have upgraded :3
-
-function isIgnorableIdbError(err: unknown): boolean {
-  if (!err || typeof err !== 'object') return false
-
-  const name = 'name' in err ? String(err.name) : ''
-  return name === 'ConstraintError' || name === 'AbortError'
-}
 
 export class IdbStorageDriver extends BaseStorageDriver {
   db!: IDBDatabase
@@ -90,8 +85,8 @@ export class IdbStorageDriver extends BaseStorageDriver {
     this._pendingWritesOses.add(os)
   }
 
-  _load(): Promise<void> {
-    return new Promise<IDBDatabase>((resolve, reject) => {
+  async _load(): Promise<void> {
+    this.db = await new Promise((resolve, reject) => {
       // indexed db fucking sucks - we can't create tables once we have loaded
       // and making an ever-incrementing version number is pretty hard
       // since migrations are added dynamically.
@@ -108,29 +103,23 @@ export class IdbStorageDriver extends BaseStorageDriver {
 
       const postUpgrade: PostMigrationFunction[] = []
 
-      req.onsuccess = () => {
+      req.onsuccess = async () => {
         // verify that the version number is correct and we didn't have a downgrade
         const db = req.result
         if (db.version !== this.calculateVersion()) {
           const ourRepoCount = this._maxVersion.size
           const dbRepoCount = (db.version - V2_MIGRATIONS_EPOCH) >> 8
           reject(new Error(`IDB version number mismatch. Did some repository get removed? If so, please use \`setRepoCountOverride\` (DB has ${dbRepoCount} repos, but we have ${ourRepoCount})`))
-          return
         }
 
-        const runPostUpgrade = (idx: number) => {
-          if (idx >= postUpgrade.length) {
-            resolve(db)
-            return
+        try {
+          for (const cb of postUpgrade) {
+            await cb(db)
           }
-
-          Promise.resolve(postUpgrade[idx](db)).then(
-            () => runPostUpgrade(idx + 1),
-            err => reject(err),
-          )
+          resolve(db)
+        } catch (e) {
+          reject(e)
         }
-
-        runPostUpgrade(0)
       }
       req.onupgradeneeded = () => {
         // indexed db still fucking sucks. we can't fetch anything from here,
@@ -187,86 +176,36 @@ export class IdbStorageDriver extends BaseStorageDriver {
           doUpgrade(repo, 0)
         }
       }
-    }).then((db) => {
-      this.db = db
     })
   }
 
   _save(): Promise<void> {
-    if (this._pendingWrites.length === 0) return Promise.resolve()
+    if (this._pendingWritesOses.size === 0) return Promise.resolve()
 
     const writes = this._pendingWrites
+    const oses = this._pendingWritesOses
     this._pendingWrites = []
     this._pendingWritesOses = new Set()
 
-    let p = Promise.resolve()
+    const tx = this.db.transaction([...oses], 'readwrite')
 
-    for (const [table, obj] of writes) {
-      p = p.then(() => this._writeCompat(table, obj))
+    const osMap = new Map<string, IDBObjectStore>()
+
+    for (const table of oses) {
+      osMap.set(table, tx.objectStore(table))
     }
 
-    return p
-  }
+    for (const [table, obj] of writes) {
+      const os = osMap.get(table)!
 
-  private _writeCompat(table: string, obj: unknown): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Use a plain array instead of iterable Set to support older Firefox IndexedDB implementations.
-      const tx = this.db.transaction([table], 'readwrite')
-      const os = tx.objectStore(table)
-
-      let settled = false
-      const finishResolve = () => {
-        if (settled) return
-        settled = true
-        resolve()
+      if (obj === null) {
+        os.delete(table)
+      } else {
+        os.put(obj)
       }
-      const finishReject = (err: unknown) => {
-        if (settled) return
-        settled = true
-        reject(err)
-      }
+    }
 
-      const req = obj === null
-        ? os.delete(table)
-        : os.put(obj)
-
-      req.onerror = (ev) => {
-        const err = req.error
-
-        if (isIgnorableIdbError(err)) {
-          ev.preventDefault()
-          ev.stopPropagation()
-          finishResolve()
-          return
-        }
-
-        finishReject(err)
-      }
-
-      tx.oncomplete = () => {
-        finishResolve()
-      }
-
-      tx.onerror = (ev) => {
-        if (isIgnorableIdbError(tx.error)) {
-          ev.preventDefault()
-          finishResolve()
-          return
-        }
-
-        finishReject(tx.error ?? new Error('IndexedDB transaction error'))
-      }
-
-      tx.onabort = (ev) => {
-        if (isIgnorableIdbError(tx.error)) {
-          ev.preventDefault()
-          finishResolve()
-          return
-        }
-
-        finishReject(tx.error ?? new Error('IndexedDB transaction aborted'))
-      }
-    })
+    return txToPromise(tx)
   }
 
   _destroy(): void {

@@ -94,6 +94,6 @@ export class IdbRefMsgRepository implements IReferenceMessagesRepository {
   }
 
   deleteAll(): Promise<void> {
-    return reqToPromise(this.os('readwrite').clear()).then(() => {})
+    return reqToPromise(this.os('readwrite').clear())
   }
 }

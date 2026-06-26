@@ -41,10 +41,10 @@ export class IdbKvRepository implements IKeyValueRepository {
   }
 
   delete(key: string): Promise<void> {
-    return reqToPromise(this.os('readwrite').delete(key)).then(() => {})
+    return reqToPromise(this.os('readwrite').delete(key))
   }
 
   deleteAll(): Promise<void> {
-    return reqToPromise(this.os('readwrite').clear()).then(() => {})
+    return reqToPromise(this.os('readwrite').clear())
   }
 }
