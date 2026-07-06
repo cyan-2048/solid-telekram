@@ -21,6 +21,7 @@ import {
   SortedArray,
 } from '../utils/index.js'
 import { AuthKey } from './auth-key.js'
+import { MessageIdStore } from './message-id-store.js'
 
 export interface PendingRpc {
   method: string
@@ -106,7 +107,7 @@ export class MtprotoSession {
   /// state ///
   // recent msg ids
   recentOutgoingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
-  recentIncomingMsgIds: LruSet<Long> = new LruSet(1000, LongSet)
+  recentIncomingMsgIds: MessageIdStore = new MessageIdStore()
   // <deno-tsignore>
   recentStateRequests: LruMap<Long, Long[]> = new LruMap(1000, LongMap)
 
@@ -135,6 +136,7 @@ export class MtprotoSession {
   lastPingRtt: number = Number.NaN
   lastPingTime = 0
   lastPingMsgId: Long = Long.ZERO
+  lastActivityTime = 0
   lastSessionCreatedUid: Long = Long.ZERO
 
   initConnectionCalled = false
@@ -148,6 +150,8 @@ export class MtprotoSession {
     readonly _salts: ServerSaltManager,
   ) {
     this.log.prefix = `[SESSION ${this._sessionId.toString(16)}] `
+
+    this._salts.setTimeSource(this.getServerTime.bind(this))
 
     this._authKey = new AuthKey(_crypto, log, _readerMap)
     this._authKeyTemp = new AuthKey(_crypto, log, _readerMap)
@@ -181,12 +185,18 @@ export class MtprotoSession {
     this._authKeyTempSecondary.reset()
   }
 
-  updateTimeOffset(offset: number): void {
+  updateTimeOffset(offset: number, force = false): void {
+    if (!force && offset <= this._timeOffset) return
+
     this.log.debug('time offset updated: %d', offset)
     this._timeOffset = offset
     // lastMessageId was generated with (potentially) wrong time
     // reset it to avoid bigger issues - at worst, we'll get bad_msg_notification
     this._lastMessageId = Long.ZERO
+  }
+
+  getServerTime(): number {
+    return Math.floor(performance.now() / 1000) + this._timeOffset
   }
 
   /**

@@ -409,7 +409,7 @@ export function StickerMedia(props: FocusableMediaProps) {
 
 		if (media.type !== "sticker") return;
 
-		console.error("STICKEERRRR", media, media.mimeType);
+		// console.error("STICKEERRRR", media, media.mimeType);
 
 		if (media.mimeType.includes("webm")) {
 			downloadAsync(media, "url", setVideo);
@@ -424,7 +424,7 @@ export function StickerMedia(props: FocusableMediaProps) {
 		let mounted = true;
 
 		if (media.mimeType.includes("x-tgsticker")) {
-			console.error("non-webp sticker set", media.mimeType, media.emoji, media.uniqueFileId);
+			// console.error("non-webp sticker set", media.mimeType, media.emoji, media.uniqueFileId);
 
 			getOptimizedSticker(media.uniqueFileId).then((hasPrecompiled) => {
 				if (!mounted) return;

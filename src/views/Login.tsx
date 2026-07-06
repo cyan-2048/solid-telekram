@@ -210,6 +210,7 @@ export default function Login() {
 				_: "help.getNearestDc",
 			});
 
+			// if nearestDc is not equals to the currentDc
 			if (result.nearestDc != result.thisDc) {
 				tg.call({ _: "help.getConfig" }, { dcId: result.nearestDc }).then((e) => {
 					console.log("help.getConfig", e);
@@ -226,6 +227,7 @@ export default function Login() {
 
 		const cachedCountryFromLS = $cachedPhoneNumber.get().iso2;
 
+		// default to USA if not found
 		const USA_USA_USA = {
 			a: "1",
 			b: "USA",
@@ -238,6 +240,7 @@ export default function Login() {
 			const found = countries().find((a) => a.c == cachedCountryFromLS);
 			found && setCountry((countryCache = found));
 		} else {
+			// uses timezone fingerprinting to get the country of the current user
 			const { guess, getCountryForTimezone } = await import("@/lib/geoguessr");
 
 			const guessed = getCountryForTimezone(guess());

@@ -15,6 +15,7 @@ import { MtArgumentError, MtcuteError, MtTimeoutError } from '../types/index.js'
 import { createAesIgeForMessageOld } from '../utils/crypto/mtproto.js'
 import {
   EarlyTimer,
+  getRandomInt,
   longFromBuffer,
   randomLong,
   removeFromLongArray,
@@ -43,6 +44,8 @@ export interface SessionConnectionParams extends PersistentConnectionParams {
 }
 
 const TEMP_AUTH_KEY_EXPIRY = 86400 // 24 hours
+const TEMP_AUTH_KEY_REFRESH_MARGIN = 3600 // refresh 1 hour before expiry
+const TEMP_AUTH_KEY_REFRESH_JITTER = 600 // up to 10 minutes of jitter to desync connections
 const GET_STATE_INTERVAL = 1500 // 1.5 seconds
 const GET_STATE_TIMEOUT = 2500 // 2 seconds
 
@@ -69,6 +72,9 @@ export class SessionConnection extends PersistentConnection {
   private _flushTimer = new EarlyTimer()
   private _queuedDestroySession: Long[] = []
 
+  private _needDestroyAuthKey = false
+  private _sentDestroyAuthKey = false
+
   // waitForMessage
   private _pendingWaitForUnencrypted: [Deferred<Uint8Array>, timers.Timer][] = []
 
@@ -85,9 +91,8 @@ export class SessionConnection extends PersistentConnection {
   private _salts: ServerSaltManager
   readonly _session: MtprotoSession
 
-  // todo: we should probably do adaptive ping interval based on rtt like tdlib:
-  // https://github.com/tdlib/td/blob/91aa6c9e4d0774eabf4f8d7f3aa51239032059a6/td/mtproto/SessionConnection.h
   private _pingInterval: number
+  private _randomDelay: number = getRandomInt(5000)
 
   // NB: dont forget to update .reset()
   readonly onDisconnect: Emitter<void> = new Emitter()
@@ -124,6 +129,7 @@ export class SessionConnection extends PersistentConnection {
   }
 
   private _online
+  private _active = false
 
   getAuthKey(temp = false): Uint8Array | null {
     const key = temp ? this._session._authKeyTemp : this._session._authKey
@@ -160,6 +166,12 @@ export class SessionConnection extends PersistentConnection {
       this._onMessageFailed(msgId, 'connection loss', true)
     }
 
+    // force re-fetch state for all messages
+    // ! setting getState=0 is safe as it keeps the array sorted
+    for (const rpc of this._session.getStateSchedule.raw) {
+      rpc.getState = 0
+    }
+
     this.onDisconnect.emit()
 
     this.reset()
@@ -168,6 +180,15 @@ export class SessionConnection extends PersistentConnection {
   override async destroy(): Promise<void> {
     await super.destroy()
     this.reset(true)
+  }
+
+  destroyAuthKey(): void {
+    if (!this._session._authKey.ready || this._needDestroyAuthKey) return
+
+    this._needDestroyAuthKey = true
+    this._sentDestroyAuthKey = false
+    // ! need to flush now because the session is immediately reset after this call
+    this._flushTimer.emitNow()
   }
 
   reset(forever = false): void {
@@ -183,6 +204,8 @@ export class SessionConnection extends PersistentConnection {
       timers.clearTimeout(timeout)
     }
     this._session.pendingGetStateTimeouts.clear()
+
+    if (this._needDestroyAuthKey) this._sentDestroyAuthKey = false
 
     if (forever) {
       timers.clearTimeout(this._pfsUpdateTimeout)
@@ -301,6 +324,9 @@ export class SessionConnection extends PersistentConnection {
   }
 
   protected onConnectionUsable(): void {
+    this._session.lastActivityTime = performance.now()
+    this._active = false
+
     if (this.params.withUpdates) {
       // we must send some user-related rpc to the server to make sure that
       // it will send us updates
@@ -336,7 +362,7 @@ export class SessionConnection extends PersistentConnection {
       .then(([authKey, serverSalt, timeOffset]) => {
         this._session._authKey.setup(authKey)
         this._salts.currentSalt = serverSalt
-        this._session.updateTimeOffset(timeOffset)
+        this._session.updateTimeOffset(timeOffset, true)
 
         this._session.authorizationPending = false
 
@@ -513,7 +539,7 @@ export class SessionConnection extends PersistentConnection {
             this.log.debug('temp key is expiring soon')
             this._authorizePfs(true)
           },
-          (TEMP_AUTH_KEY_EXPIRY - 60) * 1000,
+          (TEMP_AUTH_KEY_EXPIRY - TEMP_AUTH_KEY_REFRESH_MARGIN - getRandomInt(TEMP_AUTH_KEY_REFRESH_JITTER)) * 1000,
         )
       })
       .catch((err: Error) => {
@@ -550,6 +576,8 @@ export class SessionConnection extends PersistentConnection {
   private _warnedAboutUpdates = false
 
   protected onMessage(data: Uint8Array): void {
+    this._session.lastActivityTime = performance.now()
+
     if (this._pendingWaitForUnencrypted.length) {
       const int32 = new Int32Array(data.buffer, data.byteOffset, 2)
 
@@ -634,15 +662,14 @@ export class SessionConnection extends PersistentConnection {
       return
     }
 
-    if (this._session.recentIncomingMsgIds.has(messageId)) {
-      this.log.debug('ignoring duplicate message %s', messageId)
+    if (!this._session.recentIncomingMsgIds.add(messageId)) {
+      this.log.debug('ignoring duplicate or too old message %s', messageId)
 
       return
     }
     const message = message_ as mtp.TlObject
 
     this.log.debug('received %s (msg_id: %l)', message._, messageId)
-    this._session.recentIncomingMsgIds.add(messageId)
 
     switch (message._) {
       case 'mt_msgs_ack':
@@ -698,6 +725,16 @@ export class SessionConnection extends PersistentConnection {
       case 'mt_destroy_session_none':
         // no point in handling these
         this.log.debug('received %s (msg_id = %l): %j', message._, messageId, message)
+        break
+      case 'mt_destroy_auth_key_ok':
+      case 'mt_destroy_auth_key_none':
+        this.log.info('auth key destroyed: %s', message._)
+        this._needDestroyAuthKey = false
+        this._sentDestroyAuthKey = false
+        break
+      case 'mt_destroy_auth_key_fail':
+        this.log.warn('auth key destruction failed')
+        this._sentDestroyAuthKey = false
         break
       default:
         if (tl.isAnyUpdates(message)) {
@@ -1174,6 +1211,7 @@ export class SessionConnection extends PersistentConnection {
 
     this.log.debug('received pong: msg_id %l, ping_id %l, rtt = %dms', msgId, pingId, rtt)
     this._session.resetLastPing()
+    this._flushTimer.emitBefore(this._session.lastPingTime + this._pingMustDelay())
   }
 
   private _onBadServerSalt(msg: mtp.RawMt_bad_server_salt): void {
@@ -1184,11 +1222,23 @@ export class SessionConnection extends PersistentConnection {
 
   private _onBadMsgNotification(msgId: Long, msg: mtp.RawMt_bad_msg_notification): void {
     switch (msg.errorCode) {
+      case 17: {
+        const serverTime = msgId.high >>> 0
+        const timeOffset = serverTime - Math.floor(performance.now() / 1000)
+
+        this._session.updateTimeOffset(timeOffset, true)
+        this.log.warn(
+          'msg_id too high, server time: %d, corrected offset to %d, resetting session',
+          serverTime,
+          timeOffset,
+        )
+        this._resetSession('msg_id too high')
+        break
+      }
       case 16:
-      case 17:
       case 20: {
         if (msg.errorCode !== 20) {
-          // msg_id is either too high or too low
+          // msg_id is either too low
           // code 20 means msg_id is too old,
           // we just need to resend the message
           const serverTime = msgId.high >>> 0
@@ -1640,6 +1690,54 @@ export class SessionConnection extends PersistentConnection {
     this._onMessageFailed(msgId, 'timeout')
   }
 
+  // https://github.com/tdlib/td/blob/master/td/mtproto/SessionConnection.h
+  private _rtt(): number {
+    const rtt = this._session.lastPingRtt
+    if (Number.isNaN(rtt)) return 2000
+    return Math.max(2000, rtt * 1.5 + 1000)
+  }
+
+  private _readDisconnectDelay(): number {
+    return this._active ? this._rtt() * 3.5 : 135000 + this._randomDelay
+  }
+
+  private _pingDisconnectDelay(): number {
+    return this._active && this.params.isMainConnection ? this._rtt() * 2.5 : 135000 + this._randomDelay
+  }
+
+  private _pingMustDelay(): number {
+    return this._active ? this._rtt() : this._pingInterval + this._randomDelay
+  }
+
+  private _isActive(): boolean {
+    if (this._session.queuedRpc.length > 0) return true
+
+    for (const msg of this._session.pendingMessages.values()) {
+      if (msg._ === 'rpc') return true
+    }
+
+    return false
+  }
+
+  private _checkTimeouts(now: number): boolean {
+    if (
+      !this._session.lastPingMsgId.isZero()
+      && now - this._session.lastPingTime > this._pingDisconnectDelay()
+    ) {
+      this.log.warn('ping timeout, no pong for %dms', Math.round(now - this._session.lastPingTime))
+      this._resetSession('ping timeout')
+      return true
+    }
+
+    if (now - this._session.lastActivityTime > this._readDisconnectDelay()) {
+      this.log.warn('read timeout, last read was %dms ago', Math.round(now - this._session.lastActivityTime))
+      this._resetSession('read timeout')
+      return true
+    }
+
+    return false
+  }
+
   private _flush(): void {
     if (
       this._disconnectedManually
@@ -1656,6 +1754,16 @@ export class SessionConnection extends PersistentConnection {
       // it will be flushed once connection is usable
       return
     }
+
+    const now = performance.now()
+    const active = this._online && this._isActive()
+    if (active && !this._active) {
+      this._session.lastActivityTime = now
+      this._session.resetLastPing(true)
+    }
+    this._active = active
+
+    if (this._checkTimeouts(now)) return
 
     try {
       this._doFlush()
@@ -1675,10 +1783,16 @@ export class SessionConnection extends PersistentConnection {
       // between multiple connections using the same session
       this._flushTimer.emitWhenIdle()
     } else {
-      const nextPingTime = this._session.lastPingTime + this._pingInterval
+      const nextPingTime = this._session.lastPingMsgId.isZero()
+        ? this._session.lastPingTime + this._pingMustDelay()
+        : Infinity
       const nextGetScheduleTime = this._session.getStateSchedule.raw[0]?.getState || Infinity
+      const readDeadline = this._session.lastActivityTime + this._readDisconnectDelay()
+      const pingDeadline = this._session.lastPingMsgId.isZero()
+        ? Infinity
+        : this._session.lastPingTime + this._pingDisconnectDelay()
 
-      this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime))
+      this._flushTimer.emitBefore(Math.min(nextPingTime, nextGetScheduleTime, readDeadline, pingDeadline))
     }
   }
 
@@ -1715,6 +1829,7 @@ export class SessionConnection extends PersistentConnection {
 
     let cancelRpcs: Long[] | null = null
     let destroySessions: Long[] | null = null
+    let destroyAuthKey = false
     let rootMsgId: Long | null = null
 
     const now = performance.now()
@@ -1740,21 +1855,12 @@ export class SessionConnection extends PersistentConnection {
       messageCount += 1
     }
 
-    if (now - this._session.lastPingTime > this._pingInterval) {
-      if (!this._session.lastPingMsgId.isZero()) {
-        this.log.warn("didn't receive pong for previous ping (msg_id = %l). are we offline?", this._session.lastPingMsgId)
-        if (!this._disconnectedManually) {
-          this._resetSession('ping timeout')
-        }
-        return
-      }
-
+    if (this._session.lastPingMsgId.isZero() && now - this._session.lastPingTime > this._pingMustDelay()) {
       pingId = randomLong()
       const obj: mtp.RawMt_ping_delay_disconnect = {
         _: 'mt_ping_delay_disconnect',
         pingId,
-        // ÷ 1000 * 1.25
-        disconnectDelay: Math.round(this._pingInterval * 0.00125),
+        disconnectDelay: Math.round(this._pingDisconnectDelay() / 1000) + 2,
       }
 
       this._session.lastPingTime = now
@@ -1829,6 +1935,12 @@ export class SessionConnection extends PersistentConnection {
       containerSize += this._queuedDestroySession.length * 28
       destroySessions = this._queuedDestroySession
       this._queuedDestroySession = []
+    }
+
+    if (this._needDestroyAuthKey && !this._sentDestroyAuthKey) {
+      destroyAuthKey = true
+      containerMessageCount += 1
+      containerSize += 20
     }
 
     if (this._salts.shouldFetchSalts()) {
@@ -1978,6 +2090,11 @@ export class SessionConnection extends PersistentConnection {
         this._session.pendingMessages.set(msgId, pending)
         otherPendings.push(pending)
       })
+    }
+
+    if (destroyAuthKey) {
+      this._registerOutgoingMsgId(this._session.writeMessage(writer, { _: 'mt_destroy_auth_key' }))
+      this._sentDestroyAuthKey = true
     }
 
     if (getFutureSaltsRequest) {

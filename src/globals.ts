@@ -425,6 +425,41 @@ async function onLoggedIn() {
 				}
 				break;
 			}
+
+			// TODO: updateDialogFilter
+			case "updateDialogFilter": {
+				// EXAMPLE:
+				/*
+				
+				{
+  "_": "updateDialogFilter",
+  "id": 4,
+  "filter": {
+    "_": "dialogFilter",
+    "contacts": false,
+    "nonContacts": false,
+    "groups": false,
+    "broadcasts": true,
+    "bots": false,
+    "excludeMuted": false,
+    "excludeRead": false,
+    "excludeArchived": false,
+    "titleNoanimate": false,
+    "id": 4,
+    "title": {
+      "_": "textWithEntities",
+      "text": "Channels",
+      "entities": []
+    },
+    "color": 4,
+    "pinnedPeers": [],
+    "includePeers": [],
+    "excludePeers": []
+  }
+}
+				*/
+				break;
+			}
 		}
 	});
 
@@ -588,6 +623,7 @@ export async function startQr() {
 			},
 			onQrScanned() {
 				console.log("QR was scanned!");
+				$qrLink.set(null);
 			},
 			onUrlUpdated(url, expires) {
 				const secondsLeftTillExpired = Math.floor((expires.getTime() - new Date().getTime()) / 1000);

@@ -692,11 +692,12 @@ export class NetworkManager {
       assertTypeIs('auth.importAuthorization', res, 'auth.authorization')
 
       promise.resolve()
-      this._pendingExports.delete(manager.dcId)
     } catch (e) {
       this._log.warn('failed to export auth to dc %d: %s', manager.dcId, e)
       promise.reject(e)
       throw e
+    } finally {
+      this._pendingExports.delete(manager.dcId)
     }
   }
 
@@ -746,6 +747,16 @@ export class NetworkManager {
   }
 
   notifyLoggedOut(): void {
+    // destroy auth keys
+    const primaryDcId = this._primaryDc?.dcId
+
+    for (const dc of this._dcConnections.values()) {
+      if (dc.dcId === primaryDcId) continue
+
+      const pool = [dc.main, dc.download, dc.upload, dc.downloadSmall].find(p => p.isConnected)
+      pool?.destroyAuthKey()
+    }
+
     this._businessConnectionDcs.clear()
     this.setIsPremium(false)
     this.resetSessions()
