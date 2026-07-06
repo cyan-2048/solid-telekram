@@ -47,7 +47,7 @@ function App() {
 			// preload wallpaper
 			if (typeof $wallpaper.get() == "number") {
 				const img = new Image();
-				img.src = "https://cyan-2048.github.io/kaigram-assets/wallpapers/" + $wallpaper.get() + ".jpg";
+				img.src = "/wallpapers/" + $wallpaper.get() + ".jpg";
 			}
 
 			await sleep(2000);

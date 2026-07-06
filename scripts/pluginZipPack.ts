@@ -8,7 +8,8 @@ import path from "path";
 import JSZip from "jszip";
 
 function timeZoneOffset(date: Date): Date {
-	return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+	// return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+	return new Date(1722534035534);
 }
 
 interface Options {

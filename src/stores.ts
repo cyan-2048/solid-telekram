@@ -68,10 +68,7 @@ export const $wallpaper = persistentAtom<number | "custom" | "color" | "brat">(
 
 $wallpaper.subscribe((wallpaper) => {
 	if (typeof wallpaper == "number") {
-		document.body.style.setProperty(
-			"--wallpaper",
-			`url(https://cyan-2048.github.io/kaigram-assets/wallpapers/${wallpaper}.jpg)`,
-		);
+		document.body.style.setProperty("--wallpaper", `url(/wallpapers/${wallpaper}.jpg)`);
 	}
 });
 
@@ -84,14 +81,14 @@ localforage.ready().then(async () => {
 	}
 });
 
-export const $wallpaper_brat = persistentMap(
-	"brat_:",
-	{
-		fontSize: "",
-		text: "",
-	},
-	noListen,
-);
+// export const $wallpaper_brat = persistentMap(
+// 	"brat_:",
+// 	{
+// 		fontSize: "",
+// 		text: "",
+// 	},
+// 	noListen,
+// );
 
 export const DEFAULT_WALLPAPER_COLOR = "#b2cee1";
 

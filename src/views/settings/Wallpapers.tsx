@@ -5,7 +5,7 @@ import SpatialNavigation from "@/lib/spatial_navigation";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { $wallpaper } from "@/stores";
 
-const LINK = "https://cyan-2048.github.io/kaigram-assets/wallpapers/";
+const LINK = "/wallpapers/";
 
 function Preview(props: { id: number; onFocus: () => void; onCancel: () => void; onSelect: () => void }) {
 	let imgEl!: HTMLImageElement;
