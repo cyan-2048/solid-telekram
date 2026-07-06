@@ -291,7 +291,7 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 						ref={(ref) => {
 							zoomRef = ref;
 
-							console.error(ref.scaleValue);
+							// console.error(ref.scaleValue);
 						}}
 						src={src()}
 					></Zoom>
