@@ -26,7 +26,7 @@ let countriesCache = null as any;
 
 export const countries: () => Country[] = () => {
 	if (countriesCache) return countriesCache;
-	console.error(countriesURL);
+	// console.error(countriesURL);
 	const xhr = new XMLHttpRequest();
 	xhr.open("GET", countriesURL, false);
 	xhr.send();
