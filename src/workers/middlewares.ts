@@ -4,6 +4,10 @@ import appVersion from "@/lib/appVersion";
 import parseUserAgent from "@/lib/parseUserAgent";
 import type { Middleware } from "@fuman/utils";
 import type { RpcCallMiddlewareContext } from "@mtcute/core";
+
+// @ts-ignore
+import { mediaThrottle } from "@mtcute/core/network/middlewares/media-throttle";
+
 // @ts-ignore
 import { floodWaiter } from "@mtcute/core/network/middlewares/flood-waiter";
 // @ts-ignore
@@ -16,6 +20,7 @@ function isTlRpcError(obj: unknown): obj is mtp.RawMt_rpc_error {
 }
 
 const middlewares = [
+	mediaThrottle(),
 	floodWaiter({
 		maxRetries: 20,
 	}),
