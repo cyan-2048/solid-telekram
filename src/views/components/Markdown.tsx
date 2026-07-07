@@ -1,6 +1,17 @@
-import type { TextWithEntities } from "@mtcute/core";
+import type { Sticker, TextWithEntities, tl } from "@mtcute/core";
 import * as styles from "./Markdown.module.scss";
-import { For, Match, Switch, Show, createRenderEffect, type Component, createSignal, type JSXElement } from "solid-js";
+import {
+	For,
+	Match,
+	Switch,
+	Show,
+	createRenderEffect,
+	type Component,
+	createSignal,
+	type JSXElement,
+	createEffect,
+	onCleanup,
+} from "solid-js";
 import { type ASTNodeLoose, type ASTNode, unparse } from "@/lib/unparse";
 import { Dynamic } from "solid-js/web";
 import { createStore } from "solid-js/store";
@@ -8,6 +19,8 @@ import { reconcile } from "solid-js/store";
 import memoize from "lodash-es/memoize";
 import { cloudphone } from "@/config";
 import emojiRegex from "emoji-regex";
+import { tg } from "@globals";
+import { downloadAsync } from "../room/MessageMedia";
 
 const twemojiMatcher = emojiRegex();
 
@@ -62,6 +75,9 @@ function EntityNode(props: { $: ASTNode; customRenderer?: CustomRenderer }) {
 				<span class={styles.spoiler}>
 					<EntityChildren {...props} />
 				</span>
+			</Match>
+			<Match when={props.$.entity._ == "messageEntityCustomEmoji"}>
+				<CustomEmoji entity={props.$.entity as any} />
 			</Match>
 		</Switch>
 	);
@@ -181,6 +197,53 @@ function Twemoji(props: { text: string }) {
 					// use css ttf emoji for cloudphone
 					props.text
 				}
+			</Show>
+		</span>
+	);
+}
+
+function CustomEmojiSticker(props: { sticker: Sticker }) {
+	const [src, setSrc] = createSignal("");
+
+	createEffect(() => {
+		const sticker = props.sticker;
+		downloadAsync(sticker, "url", setSrc);
+	});
+
+	return (
+		<Show when={src()}>
+			<img class={styles.emoji} src={src()} alt={props.sticker.emoji} />
+		</Show>
+	);
+}
+
+function CustomEmoji(props: { entity: tl.RawMessageEntityCustomEmoji }) {
+	const [sticker, setSticker] = createSignal<null | Sticker>(null);
+
+	createEffect(() => {
+		let mounted = true;
+
+		const entity = props.entity;
+
+		tg.getCustomEmojis([entity.documentId]).then((a) => {
+			if (!mounted) return;
+			const sticker = a[0];
+			if (!sticker) return;
+
+			setSticker(sticker);
+			// console.error("EMOJI STICKER", a);
+		});
+
+		onCleanup(() => {
+			setSticker(null);
+			mounted = false;
+		});
+	});
+
+	return (
+		<span class={styles.emoji_wrap}>
+			<Show when={sticker()}>
+				<CustomEmojiSticker sticker={sticker()!} />
 			</Show>
 		</span>
 	);

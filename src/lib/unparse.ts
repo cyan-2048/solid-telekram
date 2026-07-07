@@ -189,6 +189,18 @@ function _unparse(
 					//  `<a href="tg://user?id=${entity.userId}">${entityText}</a>`
 				);
 				break;
+
+			case "messageEntityCustomEmoji":
+				html.push({
+					type,
+					entity,
+					tag: "a",
+					props: { href: `javascript:void(0)` },
+					children: entityText,
+					source: substr,
+				});
+				break;
+
 			default:
 				skip = true;
 				break;
