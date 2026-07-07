@@ -54,7 +54,7 @@ Blob.prototype.arrayBuffer ||= function () {
 	return Promise.resolve(new Response(this).arrayBuffer());
 };
 
-const _ReadableStream = require("web-streams-polyfill/dist/ponyfill.js").ReadableStream;
+const _ReadableStream = require("web-streams-polyfill/dist/ponyfill.mjs").ReadableStream;
 
 globalThis.ReadableStream = _ReadableStream;
 
