@@ -17,7 +17,7 @@ import { Portal } from "solid-js/web";
 import { importKaiContact, importKaiContacts } from "@/lib/import-contacts";
 import debounce from "lodash-es/debounce";
 import { startActivity } from "@/lib/webActivities";
-import { tg, dialogsJar, contactsJar } from "@globals";
+import { tg, dialogsJar, contactsJar, sortDialogs } from "@globals";
 import { $room, $view, setStatusbarColor } from "@/stores";
 import { useStore } from "@nanostores/solid";
 
@@ -112,12 +112,29 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 	);
 }
 
+async function getUIDialogFromUser(user: User) {
+	const peerId = user.id;
+	const fromJar = dialogsJar.get(peerId);
+	if (fromJar) return fromJar;
+
+	const fromTelegram = (await tg.getPeerDialogs(user))[0];
+
+	if (!fromTelegram) return null;
+
+	const uiDialog = dialogsJar.add(fromTelegram);
+	sortDialogs();
+	return uiDialog;
+}
+
 function ContactItem(props: { user: User }) {
 	const [showOptions, setShowOptions] = createSignal(false);
+
+	let divRef!: HTMLDivElement;
 
 	return (
 		<>
 			<div
+				ref={divRef}
 				tabIndex={0}
 				classList={{
 					[styles.item]: true,
@@ -134,11 +151,18 @@ function ContactItem(props: { user: User }) {
 				}}
 				onKeyDown={async (e) => {
 					if (e.key == "Enter") {
-						const dialog = (await tg.getPeerDialogs(props.user))[0];
+						divRef.blur();
 
-						if (!dialog) return;
+						SpatialNavigation.pause();
 
-						const uiDialog = dialogsJar.add(dialog);
+						const uiDialog = await getUIDialogFromUser(props.user);
+
+						SpatialNavigation.resume();
+
+						if (!uiDialog) {
+							divRef.focus();
+							return;
+						}
 
 						if (!uiDialog.messages.hasLoadedBefore) {
 							uiDialog.messages.loadMore();
@@ -221,7 +245,7 @@ export default function NewChat(props: { onClose: () => void }) {
 
 	return (
 		<>
-			<Content before={<Header>New chat{cachedContacts().length ? ` (${contactsJar.size})` : ""}</Header>}>
+			<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
 				<div
 					onKeyDown={(e) => {
 						if (e.key == "SoftLeft") {
