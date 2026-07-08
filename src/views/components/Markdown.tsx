@@ -21,6 +21,7 @@ import { cloudphone } from "@/config";
 import emojiRegex from "emoji-regex";
 import { tg } from "@globals";
 import { downloadAsync } from "../room/MessageMedia";
+import { processWebpToCanvas } from "@/workers";
 
 const twemojiMatcher = emojiRegex();
 
@@ -166,52 +167,101 @@ export function unifiedString(str: string) {
 	return emojiFromCodePoints(str);
 }
 
-function Twemoji(props: { text: string }) {
+function TwemojiInner(props: { text: string }) {
 	const [show, setShow] = createSignal(false);
 
 	return (
-		<span class={cloudphone ? undefined : styles.emoji_wrap}>
-			<Show
-				when={cloudphone}
-				fallback={
-					// use custom emoji for KaiOS
-					<img
-						style={{
-							opacity: show() ? undefined : 0,
-						}}
-						onError={() => {
-							setTimeout(() => {
-								setShow(true);
-							}, 1000);
-						}}
-						onLoad={() => {
+		<Show
+			when={cloudphone}
+			fallback={
+				// use custom emoji for KaiOS
+				<img
+					style={{
+						opacity: show() ? undefined : 0,
+					}}
+					onError={() => {
+						setTimeout(() => {
 							setShow(true);
-						}}
-						class={styles.emoji}
-						src={"/emoji/" + toCodePoint(props.text) + ".png"}
-						alt={props.text}
-					/>
-				}
-			>
-				{
-					// use css ttf emoji for cloudphone
-					props.text
-				}
-			</Show>
+						}, 1000);
+					}}
+					onLoad={() => {
+						setShow(true);
+					}}
+					class={styles.emoji}
+					src={"/emoji/" + toCodePoint(props.text) + ".png"}
+					alt={props.text}
+				/>
+			}
+		>
+			{
+				// use css ttf emoji for cloudphone
+				props.text
+			}
+		</Show>
+	);
+}
+
+function Twemoji(props: { text: string }) {
+	return (
+		<span class={cloudphone ? undefined : styles.emoji_wrap}>
+			<TwemojiInner {...props} />
 		</span>
 	);
 }
 
 function CustomEmojiSticker(props: { sticker: Sticker }) {
+	let canvasRef!: HTMLCanvasElement;
+
 	const [src, setSrc] = createSignal("");
+	// const [loading, setLoading] = createSignal(true);
 
 	createEffect(() => {
 		const sticker = props.sticker;
-		downloadAsync(sticker, "url", setSrc);
+
+		// setLoading(true);
+
+		// console.error(sticker, sticker.mimeType);
+
+		// only support webp (for now)
+		// TODO: support other sourceType of custom emoji
+		if (sticker.sourceType != "static") {
+			// setLoading(false);
+			return;
+		}
+
+		// if kai3 use img tag
+		if (import.meta.env.KAIOS != 2) {
+			downloadAsync(sticker, "url", setSrc);
+			return;
+		}
+
+		downloadAsync(sticker, "buffer", (buffer) => {
+			return new Promise((res) => {
+				processWebpToCanvas(canvasRef, new Uint8Array(buffer), sticker.width, sticker.height).then((blob) => {
+					if (blob != null) {
+						const url = URL.createObjectURL(blob);
+						setSrc(url);
+						res(url);
+						// setLoading(false);
+					} else {
+						// setLoading(false);
+						res();
+					}
+				});
+			});
+		});
 	});
 
 	return (
-		<Show when={src()}>
+		<Show
+			when={src()}
+			fallback={
+				<>
+					<canvas style={{ display: "none" }} ref={canvasRef} width={32} height={32}></canvas>
+					<TwemojiInner text={props.sticker.emoji} />
+				</>
+			}
+		>
 			<img class={styles.emoji} src={src()} alt={props.sticker.emoji} />
 		</Show>
 	);
@@ -231,7 +281,8 @@ function CustomEmoji(props: { entity: tl.RawMessageEntityCustomEmoji }) {
 			if (!sticker) return;
 
 			setSticker(sticker);
-			// console.error("EMOJI STICKER", a);
+
+			console.error("EMOJI STICKER", a);
 		});
 
 		onCleanup(() => {
