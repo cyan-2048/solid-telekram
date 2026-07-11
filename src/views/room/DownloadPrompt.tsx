@@ -114,13 +114,18 @@ export default function DownloadPrompt(props: { file: FileLocation | Downloadabl
 	return (
 		<div
 			on:keydown={(e) => {
-				if (e.key == "SoftLeft" || e.key == "Backspace") {
+				if (e.key == "Backspace") {
 					e.preventDefault();
-					cancel();
-					props.onClose();
 				}
+
 				if (e.key == "SoftRight") {
 					downloadToFile(src(), fileName());
+				}
+			}}
+			onKeyUp={(e) => {
+				if (e.key == "SoftLeft" || e.key == "Backspace") {
+					cancel();
+					props.onClose();
 				}
 			}}
 			tabIndex={-1}
