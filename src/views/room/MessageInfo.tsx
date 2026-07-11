@@ -471,6 +471,10 @@ export default function MessageInfo(props: { onClose: () => void }) {
 														onDeepLink={async (deeplink, url) => {
 															SpatialNavigation.pause();
 
+															const _previousFocus = document.activeElement as HTMLElement;
+
+															_previousFocus?.blur();
+
 															if (deeplink.type == "username" || deeplink.type == "user") {
 																const dialog = await tg
 																	.getPeerDialogs(deeplink.type == "user" ? deeplink.id : deeplink.username)
@@ -499,6 +503,8 @@ export default function MessageInfo(props: { onClose: () => void }) {
 															}
 
 															SpatialNavigation.resume();
+
+															_previousFocus?.focus();
 
 															toaster("Unsupported Telegram Link!");
 														}}

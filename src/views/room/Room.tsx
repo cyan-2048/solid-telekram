@@ -16,6 +16,7 @@ import MessageItem, { MessageProvider, UploadingMessageItem } from "./MessageIte
 import ISpinner from "@components/ISpinner";
 import RoomTextBox from "./RoomTextBox";
 import KaiButton, { ButtonContainer } from "../components/KaiButton";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 function getMembersCount(peer: Peer) {
 	if ((peer.raw as tl.RawChannel).participantsCount) {
@@ -193,7 +194,11 @@ function Messages(props: { dialog: UIDialog }) {
 									$view.set("home");
 								}
 							}}
-							onFocus={() => {
+							onFocus={(e) => {
+								scrollIntoView(e.currentTarget, {
+									behavior: "instant",
+									block: "center",
+								});
 								setSoftkeys("", "tg:arrow_next", "");
 							}}
 							classList={{ last: true, focusable: true, join: true }}
