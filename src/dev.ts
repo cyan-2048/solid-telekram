@@ -16,9 +16,11 @@ import appVersion from "./lib/appVersion";
 
 import UIDialog from "./ui/UIDialog";
 import { InputMedia } from "@mtcute/web";
+import { parseTelegramLink } from "./lib/deeplinks";
 
 if (import.meta.env.DEV || import.meta.env.CANARY)
 	Object.assign(window, {
+		parseTelegramLink,
 		Long,
 		BigInteger,
 		leemon,
