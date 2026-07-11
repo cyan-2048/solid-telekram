@@ -28,6 +28,7 @@ require("core-js/modules/es.promise.with-resolvers.js");
 require("core-js/modules/es.promise.finally.js");
 require("core-js/modules/web.queue-microtask.js");
 require("core-js/modules/web.set-immediate.js");
+require("core-js/modules/web.url.js");
 require("core-js/modules/es.object.from-entries.js");
 require("core-js/modules/es.array.unscopables.flat.js");
 require("core-js/modules/es.array.flat.js");
