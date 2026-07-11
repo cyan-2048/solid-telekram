@@ -196,7 +196,7 @@ function Messages(props: { dialog: UIDialog }) {
 							onFocus={() => {
 								setSoftkeys("", "tg:arrow_next", "");
 							}}
-							classList={{ last: true, focusable: true }}
+							classList={{ last: true, focusable: true, join: true }}
 						>
 							Join
 						</KaiButton>

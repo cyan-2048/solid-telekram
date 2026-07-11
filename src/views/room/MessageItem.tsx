@@ -304,6 +304,7 @@ export function MessageProvider(props: {
 	const isExpanded = () => !!props.expanded;
 
 	const viaBot = useStore(() => props.$.$viaBot);
+	const isMember = useStore(() => props.dialog.$isMember);
 
 	return (
 		<MessageContext.Provider
@@ -338,7 +339,13 @@ export function MessageProvider(props: {
 
 				dialog: () => props.dialog,
 
-				last: () => props.last && props.$.chatType == "channel",
+				last: () => {
+					const member = isMember();
+					const actualLast = props.last;
+					const isChannel = props.$.chatType == "channel";
+
+					return member && actualLast && isChannel;
+				},
 				actualLast: () => props.last,
 				isOutgoing: () => props.$.isOutgoing,
 				rawMessage: () => props.$.raw,
@@ -894,7 +901,7 @@ function MessageContainer(props: { children: JSXElement }) {
 
 			const actEl = document.activeElement as HTMLElement;
 
-			if (actEl && actEl.classList.contains("roomTextbox")) {
+			if (actEl && (actEl.classList.contains("roomTextbox") || actEl.classList.contains("join"))) {
 				const _dialog = dialog();
 
 				setTimeout(() => {
