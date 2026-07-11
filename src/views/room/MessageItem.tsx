@@ -488,6 +488,14 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 
 	const SN_ID = createUniqueId();
 
+	const isMember = useStore(() => dialog().$isMember);
+
+	const canReply = createMemo(() => {
+		const member = isMember();
+		const isNotChannel = dialog().chatType !== "channel";
+		return member && isNotChannel;
+	});
+
 	onMount(() => {
 		SpatialNavigation.add(SN_ID, {
 			selector: ".option",
@@ -520,7 +528,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 				>
 					Message info
 				</OptionsItem>
-				<Show when={dialog().chatType !== "channel"}>
+				<Show when={canReply()}>
 					<OptionsItem
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}

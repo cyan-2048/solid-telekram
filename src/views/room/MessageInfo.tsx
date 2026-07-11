@@ -477,46 +477,24 @@ export default function MessageInfo(props: { onClose: () => void }) {
 																	.then((a) => a[0])
 																	.catch(() => null);
 																if (dialog) {
-																	const peer = dialog.peer;
-																	if (peer.type == "user") {
-																		const uiDialog = dialogsJar.add(dialog);
-																		sortDialogs();
-																		onClose();
+																	// const peer = dialog.peer;
 
-																		if (!uiDialog.messages.hasLoadedBefore) {
-																			uiDialog.messages.loadMore();
-																		}
+																	const uiDialog = dialogsJar.add(dialog);
+																	sortDialogs();
+																	onClose();
 
-																		batch(() => {
-																			setStatusbarColor("#1c96c3");
-																			$room.set(uiDialog);
-																			$view.set("room");
-																		});
-
-																		SpatialNavigation.resume();
-																		return;
+																	if (!uiDialog.messages.hasLoadedBefore) {
+																		uiDialog.messages.loadMore();
 																	}
 
-																	if (peer.type == "chat") {
-																		const uiDialog = dialogsJar.get(peer.id);
-																		// TODO: support non-member chats
-																		if (uiDialog) {
-																			onClose();
+																	batch(() => {
+																		setStatusbarColor("#1c96c3");
+																		$room.set(uiDialog);
+																		$view.set("room");
+																	});
 
-																			if (!uiDialog.messages.hasLoadedBefore) {
-																				uiDialog.messages.loadMore();
-																			}
-
-																			batch(() => {
-																				setStatusbarColor("#1c96c3");
-																				$room.set(uiDialog);
-																				$view.set("room");
-																			});
-
-																			SpatialNavigation.resume();
-																			return;
-																		}
-																	}
+																	SpatialNavigation.resume();
+																	return;
 																}
 															}
 

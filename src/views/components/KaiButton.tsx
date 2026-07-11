@@ -1,6 +1,6 @@
 // this button is meant to look KaiOS-like
 
-import { ComponentProps, JSXElement } from "solid-js";
+import type { ComponentProps, JSXElement } from "solid-js";
 import * as styles from "./KaiButton.module.scss";
 
 export default function KaiButton(props: ComponentProps<"button">) {

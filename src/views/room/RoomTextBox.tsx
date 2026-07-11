@@ -258,26 +258,33 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 		on(
 			isTyping,
 			(typing) => {
-				console.log("SET TYPING", typing);
-				tg.setTyping({
-					peerId: props.dialog.peer,
-					status: typing ? "typing" : "cancel",
-				});
+				if (props.dialog.$isMember.get()) {
+					console.log("SET TYPING", typing);
+
+					tg.setTyping({
+						peerId: props.dialog.peer,
+						status: typing ? "typing" : "cancel",
+					});
+				}
 			},
 			{ defer: true },
 		),
 	);
 
-	onCleanup(() => {
-		setIsTyping(false);
+	createEffect(() => {
+		const dialog = props.dialog;
 
-		if (props.dialog.peer.type == "chat" && props.dialog.peer.chatType == "channel") {
-		} else {
-			tg.setTyping({
-				peerId: props.dialog.peer,
-				status: "cancel",
-			});
-		}
+		onCleanup(() => {
+			setIsTyping(false);
+
+			if (dialog.peer.type == "chat" && dialog.peer.chatType == "channel") {
+			} else if (dialog.$isMember.get()) {
+				tg.setTyping({
+					peerId: dialog.peer,
+					status: "cancel",
+				});
+			}
+		});
 	});
 
 	const setTyping = () => {

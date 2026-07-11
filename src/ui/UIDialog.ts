@@ -193,6 +193,7 @@ export default class UIDialog {
 	$count = atom(0);
 	$countMention = atom(0);
 	$countReaction = atom(0);
+	$isMember = atom(true);
 
 	private muteUntil: null | number = null;
 
@@ -284,6 +285,7 @@ export default class UIDialog {
 			// peer must be Chat
 			this.isGroup = peer.isGroup;
 			this.isForum = peer.isForum;
+			this.$isMember.set(peer.isMember);
 		}
 
 		this.$lastMessage.set(dialog.lastMessage ? new UIMessage(dialog.lastMessage) : null);

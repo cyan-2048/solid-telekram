@@ -15,6 +15,7 @@ import WhenMounted from "@components/WhenMounted";
 import MessageItem, { MessageProvider, UploadingMessageItem } from "./MessageItem";
 import ISpinner from "@components/ISpinner";
 import RoomTextBox from "./RoomTextBox";
+import KaiButton, { ButtonContainer } from "../components/KaiButton";
 
 function getMembersCount(peer: Peer) {
 	if ((peer.raw as tl.RawChannel).participantsCount) {
@@ -116,6 +117,14 @@ function Messages(props: { dialog: UIDialog }) {
 		SpatialNavigation.remove("room");
 	});
 
+	const isMember = useStore_(() => props.dialog.$isMember);
+
+	const showTextBox = createMemo(() => {
+		const isNotChannel = props.dialog.chatType !== "channel";
+		const _isMember = isMember();
+		return isNotChannel && _isMember;
+	});
+
 	return (
 		<div
 			ref={divRef}
@@ -168,8 +177,30 @@ function Messages(props: { dialog: UIDialog }) {
 					</Show>
 				</WhenMounted>
 				<For each={uploading()}>{(upload) => <UploadingMessageItem upload={upload} />}</For>
-				<Show when={props.dialog.chatType !== "channel"}>
+				<Show when={showTextBox()}>
 					<RoomTextBox dialog={props.dialog} />
+				</Show>
+				<Show when={!isMember()}>
+					<ButtonContainer>
+						<KaiButton
+							onKeyDown={(e) => {
+								if (e.key == "Backspace") {
+									e.preventDefault();
+								}
+							}}
+							onKeyUp={(e) => {
+								if (e.key == "Backspace") {
+									$view.set("home");
+								}
+							}}
+							onFocus={() => {
+								setSoftkeys("", "tg:arrow_next", "");
+							}}
+							classList={{ last: true, focusable: true }}
+						>
+							Join
+						</KaiButton>
+					</ButtonContainer>
 				</Show>
 			</Show>
 		</div>
