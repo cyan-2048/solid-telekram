@@ -25,7 +25,7 @@ let hasUpdates = false;
 const promises = mtcuteDependencies.map((dependency) =>
 	fetch(`https://registry.npmjs.org/${dependency}/latest`)
 		.then((a) => a.json())
-		.then((info) => {
+		.then((info: any) => {
 			const currentVersion = packageJson.dependencies[dependency];
 			const latestVersion = info.version;
 
