@@ -407,6 +407,9 @@ export default class UIMessage {
 		// action messages seem to never be editable???
 		if (messsage.raw._ != "message") return false;
 
+		// you can't message that is generated from an inline query
+		if (messsage.viaBot) return false;
+
 		// obviously
 		if (this.cached) return false;
 
