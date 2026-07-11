@@ -2,6 +2,7 @@ import * as styles from "./MessageItem.module.scss";
 import Content from "@components/Content";
 import { MessageItemInner, MessageProvider, today, toMidnight, useMessageContext } from "./MessageItem";
 import {
+	batch,
 	type ComponentProps,
 	createEffect,
 	createMemo,
@@ -13,7 +14,6 @@ import {
 	onCleanup,
 	onMount,
 	Show,
-	Switch,
 	untrack,
 } from "solid-js";
 import SpatialNavigation from "@/lib/spatial_navigation";
@@ -25,19 +25,22 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { FileLocation, tl, Video } from "@mtcute/core";
+import type { tl, Video } from "@mtcute/core";
 import { cloudphone, cloudphone_features } from "@/config";
 import once from "lodash-es/once";
 
 import { SPOILER_CLASS, SPOILER_TOGGLE } from "../components/Markdown";
 import type { Photo } from "@mtcute/core";
 import ImageViewer from "./ImageViewer";
-import { setStatusbarColor } from "@/stores";
+import { $room, $view, setStatusbarColor } from "@/stores";
 import Options from "../components/Options";
 import OptionsItem from "../components/OptionsItem";
 import DownloadPrompt from "./DownloadPrompt";
 import { downloadFile } from "@/lib/storage";
 import VideoPlayer from "./VideoPlayer";
+import { parseTelegramLink, type TelegramDeepLink } from "@/lib/deeplinks";
+import { dialogsJar, sortDialogs, tg } from "@globals";
+import { unwrap } from "solid-js/store";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
@@ -109,7 +112,11 @@ function FocusableSpoiler(props: { children: JSXElement }) {
 	);
 }
 
-function FocusableLink(props: { children: JSXElement; url: null | URL; onDeepLink: (url: URL) => void }) {
+function FocusableLink(props: {
+	children: JSXElement;
+	url: null | URL;
+	onDeepLink: (deeplink: TelegramDeepLink, url: URL) => void;
+}) {
 	const [showProxySettings, setShowProxySettings] = createSignal(false);
 
 	let spanRef!: HTMLSpanElement;
@@ -128,7 +135,7 @@ function FocusableLink(props: { children: JSXElement; url: null | URL; onDeepLin
 				on:sn-focused={() => {
 					setSoftkeys("", "OPEN", "");
 				}}
-				on:sn-enter-down={(e) => {
+				on:sn-enter-up={(e) => {
 					const url = props.url;
 
 					// toaster("HREF!!! " + url?.href);
@@ -138,7 +145,9 @@ function FocusableLink(props: { children: JSXElement; url: null | URL; onDeepLin
 						return;
 					}
 
-					if (url.host == "t.me" || url.protocol == "tg:") {
+					const deeplink = parseTelegramLink(url);
+
+					if (deeplink.type != "unknown") {
 						// proxy is unavailable on CloudPhone
 						if (!cloudphone) {
 							isSocks = null;
@@ -173,7 +182,7 @@ function FocusableLink(props: { children: JSXElement; url: null | URL; onDeepLin
 							}
 						}
 
-						props.onDeepLink(url);
+						props.onDeepLink(deeplink, url);
 					} else {
 						window.open(url, "_blank");
 					}
@@ -359,10 +368,14 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						});
 					}}
 					onKeyDown={(e) => {
+						if (e.key == "Backspace") {
+							e.preventDefault();
+						}
+					}}
+					onKeyUp={(e) => {
 						if (isFocusing) {
 							if (e.key == "Backspace" || (cloudphone && e.key == "SoftLeft")) {
-								e.preventDefault();
-								sleep(10).then(() => viewRef.focus());
+								sleep(100).then(() => viewRef.focus());
 								isFocusing = false;
 							}
 
@@ -371,7 +384,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 						if (hasFocusable() && !isFocusing && e.key == "Enter") {
 							isFocusing = true;
-							sleep(10).then(() => {
+							sleep(100).then(() => {
 								SpatialNavigation.focus(SN_ID);
 							});
 
@@ -385,8 +398,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						}
 
 						if (e.key == "Backspace" || e.key == "SoftLeft") {
-							e.preventDefault();
-							sleep(10).then(() => onClose());
+							sleep(100).then(() => onClose());
 						}
 					}}
 				>
@@ -440,22 +452,72 @@ export default function MessageInfo(props: { onClose: () => void }) {
 												);
 											}
 
-											// console.error("MESSAGE INFO CUSTOM RENDERER", e);
-											if (e.tag == "a" && e.entity._.includes("Url")) {
-												const entity = e.entity as tl.RawMessageEntityUrl | tl.RawMessageEntityTextUrl;
+											console.error("MESSAGE INFO CUSTOM RENDERER", unwrap(e));
+											if (
+												e.tag == "a" &&
+												(e.entity._ == "messageEntityUrl" ||
+													e.entity._ == "messageEntityTextUrl" ||
+													e.entity._ == "messageEntityEmail" ||
+													e.entity._ == "messageEntityMention")
+											) {
+												// const entity = e.entity;
 
-												let url: URL | null;
-
-												if (entity._ == "messageEntityUrl") {
-													url = parseURL(e.source);
-												} else {
-													url = parseURL(entity.url);
-												}
+												let url = parseURL(e.props.href);
 
 												return () => (
 													<FocusableLink
 														url={url}
-														onDeepLink={(url) => {
+														onDeepLink={async (deeplink, url) => {
+															SpatialNavigation.pause();
+
+															if (deeplink.type == "username") {
+																const dialog = await tg.getPeerDialogs(deeplink.username).then((a) => a[0]);
+																if (dialog) {
+																	const peer = dialog.peer;
+																	if (peer.type == "user") {
+																		const uiDialog = dialogsJar.add(dialog);
+																		sortDialogs();
+																		onClose();
+
+																		if (!uiDialog.messages.hasLoadedBefore) {
+																			uiDialog.messages.loadMore();
+																		}
+
+																		batch(() => {
+																			setStatusbarColor("#1c96c3");
+																			$room.set(uiDialog);
+																			$view.set("room");
+																		});
+
+																		SpatialNavigation.resume();
+																		return;
+																	}
+
+																	if (peer.type == "chat") {
+																		const uiDialog = dialogsJar.get(peer.id);
+																		// TODO: support non-member chats
+																		if (uiDialog) {
+																			onClose();
+
+																			if (!uiDialog.messages.hasLoadedBefore) {
+																				uiDialog.messages.loadMore();
+																			}
+
+																			batch(() => {
+																				setStatusbarColor("#1c96c3");
+																				$room.set(uiDialog);
+																				$view.set("room");
+																			});
+
+																			SpatialNavigation.resume();
+																			return;
+																		}
+																	}
+																}
+															}
+
+															SpatialNavigation.resume();
+
 															toaster("Unsupported Telegram Link!");
 														}}
 													>

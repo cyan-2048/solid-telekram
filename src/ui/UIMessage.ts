@@ -31,6 +31,7 @@ export default class UIMessage {
 	$entities = atom<TextWithEntities>(null as any);
 	$editDate = atom<Date | null>(null);
 	$isUnsupported = atom(false);
+	$viaBot = atom<User | null>(null);
 
 	isOutgoing: boolean;
 	isSticker = false;
@@ -104,6 +105,8 @@ export default class UIMessage {
 		this.#updateText($);
 
 		this.$editDate.set($.hideEditMark ? null : $.editDate);
+
+		this.$viaBot.set(raw.viaBot);
 
 		return this;
 	}

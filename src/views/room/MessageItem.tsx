@@ -188,6 +188,7 @@ export const MessageContext = createContext<{
 	media: () => MessageMedia;
 	action: () => Message["action"];
 	actionType: () => MessageActionTypes;
+	viaBot: () => User | null;
 
 	/**
 	 * - undefined: reply is loading
@@ -302,6 +303,8 @@ export function MessageProvider(props: {
 
 	const isExpanded = () => !!props.expanded;
 
+	const viaBot = useStore(() => props.$.$viaBot);
+
 	return (
 		<MessageContext.Provider
 			value={{
@@ -345,6 +348,8 @@ export function MessageProvider(props: {
 				isReply: () => props.$.isReply(),
 
 				first: () => props.first,
+
+				viaBot,
 			}}
 		>
 			{props.children}
@@ -1008,7 +1013,7 @@ function MessageContainer(props: { children: JSXElement }) {
 				onBlur={() => {
 					setFocused(false);
 				}}
-				on:sn-enter-down={() => {
+				on:sn-enter-up={() => {
 					const type = mediaType();
 					if (type == "voice") {
 						setAudioPlaying(true);
@@ -1030,14 +1035,17 @@ function MessageContainer(props: { children: JSXElement }) {
 						});
 					}
 				}}
-				onKeyDown={(e) => {
+				onKeyUp={(e) => {
 					if (audioPlaying()) {
 						if (e.key == "Enter") {
-							sleep(10).then(() => {
+							sleep(100).then(() => {
 								setAudioPlaying(false);
 							});
 						}
-
+					}
+				}}
+				onKeyDown={(e) => {
+					if (audioPlaying()) {
 						if (e.key == "Backspace") {
 							e.preventDefault();
 							setAudioPlaying(false);
@@ -1333,6 +1341,29 @@ export function UploadingMessageItem(props: { upload: UIMessageUploading }) {
 	);
 }
 
+function ViaBot() {
+	const { viaBot, message } = useMessageContext();
+
+	const sender = createMemo(() => message().sender);
+
+	const color = createMemo(() => {
+		return `var(--peer-avatar-${getColorFromPeer(sender().raw)}-bottom)`;
+	});
+
+	return (
+		<Show when={viaBot()}>
+			<div
+				style={{ color: color() }}
+				classList={{
+					[styles.forwarded_from]: true,
+				}}
+			>
+				via @{viaBot()!.username}
+			</div>
+		</Show>
+	);
+}
+
 function ForwardedFrom(props: { noPadding?: boolean }) {
 	const { message, isOutgoing } = useMessageContext();
 
@@ -1436,6 +1467,7 @@ export function MessageItemInner(props: {
 								</Match>
 							</Switch>
 							<ForwardedFrom />
+							<ViaBot />
 							<Dynamic
 								focusable={isExpanded()}
 								onSelect={props.onSelect}

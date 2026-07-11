@@ -182,7 +182,7 @@ function _unparse(
 						type,
 						entity,
 						tag: "a",
-						props: { href: `javascript:void(0)` },
+						props: { href: `tg://resolve?domain=${entityText}` },
 						children: entityText,
 						source: substr,
 					},
