@@ -1352,12 +1352,7 @@ function ViaBot() {
 
 	return (
 		<Show when={viaBot()}>
-			<div
-				style={{ color: color() }}
-				classList={{
-					[styles.forwarded_from]: true,
-				}}
-			>
+			<div style={{ color: color() }} class={styles.via_bot}>
 				via @{viaBot()!.username}
 			</div>
 		</Show>

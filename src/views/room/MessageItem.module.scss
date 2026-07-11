@@ -99,6 +99,17 @@
 	}
 }
 
+.via_bot {
+	@extend .forwarded_from;
+	font-weight: 600;
+
+	padding-bottom: 0;
+
+	& + .text_container {
+		padding-top: 0;
+	}
+}
+
 .noPadding {
 	padding-left: 0;
 	font-size: 12px;
