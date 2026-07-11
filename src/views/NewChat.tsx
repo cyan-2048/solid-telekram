@@ -149,7 +149,7 @@ function ContactItem(props: { user: User }) {
 
 					setSoftkeys("Cancel", "OPEN", "tg:more");
 				}}
-				onKeyDown={async (e) => {
+				onKeyUp={async (e) => {
 					if (e.key == "Enter") {
 						divRef.blur();
 
@@ -248,10 +248,6 @@ export default function NewChat(props: { onClose: () => void }) {
 			<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
 				<div
 					onKeyDown={(e) => {
-						if (e.key == "SoftLeft") {
-							props.onClose();
-						}
-
 						if (e.key == "Backspace") {
 							const actEl = document.activeElement as HTMLInputElement;
 
@@ -260,6 +256,14 @@ export default function NewChat(props: { onClose: () => void }) {
 							}
 
 							e.preventDefault();
+						}
+					}}
+					onKeyUp={(e) => {
+						if (e.key == "SoftLeft") {
+							props.onClose();
+						}
+
+						if (e.key == "Backspace") {
 							props.onClose();
 						}
 					}}

@@ -15,7 +15,7 @@ export class IdbPeersRepository implements IPeersRepository {
   constructor(readonly _driver: IdbStorageDriver) {
     _driver.registerMigration(TABLE, 1, (db) => {
       const os = db.createObjectStore(TABLE, { keyPath: 'id' })
-      os.createIndex('by_username', 'usernames', { unique: true, multiEntry: true })
+      os.createIndex('by_username', 'usernames', { unique: false, multiEntry: true })
       os.createIndex('by_phone', 'phone', { unique: true })
     })
   }

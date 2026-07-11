@@ -421,7 +421,7 @@ function DeleteOptions(props: { onSelect: () => void }) {
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							sleep(2).then(async () => {
 								const message = rawMessage();
 								await tg
@@ -453,7 +453,7 @@ function DeleteOptions(props: { onSelect: () => void }) {
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							const _dialog = dialog();
 							sleep(2).then(() => {
 								const message = rawMessage();
@@ -514,7 +514,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
-					on:sn-enter-down={() => {
+					on:sn-enter-up={() => {
 						props.onSelect(MessageOptionsSelected.INFO);
 					}}
 				>
@@ -525,7 +525,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(MessageOptionsSelected.REPLY);
 						}}
 					>
@@ -537,7 +537,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(MessageOptionsSelected.EDIT);
 						}}
 					>
@@ -547,7 +547,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 				<Show when={canDeleteForEverone(rawMessage(), dialog()) || canDeleteForMe(dialog())}>
 					<OptionsItem
 						classList={{ option: true, [styles.option_item]: true }}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(MessageOptionsSelected.DELETE);
 						}}
 						on:sn-willfocus={willFocusScrollIfNeeded}
@@ -562,7 +562,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(MessageOptionsSelected.COPY);
 						}}
 					>
@@ -580,7 +580,7 @@ function MessageOptions(props: { onSelect: (e: MessageOptionsSelected | null) =>
 					on:sn-willfocus={willFocusScrollIfNeeded}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
-					on:sn-enter-down={() => {
+					on:sn-enter-up={() => {
 						props.onSelect(MessageOptionsSelected.JUMP);
 					}}
 					ref={lastRef}

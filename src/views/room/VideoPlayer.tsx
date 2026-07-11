@@ -266,6 +266,22 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 		<>
 			<div
 				ref={divRef}
+				onKeyUp={(e) => {
+					if (showOptions()) return;
+					if (e.key == "Backspace") {
+						if (isFullscreen()) {
+							toggleFullScreen(divRef).then((fullscreen) => {
+								setIsFullscreen(fullscreen);
+							});
+
+							return;
+						}
+
+						setTimeout(() => {
+							closePlayer();
+						}, 100);
+					}
+				}}
 				onKeyDown={(e) => {
 					if (showOptions()) return;
 					const key = e.key;
@@ -273,17 +289,6 @@ export default function VideoPlayer(props: { video: Video; onClose: () => void }
 						case "Backspace":
 							e.preventDefault();
 
-							if (isFullscreen()) {
-								toggleFullScreen(divRef).then((fullscreen) => {
-									setIsFullscreen(fullscreen);
-								});
-
-								return;
-							}
-
-							setTimeout(() => {
-								closePlayer();
-							}, 100);
 							break;
 						case "SoftLeft":
 							toggleFullScreen(divRef).then((fullscreen) => {

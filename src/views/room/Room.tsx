@@ -7,7 +7,7 @@ import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
 import type { tl } from "@mtcute/core";
 import type { Peer, TypingStatus } from "@mtcute/core";
-import { setSoftkeys, sleep, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
+import { setSoftkeys, sleep, toaster, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
 import { timeStamp } from "../Home";
 import type UIDialog from "@/ui/UIDialog";
 import SpatialNavigation from "@/lib/spatial_navigation";
@@ -248,6 +248,15 @@ export default function Room(props: { hidden: boolean }) {
 		const _room = room()?.peer;
 
 		if (_room) {
+			if ("isForum" in _room && _room.isForum) {
+				// currently this one is so confusing
+				toaster("Forum supergroups are currently unstable!");
+			}
+
+			if ("isBot" in _room && _room.isBot) {
+				toaster("Bots are currently not supported!");
+			}
+
 			tg.openChat(_room);
 
 			// console.log(dialogsJar.get(_room.id), _room.id, _room);

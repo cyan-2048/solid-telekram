@@ -1062,13 +1062,15 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 						onComplete={async (send) => {
 							const dialog = props.dialog;
 							setShowVoiceRecorder(false);
+
+							await sleep(5);
+
+							textboxRef()?.focus();
+
 							await tg.setTyping({
 								peerId: dialog.peer,
 								status: "cancel",
 							});
-							await sleep(5);
-
-							textboxRef()?.focus();
 
 							if (send) {
 								await tg.setTyping({

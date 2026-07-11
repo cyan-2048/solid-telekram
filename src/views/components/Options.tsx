@@ -12,9 +12,13 @@ export default function Options(props: {
 	return (
 		<Content>
 			<div
-				onKeyDown={(e) => {
+				onKeyUp={(e) => {
 					if (e.key == "Backspace" || (e.key == "SoftLeft" && cloudphone)) {
 						props.onClose?.();
+					}
+				}}
+				onKeyDown={(e) => {
+					if (e.key == "Backspace") {
 						e.preventDefault();
 					}
 				}}

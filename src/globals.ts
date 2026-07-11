@@ -707,7 +707,7 @@ export async function logOut(silent = false) {
 			.then(() => true)
 			.catch(() => false);
 
-		if (!result) throw null;
+		if (!result) throw new Error("LOGOUT WAS NOT SUCCESFUL");
 	} catch {
 		await tg.storage.clear(true);
 		if (!silent) await alert("Log out was not successful!");

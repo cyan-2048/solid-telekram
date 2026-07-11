@@ -174,10 +174,14 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 		<>
 			<div
 				onKeyDown={(e) => {
+					if (e.key == "Backspace") {
+						e.preventDefault();
+					}
+				}}
+				onKeyUp={(e) => {
 					const current = state();
 
 					if (e.key == "Backspace") {
-						e.preventDefault();
 						if (current == State.Initial) {
 							props.onClose();
 						} else {

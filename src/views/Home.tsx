@@ -373,15 +373,16 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				onBlur={() => {
 					setFocused(false);
 				}}
+				onKeyUp={(e) => {
+					if (e.key == "SoftLeft") {
+						$previousView.set("home");
+						$view.set("new_chat");
+					}
+				}}
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
 						props.$.syncMuted();
 						setShowOptions(true);
-					}
-
-					if (e.key == "SoftLeft") {
-						$previousView.set("home");
-						$view.set("new_chat");
 					}
 				}}
 				on:sn-enter-down={async () => {
@@ -393,17 +394,6 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 						$room.set(props.$);
 						$view.set("room");
 					});
-
-					if (props.$.isForum) {
-						// currently this one is so confusing
-						toaster("Forum supergroups are currently unstable!");
-					}
-
-					const peer = props.$.peer;
-
-					if ("isBot" in peer && peer.isBot) {
-						toaster("Bots are currently not supported!");
-					}
 				}}
 				tabIndex={-1}
 				classList={{ [styles.dialog]: true, focusable }}

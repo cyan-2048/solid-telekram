@@ -25,7 +25,8 @@ export type TelegramDeepLink =
 			pass?: string;
 	  }
 	| { type: "tonsite"; domain: string; path: string; query: string; hash: string }
-	| { type: "unknown"; rawUrl: string; protocol: string };
+	| { type: "unknown"; rawUrl: string; protocol: string }
+	| { type: "user"; id: number };
 
 const RESERVED_SUBDOMAINS = new Set([
 	"addemoji",
@@ -160,6 +161,8 @@ export function parseTelegramLink(rawUrl: URL): TelegramDeepLink {
 				return { type: "stickerset", slug: params.get("set") || "", isEmoji: false };
 			case "addemoji":
 				return { type: "stickerset", slug: params.get("set") || "", isEmoji: true };
+			case "user":
+				return { type: "user", id: Number(params.get("id")) };
 			case "proxy":
 				return {
 					type: "proxy",

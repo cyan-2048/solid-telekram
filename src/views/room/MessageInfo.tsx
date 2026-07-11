@@ -458,7 +458,8 @@ export default function MessageInfo(props: { onClose: () => void }) {
 												(e.entity._ == "messageEntityUrl" ||
 													e.entity._ == "messageEntityTextUrl" ||
 													e.entity._ == "messageEntityEmail" ||
-													e.entity._ == "messageEntityMention")
+													e.entity._ == "messageEntityMention" ||
+													e.entity._ == "messageEntityMentionName")
 											) {
 												// const entity = e.entity;
 
@@ -470,8 +471,11 @@ export default function MessageInfo(props: { onClose: () => void }) {
 														onDeepLink={async (deeplink, url) => {
 															SpatialNavigation.pause();
 
-															if (deeplink.type == "username") {
-																const dialog = await tg.getPeerDialogs(deeplink.username).then((a) => a[0]);
+															if (deeplink.type == "username" || deeplink.type == "user") {
+																const dialog = await tg
+																	.getPeerDialogs(deeplink.type == "user" ? deeplink.id : deeplink.username)
+																	.then((a) => a[0])
+																	.catch(() => null);
 																if (dialog) {
 																	const peer = dialog.peer;
 																	if (peer.type == "user") {
