@@ -100,13 +100,16 @@ function FocusableSpoiler(props: { children: JSXElement }) {
 			on:sn-enter-down={() => {
 				setToggle((e) => !e);
 			}}
+			on:sn-willfocus={() => {
+				setSoftkeys("", "TOGGLE", "");
+			}}
 		>
 			{props.children}
 		</span>
 	);
 }
 
-function FocusableLink(props: { children: JSXElement; url: null | URL }) {
+function FocusableLink(props: { children: JSXElement; url: null | URL; onDeepLink: (url: URL) => void }) {
 	const [showProxySettings, setShowProxySettings] = createSignal(false);
 
 	let spanRef!: HTMLSpanElement;
@@ -122,6 +125,9 @@ function FocusableLink(props: { children: JSXElement; url: null | URL }) {
 		<>
 			<span
 				ref={spanRef}
+				on:sn-focused={() => {
+					setSoftkeys("", "OPEN", "");
+				}}
 				on:sn-enter-down={(e) => {
 					const url = props.url;
 
@@ -166,7 +172,8 @@ function FocusableLink(props: { children: JSXElement; url: null | URL }) {
 								return;
 							}
 						}
-						toaster("Unsupported Telegram Link!");
+
+						props.onDeepLink(url);
 					} else {
 						window.open(url, "_blank");
 					}
@@ -346,7 +353,6 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 						_last_inner_focused = target as HTMLElement;
 
-						setSoftkeys("", target.classList.contains(SPOILER_CLASS) ? "TOGGLE" : "VIEW", "");
 						scrollIntoView(target, {
 							behavior: "smooth",
 							block: "center",
@@ -422,6 +428,9 @@ export default function MessageInfo(props: { onClose: () => void }) {
 													break;
 											}
 										}}
+										onFocus={(media) => {
+											setSoftkeys("", "VIEW", "");
+										}}
 										customRenderer={(e, _default, _children) => {
 											if (e.tag == "spoiler") {
 												return () => (
@@ -444,7 +453,12 @@ export default function MessageInfo(props: { onClose: () => void }) {
 												}
 
 												return () => (
-													<FocusableLink url={url}>
+													<FocusableLink
+														url={url}
+														onDeepLink={(url) => {
+															toaster("Unsupported Telegram Link!");
+														}}
+													>
 														<Dynamic component={_default}></Dynamic>
 													</FocusableLink>
 												);

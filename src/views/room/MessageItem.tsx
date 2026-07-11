@@ -1383,6 +1383,7 @@ function ForwardedFrom(props: { noPadding?: boolean }) {
 export function MessageItemInner(props: {
 	customRenderer?: ComponentProps<typeof Markdown>["customRenderer"];
 	onSelect?: (media: NonNullable<MessageMedia>) => void;
+	onFocus?: (media: NonNullable<MessageMedia>) => void;
 }) {
 	const { text, entities, reply, mediaType, showUsername, message, isReply, isSticker, isDice, isExpanded } =
 		useMessageContext();
@@ -1435,7 +1436,12 @@ export function MessageItemInner(props: {
 								</Match>
 							</Switch>
 							<ForwardedFrom />
-							<Dynamic focusable={isExpanded()} onSelect={props.onSelect} component={switchMessageMedia(mediaType())} />
+							<Dynamic
+								focusable={isExpanded()}
+								onSelect={props.onSelect}
+								onFocus={props.onFocus}
+								component={switchMessageMedia(mediaType())}
+							/>
 							<Show when={!isSticker() && (entities().entities || entities().text)}>
 								<div class={styles.text_container}>
 									<div class={styles.text}>

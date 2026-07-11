@@ -47,6 +47,7 @@ import { Transition } from "solid-transition-group";
 interface FocusableMediaProps {
 	focusable?: boolean;
 	onSelect?: (m: NonNullable<MessageMedia>) => void;
+	onFocus?: (m: NonNullable<MessageMedia>) => void;
 }
 
 function StickerThumbnail() {
@@ -813,6 +814,9 @@ function PhotoMedia(props: FocusableMediaProps) {
 			on:sn-enter-down={() => {
 				props.onSelect?.(_media()!);
 			}}
+			on:sn-focused={() => {
+				props.onFocus?.(_media()!);
+			}}
 			tabIndex={props.focusable ? -1 : undefined}
 			classList={{ [styles.photo]: true, focusable: !!props.focusable }}
 		>
@@ -923,6 +927,10 @@ function VideoMedia(props: FocusableMediaProps) {
 			on:sn-enter-down={() => {
 				const media = message().media;
 				if (!isGif()) props.onSelect?.(media!);
+			}}
+			on:sn-focused={() => {
+				const media = message().media;
+				if (!isGif()) props.onFocus?.(media!);
 			}}
 			tabIndex={props.focusable ? -1 : undefined}
 			classList={{
