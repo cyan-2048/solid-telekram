@@ -768,7 +768,9 @@ function ActionMessage(
 }
 
 function MessageAction() {
-	const { text, actionType, actualLast, dialog, last } = useMessageContext();
+	const { text, actionType, actualLast, dialog, last, message } = useMessageContext();
+
+	const hidden = useStore(() => message().$hidden);
 
 	let divRef!: HTMLDivElement;
 
@@ -778,7 +780,7 @@ function MessageAction() {
 
 			const actEl = document.activeElement as HTMLElement;
 
-			if (actEl && actEl.classList.contains("roomTextbox")) {
+			if (actEl && (actEl.classList.contains("roomTextbox") || actEl.classList.contains("join"))) {
 				const _dialog = dialog();
 
 				scrollIntoView(actEl, {
@@ -815,7 +817,7 @@ function MessageAction() {
 	}
 
 	return (
-		<Show when={actionType() != "history_cleared" && actionType() != "contact_joined"}>
+		<Show when={!hidden()}>
 			<ActionMessage
 				ref={(el) => {
 					divRef = el;

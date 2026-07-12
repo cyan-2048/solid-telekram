@@ -37,10 +37,17 @@ export default function Select(props: {
 		lastFocusedElement?.focus();
 	});
 
+	let shouldClose = false;
+
 	return (
 		<ModalContainer select>
 			<ModalHeader>{props.title || "Select"}</ModalHeader>
 			<div
+				onKeyUp={() => {
+					if (shouldClose) {
+						props.onClose(null);
+					}
+				}}
 				onKeyDown={(e) => {
 					if (e.key == "Enter" || e.key.startsWith("Arrow")) return;
 
@@ -49,7 +56,7 @@ export default function Select(props: {
 
 					if (e.key == "SoftLeft" || e.key == "Backspace" || e.key == "EndCall") {
 						e.preventDefault();
-						props.onClose(null);
+						shouldClose = true;
 					}
 				}}
 				class={styles.select}
@@ -89,7 +96,7 @@ export default function Select(props: {
 						<div
 							classList={{ [SN_ID]: true, [styles.selected]: value === props.selected, [styles.item]: true }}
 							tabIndex={-1}
-							on:sn-enter-down={() => {
+							on:sn-enter-up={() => {
 								props.onClose(value);
 							}}
 							onBlur={(e) => {

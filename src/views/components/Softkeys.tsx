@@ -41,10 +41,20 @@ function Softkeys__(props: {
 		});
 	});
 
+	function hasNoCenter(softkeys: [string, string, string, boolean]) {
+		return !softkeys[1];
+	}
+
 	return (
 		<div classList={{ [styles.softkeys]: true, [styles.hidden]: props.hidden }}>
 			<Show when={previous()}>
-				<div classList={{ [styles.previous]: true, [styles.black]: previous()![3] }}>
+				<div
+					classList={{
+						[styles.previous]: true,
+						[styles.nocenter]: hasNoCenter(previous()!),
+						[styles.black]: previous()![3],
+					}}
+				>
 					<div>
 						<Show when={isTelegramIcon(previous()![0])} fallback={previous()![0]}>
 							<TelegramIcon name={previous()![0].slice(3) as TelegramIconNames} />
@@ -62,7 +72,14 @@ function Softkeys__(props: {
 					</div>
 				</div>
 			</Show>
-			<div classList={{ [styles.current]: true, [styles.loading]: props.loading, [styles.black]: softkeys()[3] }}>
+			<div
+				classList={{
+					[styles.current]: true,
+					[styles.nocenter]: hasNoCenter(softkeys()),
+					[styles.loading]: props.loading,
+					[styles.black]: softkeys()[3],
+				}}
+			>
 				<div>
 					<Show when={isTelegramIcon(softkeys()[0])} fallback={softkeys()[0]}>
 						<TelegramIcon name={softkeys()[0].slice(3) as TelegramIconNames} />

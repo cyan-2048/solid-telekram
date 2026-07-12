@@ -29,17 +29,24 @@ export default function Confirm(props: {
 		lastFocusedElement.focus();
 	});
 
+	let shouldClose: boolean | null = null;
+
 	return (
 		<ModalContainer>
 			<ModalHeader>{props.title}</ModalHeader>
 			<div
+				onKeyUp={() => {
+					if (shouldClose !== null) {
+						props.onClose(shouldClose);
+					}
+				}}
 				onKeyDown={(e) => {
 					e.stopImmediatePropagation();
 					e.stopPropagation();
 
 					if (e.key == "SoftLeft" || e.key == "Backspace" || e.key == "SoftRight" || e.key == "EndCall") {
 						e.preventDefault();
-						props.onClose(e.key == "SoftRight");
+						shouldClose = e.key == "SoftRight";
 					}
 				}}
 				onBlur={(e) => {

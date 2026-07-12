@@ -1,4 +1,4 @@
-import type { ChatPhoto, Peer } from "@mtcute/core";
+import type { ChatPhoto, ChatPreview, Peer, Photo } from "@mtcute/core";
 import * as styles from "./PeerPhotoIcon.module.scss";
 import {
 	createEffect,
@@ -12,7 +12,7 @@ import {
 	Switch,
 	untrack,
 } from "solid-js";
-import { calculateSampleSize, getColorFromPeer, isUser } from "@/utils";
+import { calculateSampleSize, getColorFromPalette, getColorFromPeer, isUser } from "@/utils";
 import { downloadFile } from "@/lib/storage";
 import TelegramIcon from "./TelegramIcon";
 
@@ -25,8 +25,8 @@ function formatDisplayName(s: string) {
 }
 
 function ChatPhotoWithIcon(props: {
-	src: ChatPhoto;
-	peer: Peer;
+	src: ChatPhoto | Photo;
+	//peer?: Peer;
 	// fallback to ChatPhotoColor when an error occurs
 	onError: () => void;
 }) {
@@ -35,7 +35,7 @@ function ChatPhotoWithIcon(props: {
 	const [sampleSize, setSampleSize] = createSignal("");
 
 	createEffect(() => {
-		const src = props.src.thumb;
+		const src = "thumb" in props.src ? props.src.thumb : null;
 		if (src) {
 			const url = URL.createObjectURL(new Blob([src as Uint8Array<ArrayBuffer>]));
 			setPlaceholder(url);
@@ -61,7 +61,7 @@ function ChatPhotoWithIcon(props: {
 	});
 
 	createEffect(() => {
-		const file = props.src.small;
+		const file = "small" in props.src ? props.src.small : props.src;
 
 		const download = downloadFile(file);
 		download.catch(() => {
@@ -135,6 +135,43 @@ function ChatPhotoColor(props: { color: string; children: JSXElement }) {
 	);
 }
 
+export function ChatPreviewPhoto(props: { chatPreview: ChatPreview }) {
+	const [error, setError] = createSignal(false);
+
+	function onError() {
+		setError(true);
+	}
+
+	createRenderEffect(() => {
+		// listen to changes
+		props.chatPreview;
+
+		untrack(() => {
+			setError(false);
+		});
+	});
+
+	return (
+		<Switch>
+			<Match when={error()}>
+				<ChatPhotoColor color={getColorFromPalette(props.chatPreview.invite.color)}>
+					{formatDisplayName(props.chatPreview.title)}
+				</ChatPhotoColor>
+			</Match>
+
+			<Match when={props.chatPreview.photo}>
+				<ChatPhotoWithIcon onError={onError} src={props.chatPreview.photo!} />
+			</Match>
+
+			<Match when={!props.chatPreview.photo}>
+				<ChatPhotoColor color={getColorFromPalette(props.chatPreview.invite.color)}>
+					{formatDisplayName(props.chatPreview.title)}
+				</ChatPhotoColor>
+			</Match>
+		</Switch>
+	);
+}
+
 export default function PeerPhotoIcon(props: { peer: Peer; showSavedIcon?: boolean }) {
 	const isSelf = () => isUser(props.peer) && props.peer.isSelf;
 	const [error, setError] = createSignal(false);
@@ -175,12 +212,12 @@ export default function PeerPhotoIcon(props: { peer: Peer; showSavedIcon?: boole
 						</ChatPhotoColor>
 					}
 				>
-					<ChatPhotoWithIcon onError={onError} peer={props.peer} src={props.peer.photo!} />
+					<ChatPhotoWithIcon onError={onError} src={props.peer.photo!} />
 				</Show>
 			</Match>
 
 			<Match when={props.peer.photo && !isSelf()}>
-				<ChatPhotoWithIcon onError={onError} peer={props.peer} src={props.peer.photo!} />
+				<ChatPhotoWithIcon onError={onError} src={props.peer.photo!} />
 			</Match>
 
 			<Match when={!props.peer.photo || isSelf()}>

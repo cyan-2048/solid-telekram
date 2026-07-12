@@ -404,6 +404,7 @@ async function onLoggedIn() {
 			}
 
 			case "updateChannel": {
+				console.error("updateChannel", upd.channelId, getMarkedPeerId(upd.channelId, "channel"));
 				refreshDialogsByPeer(getMarkedPeerId(upd.channelId, "channel"));
 				break;
 			}

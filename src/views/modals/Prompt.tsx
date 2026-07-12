@@ -5,6 +5,8 @@ import ModalHeader from "./ModalHeader";
 import { onCleanup, onMount } from "solid-js";
 import { sleep } from "@/helpers";
 
+const NO_VALUE = Symbol();
+
 export default function Prompt(props: {
 	title: string;
 	text: string;
@@ -32,6 +34,8 @@ export default function Prompt(props: {
 		lastFocusedElement.focus();
 	});
 
+	let shouldClose: string | null | typeof NO_VALUE = NO_VALUE;
+
 	return (
 		<ModalContainer>
 			<ModalHeader>{props.title}</ModalHeader>
@@ -39,6 +43,11 @@ export default function Prompt(props: {
 				{props.text}
 				<input
 					ref={inputRef}
+					onKeyUp={() => {
+						if (shouldClose !== NO_VALUE) {
+							props.onClose(shouldClose);
+						}
+					}}
 					onKeyDown={(e) => {
 						e.stopImmediatePropagation();
 						e.stopPropagation();
@@ -46,7 +55,7 @@ export default function Prompt(props: {
 						if (e.key == "SoftLeft" || e.key == "SoftRight" || e.key == "Backspace" || e.key == "EndCall") {
 							if (e.key == "Backspace" && e.currentTarget.value != "") return;
 							e.preventDefault();
-							props.onClose(e.key == "SoftRight" ? e.currentTarget.value : null);
+							shouldClose = e.key == "SoftRight" ? e.currentTarget.value : null;
 						}
 					}}
 					onBlur={(e) => {

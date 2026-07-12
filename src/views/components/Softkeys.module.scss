@@ -27,12 +27,12 @@
 
 		background-color: rgb(204, 204, 204);
 
+		display: flex;
+
 		&.black {
 			background-color: black;
 			color: white;
 		}
-
-		display: flex;
 
 		div {
 			white-space: nowrap;
@@ -55,6 +55,16 @@
 			text-align: right;
 			:global(.tgico) {
 				float: right;
+			}
+		}
+
+		&.nocenter {
+			div {
+				width: 50%;
+			}
+
+			div:nth-child(2) {
+				width: 0%;
 			}
 		}
 	}

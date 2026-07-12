@@ -69,6 +69,100 @@ function PrivateChatBottomHeader(props: { userId: number }) {
 	);
 }
 
+function JoinButton(props: { dialog: UIDialog }) {
+	const isChannel = () => props.dialog.chatType == "channel";
+
+	const hasJoinRequests = createMemo(() => {
+		const peer = props.dialog.peer;
+
+		if (peer.type == "chat") {
+			return peer.hasJoinRequests;
+		}
+		return false;
+	});
+
+	const joinLabel = createMemo(() => {
+		const channel = isChannel();
+		const applyToJoin = hasJoinRequests();
+		return channel ? "Subscribe" : applyToJoin ? "Apply to join group" : "Join";
+	});
+
+	onCleanup(() => {
+		if ($view.get() == "room") {
+			sleep(100).then(() => {
+				SpatialNavigation.focus("room");
+			});
+		}
+	});
+
+	return (
+		<ButtonContainer>
+			<KaiButton
+				onKeyDown={(e) => {
+					if (e.key == "Backspace") {
+						e.preventDefault();
+					}
+				}}
+				onKeyUp={async (e) => {
+					if (e.key == "Backspace") {
+						$view.set("home");
+					}
+
+					if (e.key == "Enter") {
+						try {
+							const previousActive = document.activeElement as HTMLElement;
+
+							previousActive?.blur();
+
+							SpatialNavigation.pause();
+
+							const result = await tg.joinChat(props.dialog.peer);
+
+							switch (result.status) {
+								case "ok": {
+									const uiDialog = props.dialog;
+									const dialog = await tg.getPeerDialogs(result.chat).then((a) => a[0]);
+									if (dialog) {
+										uiDialog.update(dialog);
+										uiDialog.messages.dispose();
+										await uiDialog.messages.loadMore();
+										await sleep(100);
+									}
+									break;
+								}
+
+								case "request_sent":
+									await alert(
+										"You will be added to the group once an admin approves your request.",
+										"Join request sent",
+									);
+									break;
+								case "webview":
+									break;
+							}
+						} catch (e: any) {
+							toaster("Unable to join.");
+						} finally {
+							SpatialNavigation.resume();
+							SpatialNavigation.focus("room");
+						}
+					}
+				}}
+				onFocus={(e) => {
+					scrollIntoView(e.currentTarget, {
+						behavior: "instant",
+						block: "center",
+					});
+					setSoftkeys("", "tg:arrow_next", "");
+				}}
+				classList={{ last: true, focusable: true, join: true }}
+			>
+				{joinLabel()}
+			</KaiButton>
+		</ButtonContainer>
+	);
+}
+
 function Messages(props: { dialog: UIDialog }) {
 	const messages = useStore_(() => props.dialog.messages.$sorted);
 
@@ -185,70 +279,7 @@ function Messages(props: { dialog: UIDialog }) {
 					<RoomTextBox dialog={props.dialog} />
 				</Show>
 				<Show when={!isMember()}>
-					<ButtonContainer>
-						<KaiButton
-							onKeyDown={(e) => {
-								if (e.key == "Backspace") {
-									e.preventDefault();
-								}
-							}}
-							onKeyUp={async (e) => {
-								if (e.key == "Backspace") {
-									$view.set("home");
-								}
-
-								if (e.key == "Enter") {
-									try {
-										const previousActive = document.activeElement as HTMLElement;
-
-										previousActive?.blur();
-
-										SpatialNavigation.pause();
-
-										const result = await tg.joinChat(props.dialog.peer);
-
-										switch (result.status) {
-											case "ok": {
-												const uiDialog = props.dialog;
-												const dialog = await tg.getPeerDialogs(result.chat).then((a) => a[0]);
-												if (dialog) {
-													uiDialog.update(dialog);
-													uiDialog.messages.dispose();
-													await uiDialog.messages.loadMore();
-													await sleep(100);
-												}
-												break;
-											}
-
-											case "request_sent":
-												await alert(
-													"a join request was sent and needs to be approved by the chat admin",
-													"Request Sent",
-												);
-												break;
-											case "webview":
-												break;
-										}
-									} catch (e: any) {
-										toaster("Unable to join.");
-									} finally {
-										SpatialNavigation.resume();
-										SpatialNavigation.focus("room");
-									}
-								}
-							}}
-							onFocus={(e) => {
-								scrollIntoView(e.currentTarget, {
-									behavior: "instant",
-									block: "center",
-								});
-								setSoftkeys("", "tg:arrow_next", "");
-							}}
-							classList={{ last: true, focusable: true, join: true }}
-						>
-							{isChannel() ? "Subscribe" : "Join"}
-						</KaiButton>
-					</ButtonContainer>
+					<JoinButton {...props} />
 				</Show>
 			</Show>
 		</div>

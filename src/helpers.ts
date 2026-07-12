@@ -224,6 +224,10 @@ const DialogColorsFg: Array<string[]> = [
 	],
 	DialogColors = ["red", "orange", "violet", "green", "cyan", "blue", "pink"] as const;
 
+export function getColorFromPalette(idx: number) {
+	return DialogColors[getPeerColorIndexById(idx)] || "blue";
+}
+
 export function getColorFromPeer(peer: RawPeer) {
 	if (!peer) return "blue";
 

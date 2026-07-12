@@ -174,6 +174,9 @@ export default class UIDialog {
 		result.forEach((dialog) => {
 			if (!dialog) return;
 			if ("left" in dialog.peer.raw && dialog.peer.raw.left) {
+				if (dialogsJar.has(dialog.peer.id)) {
+					dialogsJar.add(dialog);
+				}
 				return;
 			}
 
@@ -363,19 +366,24 @@ export default class UIDialog {
 	async unmute() {
 		// if not muted
 		if (!this.$muted.get()) return;
-		await this.updateChatNotifySettings({});
 		this.$muted.set(false);
+		this.muteUntil = null;
+		await this.updateChatNotifySettings({});
 	}
 
 	async mute(duration: UIDialogMuteDuration) {
 		if (this.$muted.get()) return;
 
-		await this.updateChatNotifySettings({
-			muteUntil:
-				duration === UIDialogMuteDuration.Forever ? MAX_INT_32 : Math.floor(Date.now() / 1000) + Number(duration),
-		});
-
 		this.$muted.set(true);
+
+		const muteUntil =
+			duration === UIDialogMuteDuration.Forever ? MAX_INT_32 : Math.floor(Date.now() / 1000) + Number(duration);
+
+		this.muteUntil = muteUntil;
+
+		await this.updateChatNotifySettings({
+			muteUntil,
+		});
 	}
 
 	private _cached_sponsoredMessages: tl.messages.RawSponsoredMessages | null = null;

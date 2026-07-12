@@ -808,3 +808,59 @@ span.extra_width {
 	background-color: var(--accent);
 	color: white;
 }
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideInFromBottom {
+	from {
+		bottom: -100%;
+	}
+	to {
+		bottom: 0;
+	}
+}
+
+.chat_preview {
+	background-color: rgba(0, 0, 0, 0.3);
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: calc(100vh - 30px);
+	width: 100vw;
+
+	/* Points to the keyframes name below */
+	animation: fadeIn 0.3s linear forwards;
+
+	.container {
+		padding: 8px;
+		background-color: white;
+
+		border-radius: 15px 15px 0 0;
+		position: absolute;
+		left: 0;
+		bottom: 0;
+
+		width: 100%;
+
+		animation: slideInFromBottom 0.3s ease-in-out forwards;
+
+		.photo {
+			margin-left: auto;
+			margin-right: auto;
+			width: 80px;
+			height: 80px;
+			position: relative;
+
+			div {
+				font-size: 32px;
+			}
+		}
+	}
+}

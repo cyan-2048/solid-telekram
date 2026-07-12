@@ -33,6 +33,11 @@ export default class UIMessage {
 	$isUnsupported = atom(false);
 	$viaBot = atom<User | null>(null);
 
+	/**
+	 * this message should not be shown by the client, currently only used by action messages
+	 */
+	$hidden = atom(false);
+
 	isOutgoing: boolean;
 	isSticker = false;
 
@@ -294,6 +299,8 @@ export default class UIMessage {
 					break;
 
 				case "contact_joined":
+					this.$hidden.set(true);
+
 					newText = "Joined Telegram";
 					break;
 
@@ -302,7 +309,22 @@ export default class UIMessage {
 					break;
 
 				case "history_cleared":
+					this.$hidden.set(true);
+
 					newText = "History was cleared";
+					break;
+
+				case "user_joined_approved":
+					if ($.sender.type == "user" && $.sender.isSelf) {
+						newText = "Your request to join the group was approved";
+					} else {
+						newText = $.sender.displayName + " was accepted into the group";
+					}
+
+					break;
+
+				case "channel_migrate_from":
+					this.$hidden.set(true);
 					break;
 
 				// uhh idk how this one works???

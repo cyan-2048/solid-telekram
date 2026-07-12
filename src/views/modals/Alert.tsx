@@ -23,17 +23,24 @@ export default function Alert(props: { title: string; text: string; onClose: () 
 		lastFocusedElement.focus();
 	});
 
+	let shouldClose = false;
+
 	return (
 		<ModalContainer>
 			<ModalHeader>{props.title}</ModalHeader>
 			<div
+				onKeyUp={() => {
+					if (shouldClose) {
+						props.onClose();
+					}
+				}}
 				onKeyDown={(e) => {
 					e.stopImmediatePropagation();
 					e.stopPropagation();
 
 					if (e.key == "Enter" || e.key == "Backspace" || e.key == "EndCall") {
 						e.preventDefault();
-						props.onClose();
+						shouldClose = true;
 					}
 				}}
 				onBlur={(e) => {

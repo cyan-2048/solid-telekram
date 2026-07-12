@@ -5,13 +5,8 @@ import parseUserAgent from "@/lib/parseUserAgent";
 import type { Middleware } from "@fuman/utils";
 import type { RpcCallMiddlewareContext } from "@mtcute/core";
 
-// @ts-ignore
-import { mediaThrottle } from "@mtcute/core/network/middlewares/media-throttle";
+import { networkMiddlewares } from "@mtcute/core";
 
-// @ts-ignore
-import { floodWaiter } from "@mtcute/core/network/middlewares/flood-waiter";
-// @ts-ignore
-import { internalErrorsHandler } from "@mtcute/core/network/middlewares/internal-errors";
 import type { mtp } from "@mtcute/core";
 import type { BaseTelegramClientOptions } from "@mtcute/web";
 
@@ -20,8 +15,8 @@ function isTlRpcError(obj: unknown): obj is mtp.RawMt_rpc_error {
 }
 
 const middlewares = [
-	mediaThrottle(),
-	floodWaiter({
+	networkMiddlewares.mediaThrottle(),
+	networkMiddlewares.floodWaiter({
 		maxRetries: 20,
 	}),
 	async (ctx, next) => {
@@ -44,7 +39,7 @@ const middlewares = [
 
 		return res;
 	},
-	internalErrorsHandler({}),
+	networkMiddlewares.internalErrorsHandler({}),
 ] as Middleware<RpcCallMiddlewareContext, unknown>[];
 
 export const config: Omit<BaseTelegramClientOptions, "apiId" | "apiHash"> = {

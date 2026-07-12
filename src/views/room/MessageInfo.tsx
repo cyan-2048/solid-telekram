@@ -25,7 +25,7 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { tl, Video } from "@mtcute/core";
+import type { ChatPreview, Video } from "@mtcute/core";
 import { cloudphone, cloudphone_features } from "@/config";
 import once from "lodash-es/once";
 
@@ -40,7 +40,7 @@ import { downloadFile } from "@/lib/storage";
 import VideoPlayer from "./VideoPlayer";
 import { parseTelegramLink, type TelegramDeepLink } from "@/lib/deeplinks";
 import { dialogsJar, sortDialogs, tg } from "@globals";
-import { unwrap } from "solid-js/store";
+import { ChatPreviewPhoto } from "../components/PeerPhotoIcon";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
@@ -229,6 +229,49 @@ enum MessageInfoOptions {
 	JumpToReply,
 }
 
+function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => void }) {
+	let viewRef!: HTMLDivElement;
+
+	onMount(() => {
+		setSoftkeys(
+			"Cancel",
+			"",
+			props.chatPreview.withApproval
+				? "Request To Join"
+				: "Join " + (props.chatPreview.type == "channel" ? "Channel" : "Group"),
+			false,
+			true,
+		);
+		viewRef.focus();
+	});
+
+	return (
+		<div
+			onKeyDown={(e) => {
+				if (e.key == "Backspace") {
+					e.preventDefault();
+				}
+			}}
+			onKeyUp={(e) => {
+				if (e.key == "Backspace" || e.key == "SoftLeft") {
+					props.onClose();
+				}
+			}}
+			ref={viewRef}
+			tabIndex={0}
+			class={styles.chat_preview}
+		>
+			<div class={styles.container}>
+				<div class={styles.photo}>
+					<ChatPreviewPhoto chatPreview={props.chatPreview} />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+const _cached_getChatPreview: Record<string, ChatPreview> = {};
+
 // my initial idea for MessageInfo is that it would be a view
 // but I think it being a modal makes more sense?
 export default function MessageInfo(props: { onClose: () => void }) {
@@ -321,6 +364,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 	const [photo, setPhoto] = createSignal<Photo | null>(null);
 	const [video, setVideo] = createSignal<Video | null>(null);
+	const [chatPreview, setChatPreview] = createSignal<ChatPreview | null>(null);
 
 	createEffect(() => {
 		updateSoftkeys();
@@ -452,7 +496,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 												);
 											}
 
-											console.error("MESSAGE INFO CUSTOM RENDERER", unwrap(e));
+											//console.error("MESSAGE INFO CUSTOM RENDERER", unwrap(e));
 											if (
 												e.tag == "a" &&
 												(e.entity._ == "messageEntityUrl" ||
@@ -480,6 +524,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 																	.getPeerDialogs(deeplink.type == "user" ? deeplink.id : deeplink.username)
 																	.then((a) => a[0])
 																	.catch(() => null);
+
 																if (dialog) {
 																	// const peer = dialog.peer;
 
@@ -498,8 +543,37 @@ export default function MessageInfo(props: { onClose: () => void }) {
 																	});
 
 																	SpatialNavigation.resume();
+																} else {
+																	SpatialNavigation.resume();
+																	_previousFocus?.focus();
+
+																	toaster("Username not found.");
+																}
+
+																return;
+															}
+
+															if (deeplink.type == "invite") {
+																const inviteLink = url.toString();
+
+																const preview = (_cached_getChatPreview[inviteLink] ||= (await tg
+																	.getChatPreview(url.toString())
+																	.catch(() => null))!);
+
+																console.error("CHAT PREVIEW", preview);
+
+																SpatialNavigation.resume();
+
+																isFocusing = false;
+																// viewRef.focus();
+
+																if (!preview) {
+																	viewRef.focus();
 																	return;
 																}
+																setChatPreview(preview);
+
+																return;
 															}
 
 															SpatialNavigation.resume();
@@ -631,6 +705,17 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						setShowDownloadPrompt(false);
 					}}
 				></DownloadPrompt>
+			</Show>
+			<Show when={chatPreview()}>
+				<Portal>
+					<ChatPreviewViewer
+						chatPreview={chatPreview()!}
+						onClose={() => {
+							setChatPreview(null);
+							viewRef.focus();
+						}}
+					/>
+				</Portal>
 			</Show>
 		</>
 	);
