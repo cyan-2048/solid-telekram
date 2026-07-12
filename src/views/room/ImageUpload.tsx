@@ -41,7 +41,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 					showEmojiPicker() || showOptions()
 						? {
 								bottom: "30px",
-						  }
+							}
 						: undefined
 				}
 				class={styles.upload_image}
@@ -55,7 +55,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 								showEmojiPicker() || showOptions()
 									? {
 											top: "30px",
-									  }
+										}
 									: undefined
 							}
 						/>
@@ -67,7 +67,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 							showEmojiPicker() || showOptions()
 								? {
 										top: "30px",
-								  }
+									}
 								: undefined
 						}
 						preload="metadata"
@@ -104,6 +104,11 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 					ref={inputRef}
 					class={styles.caption_textbox}
 					placeholder="Add a caption..."
+					onKeyUp={(e) => {
+						if (e.key == "Backspace") {
+							sleep(10).then(() => props.onSend(false));
+						}
+					}}
 					onKeyDown={(e) => {
 						const value = e.currentTarget.value;
 
@@ -112,7 +117,6 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 						}
 						if (e.key == "Backspace" && value === "") {
 							e.preventDefault();
-							sleep(10).then(() => props.onSend(false));
 						}
 
 						if (e.key == "SoftLeft") {
@@ -183,7 +187,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 								ref={itemRef}
 								classList={{ option: true, [styles.option_item]: true }}
 								tabIndex={-1}
-								onKeyDown={(e) => {
+								onKeyUp={(e) => {
 									if (e.key == "Enter") {
 										setSoftkeys("", "", "");
 										hideSoftkeys(true);

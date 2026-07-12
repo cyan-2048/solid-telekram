@@ -9,7 +9,7 @@ import { telegramPort } from "@workers";
 
 import { EventEmitter } from "tseep";
 import { NOOP, sleep, startLogin, startLoginQr } from "@utils";
-import { isTlRpcError } from "@mtcute/core/utils.js";
+import { getMarkedPeerId, isTlRpcError } from "@mtcute/core/utils.js";
 import { MtProxyTcpTransport, SocksProxyTcpTransport, TcpTransport } from "@proxies";
 import {
 	$dialogFilters,
@@ -257,10 +257,10 @@ async function onLoggedIn() {
 						),
 					);
 
-					refreshDialogsByPeer(found.peer.id);
+					refreshDialogsByPeer(found.peer);
 				} else {
 					console.error("dialog was not found for message, refreshing");
-					refreshDialogsByPeer(message.chat.id);
+					refreshDialogsByPeer(message.chat);
 				}
 
 				break;
@@ -390,13 +390,13 @@ async function onLoggedIn() {
 		switch (upd._) {
 			case "updateChatParticipants": {
 				if (upd.participants._ == "chatParticipants") {
-					const has = dialogsJar.get(upd.participants.chatId);
+					const has = dialogsJar.get(getMarkedPeerId(upd.participants.chatId, "chat"));
 
 					if (has) {
 						has.$memberCount.set(upd.participants.participants.length);
 					} else {
 						console.error("chat participant was not found, refreshing dialogs");
-						refreshDialogsByPeer(upd.participants.chatId);
+						refreshDialogsByPeer(getMarkedPeerId(upd.participants.chatId, "chat"));
 					}
 				}
 
@@ -404,7 +404,7 @@ async function onLoggedIn() {
 			}
 
 			case "updateChannel": {
-				refreshDialogsByPeer(upd.channelId);
+				refreshDialogsByPeer(getMarkedPeerId(upd.channelId, "channel"));
 				break;
 			}
 

@@ -682,6 +682,11 @@ function GifSearch(props: { onSelect: (e: Video | null) => void }) {
 		<Content>
 			<div
 				class={styles.search}
+				onKeyUp={(e) => {
+					if (e.key == "Backspace" || e.key == "SoftLeft") {
+						props.onSelect(null);
+					}
+				}}
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
 						const search = text();
@@ -703,8 +708,7 @@ function GifSearch(props: { onSelect: (e: Video | null) => void }) {
 						}
 					}
 
-					if (e.key == "Backspace" || e.key == "SoftLeft") {
-						props.onSelect(null);
+					if (e.key == "Backspace") {
 						e.preventDefault();
 					}
 				}}

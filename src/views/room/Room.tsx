@@ -17,6 +17,7 @@ import ISpinner from "@components/ISpinner";
 import RoomTextBox from "./RoomTextBox";
 import KaiButton, { ButtonContainer } from "../components/KaiButton";
 import scrollIntoView from "scroll-into-view-if-needed";
+import { alert } from "../modals";
 
 function getMembersCount(peer: Peer) {
 	if ((peer.raw as tl.RawChannel).participantsCount) {
@@ -120,8 +121,10 @@ function Messages(props: { dialog: UIDialog }) {
 
 	const isMember = useStore_(() => props.dialog.$isMember);
 
+	const isChannel = () => props.dialog.chatType == "channel";
+
 	const showTextBox = createMemo(() => {
-		const isNotChannel = props.dialog.chatType !== "channel";
+		const isNotChannel = !isChannel();
 		const _isMember = isMember();
 		return isNotChannel && _isMember;
 	});
@@ -189,9 +192,49 @@ function Messages(props: { dialog: UIDialog }) {
 									e.preventDefault();
 								}
 							}}
-							onKeyUp={(e) => {
+							onKeyUp={async (e) => {
 								if (e.key == "Backspace") {
 									$view.set("home");
+								}
+
+								if (e.key == "Enter") {
+									try {
+										const previousActive = document.activeElement as HTMLElement;
+
+										previousActive?.blur();
+
+										SpatialNavigation.pause();
+
+										const result = await tg.joinChat(props.dialog.peer);
+
+										switch (result.status) {
+											case "ok": {
+												const uiDialog = props.dialog;
+												const dialog = await tg.getPeerDialogs(result.chat).then((a) => a[0]);
+												if (dialog) {
+													uiDialog.update(dialog);
+													uiDialog.messages.dispose();
+													await uiDialog.messages.loadMore();
+													await sleep(100);
+												}
+												break;
+											}
+
+											case "request_sent":
+												await alert(
+													"a join request was sent and needs to be approved by the chat admin",
+													"Request Sent",
+												);
+												break;
+											case "webview":
+												break;
+										}
+									} catch (e: any) {
+										toaster("Unable to join.");
+									} finally {
+										SpatialNavigation.resume();
+										SpatialNavigation.focus("room");
+									}
 								}
 							}}
 							onFocus={(e) => {
@@ -203,7 +246,7 @@ function Messages(props: { dialog: UIDialog }) {
 							}}
 							classList={{ last: true, focusable: true, join: true }}
 						>
-							Join
+							{isChannel() ? "Subscribe" : "Join"}
 						</KaiButton>
 					</ButtonContainer>
 				</Show>

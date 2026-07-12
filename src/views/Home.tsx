@@ -120,7 +120,7 @@ function DialogOptions(props: {
 			<OptionsItem
 				classList={{ option: true, [styles.item]: true }}
 				tabIndex={-1}
-				on:sn-enter-down={() => {
+				on:sn-enter-up={() => {
 					props.onSelect(DialogOptionsSelected.SETTINGS);
 				}}
 				on:sn-focused={() => {

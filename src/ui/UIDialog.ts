@@ -1,13 +1,14 @@
-import type { tl, ChatPermissions, Dialog, InputPeerLike, MaybeArray, TextWithEntities } from "@mtcute/core";
+import { tl, type ChatPermissions, type Dialog, type Peer, type TextWithEntities } from "@mtcute/core";
 import { atom } from "nanostores";
 import UIMessage from "./UIMessage";
 import Queue from "queue";
-import { tg } from "@globals";
+import { dialogsJar, tg } from "@globals";
 import { sleep } from "@utils";
 import DialogsJar from "./DialogJar";
 import MessagesJar from "./MessagesJar";
-import { $dialogs } from "@/stores";
+import { $dialogs, $room, $view } from "@/stores";
 import { getNotifications } from "@/workers/pushNotifications";
+import { batch } from "solid-js";
 
 const MAX_INT_32 = 2 ** 31 - 1;
 
@@ -148,8 +149,27 @@ export default class UIDialog {
 		});
 	}
 
-	static async refreshDialogsByPeer(peers: MaybeArray<InputPeerLike>) {
-		const result = await tg.getPeerDialogs(peers);
+	static async refreshDialogsByPeer(peer: Peer | number) {
+		const result = await tg.getPeerDialogs(peer).catch(async (err) => {
+			if (tl.RpcError.is(err, "CHANNEL_PRIVATE")) {
+				const peerId = typeof peer == "number" ? peer : peer.id;
+				dialogsJar.delete(peerId);
+
+				batch(() => {
+					if ($room.get()?.id == peerId) {
+						$room.set(null);
+					}
+
+					if ($view.get() == "room") {
+						$view.set("home");
+					}
+				});
+			} else {
+				console.error("REFRESH BY PEER ERROR", err);
+			}
+
+			return [];
+		});
 
 		result.forEach((dialog) => {
 			if (!dialog) return;
@@ -158,10 +178,10 @@ export default class UIDialog {
 			}
 
 			// console.log(a);
-			DialogsJar.jar.add(dialog);
+			dialogsJar.add(dialog);
 		});
 
-		$dialogs.set(DialogsJar.jar.sorted());
+		$dialogs.set(dialogsJar.sorted());
 	}
 
 	isVerified = false;
@@ -312,7 +332,7 @@ export default class UIDialog {
 	}
 
 	async refreshByPeer() {
-		return UIDialog.refreshDialogsByPeer([this.rawDialog.peer]);
+		return UIDialog.refreshDialogsByPeer(this.rawDialog.peer);
 	}
 
 	async readHistory() {

@@ -277,16 +277,24 @@ export default function MusicPlayer(props: { music: Audio; onClose: () => void }
 		<>
 			<div
 				ref={divRef}
-				onKeyDown={(e) => {
+				onKeyUp={(e) => {
 					if (showOptions()) return;
 
 					const key = e.key;
 
 					if (key == "Backspace" || key == "SoftLeft") {
-						e.preventDefault();
 						setTimeout(() => {
 							closePlayer();
 						}, 100);
+					}
+				}}
+				onKeyDown={(e) => {
+					if (showOptions()) return;
+
+					const key = e.key;
+
+					if (key == "Backspace") {
+						e.preventDefault();
 						return;
 					}
 

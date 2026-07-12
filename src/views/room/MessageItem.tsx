@@ -437,7 +437,7 @@ function DeleteOptions(props: { onSelect: () => void }) {
 									})
 									.then(() => {
 										dialog().messages.delete(message.id);
-										UIDialog.refreshDialogsByPeer([dialog().peer]);
+										UIDialog.refreshDialogsByPeer(dialog().peer);
 									});
 								// dialog().messages.delete(message.id);
 							});
@@ -469,7 +469,7 @@ function DeleteOptions(props: { onSelect: () => void }) {
 									revoke: true,
 								}).then(() => {
 									_dialog.messages.delete(message.id);
-									UIDialog.refreshDialogsByPeer(_dialog.id);
+									UIDialog.refreshDialogsByPeer(_dialog.peer);
 								});
 								// dialog().messages.delete(message.id);
 							});

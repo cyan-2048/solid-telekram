@@ -165,7 +165,7 @@ function TextboxOptions(props: {
 					}}
 					classList={{ option: true, [styles.option_item]: true }}
 					tabIndex={-1}
-					on:sn-enter-down={() => {
+					on:sn-enter-up={() => {
 						props.onSelect(TextboxOptionsSelected.SETTINGS);
 					}}
 					ref={lastRef}

@@ -181,6 +181,8 @@ export default function ProxySettings(props: {
 		updateSoftkeys();
 	});
 
+	let shouldCancel = false;
+
 	return (
 		<>
 			<Content
@@ -196,12 +198,19 @@ export default function ProxySettings(props: {
 						scrollIntoView(isInput || e.target.tagName == "BUTTON" ? e.target.parentElement! : e.target);
 						setSoftkeys(null, isInput ? "" : "SELECT", null);
 					}}
+					onKeyUp={(e) => {
+						if (e.key == "SoftLeft" || e.key == "Backspace") {
+							if (shouldCancel) {
+								props.onCancel();
+							}
+						}
+					}}
 					onKeyDown={(e) => {
 						if (e.key == "SoftLeft" || e.key == "Backspace") {
 							if (e.key == "Backspace" && "value" in e.target && e.target.value !== "") return;
 							e.preventDefault();
 							// console.log("CANCELLED!!!");
-							props.onCancel();
+							shouldCancel = true;
 						}
 
 						if (e.key == "SoftRight") {

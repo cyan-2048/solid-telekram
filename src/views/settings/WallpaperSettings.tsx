@@ -92,6 +92,8 @@ export default function WallpaperSettings(props: { onClose: () => void }) {
 		setSoftkeys("Cancel", "SELECT", "");
 	}
 
+	let shouldClose = false;
+
 	return (
 		<>
 			<Content before={<Header>{showColorPicker() ? "Set a color" : "Chat Wallpaper"}</Header>}>
@@ -100,6 +102,13 @@ export default function WallpaperSettings(props: { onClose: () => void }) {
 					on:sn-navigatefailed={(e) => {
 						if (e.detail.direction == "up") {
 							SpatialNavigation.focus("wallpaper-settings-1");
+						}
+					}}
+					onKeyUp={(e) => {
+						if (e.key == "Backspace" || e.key == "SoftLeft") {
+							if (shouldClose) {
+								props.onClose();
+							}
 						}
 					}}
 					onKeyDown={(e) => {
@@ -115,7 +124,7 @@ export default function WallpaperSettings(props: { onClose: () => void }) {
 								setHexInvalid(false);
 								return;
 							}
-							props.onClose();
+							shouldClose = true;
 						}
 					}}
 				>

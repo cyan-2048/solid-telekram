@@ -42,8 +42,12 @@ function ImageFileInfo(props: { photo: Photo; onClose: () => void }) {
 			<div
 				ref={divRef}
 				onKeyDown={(e) => {
-					if (e.key == "Backspace" || e.key == "SoftLeft") {
+					if (e.key == "Backspace") {
 						e.preventDefault();
+					}
+				}}
+				onKeyUp={(e) => {
+					if (e.key == "Backspace" || e.key == "SoftLeft") {
 						sleep(100).then(() => {
 							props.onClose();
 						});
