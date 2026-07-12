@@ -25,7 +25,7 @@ import { differenceInCalendarDays } from "date-fns/differenceInCalendarDays";
 import type UIDialog from "@/ui/UIDialog";
 import type UIMessage from "@/ui/UIMessage";
 import { Dynamic, Portal } from "solid-js/web";
-import type { ChatPreview, Video } from "@mtcute/core";
+import { MtPeerNotFoundError, tl, type ChatPreview, type Video } from "@mtcute/core";
 import { cloudphone, cloudphone_features } from "@/config";
 import once from "lodash-es/once";
 
@@ -41,6 +41,7 @@ import VideoPlayer from "./VideoPlayer";
 import { parseTelegramLink, type TelegramDeepLink } from "@/lib/deeplinks";
 import { dialogsJar, sortDialogs, tg } from "@globals";
 import { ChatPreviewPhoto } from "../components/PeerPhotoIcon";
+import { alert } from "../modals";
 
 const ProxySettings = lazy(() => import("../settings/ProxySettings"));
 
@@ -229,7 +230,7 @@ enum MessageInfoOptions {
 	JumpToReply,
 }
 
-function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => void }) {
+function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => void; onJoin: () => void }) {
 	let viewRef!: HTMLDivElement;
 
 	onMount(() => {
@@ -256,6 +257,10 @@ function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => voi
 				if (e.key == "Backspace" || e.key == "SoftLeft") {
 					props.onClose();
 				}
+
+				if (e.key == "SoftRight") {
+					props.onJoin();
+				}
 			}}
 			ref={viewRef}
 			tabIndex={0}
@@ -265,16 +270,14 @@ function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => voi
 				<div class={styles.chat_preview_photo}>
 					<ChatPreviewPhoto chatPreview={props.chatPreview} />
 				</div>
-				<div>{props.chatPreview.title}</div>
-				<div>
+				<div class={styles.chat_preview_title}>{props.chatPreview.title}</div>
+				<div class={styles.chat_preview_members}>
 					{props.chatPreview.memberCount} {props.chatPreview.type == "channel" ? "subscribers" : "members"}
 				</div>
 			</div>
 		</div>
 	);
 }
-
-const _cached_getChatPreview: Record<string, ChatPreview> = {};
 
 // my initial idea for MessageInfo is that it would be a view
 // but I think it being a modal makes more sense?
@@ -560,9 +563,18 @@ export default function MessageInfo(props: { onClose: () => void }) {
 															if (deeplink.type == "invite") {
 																const inviteLink = url.toString();
 
-																const preview = (_cached_getChatPreview[inviteLink] ||= (await tg
-																	.getChatPreview(url.toString())
-																	.catch(() => null))!);
+																const preview = await tg.getChatPreview(inviteLink).catch((err) => {
+																	if (tl.RpcError.is(err)) {
+																		// telegram error
+																		toaster("This invite link has expired.");
+																	}
+
+																	if (MtPeerNotFoundError === err?.constructor) {
+																		return tg.getChat(inviteLink);
+																	}
+
+																	return null;
+																});
 
 																console.error("CHAT PREVIEW", preview);
 
@@ -575,6 +587,19 @@ export default function MessageInfo(props: { onClose: () => void }) {
 																	viewRef.focus();
 																	return;
 																}
+
+																if ("id" in preview) {
+																	props.onClose();
+																	const dialog = await tg.getPeerDialogs(preview).then((a) => a[0]);
+
+																	if (dialog) {
+																		const uiDialog = dialogsJar.add(dialog);
+																		$room.set(uiDialog);
+																	}
+
+																	return;
+																}
+
 																setChatPreview(preview);
 
 																return;
@@ -717,6 +742,45 @@ export default function MessageInfo(props: { onClose: () => void }) {
 						onClose={() => {
 							setChatPreview(null);
 							viewRef.focus();
+						}}
+						onJoin={async () => {
+							const preview = chatPreview()!;
+							props.onClose();
+
+							try {
+								SpatialNavigation.pause();
+
+								const result = await tg.joinChat(preview.link);
+
+								switch (result.status) {
+									case "ok": {
+										const dialog = await tg.getPeerDialogs(result.chat).then((a) => a[0]);
+
+										if (dialog) {
+											const uiDialog = dialogsJar.add(dialog);
+											uiDialog.messages.dispose();
+											$room.set(uiDialog);
+											await uiDialog.messages.loadMore();
+											await sleep(100);
+										}
+										break;
+									}
+
+									case "request_sent":
+										await alert(
+											"You will be added to the group once an admin approves your request.",
+											"Join request sent",
+										);
+										break;
+									case "webview":
+										break;
+								}
+							} catch (e: any) {
+								toaster("Unable to join.");
+							} finally {
+								SpatialNavigation.resume();
+								SpatialNavigation.focus("room");
+							}
 						}}
 					/>
 				</Portal>

@@ -818,15 +818,6 @@ span.extra_width {
 	}
 }
 
-@keyframes slideInFromBottom {
-	from {
-		bottom: -100%;
-	}
-	to {
-		bottom: 0;
-	}
-}
-
 .chat_preview {
 	background-color: rgba(0, 0, 0, 0.3);
 	position: fixed;
@@ -849,8 +840,6 @@ span.extra_width {
 
 		width: 100%;
 
-		animation: slideInFromBottom 0.3s ease-in-out forwards;
-
 		.chat_preview_photo {
 			margin-left: auto;
 			margin-right: auto;
@@ -863,6 +852,17 @@ span.extra_width {
 			div {
 				font-size: 32px;
 			}
+		}
+
+		.chat_preview_title {
+			margin-top: 8px;
+			text-align: center;
+			font-weight: 600;
+		}
+
+		.chat_preview_members {
+			text-align: center;
+			font-size: 14px;
 		}
 	}
 }
