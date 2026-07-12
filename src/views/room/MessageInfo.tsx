@@ -262,8 +262,12 @@ function ChatPreviewViewer(props: { chatPreview: ChatPreview; onClose: () => voi
 			class={styles.chat_preview}
 		>
 			<div class={styles.container}>
-				<div class={styles.photo}>
+				<div class={styles.chat_preview_photo}>
 					<ChatPreviewPhoto chatPreview={props.chatPreview} />
+				</div>
+				<div>{props.chatPreview.title}</div>
+				<div>
+					{props.chatPreview.memberCount} {props.chatPreview.type == "channel" ? "subscribers" : "members"}
 				</div>
 			</div>
 		</div>

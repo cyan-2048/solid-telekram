@@ -851,12 +851,14 @@ span.extra_width {
 
 		animation: slideInFromBottom 0.3s ease-in-out forwards;
 
-		.photo {
+		.chat_preview_photo {
 			margin-left: auto;
 			margin-right: auto;
 			width: 80px;
 			height: 80px;
 			position: relative;
+			border-radius: 100%;
+			overflow: hidden;
 
 			div {
 				font-size: 32px;

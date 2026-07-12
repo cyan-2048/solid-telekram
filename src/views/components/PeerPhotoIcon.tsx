@@ -1,4 +1,4 @@
-import type { ChatPhoto, ChatPreview, Peer, Photo } from "@mtcute/core";
+import { Thumbnail, type ChatPhoto, type ChatPreview, type Peer, type Photo } from "@mtcute/core";
 import * as styles from "./PeerPhotoIcon.module.scss";
 import {
 	createEffect,
@@ -35,7 +35,7 @@ function ChatPhotoWithIcon(props: {
 	const [sampleSize, setSampleSize] = createSignal("");
 
 	createEffect(() => {
-		const src = "thumb" in props.src ? props.src.thumb : null;
+		const src = "thumb" in props.src ? props.src.thumb : props.src.getThumbnail("i")?.location;
 		if (src) {
 			const url = URL.createObjectURL(new Blob([src as Uint8Array<ArrayBuffer>]));
 			setPlaceholder(url);
@@ -61,7 +61,7 @@ function ChatPhotoWithIcon(props: {
 	});
 
 	createEffect(() => {
-		const file = "small" in props.src ? props.src.small : props.src;
+		const file = "small" in props.src ? props.src.small : props.src.getThumbnail("a") || props.src;
 
 		const download = downloadFile(file);
 		download.catch(() => {
