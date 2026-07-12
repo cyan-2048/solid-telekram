@@ -594,6 +594,9 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 																	if (dialog) {
 																		const uiDialog = dialogsJar.add(dialog);
+																		if (!uiDialog.messages.hasLoadedBefore) {
+																			uiDialog.messages.loadMore();
+																		}
 																		$room.set(uiDialog);
 																	}
 
