@@ -5,8 +5,7 @@ import "./lib/scrollBy.js";
 import App from "./App.tsx";
 import { cloudphone } from "./config.ts";
 
-// if (import.meta.env.DEV)
-import("./dev.ts");
+if (import.meta.env.DEV) import("./dev.ts");
 
 if (import.meta.env.CLOUDPHONE) {
 	if (cloudphone) import("./cloudphone.ts");

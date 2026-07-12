@@ -323,6 +323,24 @@ export default class UIMessage {
 
 					break;
 
+				case "photo_changed":
+					if ($.sender.type == "user" && $.sender.isSelf) {
+						newText = "You changed the group photo";
+					} else {
+						newText = $.sender.displayName + " changed the group photo";
+					}
+
+					break;
+
+				case "photo_deleted":
+					if ($.sender.type == "user" && $.sender.isSelf) {
+						newText = "You removed the group photo";
+					} else {
+						newText = $.sender.displayName + " removed the group photo";
+					}
+
+					break;
+
 				case "channel_migrate_from":
 					this.$hidden.set(true);
 					break;
