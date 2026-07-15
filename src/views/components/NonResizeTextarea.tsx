@@ -1,4 +1,4 @@
-import { ComponentProps, splitProps } from "solid-js";
+import { type ComponentProps, splitProps } from "solid-js";
 import * as styles from "./AutoResizeTextarea.module.scss";
 
 export default function NonResizeTextarea(props: ComponentProps<"input">) {

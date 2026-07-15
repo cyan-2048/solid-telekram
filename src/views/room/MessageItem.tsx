@@ -343,8 +343,9 @@ export function MessageProvider(props: {
 					const member = isMember();
 					const actualLast = props.last;
 					const isChannel = props.$.chatType == "channel";
+					const isForum = "isForum" in props.$.raw.chat && props.$.raw.chat.isForum;
 
-					return member && actualLast && isChannel;
+					return member && actualLast && (isChannel || isForum);
 				},
 				actualLast: () => props.last,
 				isOutgoing: () => props.$.isOutgoing,

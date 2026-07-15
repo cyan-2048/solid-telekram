@@ -254,11 +254,13 @@ function Messages(props: { dialog: UIDialog }) {
 	const isMember = useStore_(() => props.dialog.$isMember);
 
 	const isChannel = () => props.dialog.chatType == "channel";
+	const isForum = () => "isForum" in props.dialog.peer && props.dialog.peer.isForum;
 
 	const showTextBox = createMemo(() => {
 		const isNotChannel = !isChannel();
+		const isNotForum = !isForum();
 		const _isMember = isMember();
-		return isNotChannel && _isMember;
+		return isNotChannel && isNotForum && _isMember;
 	});
 
 	return (

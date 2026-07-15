@@ -102,7 +102,7 @@ function TextboxOptions(props: {
 							on:sn-willfocus={willFocusScrollIfNeeded}
 							classList={{ option: true, [styles.option_item]: true }}
 							tabIndex={-1}
-							on:sn-enter-down={() => {
+							on:sn-enter-up={() => {
 								props.onSelect(TextboxOptionsSelected.SEND);
 							}}
 						>
@@ -115,7 +115,7 @@ function TextboxOptions(props: {
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(TextboxOptionsSelected.CANCEL);
 						}}
 					>
@@ -127,7 +127,7 @@ function TextboxOptions(props: {
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(TextboxOptionsSelected.PASTE);
 						}}
 					>
@@ -139,7 +139,7 @@ function TextboxOptions(props: {
 						on:sn-willfocus={willFocusScrollIfNeeded}
 						classList={{ option: true, [styles.option_item]: true }}
 						tabIndex={-1}
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							props.onSelect(TextboxOptionsSelected.COPY);
 						}}
 					>
@@ -491,7 +491,9 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 		resetTextbox();
 
-		if (!replying) sleep(10).then(() => SpatialNavigation.focus("room"));
+		if (!replying || props.dialog.isForum) {
+			sleep(10).then(() => SpatialNavigation.focus("room"));
+		}
 	}
 
 	function resetTextbox(dispatch = true) {
@@ -693,11 +695,13 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 							setText(e.currentTarget.value);
 							onInput();
 						}}
-						onKeyDown={(e) => {
-							const canUseKeyboard = !e.currentTarget.value || e.currentTarget.selectionStart === 0;
+						onKeyUp={(e) => {
 							if (e.key == "Enter" && e.currentTarget.value.trim()) {
 								sendMessage();
 							}
+						}}
+						onKeyDown={(e) => {
+							const canUseKeyboard = !e.currentTarget.value || e.currentTarget.selectionStart === 0;
 							onKeyDown(e, canUseKeyboard);
 						}}
 					/>
