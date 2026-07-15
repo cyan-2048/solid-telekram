@@ -890,6 +890,32 @@ span.extra_width {
 
 	.ad_content {
 		font-size: 14px;
+		line-height: 18.4px;
+	}
+
+	.ad_button {
+		height: 36px;
+		padding: 7px;
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 14px;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 6px;
+		color: var(--accent);
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 0.8px;
+			opacity: 0.25;
+			background-color: var(--accent);
+		}
 	}
 
 	&::before {

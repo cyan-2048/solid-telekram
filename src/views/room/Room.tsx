@@ -248,7 +248,7 @@ function Messages(props: { dialog: UIDialog }) {
 						{(e, index) => (
 							<>
 								<Show when={sponsoredMessages()?.getByIndex(index())}>
-									{(sponsor) => <SponsoredMessageItem message={sponsor()} />}
+									{(sponsor) => <SponsoredMessageItem sponsor={sponsor()} />}
 								</Show>
 								<MessageProvider
 									first={index() == 0}
@@ -262,7 +262,7 @@ function Messages(props: { dialog: UIDialog }) {
 							</>
 						)}
 					</For>
-					<Show when={sponsoredMessages()?.getLast()}>{(sponsor) => <SponsoredMessageItem message={sponsor()} />}</Show>
+					<Show when={sponsoredMessages()?.getLast()}>{(sponsor) => <SponsoredMessageItem sponsor={sponsor()} />}</Show>
 				</WhenMounted>
 				<For each={uploading()}>{(upload) => <UploadingMessageItem upload={upload} />}</For>
 				<Show when={showTextBox()}>

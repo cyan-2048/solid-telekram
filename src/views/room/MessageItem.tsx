@@ -1576,18 +1576,38 @@ export default function MessageItem() {
 	);
 }
 
-export function SponsoredMessageItem(props: { message: tl.RawSponsoredMessage }) {
-	props.message.message;
-
+export function SponsoredMessageItem(props: { sponsor: tl.RawSponsoredMessage }) {
 	return (
-		<div tabIndex={-1} classList={{ [styles.message]: true }}>
+		<div
+			tabIndex={-1}
+			on:sn-willfocus={() => {
+				setSoftkeys("", "INFO", "");
+			}}
+			onFocus={(e) => {
+				if (e.currentTarget == e.target) {
+					scrollIntoView(e.currentTarget, {
+						behavior: "instant",
+						block: "center",
+					});
+				}
+			}}
+			onKeyDown={(e) => {
+				if (e.key == "Backspace") {
+					$view.set("home");
+					e.preventDefault();
+					return;
+				}
+			}}
+			classList={{ [styles.message]: true, focusable: true }}
+		>
 			<div classList={{ [styles.message_inner]: true, [styles.tail]: true }}>
 				<div class={styles.sponsored_message_container}>
 					<div class={styles.ad_title + " " + styles.accent}>Ad</div>
-					<div class={styles.ad_title}>{props.message.title}</div>
+					<div class={styles.ad_title}>{props.sponsor.title}</div>
 					<div class={styles.ad_content}>
-						<Markdown entities={{ text: props.message.message, entities: props.message.entities }}></Markdown>
+						<Markdown entities={{ text: props.sponsor.message, entities: props.sponsor.entities }}></Markdown>
 					</div>
+					<div class={styles.ad_button}>{props.sponsor.buttonText}</div>
 				</div>
 			</div>
 		</div>
