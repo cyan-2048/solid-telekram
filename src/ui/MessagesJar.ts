@@ -159,22 +159,32 @@ export default class MessagesJar extends Map<number, UIMessage> {
 			// toaster("Loading more messages...");
 		}
 
-		try {
-			const e = await tg.getHistory(this.dialog.peer, {
-				limit: 20,
-				offset: this.lastOffset,
-			});
+		let tries = 0;
 
-			// if (hasLoadedBefore) await sleep(2000);
+		while (true) {
+			try {
+				tries++;
+				const e = await tg.getHistory(this.dialog.peer, {
+					limit: 20,
+					offset: this.lastOffset,
+				});
 
-			// console.log(e);
+				// if (hasLoadedBefore) await sleep(2000);
 
-			this.hasLoadedBefore = true;
-			this.lastOffset = e.next;
+				// console.log(e);
 
-			this.addBulk(e);
-		} catch (e: any) {
-			toaster((e?.name || "Unknown Error") + ": " + (e?.message || "???"));
+				this.hasLoadedBefore = true;
+				this.lastOffset = e.next;
+
+				this.addBulk(e);
+				break;
+			} catch (e: any) {
+				console.error("ERROR tg.getHistory", e);
+				if (tries > 2) {
+					toaster((e?.name || "Unknown Error") + ": " + (e?.message || "???"));
+					break;
+				}
+			}
 		}
 
 		if (hasLoadedBefore) {
