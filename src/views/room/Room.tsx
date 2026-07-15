@@ -12,7 +12,7 @@ import { timeStamp } from "../Home";
 import type UIDialog from "@/ui/UIDialog";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import WhenMounted from "@components/WhenMounted";
-import MessageItem, { MessageProvider, UploadingMessageItem } from "./MessageItem";
+import MessageItem, { MessageProvider, SponsoredMessageItem, UploadingMessageItem } from "./MessageItem";
 import ISpinner from "@components/ISpinner";
 import RoomTextBox from "./RoomTextBox";
 import KaiButton, { ButtonContainer } from "../components/KaiButton";
@@ -248,11 +248,7 @@ function Messages(props: { dialog: UIDialog }) {
 						{(e, index) => (
 							<>
 								<Show when={sponsoredMessages()?.getByIndex(index())}>
-									{(sponsor) => (
-										<div>
-											{sponsor().message} {sponsor().url}
-										</div>
-									)}
+									{(sponsor) => <SponsoredMessageItem message={sponsor()} />}
 								</Show>
 								<MessageProvider
 									first={index() == 0}
@@ -266,13 +262,7 @@ function Messages(props: { dialog: UIDialog }) {
 							</>
 						)}
 					</For>
-					<Show when={sponsoredMessages()?.getLast()}>
-						{(sponsor) => (
-							<div>
-								{sponsor().message} {sponsor().url}
-							</div>
-						)}
-					</Show>
+					<Show when={sponsoredMessages()?.getLast()}>{(sponsor) => <SponsoredMessageItem message={sponsor()} />}</Show>
 				</WhenMounted>
 				<For each={uploading()}>{(upload) => <UploadingMessageItem upload={upload} />}</For>
 				<Show when={showTextBox()}>

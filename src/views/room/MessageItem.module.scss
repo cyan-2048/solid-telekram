@@ -866,3 +866,40 @@ span.extra_width {
 		}
 	}
 }
+
+.sponsored_message_container {
+	position: relative;
+	padding-left: 9px;
+	padding-top: 4px;
+	padding-right: 6px;
+
+	background-color: rgba(51, 142, 232, 0.1);
+	overflow: hidden;
+	border-radius: 4px;
+
+	.ad_title {
+		font-size: 14px;
+		font-weight: 500;
+
+		line-height: 20px;
+
+		&.accent {
+			color: var(--accent);
+		}
+	}
+
+	.ad_content {
+		font-size: 14px;
+	}
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: block;
+		height: 100%;
+		width: 3px;
+		background-color: rgb(57, 149, 241);
+	}
+}

@@ -33,7 +33,7 @@ import {
 	batch,
 } from "solid-js";
 import { DiceMedia, StickerMedia, switchMessageMedia } from "./MessageMedia";
-import type { TextWithEntities, MessageMediaType, MessageMedia, Message, User, Peer, Audio } from "@mtcute/core";
+import type { TextWithEntities, MessageMediaType, MessageMedia, Message, User, Peer, Audio, tl } from "@mtcute/core";
 import { md } from "@mtcute/markdown-parser";
 import type { TelegramClient } from "@mtcute/web";
 
@@ -1573,5 +1573,23 @@ export default function MessageItem() {
 				<MessageAction />
 			</Show>
 		</>
+	);
+}
+
+export function SponsoredMessageItem(props: { message: tl.RawSponsoredMessage }) {
+	props.message.message;
+
+	return (
+		<div tabIndex={-1} classList={{ [styles.message]: true }}>
+			<div classList={{ [styles.message_inner]: true, [styles.tail]: true }}>
+				<div class={styles.sponsored_message_container}>
+					<div class={styles.ad_title + " " + styles.accent}>Ad</div>
+					<div class={styles.ad_title}>{props.message.title}</div>
+					<div class={styles.ad_content}>
+						<Markdown entities={{ text: props.message.message, entities: props.message.entities }}></Markdown>
+					</div>
+				</div>
+			</div>
+		</div>
 	);
 }
