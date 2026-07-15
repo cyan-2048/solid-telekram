@@ -1581,7 +1581,7 @@ export function SponsoredMessageItem(props: { sponsor: tl.RawSponsoredMessage })
 		<div
 			tabIndex={-1}
 			on:sn-willfocus={() => {
-				setSoftkeys("", "INFO", "");
+				setSoftkeys("", "Go", "");
 			}}
 			onFocus={(e) => {
 				if (e.currentTarget == e.target) {
@@ -1602,10 +1602,12 @@ export function SponsoredMessageItem(props: { sponsor: tl.RawSponsoredMessage })
 		>
 			<div classList={{ [styles.message_inner]: true, [styles.tail]: true }}>
 				<div class={styles.sponsored_message_container}>
-					<div class={styles.ad_title + " " + styles.accent}>Ad</div>
-					<div class={styles.ad_title}>{props.sponsor.title}</div>
-					<div class={styles.ad_content}>
-						<Markdown entities={{ text: props.sponsor.message, entities: props.sponsor.entities }}></Markdown>
+					<div class={styles.ad_wrapper}>
+						<div class={styles.ad_title + " " + styles.accent}>Ad</div>
+						<div class={styles.ad_title}>{props.sponsor.title}</div>
+						<div class={styles.ad_content}>
+							<Markdown entities={{ text: props.sponsor.message, entities: props.sponsor.entities }}></Markdown>
+						</div>
 					</div>
 					<div class={styles.ad_button}>{props.sponsor.buttonText}</div>
 				</div>

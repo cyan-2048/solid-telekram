@@ -873,7 +873,7 @@ span.extra_width {
 	padding-top: 4px;
 	padding-right: 6px;
 
-	background-color: rgba(51, 142, 232, 0.1);
+	background-color: #eaf3fd;
 	overflow: hidden;
 	border-radius: 4px;
 
@@ -891,6 +891,11 @@ span.extra_width {
 	.ad_content {
 		font-size: 14px;
 		line-height: 18.4px;
+	}
+
+	.ad_wrapper {
+		max-height: calc(60vh - 46px);
+		overflow: hidden;
 	}
 
 	.ad_button {

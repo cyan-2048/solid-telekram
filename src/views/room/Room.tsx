@@ -1,7 +1,17 @@
 import { useStore } from "@nanostores/solid";
 import * as styles from "./Room.module.scss";
 import { $editingMessage, $replyingMessage, $room, $view, $wallpaper, $wallpaper_color } from "@/stores";
-import { type ComponentProps, createEffect, createMemo, For, type JSX, onCleanup, onMount, Show } from "solid-js";
+import {
+	type ComponentProps,
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	type JSX,
+	onCleanup,
+	onMount,
+	Show,
+} from "solid-js";
 import { tg, typingIndicatorPrivateJar, userStatusJar } from "@globals";
 import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
@@ -192,10 +202,26 @@ function Messages(props: { dialog: UIDialog }) {
 
 	const sponsoredMessagesRaw = useStore_(() => props.dialog.$sponsoredMessages);
 
+	const [sponsoredMessagesReady, setSponsoredMessagesReady] = createSignal(true);
+
+	createEffect(() => {
+		// Track props.dialog
+		props.dialog;
+
+		setSponsoredMessagesReady(false);
+
+		const timer = setTimeout(() => {
+			setSponsoredMessagesReady(true);
+		}, 1_500);
+
+		onCleanup(() => clearTimeout(timer));
+	});
+
 	const sponsoredMessages = createMemo(() => {
+		const ready = sponsoredMessagesReady();
 		messages();
 		sponsoredMessagesRaw();
-		return props.dialog.getSponsoredMessages();
+		return ready ? props.dialog.getSponsoredMessages() : null;
 	});
 
 	const view = useStore($view);
