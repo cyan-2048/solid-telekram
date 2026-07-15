@@ -212,7 +212,7 @@ function Messages(props: { dialog: UIDialog }) {
 
 		const timer = setTimeout(() => {
 			setSponsoredMessagesReady(true);
-		}, 1_500);
+		}, 2_000);
 
 		onCleanup(() => clearTimeout(timer));
 	});
@@ -222,6 +222,18 @@ function Messages(props: { dialog: UIDialog }) {
 		messages();
 		sponsoredMessagesRaw();
 		return ready ? props.dialog.getSponsoredMessages() : null;
+	});
+
+	createEffect(() => {
+		sponsoredMessages();
+
+		const current = document.activeElement as HTMLElement;
+		if (current && sponsoredMessagesReady() && $view.get() == "room" && current.matches(`.${styles.room} .focusable`)) {
+			scrollIntoView(current, {
+				behavior: "instant",
+				block: "center",
+			});
+		}
 	});
 
 	const view = useStore($view);
