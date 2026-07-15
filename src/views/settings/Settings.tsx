@@ -78,7 +78,7 @@ function DataSettings(props: { onClose: () => void }) {
 						[SN_ID]: true,
 					}}
 					tabIndex={0}
-					on:sn-enter-down={async () => {
+					on:sn-enter-up={async () => {
 						const supported = await isDeviceStorageSupportedAsync();
 						const result = await select(
 							(["caches", "localforage", supported ? "device" : null] as const)
@@ -192,7 +192,7 @@ export default function Settings(props: { onClose: () => void }) {
 						{/* proxy is only available on KaiOS */}
 						<ListItem
 							focusable
-							on:sn-enter-down={() => {
+							on:sn-enter-up={() => {
 								setShowProxySettings(true);
 							}}
 							on:sn-focused={() => {
@@ -206,7 +206,7 @@ export default function Settings(props: { onClose: () => void }) {
 						</ListItem>
 					</Show>
 					<ListItem
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							setShowWallpaperSettings(true);
 						}}
 						on:sn-focused={() => {
@@ -219,7 +219,7 @@ export default function Settings(props: { onClose: () => void }) {
 						Chat Wallpaper
 					</ListItem>
 					<ListItem
-						on:sn-enter-down={() => {
+						on:sn-enter-up={() => {
 							setShowDataSettings(true);
 						}}
 						focusable
@@ -234,7 +234,7 @@ export default function Settings(props: { onClose: () => void }) {
 							[items]: true,
 						}}
 						tabIndex={0}
-						on:sn-enter-down={async () => {
+						on:sn-enter-up={async () => {
 							await sleep(100);
 
 							const sure = await confirm("Are you sure you want to log out?");

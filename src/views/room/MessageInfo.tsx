@@ -696,7 +696,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 										[SN_ID_OPTIONS]: true,
 										[styles.option_item]: true,
 									}}
-									on:keydown={(e) => {
+									onKeyUp={(e) => {
 										if (e.key == "Enter") {
 											viewRef.focus();
 											setShowOptions(false);
