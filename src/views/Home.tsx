@@ -262,8 +262,6 @@ function generateHiddenCodeThing(length = 5) {
 	return e;
 }
 
-const isLandscape = window.innerHeight < window.innerWidth;
-
 function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () => boolean; loadMore?: () => void }) {
 	const [focused, setFocused] = createSignal(false);
 
@@ -385,11 +383,12 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 						setShowOptions(true);
 					}
 				}}
-				on:sn-enter-down={async () => {
+				on:sn-enter-down={() => {
 					if (!props.$.messages.hasLoadedBefore) {
 						props.$.messages.loadMore();
 					}
-
+				}}
+				on:sn-enter-up={() => {
 					batch(() => {
 						$room.set(props.$);
 						$view.set("room");
@@ -428,7 +427,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 					<div class={styles.bottom}>
 						<div class={styles.desc}>
 							<DialogSender $={props.$} />
-							<MarkdownText text={textFactory()?.slice(0, isLandscape ? 50 : 30) || "__"} />
+							<MarkdownText text={textFactory() || "__"} />
 						</div>
 						<div class={styles.meta}>
 							<Show when={pinned() && !count()}>

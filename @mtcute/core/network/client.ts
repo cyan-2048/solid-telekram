@@ -206,6 +206,7 @@ export class MtClient {
   readonly network: NetworkManager
 
   private _abortController: AbortController
+  /** Signal that is aborted when the client is destroyed */
   readonly stopSignal: AbortSignal
 
   readonly onUsable: Emitter<void> = new Emitter()
@@ -272,7 +273,6 @@ export class MtClient {
         onConnecting: this.onConnecting.emit.bind(this.onConnecting),
         onNetworkChanged: this.onNetworkChanged.emit.bind(this.onNetworkChanged),
         onUpdate: this.onUpdate.emit.bind(this.onUpdate),
-        stopSignal: this.stopSignal,
         platform: params.platform,
         ...dropUndefined(params.network),
       },
@@ -317,12 +317,11 @@ export class MtClient {
   }
 
   async disconnect(): Promise<void> {
-    await this.network.destroy()
+    await this.network.disconnect()
     await this.storage.save()
     this._config.destroy()
     this._prepare.reset()
     this._connect.reset()
-    this._abortController.abort()
     this.log.debug('client disconnected')
   }
 
@@ -332,6 +331,8 @@ export class MtClient {
    * **Note**: must be called *after* {@link disconnect}
    */
   async destroy(): Promise<void> {
+    this._abortController.abort()
+    await this.network.destroy()
     await this.storage.destroy()
 
     this.log.debug('client destroyed')
