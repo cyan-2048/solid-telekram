@@ -20,7 +20,7 @@ const lru = new LRUCache<number, MessagesJar>({
 });
 
 export default class MessagesJar extends Map<number, UIMessage> {
-	constructor(public dialog: UIDialog) {
+	constructor(protected dialog: UIDialog) {
 		super();
 	}
 
@@ -46,8 +46,8 @@ export default class MessagesJar extends Map<number, UIMessage> {
 
 	hasLoadedBefore = false;
 
-	private lastOffset?: GetHistoryOffset;
-	private isLoadingMore = false;
+	protected lastOffset?: GetHistoryOffset;
+	protected isLoadingMore = false;
 
 	/* add cached message, aka message that should not be shown in the UI */
 	addCached($: UIMessage | Message) {
@@ -94,8 +94,8 @@ export default class MessagesJar extends Map<number, UIMessage> {
 		return arr;
 	}
 
-	sort() {
-		lru.set(this.dialog.id, this);
+	protected sort(addToLru = true) {
+		if (addToLru) lru.set(this.dialog.id, this);
 
 		const messages = this.list();
 		messages.sort((a, b) => {

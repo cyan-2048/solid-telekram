@@ -14,7 +14,6 @@ import {
 	setSoftkeys,
 	sleep,
 	typeInTextbox,
-	useStore as useStore_,
 } from "@utils";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { ReplyMessage } from "./MessageItem";
@@ -33,6 +32,7 @@ import ImageUpload from "./ImageUpload";
 import LazyGifPicker from "./LazyGifPicker";
 import LazyEmojiPicker from "./LazyEmojiPicker";
 import { cloudphone, cloudphone_features } from "@/config";
+import { createThumbnail } from "@/lib/music-metadata/createThumbnail";
 
 const SN_ID_OPTIONS = "options";
 
@@ -403,7 +403,12 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 	function focusNonFloatingTextbox() {
 		return sleep(0).then(() => {
-			document.querySelector<HTMLDivElement>(".roomTextbox")?.focus();
+			const textbox = document.querySelector<HTMLDivElement>(".roomTextbox");
+			if (textbox) {
+				textbox.focus();
+			} else {
+				SpatialNavigation.focus("room");
+			}
 		});
 	}
 
@@ -604,17 +609,37 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 			await focusNonFloatingTextbox();
 		}
 
-		tg.sendMedia(dialog.peer, InputMedia.audio(blob, {}), {
-			...additionalProps,
-			shouldDispatch: true,
-			abortSignal: upload.abortSignal,
-			progressCallback(uploaded, total) {
-				upload.setFileSize(total);
-				upload.setUploaded(uploaded);
-				const progress = Math.ceil((uploaded / total) * 100);
-				upload.setProgress(progress);
+		const metadata = await (await import("@/lib/music-metadata")).parseBlob(blob, {
+			duration: false,
+			skipPostHeaders: true,
+			includeChapters: false,
+		});
+
+		const picture = metadata.common.picture?.[0].data;
+
+		const thumb = picture
+			? await createThumbnail(picture as Uint8Array<ArrayBuffer>).catch(() => undefined)
+			: undefined;
+
+		tg.sendMedia(
+			dialog.peer,
+			InputMedia.audio(blob, {
+				title: metadata.common.title,
+				thumb: thumb,
+				performer: metadata.common.artist,
+			}),
+			{
+				...additionalProps,
+				shouldDispatch: true,
+				abortSignal: upload.abortSignal,
+				progressCallback(uploaded, total) {
+					upload.setFileSize(total);
+					upload.setUploaded(uploaded);
+					const progress = Math.ceil((uploaded / total) * 100);
+					upload.setProgress(progress);
+				},
 			},
-		})
+		)
 			.then((msg) => {
 				dialog.removeUpload(upload);
 				dialog.$lastMessage.set(dialog.messages.add(msg));

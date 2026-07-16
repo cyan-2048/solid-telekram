@@ -274,11 +274,22 @@ export default class UIMessage {
 					newText = action.title + " was created";
 					break;
 
-				case "topic_edited":
-					if (action.closed) {
-						newText = $.sender.displayName + " closed the topic";
+				case "topic_edited": {
+					if (typeof action.closed == "boolean") {
+						newText = `${$.isOutgoing ? "You" : $.sender.displayName} ${action.closed ? "closed" : "reopened"} the topic`;
+						break;
 					}
+
+					if (action.title) {
+						newText = `${$.isOutgoing ? "You" : $.sender.displayName} renamed the topic to "${action.title}"`;
+
+						break;
+					}
+
+					// unsupported
+					newText = "Unsupported Message Action: " + action.type;
 					break;
+				}
 
 				case "call":
 					if (action.duration) {

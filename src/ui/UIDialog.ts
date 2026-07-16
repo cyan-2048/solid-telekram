@@ -87,7 +87,7 @@ export enum UIDialogMuteDuration {
 const _instanceof_symbol = Symbol("UIDialog");
 
 export default class UIDialog {
-	[_instanceof_symbol] = true;
+	private [_instanceof_symbol] = true;
 
 	private static _queue = new Queue({
 		autostart: true,
