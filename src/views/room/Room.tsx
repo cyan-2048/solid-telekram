@@ -29,13 +29,6 @@ import KaiButton, { ButtonContainer } from "../components/KaiButton";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { alert } from "../modals";
 
-function getMembersCount(peer: Peer) {
-	if ((peer.raw as tl.RawChannel).participantsCount) {
-		return (peer.raw as tl.RawChannel).participantsCount;
-	}
-	return null;
-}
-
 const typingStatusDictionaryForPrivateChats = {
 	typing: "typing",
 	upload_voice: "sending file",
@@ -384,6 +377,8 @@ export default function Room(props: { hidden: boolean }) {
 		return editing || replying;
 	});
 
+	const memberCount = useStore_(() => room()?.$memberCount);
+
 	createEffect(() => {
 		const _room = room()?.peer;
 
@@ -437,7 +432,7 @@ export default function Room(props: { hidden: boolean }) {
 												</Show>
 											}
 										>
-											{getMembersCount(dialog().peer)} {dialog().chatType == "channel" ? "Subscribers" : "Members"}
+											{memberCount() || 0} {dialog().chatType == "channel" ? "Subscribers" : "Members"}
 										</Show>
 									</span>
 								</div>
