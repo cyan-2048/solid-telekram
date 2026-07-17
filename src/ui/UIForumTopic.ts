@@ -3,10 +3,10 @@ import MessagesJar from "./MessagesJar";
 import type UIDialog from "./UIDialog";
 
 import { LRUCache } from "lru-cache";
-import type { ChatPermissions, ChatType, Dialog, ForumTopic, Peer, TextWithEntities, tl } from "@mtcute/core";
+import type { ChatType, ForumTopic, Peer, TextWithEntities, tl } from "@mtcute/core";
 import { toaster } from "@utils";
-import { atom, type PreinitializedWritableAtom } from "nanostores";
-import { UIMessageUploading, type UIDialogMuteDuration, type UISponsoredMessages } from "./UIDialog";
+import { atom } from "nanostores";
+import { UIDialogMuteDuration, UIMessageUploading } from "./UIDialog";
 import UIMessage from "./UIMessage";
 
 const lru = new LRUCache<string, MessagesJar>({
@@ -104,7 +104,11 @@ class ForumMessagesJar extends MessagesJar {
 	}
 }
 
+const MAX_INT_32 = 2 ** 31 - 1;
+
 const _instanceof_symbol = Symbol("UIForumTopic");
+
+// I wanted to inherit UIDialog for this but it feels like both are too different to be inherited
 
 export default class UIForumTopic {
 	private [_instanceof_symbol] = true;
@@ -136,6 +140,8 @@ export default class UIForumTopic {
 	$countMention = atom(0);
 	$countReaction = atom(0);
 
+	private muteUntil: null | number = null;
+
 	get peer(): Peer {
 		return this.dialog.peer;
 	}
@@ -157,28 +163,65 @@ export default class UIForumTopic {
 		this.$count.set(forumTopic.unreadCount);
 		this.$countMention.set(forumTopic.unreadMentionsCount);
 		this.$countReaction.set(forumTopic.unreadReactionsCount);
+
+		this.updateNotifySettings(forumTopic.raw.notifySettings);
 	}
 
-	syncMuted(): void {
-		throw new Error("Method not implemented.");
+	private async updateChatNotifySettings(settings: Omit<tl.RawInputPeerNotifySettings, "_">) {
+		const peer = await tg.resolvePeer(this.dialog.peer);
+
+		tg.call({
+			_: "account.updateNotifySettings",
+			peer: { _: "inputNotifyForumTopic", peer: peer, topMsgId: this.forumTopic.id },
+			settings: {
+				_: "inputPeerNotifySettings",
+				...settings,
+			},
+		});
 	}
-	updateNotifySettings(notifySettings: tl.RawPeerNotifySettings): void {
-		throw new Error("Method not implemented.");
+
+	/**
+	 * refresh $muted store (run this when really necessary)
+	 */
+	syncMuted() {
+		this.$muted.set(typeof this.muteUntil == "number" && Math.floor(Date.now() / 1000) < this.muteUntil);
+	}
+
+	updateNotifySettings(notifySettings: tl.RawPeerNotifySettings) {
+		this.muteUntil = typeof notifySettings.muteUntil == "number" ? notifySettings.muteUntil : null;
+		this.syncMuted();
+	}
+
+	async unmute() {
+		// if not muted
+		if (!this.$muted.get()) return;
+		this.$muted.set(false);
+		this.muteUntil = null;
+		await this.updateChatNotifySettings({});
+	}
+
+	async mute(duration: UIDialogMuteDuration) {
+		if (this.$muted.get()) return;
+
+		this.$muted.set(true);
+
+		const muteUntil =
+			duration === UIDialogMuteDuration.Forever ? MAX_INT_32 : Math.floor(Date.now() / 1000) + Number(duration);
+
+		this.muteUntil = muteUntil;
+
+		await this.updateChatNotifySettings({
+			muteUntil,
+		});
 	}
 
 	refreshByPeer(): Promise<void> {
 		throw new Error("Method not implemented.");
 	}
-	readHistory(): Promise<void> {
-		throw new Error("Method not implemented.");
-	}
+
+	async readHistory() {}
+
 	deleteChannel(): Promise<void> {
-		throw new Error("Method not implemented.");
-	}
-	unmute(): Promise<void> {
-		throw new Error("Method not implemented.");
-	}
-	mute(duration: UIDialogMuteDuration): Promise<void> {
 		throw new Error("Method not implemented.");
 	}
 

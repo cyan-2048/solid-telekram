@@ -20,7 +20,7 @@ const isProd = process.env.NODE_ENV === "production";
 
 // replace BigInteger.ts with NativeBigInteger.ts on KaiOS 3.0
 const bigintFolder = path.resolve(__dirname, "@mtcute", "core", "utils", "bigint");
-const kai3Alias = {
+const nativeBigIntAlias = {
 	[path.resolve(bigintFolder, "BigInteger.ts")]: path.resolve(bigintFolder, "NativeBigInteger.ts"),
 };
 
@@ -142,7 +142,7 @@ export default defineConfig({
 			"@mtcute/web": path.resolve(__dirname, "@mtcute", "web"),
 			"@mtcute/core": path.resolve(__dirname, "@mtcute", "core"),
 
-			...(isKai3 || isKai4 ? kai3Alias : null),
+			...(isKai3 || isKai4 ? nativeBigIntAlias : null),
 		},
 	},
 
@@ -188,7 +188,7 @@ export default defineConfig({
 				polyfills:
 					/(scripts[\\/]polyfills)|(node_modules[\\/]core-js)|(node_modules[\\/]web-streams-polyfill)|(node_modules[\\/]@swc[\\/]helpers)|(node_modules[\\/]tslib)/,
 			},
-			strategy: "split-by-experience",
+			strategy: "split-by-module",
 		},
 		printFileSize: {
 			compressed: false,

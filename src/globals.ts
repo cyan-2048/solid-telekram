@@ -489,6 +489,21 @@ export async function handleNotificationClick(data: any) {
 
 	const uiDialog = dialogsJar.add(dialog);
 
+	if (uiDialog.isForum) {
+		// do something else when forum
+
+		// custom data of forum topic notifications
+		/*	 
+			msg_id: "55"
+			topic_id: "2"
+			topic_title: "Second Topic!"
+		*/
+		// topic_id, topic_title is omitted when General Topic
+
+		const topicId = Number(data?.custom?.topic_id) || 1;
+		return;
+	}
+
 	if (!uiDialog.messages.hasLoadedBefore) {
 		uiDialog.messages.loadMore();
 	}

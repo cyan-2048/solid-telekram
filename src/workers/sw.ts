@@ -296,7 +296,7 @@ async function fireNotification(data: any) {
 		} else if (data.custom.chat_id) {
 			markedPeerId = -data.custom.chat_id;
 		} else {
-			markedPeerId = data.custom.from_id || 0;
+			markedPeerId = Number(data.custom.from_id) || 0;
 		}
 		data.custom.markedPeerId = markedPeerId;
 	}
@@ -315,6 +315,7 @@ async function fireNotification(data: any) {
 		if (created && now - created < 30_000) {
 			// Notification was created within last 30 seconds
 			silent = true;
+			// issue on Nokia 8110 4G, silent notification is not silent
 			break;
 		}
 	}
