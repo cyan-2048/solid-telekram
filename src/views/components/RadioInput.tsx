@@ -1,4 +1,4 @@
-import { ComponentProps, JSX, Show, splitProps } from "solid-js";
+import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
 import * as styles from "./RadioInput.module.scss";
 
 export default function RadioInput(
@@ -6,7 +6,7 @@ export default function RadioInput(
 		subtext?: JSX.Element;
 		checked?: boolean;
 		checkbox?: boolean;
-	}
+	},
 ) {
 	const [local, rest] = splitProps(props, ["classList", "subtext", "checked", "checkbox"]);
 

@@ -45,7 +45,7 @@ export default function Zoom(
 	createEffect(() => {
 		setSrc(_props.src || "");
 
-		let timeout: NodeJS.Timeout;
+		let timeout: number;
 
 		const img = imgEl;
 		if (!img) return;

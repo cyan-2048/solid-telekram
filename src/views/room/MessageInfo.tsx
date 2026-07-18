@@ -136,7 +136,7 @@ function FocusableLink(props: {
 				on:sn-focused={() => {
 					setSoftkeys("", "OPEN", "");
 				}}
-				on:sn-enter-up={(e) => {
+				on:sn-enter-up={() => {
 					const url = props.url;
 
 					// toaster("HREF!!! " + url?.href);
@@ -491,7 +491,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 													break;
 											}
 										}}
-										onFocus={(media) => {
+										onFocus={(_media) => {
 											setSoftkeys("", "VIEW", "");
 										}}
 										customRenderer={(e, _default, _children) => {

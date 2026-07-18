@@ -9,7 +9,6 @@ import {
 	resolveSync,
 	setSoftkeys,
 	sleep,
-	toaster,
 	useMessageChecks,
 	useStore,
 } from "@utils";
@@ -769,7 +768,7 @@ function ActionMessage(
 }
 
 function MessageAction() {
-	const { text, actionType, actualLast, dialog, last, message } = useMessageContext();
+	const { text, actualLast, dialog, last, message } = useMessageContext();
 
 	const hidden = useStore(() => message().$hidden);
 

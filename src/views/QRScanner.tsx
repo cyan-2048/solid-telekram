@@ -28,7 +28,7 @@ export default function QRScanner(props: { onResult: (result: string | null) => 
 
 	function checkForQRCode(): Promise<string | null> {
 		const stop = () => stream.getTracks().forEach((a) => a.stop());
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			const canvas = document.createElement("canvas");
 			canvas.width = videoEl.videoWidth;
 			canvas.height = videoEl.videoHeight;

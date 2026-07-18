@@ -1,11 +1,11 @@
-import { ComponentProps, createSignal, splitProps, JSX } from "solid-js";
+import { type ComponentProps, createSignal, splitProps, type JSX } from "solid-js";
 import * as styles from "./Search.module.scss";
 
 export default function Search(
 	props: Omit<ComponentProps<"input">, "onFocus" | "onBlur"> & {
 		onFocus?: JSX.FocusEventHandler<HTMLInputElement, FocusEvent>;
 		onBlur?: JSX.FocusEventHandler<HTMLInputElement, FocusEvent>;
-	}
+	},
 ) {
 	const [local, rest] = splitProps(props, ["onFocus", "onBlur", "onKeyDown"]);
 

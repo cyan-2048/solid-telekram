@@ -1,4 +1,4 @@
-import { JSXElement } from "solid-js";
+import type { JSXElement } from "solid-js";
 import * as styles from "./Header.module.scss";
 
 export default function Header(props: { children: JSXElement }) {

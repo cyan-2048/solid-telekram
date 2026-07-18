@@ -1,8 +1,8 @@
 import { niceBytes, NOOP } from "@/helpers";
 import { downloadFile } from "@/lib/storage";
 import { downloadToFile, mediaFilename, setSoftkeys } from "@/utils";
-import type { FileLocation, Photo, Audio, RawDocument, MessageMedia, Sticker } from "@mtcute/core";
-import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js";
+import type { FileLocation, MessageMedia, Sticker } from "@mtcute/core";
+import { createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import * as styles from "./DownloadPrompt.module.scss";
 
 type DownloadableMedia = Extract<

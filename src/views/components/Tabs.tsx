@@ -1,4 +1,4 @@
-import { createEffect, JSXElement } from "solid-js";
+import { createEffect, type JSXElement } from "solid-js";
 import * as styles from "./Tabs.module.scss";
 import scrollIntoView from "scroll-into-view-if-needed";
 

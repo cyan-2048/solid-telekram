@@ -1,4 +1,4 @@
-import { ComponentProps, splitProps } from "solid-js";
+import { type ComponentProps, splitProps } from "solid-js";
 import * as styles from "./ProgressSpinner.module.scss";
 
 export default function ProgressSpinner(
@@ -12,7 +12,7 @@ export default function ProgressSpinner(
 		 * whether to show the close icon or not
 		 */
 		showClose?: boolean;
-	} & ComponentProps<"div">
+	} & ComponentProps<"div">,
 ) {
 	const [local, rest] = splitProps(props, ["progress", "size", "showClose"]);
 

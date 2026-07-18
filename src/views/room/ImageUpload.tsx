@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import * as styles from "./ImageUpload.module.scss";
 import { typeInTextbox, sleep, setSoftkeys, hideSoftkeys } from "@utils";
-import { Dynamic, Portal } from "solid-js/web";
+import { Portal } from "solid-js/web";
 import Options from "@components/Options";
 import OptionsMenuMaxHeight from "@components/OptionsMenuMaxHeight";
 import OptionsItem from "@components/OptionsItem";

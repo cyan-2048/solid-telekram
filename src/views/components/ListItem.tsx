@@ -1,4 +1,4 @@
-import { ComponentProps, JSX, Show, splitProps } from "solid-js";
+import { type ComponentProps, type JSX, Show, splitProps } from "solid-js";
 import * as styles from "./ListItem.module.scss";
 
 export default function ListItem(
@@ -6,7 +6,7 @@ export default function ListItem(
 		subtext?: JSX.Element;
 		indicator?: boolean;
 		focusable?: boolean;
-	}
+	},
 ) {
 	const [local, rest] = splitProps(props, ["classList", "subtext", "indicator", "tabIndex", "focusable"]);
 

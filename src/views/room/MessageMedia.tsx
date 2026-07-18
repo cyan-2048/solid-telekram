@@ -12,7 +12,7 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
-import { downloadToFile, formatTime, niceBytes, setSoftkeys, sleep, useMessageChecks, useStore } from "@utils";
+import { formatTime, niceBytes, setSoftkeys, sleep, useMessageChecks, useStore } from "@utils";
 import {
 	type MessageMediaType,
 	type Photo,

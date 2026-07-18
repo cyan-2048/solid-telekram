@@ -16,7 +16,7 @@ import { tg, typingIndicatorPrivateJar, userStatusJar } from "@globals";
 import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";
 import type { tl } from "@mtcute/core";
-import type { Peer, TypingStatus } from "@mtcute/core";
+import type { TypingStatus } from "@mtcute/core";
 import { setSoftkeys, sleep, toaster, useStore as useStore_, WALLPAPER_AVERAGE_COLORS } from "@utils";
 import { timeStamp } from "../Home";
 import type UIDialog from "@/ui/UIDialog";

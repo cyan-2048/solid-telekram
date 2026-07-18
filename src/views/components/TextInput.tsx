@@ -1,4 +1,4 @@
-import { ComponentProps, createSignal, splitProps, JSX } from "solid-js";
+import { type ComponentProps, createSignal, splitProps, type JSX } from "solid-js";
 
 import * as styles from "./TextInput.module.scss";
 
@@ -16,7 +16,7 @@ export default function TextInput(
 		 */
 		caretEnd?: boolean;
 		focused?: boolean;
-	}
+	},
 ) {
 	let pushed = false;
 

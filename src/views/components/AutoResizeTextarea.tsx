@@ -1,11 +1,11 @@
-import { ComponentProps, createSignal, splitProps } from "solid-js";
+import { type ComponentProps, createSignal, splitProps } from "solid-js";
 import * as styles from "./AutoResizeTextarea.module.scss";
 import { getTextFromContentEditable, typeInTextbox } from "@utils";
 
 export default function AutoResizeTextbox(
 	props: ComponentProps<"pre"> & {
 		placeholder?: string;
-	}
+	},
 ) {
 	const [local, _props] = splitProps(props, ["onInput", "placeholder"]);
 
@@ -18,7 +18,7 @@ export default function AutoResizeTextbox(
 				props.placeholder && show()
 					? {
 							"--placeholder": `"${props.placeholder}"`,
-					  }
+						}
 					: undefined
 			}
 		>

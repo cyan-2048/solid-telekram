@@ -1,7 +1,7 @@
 import type { Video } from "@mtcute/core";
 import { batch, createEffect, createMemo, createSignal, createUniqueId, onCleanup, onMount, Show } from "solid-js";
 import { Portal } from "solid-js/web";
-import { formatTime, sleep } from "@/helpers";
+import { formatTime } from "@/helpers";
 import SpatialNavigation from "@/lib/spatial_navigation";
 import { setStatusbarColor } from "@/stores";
 import { downloadToFile, mediaFilename, setSoftkeys } from "@/utils";

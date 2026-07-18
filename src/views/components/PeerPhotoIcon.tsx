@@ -1,4 +1,4 @@
-import { Thumbnail, type ChatPhoto, type ChatPreview, type Peer, type Photo } from "@mtcute/core";
+import type { ChatPhoto, ChatPreview, Peer, Photo } from "@mtcute/core";
 import * as styles from "./PeerPhotoIcon.module.scss";
 import {
 	createEffect,

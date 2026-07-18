@@ -1,6 +1,5 @@
 {
 	"editor.formatOnSave": true,
-	"js/ts.tsdk.path": "node_modules/typescript/lib",
 	"files.exclude": {
 		"**/*.scss.d.ts": true
 	},
@@ -22,5 +21,5 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"git.addAICoAuthor": "off",
-	"js/ts.experimental.useTsgo": true
+	"js/ts.experimental.useTsgo": false
 }

@@ -28,7 +28,7 @@ import {
 } from "@/stores";
 import type UIDialog from "@/ui/UIDialog";
 import type UIDialogFilter from "@/ui/UIDialogFilter";
-import { isToday, last, setSoftkeys, sleep, toaster, useMessageChecks, useStore } from "@/utils";
+import { isToday, last, setSoftkeys, sleep, useMessageChecks, useStore } from "@/utils";
 import Tabs, { Tab } from "@components/Tabs";
 import Content from "@components/Content";
 import PeerPhotoIcon from "@components/PeerPhotoIcon";

@@ -1,4 +1,4 @@
-import { JSXElement } from "solid-js";
+import type { JSXElement } from "solid-js";
 import * as styles from "./OptionsMenuMaxHeight.module.scss";
 
 export default function OptionsMenuMaxHeight(props: { children: JSXElement }) {

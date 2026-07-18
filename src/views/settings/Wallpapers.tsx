@@ -1,4 +1,4 @@
-import { createSignal, Index, onCleanup, onMount } from "solid-js";
+import { createSignal, onCleanup, onMount } from "solid-js";
 import * as styles from "./Wallpapers.module.scss";
 import { setSoftkeys, WALLPAPER_AVERAGE_COLORS } from "@/utils";
 import SpatialNavigation from "@/lib/spatial_navigation";

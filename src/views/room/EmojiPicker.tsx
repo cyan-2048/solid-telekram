@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Index, onCleanup, onMount, Show, untrack } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount, Show, untrack } from "solid-js";
 import Options from "@components/Options";
 import * as styles from "./EmojiPicker.module.scss";
 import scrollIntoView from "scroll-into-view-if-needed";
