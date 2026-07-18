@@ -485,7 +485,7 @@ function GifSearchItem(props: { video: Video; onSelect: (e: Video | null) => voi
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {
@@ -828,7 +828,7 @@ function GifItem(props: { onSelect: (e: Video | null) => void; video: Video }) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {

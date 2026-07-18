@@ -779,7 +779,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {
@@ -872,7 +872,7 @@ function VideoMedia(props: FocusableMediaProps) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {
@@ -1337,7 +1337,7 @@ function DocumentMedia(props: FocusableMediaProps) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {
@@ -1442,7 +1442,7 @@ function MusicMedia(props: FocusableMediaProps) {
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {

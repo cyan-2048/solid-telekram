@@ -1,4 +1,4 @@
-import { TelegramClient, User } from "@mtcute/web";
+import { type TelegramClient, User } from "@mtcute/web";
 import { Array_from_DOMCursor } from "../helpers";
 
 export async function importKaiContact(tg: TelegramClient, cachedContacts: User[], contact: mozContact) {

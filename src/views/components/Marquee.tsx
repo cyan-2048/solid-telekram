@@ -25,7 +25,7 @@ export default function Marquee(props: { children: JSXElement }) {
 	});
 
 	createEffect(() => {
-		let timeout: NodeJS.Timeout;
+		let timeout: number;
 
 		const string = innerEl?.innerText ?? "e".repeat(20);
 		const preciseTime = string.length / 15;

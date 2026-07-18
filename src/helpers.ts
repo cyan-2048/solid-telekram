@@ -1,4 +1,4 @@
-import type { tl } from "@mtcute/core";
+import type { Peer } from "@mtcute/core";
 
 export function capitalizeFirstLetter(string: string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
@@ -207,7 +207,7 @@ export function hexaToHsla(hexa: string) {
 	return rgbaToHsla(rgba[0], rgba[1], rgba[2], rgba[3]);
 }
 
-export type RawPeer = tl.RawUser | tl.RawChat | tl.RawChannel | tl.RawChatForbidden | tl.RawChannelForbidden;
+export type RawPeer = Peer["raw"];
 
 function getPeerColorIndexById(peerId: number) {
 	return Math.abs(peerId) % 7;

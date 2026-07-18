@@ -121,7 +121,7 @@ export default function ImageViewer(props: { photo: Photo; onClose: () => void }
 		let url!: string;
 
 		if (thumb && "byteLength" in thumb.location) {
-			setThumb((url = URL.createObjectURL(new Blob([thumb.location as Uint8Array<ArrayBuffer>]))));
+			setThumb((url = URL.createObjectURL(new Blob([thumb.location]))));
 		}
 
 		onCleanup(() => {

@@ -245,7 +245,7 @@ export class Download extends EventEmitter<{
 
 			for await (const chunk of iterable) {
 				this._state = "downloading";
-				const res = await download.append(chunk as Uint8Array<ArrayBuffer>);
+				const res = await download.append(chunk);
 				if (res) {
 					this.result = res;
 					this._state = "done";

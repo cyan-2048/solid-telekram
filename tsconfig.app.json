@@ -2,13 +2,16 @@
 	"compilerOptions": {
 		"lib": [
 			"DOM",
-			"ES2021",
-			"ES2024.Promise",
-			"DOM.Iterable",
+			"ES2016",
+			"ES2019.String",
+			"ES2015.Promise",
 			"WebWorker",
-			"ESNext.Collection",
-			"ES2023.Array",
-			"ES2022.Object"
+			"DOM.Iterable",
+			"ES2022.Object",
+			"ES2018.Promise",
+			"ES2024.Promise",
+			"ES2018.AsyncGenerator",
+			"ES2018.AsyncIterable"
 		],
 		"jsx": "preserve",
 		"target": "es6",

@@ -617,9 +617,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 
 		const picture = metadata.common.picture?.[0].data;
 
-		const thumb = picture
-			? await createThumbnail(picture as Uint8Array<ArrayBuffer>).catch(() => undefined)
-			: undefined;
+		const thumb = picture ? await createThumbnail(picture).catch(() => undefined) : undefined;
 
 		tg.sendMedia(
 			dialog.peer,
