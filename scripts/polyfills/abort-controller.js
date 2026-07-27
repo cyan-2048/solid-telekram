@@ -30,6 +30,25 @@ class AbortSignal extends EventTarget {
 		}, time);
 		return controller.signal;
 	}
+
+	static any(signals) {
+		const copy = [...signals];
+
+		const controller = new AbortController();
+
+		function abort() {
+			controller.abort(this.reason);
+			for (let i = 0; i < copy.length; i++) {
+				copy[i].removeEventListener("abort", abort);
+			}
+		}
+
+		for (let i = 0; i < copy.length; i++) {
+			copy[i].addEventListener("abort", abort);
+		}
+
+		return controller.signal;
+	}
 }
 
 class AbortController {
