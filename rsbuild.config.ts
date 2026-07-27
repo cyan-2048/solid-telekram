@@ -74,7 +74,7 @@ export default defineConfig({
 		headers: isKai4
 			? {
 					// default KaiOS 3.0 CSP rules
-					"Content-Security-Policy": `default-src *; script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline'`,
+					"Content-Security-Policy": `default-src * data: blob:; script-src 'self' http://127.0.0.1:8081 http://local-device.kaiostech.com:8081; object-src 'none'; style-src 'self' 'unsafe-inline'`,
 				}
 			: undefined,
 		port: 8082,
