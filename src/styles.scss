@@ -3,6 +3,8 @@
 	box-sizing: border-box;
 
 	background-repeat: no-repeat;
+
+	scrollbar-width: thin;
 }
 
 @font-face {
@@ -80,30 +82,30 @@ html {
 	src: url("./assets/NotoSansSymbols-BrailleSubset.woff2") format("woff2"); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
-.LOADING::before {
-	content: "";
-	background-image: url(/icon112.png);
-	position: absolute;
-	top: 50%;
-	left: 50%;
+// .LOADING::before {
+// 	content: "";
+// 	background-image: url(/icon112.png);
+// 	position: absolute;
+// 	top: 50%;
+// 	left: 50%;
 
-	background-repeat: no-repeat;
-	background-size: contain;
-	transform: translate(-50%, -50%);
-}
+// 	background-repeat: no-repeat;
+// 	background-size: contain;
+// 	transform: translate(-50%, -50%);
+// }
 
-.LOADING {
-	position: fixed;
-	bottom: 0;
-	height: 320px;
-	max-height: 320px;
-	width: 100vw;
-	background-color: black;
-	color: white;
-	z-index: 1999;
+// .LOADING {
+// 	position: fixed;
+// 	bottom: 0;
+// 	height: 320px;
+// 	max-height: 320px;
+// 	width: 100vw;
+// 	background-color: black;
+// 	color: white;
+// 	z-index: 1999;
 
-	&::before {
-		width: 84.5px;
-		height: 84.5px;
-	}
-}
+// 	&::before {
+// 		width: 84.5px;
+// 		height: 84.5px;
+// 	}
+// }

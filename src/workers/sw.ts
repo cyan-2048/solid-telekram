@@ -203,22 +203,43 @@ async function openApp(notification: Notification) {
 	} catch {}
 
 	try {
-		// KaiOS docs says this should be available?
-		if ("openApp" in sw.clients && typeof sw.clients.openApp == "function") {
-			return sw.clients.openApp() as void;
-		}
+		// the code here works fine on KaiOS 2.5, so I won't bother
+		if (import.meta.env.KAIOS == 2) {
+			// KaiOS 2.5 docs says this should be available?
+			if ("openApp" in sw.clients && typeof sw.clients.openApp == "function") {
+				console.log("[SW] has openApp");
 
-		const clientList = await sw.clients.matchAll({ type: "window" });
-
-		for (var i = 0; i < clientList.length; i++) {
-			let client = clientList[i];
-			if ("focus" in client) {
-				return client.focus();
+				return sw.clients.openApp() as void;
 			}
-		}
 
-		if (typeof sw.clients.openWindow == "function") {
-			return sw.clients.openWindow(new URL("/", self.location.origin)).then((client) => client?.focus());
+			const clientList = await sw.clients.matchAll({ type: "window" });
+
+			for (var i = 0; i < clientList.length; i++) {
+				let client = clientList[i];
+				if ("focus" in client) {
+					return client.focus();
+				}
+			}
+
+			if (typeof sw.clients.openWindow == "function") {
+				return sw.clients.openWindow(new URL("/", self.location.origin)).then((client) => client?.focus());
+			}
+		} else {
+			const clientList = await sw.clients.matchAll({ type: "window" });
+
+			for (var i = 0; i < clientList.length; i++) {
+				let client = clientList[i];
+				if ("focus" in client) {
+					client.postMessage({ type: "window-open" });
+					return client.focus();
+				}
+			}
+
+			if (typeof sw.clients.openWindow == "function") {
+				return sw.clients
+					.openWindow(new URL("/", self.location.origin) + "index.html")
+					.then((client) => client?.focus());
+			}
 		}
 	} catch (err) {
 		console.log(err);

@@ -118,18 +118,21 @@ export default function NotificationsSettings(props: { onClose: () => void }) {
 							setLoading(true);
 
 							// on KaiOS 2.5.4+ Noto Color Emoji is broken
-							// not sure if needed for KaiOS 3.0+
-							spanRef.style.fontFamily = "KaiOS Emoji";
-							const fontSizeA = spanRef.offsetHeight;
-							// globalThis.console.log("[1]", fontSizeA);
-							spanRef.style.fontFamily = "Noto Color Emoji";
-							const fontSizeB = spanRef.offsetHeight;
-							// globalThis.console.log("[2]", fontSizeB);
-							const notoColorEmojiDetected = fontSizeB != fontSizeA;
-							// globalThis.console.log("[3] Noto Color Emoji detected?", notoColorEmojiDetected);
-							spanRef.style.fontFamily = "KaiOS Emoji";
+							if (import.meta.env.KAIOS == 2) {
+								spanRef.style.fontFamily = "KaiOS Emoji";
+								const fontSizeA = spanRef.offsetHeight;
+								// globalThis.console.log("[1]", fontSizeA);
+								spanRef.style.fontFamily = "Noto Color Emoji";
+								const fontSizeB = spanRef.offsetHeight;
+								// globalThis.console.log("[2]", fontSizeB);
+								const notoColorEmojiDetected = fontSizeB != fontSizeA;
+								// globalThis.console.log("[3] Noto Color Emoji detected?", notoColorEmojiDetected);
+								spanRef.style.fontFamily = "KaiOS Emoji";
 
-							await setNotoColorEmojiFix(notoColorEmojiDetected);
+								await setNotoColorEmojiFix(notoColorEmojiDetected);
+							} else {
+								await setNotoColorEmojiFix(false);
+							}
 
 							if (import.meta.env.DEV) {
 								promise = sleep(2000);

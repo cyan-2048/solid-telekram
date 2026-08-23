@@ -42,6 +42,14 @@ if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
 					console.log("[SW]addEventListener:", event.data);
 				});
 			}
+
+			if (import.meta.env.KAIOS != 2) {
+				navigator.serviceWorker.addEventListener("message", (event) => {
+					if (event.data?.type == "window-open") {
+						window.open(location.origin + "/manifest.webmanifest", "__blank__", "kind=app,noopener=yes");
+					}
+				});
+			}
 		})
 		.catch((error) => {
 			console.error("Service Worker", error);
@@ -144,32 +152,27 @@ export function subscribePush(): Promise<any> {
 	});
 }
 
-export function unsubscribePush(): Promise<any> {
-	return new Promise((resolve, reject) => {
-		getPushSubscription()
-			.then((subscription) => {
-				if (!subscription) reject("Please subscribe");
-				else return subscription.unsubscribe();
-			})
-			.then((result) => {
-				resolve(result);
-			})
-			.catch(reject);
+export function unsubscribePush() {
+	return getPushSubscription().then((subscription) => {
+		if (!subscription) {
+			return Promise.reject("Please subscribe");
+		} else {
+			return subscription.unsubscribe();
+		}
 	});
 }
 
-export function getPushSubscription(): Promise<any> {
-	return new Promise((resolve, reject) => {
-		navigator.serviceWorker.ready
-			.then((reg) => {
-				return reg.pushManager.getSubscription();
-			})
-			.then((subscription) => {
-				if (!subscription) reject("Please subscribe");
-				else resolve(subscription);
-			})
-			.catch(reject);
-	});
+export function getPushSubscription() {
+	return navigator.serviceWorker.ready
+		.then((reg) => {
+			return reg.pushManager.getSubscription();
+		})
+		.then((subscription) => {
+			if (!subscription) return Promise.reject("Please subscribe");
+			else {
+				return subscription;
+			}
+		});
 }
 
 export async function registerDevice(subscription: any) {

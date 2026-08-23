@@ -82,6 +82,12 @@ export function pluginServiceWorker(): RsbuildPlugin {
 							avoidEntryIife: false,
 						},
 
+						plugins: [
+							new rspack.DefinePlugin({
+								"import.meta.env.KAIOS": isKai3 ? 3 : isKai4 ? 4 : 2,
+							}),
+						],
+
 						resolve: {
 							extensions: [".ts", ".js", ".json"],
 						},

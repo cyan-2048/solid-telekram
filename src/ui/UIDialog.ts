@@ -288,7 +288,14 @@ export default class UIDialog {
 	}
 
 	updateNotifySettings(notifySettings: tl.RawPeerNotifySettings) {
-		this.muteUntil = typeof notifySettings.muteUntil == "number" ? notifySettings.muteUntil : null;
+		this.muteUntil =
+			// if specified to be silent, muted forever
+			typeof notifySettings.silent == "boolean" && notifySettings.silent
+				? MAX_INT_32
+				: // if muteUntil is a number
+					typeof notifySettings.muteUntil == "number"
+					? notifySettings.muteUntil
+					: null;
 		this.syncMuted();
 	}
 

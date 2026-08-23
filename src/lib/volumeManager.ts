@@ -25,34 +25,45 @@ function startVolumeManager() {
 	sessionstate.onsessiondisconnected = function () {
 		startVolumeManager();
 	};
-	session.open("websocket", "localhost:8081", "secrettoken", sessionstate, true);
+	session.open("websocket", "localhost", "secrettoken", sessionstate, true);
 }
 
-const loadScripts = (() => {
+function loadScript(src: string) {
+	const head = document.head;
+
+	const script = document.createElement("script");
+	script.type = "text/javascript";
+	script.src = src;
+
+	const promise = new Promise((res) => {
+		script.onload = () => {
+			res(true);
+			script.remove();
+		};
+
+		script.onerror = () => {
+			res(false);
+			script.remove();
+		};
+	});
+
+	head.appendChild(script);
+	return promise;
+}
+
+const loadScripts = (async () => {
 	if (navigator.b2g) {
-		const head = document.head;
 		const scripts = [
-			"http://127.0.0.1:8081/api/v1/shared/core.js",
-			"http://127.0.0.1:8081/api/v1/shared/session.js",
-			"http://127.0.0.1:8081/api/v1/audiovolumemanager/service.js",
+			"http://127.0.0.1/api/v1/shared/core.js",
+			"http://127.0.0.1/api/v1/shared/session.js",
+			"http://127.0.0.1/api/v1/audiovolumemanager/service.js",
 		];
-		const promises = scripts.map((path) => {
-			var script = document.createElement("script");
-			script.type = "text/javascript";
-			script.src = path;
 
-			const promise = new Promise((res) => {
-				script.onload = () => {
-					res(true);
-					script.remove();
-				};
-			});
-
-			head.appendChild(script);
-			return promise;
-		});
-
-		return Promise.all(promises).then(() => true);
+		for (let i = 0; i < scripts.length; i++) {
+			const src = scripts[i];
+			await loadScript(src);
+		}
+		return true;
 	}
 
 	return Promise.resolve(false);

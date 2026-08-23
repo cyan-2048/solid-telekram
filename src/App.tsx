@@ -40,7 +40,10 @@ function App() {
 				await sleep(200);
 				await Promise.race([document.fonts.load('16px "emoji"').catch(() => null), sleep(3000)]);
 			}
-			document.querySelector(".LOADING")?.remove();
+
+			setTimeout(() => {
+				document.querySelector(".LOADING")?.remove();
+			}, 100);
 
 			// toaster(navigator.userAgent);
 

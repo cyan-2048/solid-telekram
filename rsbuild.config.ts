@@ -116,13 +116,25 @@ export default defineConfig({
 	html: {
 		inject: "body",
 		title: "TeleKram",
+		scriptLoading: "blocking",
 		meta: {
 			"theme-color": {
 				name: "theme-color",
 				content: "#000",
 			},
 		},
-		tags: [{ tag: "div", attrs: { class: "LOADING" }, append: false, head: false }],
+		tags: [
+			{
+				tag: "div",
+				attrs: {
+					class: "LOADING",
+					style: "position:fixed;bottom:0;height:320px;width:100vw;background-color:#000;color:#fff;z-index:1999;",
+				},
+				children: `<img width="84.5" height="84.5" src="data:image/png;base64,${fs.readFileSync(path.resolve(__dirname, "public", "icon112.png"), "base64")}" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">`,
+				append: false,
+				head: false,
+			},
+		],
 	},
 
 	resolve: {
