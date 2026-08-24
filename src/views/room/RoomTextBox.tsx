@@ -233,13 +233,26 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 		const _textboxRef = textboxRef();
 		if (!_textboxRef) return;
 
-		setTimeout(() => {
+		queueMicrotask(() => {
 			_textboxRef.focus();
 			const edit = editingMessage();
+			const reply = replyingMessage();
 			if (edit) {
 				typeInTextbox(md.unparse(edit.textWithEntities), _textboxRef);
 			}
-		}, 100);
+
+			if (reply) {
+				const nonFloatingTextbox = document.querySelector<HTMLPreElement | HTMLInputElement>(".roomTextbox");
+
+				if (nonFloatingTextbox) {
+					if ("value" in nonFloatingTextbox) {
+						typeInTextbox(nonFloatingTextbox.value, _textboxRef);
+					} else {
+						typeInTextbox(getTextFromContentEditable(nonFloatingTextbox), _textboxRef);
+					}
+				}
+			}
+		});
 	});
 
 	const [showVoiceRecorder, setShowVoiceRecorder] = createSignal(false);

@@ -40,7 +40,11 @@ import { config } from "./workers/middlewares";
 import UIGifPicker from "./ui/UIGifPicker";
 import Deferred from "./lib/Deffered";
 import { batch } from "solid-js";
-import { closeAllNotifications, manuallyUnsubscribePushNotification } from "./workers/pushNotifications";
+import {
+	closeAllNotifications,
+	getNotifications,
+	manuallyUnsubscribePushNotification,
+} from "./workers/pushNotifications";
 
 // #endregion
 
@@ -161,6 +165,25 @@ async function refreshDialogs() {
 	);
 }
 
+async function clearUnnecessaryNotificationsOnInit() {
+	const notifs = await getNotifications();
+
+	try {
+		for (let i = 0; i < notifs.length; i++) {
+			const notif = notifs[i];
+			const markedPeerId = Number(notif.data?.custom?.markedPeerId);
+
+			if (Number.isNaN(markedPeerId)) continue;
+
+			const dialog = dialogsJar.get(markedPeerId);
+
+			if (dialog && dialog.$count.get() == 0) {
+				notif.close();
+			}
+		}
+	} catch {}
+}
+
 async function initDialogs() {
 	const dialogs = [];
 
@@ -182,6 +205,8 @@ async function initDialogs() {
 	}
 
 	$dialogs.set(DialogsJar.sort(dialogs));
+
+	clearUnnecessaryNotificationsOnInit();
 }
 
 async function initTabs() {

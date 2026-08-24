@@ -848,6 +848,70 @@ function MediaChecks() {
 	);
 }
 
+function VideoGifWithoutThumbnails(props: {
+	src: string;
+	width: number;
+	setWidth: (val: number) => void;
+	focused: boolean;
+}) {
+	let videoRef!: HTMLVideoElement;
+
+	let canplay = false;
+
+	createEffect(() => {
+		props.src;
+		canplay = false;
+
+		if (videoRef) {
+			videoRef.load();
+		}
+	});
+
+	createEffect(() => {
+		const focused = props.focused;
+
+		if (focused) {
+			// videoRef.load();
+			videoRef.fastSeek?.(0.001);
+			videoRef.play();
+		} else {
+			videoRef.fastSeek?.(0.001);
+			videoRef.pause();
+		}
+	});
+
+	function forcedFirstFrame(e: Event & { currentTarget: HTMLVideoElement }) {
+		if (canplay) return;
+
+		if (e.type == "canplaythrough") {
+			canplay = true;
+		}
+
+		const videoEl = e.currentTarget;
+		if (!props.focused) {
+			videoRef.fastSeek?.(0.001);
+		}
+		setTimeout(() => {
+			props.setWidth(videoEl.clientWidth);
+		}, 0);
+	}
+
+	return (
+		<video
+			ref={videoRef}
+			muted
+			x-puffin-playsinline={cloudphone || undefined}
+			style={{
+				width: props.width ? props.width + "px" : undefined,
+			}}
+			onLoadedData={forcedFirstFrame}
+			onCanPlay={forcedFirstFrame}
+			onCanPlayThrough={forcedFirstFrame}
+			loop
+			src={props.src + "#t=0.001"}
+		></video>
+	);
+}
 function VideoMedia(props: FocusableMediaProps) {
 	const { message, focused, showChecks, media } = useMessageContext();
 
@@ -862,12 +926,16 @@ function VideoMedia(props: FocusableMediaProps) {
 	// if legacy use 1
 	const [isGif, setIsGif] = createSignal<boolean | 1>(false);
 
+	const [isNoThumbGif, setIsNoThumbGif] = createSignal(false);
+
 	createEffect(() => {
 		const media = message().media as Video;
 
 		setIsGif(media.isLegacyGif ? 1 : media.isAnimation);
 
 		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
+
+		setIsNoThumbGif(media.isAnimation && !media.isLegacyGif && media.thumbnails.length == 0);
 
 		let url!: string;
 
@@ -986,58 +1054,75 @@ function VideoMedia(props: FocusableMediaProps) {
 				}
 			>
 				<Show
-					when={focused() && src()}
+					when={isNoThumbGif()}
 					fallback={
 						<Show
-							when={preview()}
+							when={focused() && src()}
 							fallback={
+								<Show
+									when={preview()}
+									fallback={
+										<Show when={thumb()}>
+											<img
+												onLoad={(e) => {
+													setWidth(e.currentTarget.clientWidth);
+												}}
+												class={styles.thumb}
+												src={thumb() + "#-moz-samplesize=2"}
+											></img>
+										</Show>
+									}
+								>
+									<img
+										onLoad={(e) => {
+											setWidth(e.currentTarget.clientWidth);
+										}}
+										src={preview() + "#-moz-samplesize=2"}
+									></img>
+								</Show>
+							}
+						>
+							<Show
+								when={isGif() === 1}
+								fallback={
+									<video
+										muted
+										x-puffin-playsinline={cloudphone || undefined}
+										style={{
+											width: width() ? width() + "px" : undefined,
+										}}
+										onCanPlayThrough={(e) => {
+											setWidth(e.currentTarget.clientWidth);
+										}}
+										autoplay
+										loop
+										src={src()}
+									></video>
+								}
+							>
 								<img
+									style={{
+										width: width() ? width() + "px" : undefined,
+									}}
 									onLoad={(e) => {
 										setWidth(e.currentTarget.clientWidth);
 									}}
-									class={styles.thumb}
-									src={thumb() + "#-moz-samplesize=2"}
+									src={src()}
 								></img>
-							}
-						>
-							<img
-								onLoad={(e) => {
-									setWidth(e.currentTarget.clientWidth);
-								}}
-								src={preview() + "#-moz-samplesize=2"}
-							></img>
+							</Show>
 						</Show>
 					}
 				>
-					<Show
-						when={isGif() === 1}
-						fallback={
-							<video
-								muted
-								x-puffin-playsinline={cloudphone || undefined}
-								style={{
-									width: width() ? width() + "px" : undefined,
-								}}
-								onLoadedMetadata={(e) => {
-									setWidth(e.currentTarget.clientWidth);
-								}}
-								autoplay
-								loop
-								src={src()}
-							></video>
-						}
-					>
-						<img
-							style={{
-								width: width() ? width() + "px" : undefined,
-							}}
-							onLoad={(e) => {
-								setWidth(e.currentTarget.clientWidth);
-							}}
+					<Show when={src()}>
+						<VideoGifWithoutThumbnails
+							focused={focused()}
+							setWidth={setWidth}
+							width={width()}
 							src={src()}
-						></img>
+						></VideoGifWithoutThumbnails>
 					</Show>
 				</Show>
+
 				<Show when={!focused()}>
 					<div class={styles.gif}>GIF</div>
 				</Show>

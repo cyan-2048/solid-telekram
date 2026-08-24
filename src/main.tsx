@@ -29,9 +29,15 @@ import "./workers/pushNotifications.ts";
 //   }
 // });
 
-// we request cpu wakelock because yes
-if ("requestWakeLock" in navigator && typeof navigator.requestWakeLock == "function") {
-	navigator.requestWakeLock("cpu");
+if (import.meta.env.KAIOS == 2) {
+	// we request cpu wakelock because yes
+	if ("requestWakeLock" in navigator && typeof navigator.requestWakeLock == "function") {
+		navigator.requestWakeLock("cpu");
+	}
+} else {
+	if (navigator.b2g && "requestWakeLock" in navigator.b2g && typeof navigator.b2g.requestWakeLock == "function") {
+		navigator.b2g.requestWakeLock("cpu");
+	}
 }
 
 // #endregion
