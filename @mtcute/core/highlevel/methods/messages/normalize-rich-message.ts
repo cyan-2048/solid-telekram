@@ -200,6 +200,7 @@ export async function _normalizeInputRichMessage(
       switch (block._) {
         case 'pageBlockVideo': block.videoId = document.id; break
         case 'pageBlockAudio': block.audioId = document.id; break
+        case 'pageBlockDocument': block.documentId = document.id; break
         default:
           throw new MtArgumentError(`sendRichMessage: expected document ${document.id} to be used in a document block, but got ${block._}`)
       }

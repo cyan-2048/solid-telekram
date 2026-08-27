@@ -32,7 +32,7 @@ import type { InputStarsAmount } from './methods/premium/_normalize-stars-amount
 import type { CanApplyBoostResult } from './methods/premium/can-apply-boost.js'
 import type { CanSendStoryResult } from './methods/stories/can-send-story.js'
 import type { ITelegramStorageProvider } from './storage/provider.js'
-import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, TypingStatus, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
+import type { AllStories, ArrayPaginated, ArrayPaginatedWithMeta, ArrayWithTotal, Audio, Boost, BoostSlot, BoostStats, BotChatJoinRequestUpdate, BotCommands, BotGuestChatQuery, BotReactionCountUpdate, BotReactionUpdate, BotStoppedUpdate, BusinessCallbackQuery, BusinessChatLink, BusinessConnection, BusinessMessage, BusinessWorkHoursDay, CallbackQuery, Chat, ChatEvent, ChatInviteLink, ChatInviteLinkMember, ChatJoinRequestUpdate, ChatlistPreview, ChatMember, ChatMemberUpdate, ChatPreview, ChosenInlineResult, CollectibleInfo, CommunityPeerRequest, DeleteBusinessMessageUpdate, DeleteEphemeralMessagesUpdate, DeleteMessageUpdate, DeleteStoryUpdate, Dialog, EphemeralCallbackQuery, EphemeralMessage, FactCheck, FileDownloadLocation, FileDownloadParameters, ForumTopic, FullChat, FullUser, GameHighScore, HistoryReadUpdate, InlineCallbackQuery, InlineQuery, InputChatEventFilters, InputDialogFolder, InputDocumentId, InputFileLike, InputInlineMessage, InputInlineResult, InputMediaAudio, InputMediaLike, InputMediaSticker, InputMessageId, InputPeerLike, InputPrivacyRule, InputReaction, InputRichMessage, InputStarGift, InputStickerSet, InputStickerSetItem, InputText, InputWebview, MaybeDynamic, Message, MessageEffect, MessageMedia, MessageReactions, ParametersSkip2, ParsedUpdate, Peer, PeerReaction, PeerSettings, PeerStories, Photo, Poll, PollUpdate, PollVoteUpdate, PreCheckoutQuery, RawDocument, ReplyMarkup, RichMediaUploadCache, SavedStarGift, SendableTypingStatus, SentCode, StarGift, StarGiftUnique, StarGiftValue, StarsStatus, StarsTransaction, Sticker, StickerSet, StickerType, StoriesStealthMode, Story, StoryInteractions, StoryUpdate, StoryViewer, StoryViewersList, TakeoutSession, TextWithEntities, UploadedFile, UploadFileLike, User, UserStatusUpdate, UserTypingUpdate, WebPageMedia, WebviewResult } from './types/index.js'
 import type { ParsedUpdateHandlerParams } from './updates/parsed.js'
 import type { RawUpdateInfo } from './updates/types.js'
 import type { InputStringSessionData } from './utils/string-session.js'
@@ -147,9 +147,12 @@ import { getPeerDialogs } from './methods/dialogs/get-peer-dialogs.js'
 import { iterDialogs } from './methods/dialogs/iter-dialogs.js'
 import { joinChatlist } from './methods/dialogs/join-chatlist.js'
 import { setFoldersOrder } from './methods/dialogs/set-folders-order.js'
+import { deleteAllWelcomeMessages } from './methods/ephemeral/delete-all-welcome-messages.js'
 import { deleteEphemeralMessage } from './methods/ephemeral/delete-ephemeral-message.js'
+import { deleteWelcomeMessage } from './methods/ephemeral/delete-welcome-message.js'
 import { editEphemeralMessage } from './methods/ephemeral/edit-ephemeral-message.js'
 import { getEphemeralCallbackAnswer } from './methods/ephemeral/get-ephemeral-callback-answer.js'
+import { getWelcomeMessages } from './methods/ephemeral/get-welcome-messages.js'
 import { sendEphemeralMessage } from './methods/ephemeral/send-ephemeral-message.js'
 import { downloadAsBuffer } from './methods/files/download-buffer.js'
 import { downloadChunk } from './methods/files/download-chunk.js'
@@ -2706,13 +2709,22 @@ export interface TelegramClient extends ITelegramClient {
    * @param order  New order of folders (folder IDs, where default = 0)
    */
   setFoldersOrder(order: number[]): Promise<void>
+
+  /**
+   * Delete all welcome messages configured for a chat
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat to delete the welcome messages for
+   */
+  deleteAllWelcomeMessages(chatId: InputPeerLike): Promise<void>
   /**
    * Delete a previously sent ephemeral message
    */
   deleteEphemeralMessage(
     params: {
-    /** Chat where the message was sent */
-      chatId: InputPeerLike
+    /** Chat where the message was sent (`null` for guest chats) */
+      chatId: InputPeerLike | null
 
       /** User the message is visible to */
       receiverId: InputPeerLike
@@ -2720,13 +2732,25 @@ export interface TelegramClient extends ITelegramClient {
       /** ID of the message to delete */
       messageId: number
     }): Promise<void>
+
+  /**
+   * Delete a welcome message configured for a chat
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat where the welcome message is configured
+   * @param messageId  ID of the welcome message to delete
+   */
+  deleteWelcomeMessage(
+    chatId: InputPeerLike,
+    messageId: number): Promise<void>
   /**
    * Edit a previously sent ephemeral message
    */
   editEphemeralMessage(
     params: {
-    /** Chat where the message was sent */
-      chatId: InputPeerLike
+    /** Chat where the message was sent (`null` for guest chats) */
+      chatId: InputPeerLike | null
 
       /** User the message is visible to */
       receiverId: InputPeerLike
@@ -2740,8 +2764,25 @@ export interface TelegramClient extends ITelegramClient {
       /** New media of the message */
       media?: InputMediaLike
 
+      /** New rich message content of the message */
+      richMessage?: InputRichMessage
+
       /** New reply markup of the message */
       replyMarkup?: ReplyMarkup
+
+      /** Whether this message is a welcome message template for the chat */
+      welcome?: boolean
+
+      /**
+       * Whether to invert the media position.
+       *
+       * Currently only supported for web previews and makes the
+       * client render the preview above the caption and not below.
+       */
+      invertMedia?: boolean
+
+      /** Cache for the uploaded rich message media, see {@link createRichStreamingDraft} */
+      uploadCache?: RichMediaUploadCache
 
       /**
        * Whether to dispatch the returned updates
@@ -2780,21 +2821,34 @@ export interface TelegramClient extends ITelegramClient {
        */
       fireAndForget?: boolean
     }): Promise<tl.messages.TypeBotCallbackAnswer>
+
+  /**
+   * Get the welcome messages configured for a chat
+   *
+   * **Available**: 👤 users only
+   *
+   * @param chatId  Chat to get the welcome messages for
+   */
+  getWelcomeMessages(
+    chatId: InputPeerLike): Promise<EphemeralMessage[]>
   /**
    * Send an ephemeral message — a message that is only visible
    * to a single user in a chat and is not persisted in the chat history.
    *
-   * @param chatId  ID of the chat to send the message to
+   * @param chatId  ID of the chat to send the message to (`null` for guest chats, where `queryId` is used instead)
    * @param receiverId  ID of the user the message should be visible to
    * @param text  Text of the message
    */
   sendEphemeralMessage(
-    chatId: InputPeerLike,
+    chatId: InputPeerLike | null,
     receiverId: InputPeerLike,
     text: InputText,
     params?: {
     /** Media to be attached to the message */
       media?: InputMediaLike
+
+      /** Rich message content to be sent instead of the plain text */
+      richMessage?: InputRichMessage
 
       /** Message to reply to */
       replyTo?: number
@@ -2807,6 +2861,26 @@ export interface TelegramClient extends ITelegramClient {
 
       /** For guest chat bots, ID of the query that this message is sent in response to */
       queryId?: tl.Long
+
+      /** Whether to send this message as a welcome message template for the chat */
+      welcome?: boolean
+
+      /** Whether to anchor this message to the message it replies to */
+      anchor?: boolean
+
+      /**
+       * Whether to invert the media position.
+       *
+       * Currently only supported for web previews and makes the
+       * client render the preview above the caption and not below.
+       */
+      invertMedia?: boolean
+
+      /** Whether to forbid forwarding this message */
+      forbidForwards?: boolean
+
+      /** Cache for the uploaded rich message media, see {@link createRichStreamingDraft} */
+      uploadCache?: RichMediaUploadCache
 
       /**
        * Whether to dispatch the returned updates
@@ -3388,6 +3462,18 @@ export interface TelegramClient extends ITelegramClient {
 
       /** Whether to use TON currency for payment */
       ton?: boolean
+
+      /**
+       * Whether to buy the gift anonymously
+       * (i.e. if the recipient chooses to display the gift
+       * on their profile, your name won't be visible)
+       *
+       * @default  `true`
+       */
+      anonymous?: boolean
+
+      /** Message to send along with the gift */
+      message?: InputText
     }): Promise<Message | null>
   /**
    * Get a list of star gifts up for resale
@@ -5352,7 +5438,7 @@ export interface TelegramClient extends ITelegramClient {
    * @param params
    */
   sendTyping(
-    chatId: InputPeerLike, status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction,
+    chatId: InputPeerLike, status?: SendableTypingStatus | tl.TypeSendMessageAction,
     params?: {
     /**
      * For `upload_*` and history import actions, progress of the upload
@@ -5402,7 +5488,7 @@ export interface TelegramClient extends ITelegramClient {
        *
        * @default  `typing`
        */
-      status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction
+      status?: SendableTypingStatus | tl.TypeSendMessageAction
 
       /**
        * For `upload_*` and history import actions, progress of the upload
@@ -7435,14 +7521,23 @@ TelegramClient.prototype.joinChatlist = function (...args) {
 TelegramClient.prototype.setFoldersOrder = function (...args) {
   return setFoldersOrder(this._client, ...args)
 }
+TelegramClient.prototype.deleteAllWelcomeMessages = function (...args) {
+  return deleteAllWelcomeMessages(this._client, ...args)
+}
 TelegramClient.prototype.deleteEphemeralMessage = function (...args) {
   return deleteEphemeralMessage(this._client, ...args)
+}
+TelegramClient.prototype.deleteWelcomeMessage = function (...args) {
+  return deleteWelcomeMessage(this._client, ...args)
 }
 TelegramClient.prototype.editEphemeralMessage = function (...args) {
   return editEphemeralMessage(this._client, ...args)
 }
 TelegramClient.prototype.getEphemeralCallbackAnswer = function (...args) {
   return getEphemeralCallbackAnswer(this._client, ...args)
+}
+TelegramClient.prototype.getWelcomeMessages = function (...args) {
+  return getWelcomeMessages(this._client, ...args)
 }
 TelegramClient.prototype.sendEphemeralMessage = function (...args) {
   return sendEphemeralMessage(this._client, ...args)

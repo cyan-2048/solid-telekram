@@ -140,6 +140,14 @@ export interface ActionUserJoinedApproved {
   readonly type: 'user_joined_approved'
 }
 
+/** User has joined the group because they are a member of a community */
+export interface ActionUserJoinedViaCommunity {
+  readonly type: 'user_joined_community'
+
+  /** Community the user has joined via */
+  readonly community: Chat
+}
+
 /** A payment was received from a user (bot) */
 export interface ActionPaymentReceived {
   readonly type: 'payment_received'
@@ -636,6 +644,12 @@ interface StarGiftUniqueCommon {
 
   /** ID of the related saved profile gift */
   savedId?: tl.Long
+
+  /** Whether the name of the sender/buyer is hidden */
+  nameHidden: boolean
+
+  /** Message attached to the gift, if any */
+  message?: TextWithEntities
 }
 
 /** A star gift was upgraded to a unique one */
@@ -875,6 +889,7 @@ export type MessageAction
     | ActionThemeChanged
     | ActionThemeChangedUnique
     | ActionUserJoinedApproved
+    | ActionUserJoinedViaCommunity
     | ActionWebviewDataSent
     | ActionWebviewDataReceived
     | ActionPremiumGifted
@@ -1125,6 +1140,11 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
       return {
         type: 'user_joined_approved',
       }
+    case 'messageActionChatJoinedViaCommunity':
+      return {
+        type: 'user_joined_community',
+        community: new Chat(this._peers.chat(act.communityId)),
+      }
     case 'messageActionWebViewDataSent':
       return {
         type: 'webview_sent',
@@ -1266,6 +1286,8 @@ export function _messageActionFromTl(this: Message, act: tl.TypeMessageAction): 
         canCraftAt: act.canCraftAt ? new Date(act.canCraftAt * 1000) : undefined,
         savedId: act.savedId,
         dropDetailsStars: act.dropOriginalDetailsStars,
+        nameHidden: act.nameHidden!,
+        message: act.message,
       }
 
       if (act.assigned) {

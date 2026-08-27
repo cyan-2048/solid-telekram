@@ -8,6 +8,7 @@ import { PeersIndex } from '../../highlevel/types/peers/peers-index.js'
 import { __tlReaderMap } from '../../tl/binary/reader.js'
 import { __tlReaderMapCompat } from '../../tl/compat/reader.js'
 import { tl } from '../../tl/index.js'
+import { MtTypeAssertionError } from '../../types/errors.js'
 
 function replaceType<
   Input extends tlCompat.TlObject,
@@ -185,6 +186,8 @@ function mapCompatPageBlock(obj: tlCompat.TypePageBlock): tl.TypePageBlock {
         _: 'pageBlockOrderedList',
         items: obj.items.map(mapCompatPageListOrderedItem),
       }
+    case 'pageBlockBlockquote_layer228':
+      return replaceType(obj, 'pageBlockBlockquote')
     case 'pageBlockList':
       return {
         ...obj,
@@ -241,6 +244,7 @@ function mapCompatMessageAction(obj: tlCompat.TypeMessageAction): tl.TypeMessage
     case 'messageActionStarGiftUnique_layer202':
     case 'messageActionStarGiftUnique_layer214':
     case 'messageActionStarGiftUnique_layer221':
+    case 'messageActionStarGiftUnique_layer228':
       return {
         ...obj,
         _: 'messageActionStarGiftUnique',
@@ -328,6 +332,7 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
         _: 'message',
         media: obj.media ? mapCompatMessageMedia(obj.media) : undefined,
         replyTo: obj.replyTo ? mapMessageReplyHeader(obj.replyTo) : undefined,
+        replyMarkup: obj.replyMarkup ? mapCompatReplyMarkup(obj.replyMarkup) : undefined,
       }
     case 'messageService_layer204':
       return {
@@ -341,27 +346,174 @@ function mapCompatMessage(obj: tlCompat.TypeMessage): tl.TypeMessage {
   }
 }
 
-function mapCompatKeyboardButton(obj: tlCompat.TypeKeyboardButton): tl.TypeKeyboardButton {
+function mapCompatKeyboardButton(
+  obj: tlCompat.TypeKeyboardButton,
+): tl.TypeKeyboardButton | tl.TypeKeyboardInlineButton {
+  const style = 'style' in obj ? obj.style : undefined
+
   switch (obj._) {
-    case 'keyboardButton_layer221': return replaceType(obj, 'keyboardButton')
-    case 'keyboardButtonUrl_layer221': return replaceType(obj, 'keyboardButtonUrl')
-    case 'keyboardButtonCallback_layer221': return replaceType(obj, 'keyboardButtonCallback')
-    case 'keyboardButtonRequestPhone_layer221': return replaceType(obj, 'keyboardButtonRequestPhone')
-    case 'keyboardButtonRequestGeoLocation_layer221': return replaceType(obj, 'keyboardButtonRequestGeoLocation')
-    case 'keyboardButtonSwitchInline_layer221': return replaceType(obj, 'keyboardButtonSwitchInline')
-    case 'keyboardButtonGame_layer221': return replaceType(obj, 'keyboardButtonGame')
-    case 'keyboardButtonBuy_layer221': return replaceType(obj, 'keyboardButtonBuy')
-    case 'keyboardButtonUrlAuth_layer221': return replaceType(obj, 'keyboardButtonUrlAuth')
-    case 'inputKeyboardButtonUrlAuth_layer221': return replaceType(obj, 'inputKeyboardButtonUrlAuth')
-    case 'keyboardButtonRequestPoll_layer221': return replaceType(obj, 'keyboardButtonRequestPoll')
-    case 'inputKeyboardButtonUserProfile_layer221': return replaceType(obj, 'inputKeyboardButtonUserProfile')
-    case 'keyboardButtonUserProfile_layer221': return replaceType(obj, 'keyboardButtonUserProfile')
-    case 'keyboardButtonWebView_layer221': return replaceType(obj, 'keyboardButtonWebView')
-    case 'keyboardButtonSimpleWebView_layer221': return replaceType(obj, 'keyboardButtonSimpleWebView')
-    case 'keyboardButtonRequestPeer_layer221': return replaceType(obj, 'keyboardButtonRequestPeer')
-    case 'inputKeyboardButtonRequestPeer_layer221': return replaceType(obj, 'inputKeyboardButtonRequestPeer')
-    case 'keyboardButtonCopy_layer221': return replaceType(obj, 'keyboardButtonCopy')
-    default: return obj
+    case 'keyboardButton_layer221':
+    case 'keyboardButton_layer228':
+      return { _: 'keyboardButton', style, text: obj.text, type: { _: 'buttonTypeDefault' } }
+    case 'keyboardButtonRequestPhone_layer221':
+    case 'keyboardButtonRequestPhone_layer228':
+      return { _: 'keyboardButton', style, text: obj.text, type: { _: 'buttonTypeRequestPhone' } }
+    case 'keyboardButtonRequestGeoLocation_layer221':
+    case 'keyboardButtonRequestGeoLocation_layer228':
+      return { _: 'keyboardButton', style, text: obj.text, type: { _: 'buttonTypeRequestGeoLocation' } }
+    case 'keyboardButtonRequestPoll_layer221':
+    case 'keyboardButtonRequestPoll_layer228':
+      return { _: 'keyboardButton', style, text: obj.text, type: { _: 'buttonTypeRequestPoll', quiz: obj.quiz } }
+    case 'keyboardButtonSimpleWebView_layer221':
+    case 'keyboardButtonSimpleWebView_layer228':
+      return { _: 'keyboardButton', style, text: obj.text, type: { _: 'buttonTypeSimpleWebView', url: obj.url } }
+    case 'keyboardButtonRequestPeer_layer221':
+    case 'keyboardButtonRequestPeer_layer228':
+      return {
+        _: 'keyboardButton',
+        style,
+        text: obj.text,
+        type: {
+          _: 'buttonTypeRequestPeer',
+          buttonId: obj.buttonId,
+          peerType: obj.peerType,
+          maxQuantity: obj.maxQuantity,
+        },
+      }
+    case 'inputKeyboardButtonRequestPeer_layer221':
+    case 'inputKeyboardButtonRequestPeer_layer228':
+      return {
+        _: 'keyboardButton',
+        style,
+        text: obj.text,
+        type: {
+          _: 'inputButtonTypeRequestPeer',
+          nameRequested: obj.nameRequested,
+          usernameRequested: obj.usernameRequested,
+          photoRequested: obj.photoRequested,
+          buttonId: obj.buttonId,
+          peerType: obj.peerType,
+          maxQuantity: obj.maxQuantity,
+        },
+      }
+    case 'keyboardButtonUrl_layer221':
+    case 'keyboardButtonUrl_layer228':
+      return { _: 'keyboardInlineButton', style, text: obj.text, type: { _: 'inlineButtonTypeUrl', url: obj.url } }
+    case 'keyboardButtonCallback_layer221':
+    case 'keyboardButtonCallback_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: { _: 'inlineButtonTypeCallback', requiresPassword: obj.requiresPassword, data: obj.data },
+      }
+    case 'keyboardButtonGame_layer221':
+    case 'keyboardButtonGame_layer228':
+      return { _: 'keyboardInlineButton', style, text: obj.text, type: { _: 'inlineButtonTypeGame' } }
+    case 'keyboardButtonBuy_layer221':
+    case 'keyboardButtonBuy_layer228':
+      return { _: 'keyboardInlineButton', style, text: obj.text, type: { _: 'inlineButtonTypeBuy' } }
+    case 'keyboardButtonWebView_layer221':
+    case 'keyboardButtonWebView_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: { _: 'inlineButtonTypeWebView', url: obj.url },
+      }
+    case 'keyboardButtonCopy_layer221':
+    case 'keyboardButtonCopy_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: { _: 'inlineButtonTypeCopy', copyText: obj.copyText },
+      }
+    case 'keyboardButtonUserProfile_layer221':
+    case 'keyboardButtonUserProfile_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: { _: 'inlineButtonTypeUserProfile', userId: obj.userId },
+      }
+    case 'inputKeyboardButtonUserProfile_layer221':
+    case 'inputKeyboardButtonUserProfile_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: { _: 'inputInlineButtonTypeUserProfile', userId: obj.userId },
+      }
+    case 'keyboardButtonSwitchInline_layer221':
+    case 'keyboardButtonSwitchInline_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: {
+          _: 'inlineButtonTypeSwitchInline',
+          samePeer: obj.samePeer,
+          query: obj.query,
+          peerTypes: obj.peerTypes,
+        },
+      }
+    case 'keyboardButtonUrlAuth_layer221':
+    case 'keyboardButtonUrlAuth_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: {
+          _: 'inlineButtonTypeUrlAuth',
+          fwdText: obj.fwdText,
+          url: obj.url,
+          buttonId: obj.buttonId,
+        },
+      }
+    case 'inputKeyboardButtonUrlAuth_layer221':
+    case 'inputKeyboardButtonUrlAuth_layer228':
+      return {
+        _: 'keyboardInlineButton',
+        style,
+        text: obj.text,
+        type: {
+          _: 'inputInlineButtonTypeUrlAuth',
+          requestWriteAccess: obj.requestWriteAccess,
+          fwdText: obj.fwdText,
+          url: obj.url,
+          bot: obj.bot,
+        },
+      }
+    default:
+      return obj
+  }
+}
+
+function toInlineButton(btn: tl.TypeKeyboardButton): tl.TypeKeyboardInlineButton {
+  // buttons are mapped at runtime by the wrapped compat readers, so the static
+  // type here is a lie – an inline markup can only ever contain inline buttons
+  const mapped = btn as unknown as tl.TypeKeyboardButton | tl.TypeKeyboardInlineButton
+
+  if (mapped._ !== 'keyboardInlineButton') {
+    throw new MtTypeAssertionError('mapCompatReplyMarkup (@ rows[*].buttons[*])', 'keyboardInlineButton', mapped._)
+  }
+
+  return mapped
+}
+
+function mapCompatReplyMarkup(obj: tlCompat.TypeReplyMarkup): tl.TypeReplyMarkup {
+  switch (obj._) {
+    case 'replyInlineMarkup_layer228':
+      return {
+        _: 'replyInlineMarkup',
+        rows: obj.rows.map(row => ({
+          _: 'keyboardInlineButtonRow' as const,
+          buttons: row.buttons.map(toInlineButton),
+        })),
+      }
+    default:
+      return obj
   }
 }
 
@@ -408,6 +560,7 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'messageActionStarGift_layer216':
     case 'messageActionStarGift_layer218':
     case 'messageActionStarGiftUnique_layer221':
+    case 'messageActionStarGiftUnique_layer228':
       return mapCompatMessageAction(obj)
     case 'userFull_layer199':
       return replaceType(dropFields(obj, ['premiumGifts']), 'userFull')
@@ -511,25 +664,46 @@ function mapCompatObject(obj: tlCompat.TlObject): tl.TlObject {
     case 'poll_layer224':
       return mapCompatPoll(obj)
     case 'keyboardButton_layer221':
+    case 'keyboardButton_layer228':
     case 'keyboardButtonUrl_layer221':
+    case 'keyboardButtonUrl_layer228':
     case 'keyboardButtonCallback_layer221':
+    case 'keyboardButtonCallback_layer228':
     case 'keyboardButtonRequestPhone_layer221':
+    case 'keyboardButtonRequestPhone_layer228':
     case 'keyboardButtonRequestGeoLocation_layer221':
+    case 'keyboardButtonRequestGeoLocation_layer228':
     case 'keyboardButtonSwitchInline_layer221':
+    case 'keyboardButtonSwitchInline_layer228':
     case 'keyboardButtonGame_layer221':
+    case 'keyboardButtonGame_layer228':
     case 'keyboardButtonBuy_layer221':
+    case 'keyboardButtonBuy_layer228':
     case 'keyboardButtonUrlAuth_layer221':
+    case 'keyboardButtonUrlAuth_layer228':
     case 'inputKeyboardButtonUrlAuth_layer221':
+    case 'inputKeyboardButtonUrlAuth_layer228':
     case 'keyboardButtonRequestPoll_layer221':
+    case 'keyboardButtonRequestPoll_layer228':
     case 'inputKeyboardButtonUserProfile_layer221':
+    case 'inputKeyboardButtonUserProfile_layer228':
     case 'keyboardButtonUserProfile_layer221':
+    case 'keyboardButtonUserProfile_layer228':
     case 'keyboardButtonWebView_layer221':
+    case 'keyboardButtonWebView_layer228':
     case 'keyboardButtonSimpleWebView_layer221':
+    case 'keyboardButtonSimpleWebView_layer228':
     case 'keyboardButtonRequestPeer_layer221':
+    case 'keyboardButtonRequestPeer_layer228':
     case 'inputKeyboardButtonRequestPeer_layer221':
+    case 'inputKeyboardButtonRequestPeer_layer228':
     case 'keyboardButtonCopy_layer221':
+    case 'keyboardButtonCopy_layer228':
       return mapCompatKeyboardButton(obj)
+    case 'replyInlineMarkup_layer228':
+      return mapCompatReplyMarkup(obj)
     case 'pageBlockOrderedList_layer225':
+    case 'pageBlockBlockquote_layer228':
       return mapCompatPageBlock(obj)
     case 'pageListOrderedItemBlocks_layer225':
       return mapCompatPageListOrderedItem(obj)

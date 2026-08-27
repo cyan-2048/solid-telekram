@@ -674,6 +674,31 @@ export class UpdatesManager {
       return true
     }
 
+    async function fetchEntitiesPeers(entities?: tl.TypeMessageEntity[]) {
+      if (!entities) return true
+
+      for (const ent of entities) {
+        if (ent._ === 'messageEntityMentionName' && !(await fetchPeer(ent.userId))) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    async function fetchRichMessagePeers(richMessage?: tl.RawRichMessage) {
+      if (!richMessage) return true
+
+      const richMessagePeers = new Set<number>()
+      collectRichMessagePeerIds(richMessage, richMessagePeers)
+
+      for (const peer of richMessagePeers) {
+        if (!(await fetchPeer(peer))) return false
+      }
+
+      return true
+    }
+
     switch (upd._) {
       case 'updateNewMessage':
       case 'updateNewChannelMessage':
@@ -709,22 +734,9 @@ export class UpdatesManager {
           if (!(await fetchPeer(msg.viaBotId))) return missing
           if (!(await fetchPeer(msg.guestchatViaFrom))) return missing
 
-          if (msg.entities) {
-            for (const ent of msg.entities) {
-              if (ent._ === 'messageEntityMentionName') {
-                if (!(await fetchPeer(ent.userId))) return missing
-              }
-            }
-          }
+          if (!(await fetchEntitiesPeers(msg.entities))) return missing
 
-          if (msg.richMessage) {
-            const richMessagePeers = new Set<number>()
-            collectRichMessagePeerIds(msg.richMessage, richMessagePeers)
-
-            for (const peer of richMessagePeers) {
-              if (!(await fetchPeer(peer))) return missing
-            }
-          }
+          if (!(await fetchRichMessagePeers(msg.richMessage))) return missing
 
           if (msg.media) {
             switch (msg.media._) {
@@ -763,6 +775,25 @@ export class UpdatesManager {
               if (!(await fetchPeer(msg.action.fromId))) return missing
               if (!(await fetchPeer(msg.action.toId))) return missing
               break
+            case 'messageActionChatJoinedViaCommunity':
+              if (!(await fetchPeer(toggleChannelIdMark(msg.action.communityId), true))) {
+                return missing
+              }
+              break
+            case 'messageActionChangeCommunity':
+              if (
+                msg.action.communityId !== undefined
+                && !(await fetchPeer(toggleChannelIdMark(msg.action.communityId), true))
+              ) {
+                return missing
+              }
+              break
+            case 'messageActionGiftPremium':
+            case 'messageActionGiftCode':
+            case 'messageActionStarGift':
+            case 'messageActionStarGiftUnique':
+              if (!(await fetchEntitiesPeers(msg.action.message?.entities))) return missing
+              break
           }
         }
         break
@@ -773,6 +804,8 @@ export class UpdatesManager {
         if (!(await fetchPeer(msg.peerId, true))) return missing
         if (!(await fetchPeer(msg.fromId))) return missing
         if (!(await fetchPeer(msg.receiverId))) return missing
+        if (!(await fetchEntitiesPeers(msg.entities))) return missing
+        if (!(await fetchRichMessagePeers(msg.richMessage))) return missing
         break
       }
       case 'updateEphemeralBotCallbackQuery':
@@ -780,21 +813,8 @@ export class UpdatesManager {
         if (!(await fetchPeer(upd.userId))) return missing
         break
       case 'updateDraftMessage':
-        if ('entities' in upd.draft && upd.draft.entities) {
-          for (const ent of upd.draft.entities) {
-            if (ent._ === 'messageEntityMentionName') {
-              if (!(await fetchPeer(ent.userId))) return missing
-            }
-          }
-        }
-        if ('richMessage' in upd.draft && upd.draft.richMessage) {
-          const richMessagePeers = new Set<number>()
-          collectRichMessagePeerIds(upd.draft.richMessage, richMessagePeers)
-
-          for (const peer of richMessagePeers) {
-            if (!(await fetchPeer(peer))) return missing
-          }
-        }
+        if ('entities' in upd.draft && !(await fetchEntitiesPeers(upd.draft.entities))) return missing
+        if ('richMessage' in upd.draft && !(await fetchRichMessagePeers(upd.draft.richMessage))) return missing
     }
 
     return missing

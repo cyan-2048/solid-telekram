@@ -108,9 +108,31 @@ export class UserTypingUpdate {
         return 'interaction'
       case 'sendMessageEmojiInteractionSeen':
         return 'interaction_seen'
+      case 'sendMessageStopDraftAction':
+        return 'stop_draft'
       default:
         assertNever(this.raw.action)
     }
+  }
+
+  /**
+   * ID of the draft this update is related to, if any
+   * (i.e. the status is `typing` for a draft action, or `stop_draft`)
+   */
+  get draftId(): tl.Long | null {
+    const action = this.raw.action
+
+    return 'randomId' in action ? action.randomId : null
+  }
+
+  /** Whether the ongoing draft streaming may be stopped by the user */
+  get canStopDraft(): boolean {
+    return 'canStop' in this.raw.action ? this.raw.action.canStop! : false
+  }
+
+  /** Whether the draft should be kept once the user stops the streaming */
+  get keepDraftOnStop(): boolean {
+    return 'keepOnStop' in this.raw.action ? this.raw.action.keepOnStop! : false
   }
 }
 

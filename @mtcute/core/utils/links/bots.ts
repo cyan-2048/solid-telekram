@@ -80,10 +80,12 @@ function normalizeBotAdmin(rights?: BotAdminRight[]): string | undefined {
         case 'deleteStories':
           return 'delete_stories'
         case 'manageDirectMessages':
-          return 'manage_chat' // idk?
+          return 'manage_direct_messages'
         case 'manageRanks':
-          return 'manage_chat' // idk?
+          return 'manage_tags'
         case 'manageLinkedPeers':
+          return 'manage_chat' // idk?
+        case 'manageWelcomeMessages':
           return 'manage_chat' // idk?
         default:
           assertNever(it)
@@ -96,8 +98,10 @@ function normalizeBotAdmin(rights?: BotAdminRight[]): string | undefined {
 function parseBotAdmin(rights: string | null): BotAdminRight[] | undefined {
   if (!rights) return
 
+  // `+` in a query string decodes to a space, so links using the
+  // documented `a+b` syntax arrive here as `a b`
   return rights
-    .split('+')
+    .split(/[+ ]/)
     .map((it) => {
       switch (it) {
         case 'change_info':
@@ -130,6 +134,10 @@ function parseBotAdmin(rights: string | null): BotAdminRight[] | undefined {
           return 'editStories'
         case 'delete_stories':
           return 'deleteStories'
+        case 'manage_direct_messages':
+          return 'manageDirectMessages'
+        case 'manage_tags':
+          return 'manageRanks'
         default:
           return null
       }

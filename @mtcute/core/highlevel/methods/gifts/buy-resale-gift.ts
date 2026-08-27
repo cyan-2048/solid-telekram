@@ -1,7 +1,8 @@
 import type { tl } from '../../../tl/index.js'
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike, Message } from '../../types/index.js'
+import type { InputPeerLike, InputText, Message } from '../../types/index.js'
 import { assertTypeIs } from '../../../utils/type-assertions.js'
+import { inputTextToTl } from '../../types/misc/entities.js'
 import { _findMessageInUpdate } from '../messages/find-in-update.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -22,15 +23,29 @@ export async function buyResaleGift(
 
     /** Whether to use TON currency for payment */
     ton?: boolean
+
+    /**
+     * Whether to buy the gift anonymously
+     * (i.e. if the recipient chooses to display the gift
+     * on their profile, your name won't be visible)
+     *
+     * @default  `true`
+     */
+    anonymous?: boolean
+
+    /** Message to send along with the gift */
+    message?: InputText
   },
 ): Promise<Message | null> {
-  const { slug, recipient, shouldDispatch, ton } = params
+  const { slug, recipient, shouldDispatch, ton, anonymous, message } = params
 
   const invoice: tl.TypeInputInvoice = {
     _: 'inputInvoiceStarGiftResale',
     slug,
     toId: await resolvePeer(client, recipient),
     ton,
+    showName: anonymous === false,
+    message: message ? inputTextToTl(message) : undefined,
   }
 
   const form = await client.call({

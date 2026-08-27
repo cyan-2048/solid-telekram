@@ -1,6 +1,6 @@
 import type { tl } from '../../../tl/index.js'
 
-import type { ReplyMarkup } from '../bots/keyboards/index.js'
+import type { ParsedReplyMarkup } from '../bots/keyboards/index.js'
 import type { TextWithEntities } from '../misc/index.js'
 import type { Chat } from '../peers/chat.js'
 import type { Peer } from '../peers/peer.js'
@@ -450,7 +450,7 @@ export class Message {
   /**
    * Reply markup provided with this message, if any.
    */
-  get markup(): ReplyMarkup | null {
+  get markup(): ParsedReplyMarkup | null {
     if (this.raw._ === 'messageService' || !this.raw.replyMarkup) {
       return null
     }
@@ -468,6 +468,7 @@ export class Message {
           type: 'force_reply',
           singleUse: rm.singleUse,
           selective: rm.selective,
+          placeholder: rm.placeholder,
         }
       case 'replyKeyboardMarkup':
         return {
@@ -475,12 +476,16 @@ export class Message {
           resize: rm.resize,
           singleUse: rm.singleUse,
           selective: rm.selective,
+          persistent: rm.persistent,
+          forceReply: rm.forceReply,
+          placeholder: rm.placeholder,
           buttons: BotKeyboard._rowsTo2d(rm.rows),
         }
       case 'replyInlineMarkup':
         return {
           type: 'inline',
-          buttons: BotKeyboard._rowsTo2d(rm.rows),
+          forceReply: rm.forceReply,
+          buttons: BotKeyboard._inlineRowsTo2d(rm.rows),
         }
       default:
         assertNever(rm)

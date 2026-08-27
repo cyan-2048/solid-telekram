@@ -384,6 +384,11 @@ export class FullChat extends Chat {
     return new BotVerification(this.full.botVerification)
   }
 
+  /** Whether this chat has welcome messages configured */
+  get hasWelcomeMessages(): boolean {
+    return this.full._ !== 'communityFull' && this.full.hasWelcomeMessages!
+  }
+
   /** Whether star gifts are available in this chat */
   get starGiftsAvailable(): boolean {
     return this.full._ === 'channelFull' && this.full.stargiftsAvailable!

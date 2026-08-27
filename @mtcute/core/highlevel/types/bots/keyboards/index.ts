@@ -10,9 +10,9 @@ export {
    *
    * You can also use the type-discriminated objects directly.
    *
-   * > **Note**: Button creation functions are intended to be used
-   * > with inline reply markup, unless stated otherwise
-   * > in the description.
+   * > **Note**: Buttons are split into inline-only and reply-only ones
+   * > (see the description of each function), and passing one where the
+   * > other is expected is a type error.
    */
   BotKeyboard,
 }

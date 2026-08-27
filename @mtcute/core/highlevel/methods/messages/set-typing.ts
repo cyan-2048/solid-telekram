@@ -2,7 +2,7 @@ import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
 import type { InputPeerLike } from '../../types/peers/peer.js'
-import type { TypingStatus } from '../../types/peers/typing-status.js'
+import type { SendableTypingStatus } from '../../types/peers/typing-status.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
@@ -34,7 +34,7 @@ export async function setTyping(
      *
      * @default  `typing`
      */
-    status?: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction
+    status?: SendableTypingStatus | tl.TypeSendMessageAction
 
     /**
      * For `upload_*` and history import actions, progress of the upload
@@ -59,7 +59,7 @@ export async function setTyping(
   } = params
 
   let status = params.status ?? 'typing'
-  if (typeof status === 'string') status = _mapTypingStatus(status)
+  if (typeof status === 'string') status = _mapTypingStatus(status, params.progress ?? 0)
 
   const peer = await resolvePeer(client, peerId)
   const timerId = _getTypingTimerId(peer, businessConnectionId)

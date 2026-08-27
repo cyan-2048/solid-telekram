@@ -1,5 +1,6 @@
 import type { tl } from '../../../../tl/index.js'
 
+import type { InputInlineKeyboardButton } from '../../bots/keyboards/types.js'
 import type { InputMediaAudio, InputMediaPhoto, InputMediaVideo } from '../../media/index.js'
 import type { InputText } from '../../misc/entities.js'
 import type {
@@ -8,7 +9,9 @@ import type {
   InputPageBlockWithFile,
 } from './types.js'
 import Long from 'long'
+import { MtArgumentError } from '../../../../types/errors.js'
 import { textWithEntitiesToRichText } from '../../../utils/entities.js'
+import { _toInlineButtonType, _toRichButtonStyle } from '../../bots/keyboards/normalize.js'
 
 /**
  * Input rich text, accepted by page block factories.
@@ -113,6 +116,64 @@ export function blockquote(
   }
 
   return { _: 'pageBlockBlockquote', text: normalizeRichText(content), caption: normalizedCaption }
+}
+
+function normalizeButton(btn: InputInlineKeyboardButton, text?: InputRichText): {
+  text: tl.TypeRichText
+  type: tl.TypeInlineButtonType
+  style?: tl.RawRichButtonStyle
+} {
+  if ('_' in btn) {
+    if (btn._ !== 'keyboardInlineButton') {
+      throw new MtArgumentError('reply keyboard buttons cannot be used in rich messages')
+    }
+
+    return {
+      text: normalizeRichText(text ?? btn.text),
+      type: btn.type,
+      style: undefined,
+    }
+  }
+
+  return {
+    text: normalizeRichText(text ?? btn.text),
+    type: _toInlineButtonType(btn),
+    style: _toRichButtonStyle(btn.style),
+  }
+}
+
+/**
+ * Create an inline button inside rich text
+ *
+ * @param button  Button to render (see {@link BotKeyboard})
+ * @param text  Rich text to use as the button label, defaults to the button's own text
+ */
+export function textButton(button: InputInlineKeyboardButton, text?: InputRichText): tl.RawTextButton {
+  return { _: 'textButton', ...normalizeButton(button, text) }
+}
+
+/** Create a button to be used inside a {@link buttonRow} */
+export function button(button: InputInlineKeyboardButton, text?: InputRichText): tl.RawPageButton {
+  return { _: 'pageButton', ...normalizeButton(button, text) }
+}
+
+/**
+ * Create a row of buttons
+ *
+ * @param buttons  Buttons in the row (see {@link BotKeyboard}), or raw `pageButton`s
+ * @param params  Alignment of the row
+ */
+export function buttonRow(
+  buttons: (InputInlineKeyboardButton | tl.RawPageButton)[],
+  params: { align?: 'left' | 'center' | 'right' } = {},
+): tl.RawPageBlockButtonRow {
+  return {
+    _: 'pageBlockButtonRow',
+    alignLeft: params.align === 'left' || undefined,
+    alignCenter: params.align === 'center' || undefined,
+    alignRight: params.align === 'right' || undefined,
+    buttons: buttons.map(it => ('_' in it && it._ === 'pageButton' ? it : button(it as InputInlineKeyboardButton))),
+  }
 }
 
 /** Create a pullquote block */

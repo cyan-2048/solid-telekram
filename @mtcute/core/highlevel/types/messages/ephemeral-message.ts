@@ -10,6 +10,7 @@ import { parsePeer } from '../peers/peer.js'
 import { User } from '../peers/user.js'
 import { MessageEntity } from './message-entity.js'
 import { _messageMediaFromTl } from './message-media.js'
+import { RichMessage } from './rich/rich-message.js'
 
 /**
  * An ephemeral message — a message sent by a bot that is only visible
@@ -36,9 +37,31 @@ export class EphemeralMessage {
     return parsePeer(this.raw.fromId, this._peers)
   }
 
-  /** Chat where this message was sent */
-  get chat(): Peer {
-    return parsePeer(this.raw.peerId, this._peers)
+  /**
+   * Chat where this message was sent.
+   *
+   * `null` if not available (e.g. welcome message templates)
+   */
+  get chat(): Peer | null {
+    return this.raw.peerId ? parsePeer(this.raw.peerId, this._peers) : null
+  }
+
+  /** Whether this message is a welcome message template */
+  get isWelcomeTemplate(): boolean {
+    return this.raw.welcomeTemplate!
+  }
+
+  /**
+   * If set, any eventual webpage preview should be shown on top of
+   * the message instead of at the bottom.
+   */
+  get invertMedia(): boolean {
+    return this.raw.invertMedia!
+  }
+
+  /** Whether this message can't be forwarded */
+  get isContentProtected(): boolean {
+    return this.raw.noforwards!
   }
 
   /** ID of the user this message is visible to */
@@ -119,7 +142,22 @@ export class EphemeralMessage {
   get replyTo(): tl.TypeMessageReplyHeader | null {
     return this.raw.replyTo ?? null
   }
+
+  /** Rich message content, if any */
+  get richMessage(): RichMessage | null {
+    return this.raw.richMessage ? new RichMessage(this.raw.richMessage) : null
+  }
+
+  /** Identifier uniquely corresponding to the chat this message was sent to, if any */
+  get chatInstance(): tl.Long | null {
+    return this.raw.chatInstance ?? null
+  }
+
+  /** ID of the message this message is anchored to, if any */
+  get anchorMessageId(): number | null {
+    return this.raw.anchorMsgId ?? null
+  }
 }
 
-memoizeGetters(EphemeralMessage, ['sender', 'chat', 'receiver', 'entities', 'media'])
+memoizeGetters(EphemeralMessage, ['sender', 'chat', 'receiver', 'entities', 'media', 'richMessage'])
 makeInspectable(EphemeralMessage)

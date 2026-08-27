@@ -28,9 +28,18 @@ export class EphemeralCallbackQuery {
     return new User(this._peers.user(this.raw.userId))
   }
 
-  /** Chat where the originating ephemeral message was sent */
-  get chat(): Peer {
-    return parsePeer(this.raw.peer, this._peers)
+  /**
+   * Chat where the originating ephemeral message was sent.
+   *
+   * `null` if not available (see {@link chatInstance})
+   */
+  get chat(): Peer | null {
+    return this.raw.peer ? parsePeer(this.raw.peer, this._peers) : null
+  }
+
+  /** Identifier uniquely corresponding to the chat the message was sent to, if any */
+  get chatInstance(): tl.Long | null {
+    return this.raw.chatInstance ?? null
   }
 
   /** Identifier of the ephemeral message containing the button which was clicked */

@@ -10,8 +10,8 @@ import { resolvePeer, resolveUser } from '../users/resolve-peer.js'
 export async function deleteEphemeralMessage(
   client: ITelegramClient,
   params: {
-    /** Chat where the message was sent */
-    chatId: InputPeerLike
+    /** Chat where the message was sent (`null` for guest chats) */
+    chatId: InputPeerLike | null
 
     /** User the message is visible to */
     receiverId: InputPeerLike
@@ -24,7 +24,7 @@ export async function deleteEphemeralMessage(
 
   const r = await client.call({
     _: 'ephemeral.deleteMessage',
-    peer: await resolvePeer(client, chatId),
+    peer: chatId !== null ? await resolvePeer(client, chatId) : undefined,
     receiverId: await resolveUser(client, receiverId),
     id: messageId,
   })

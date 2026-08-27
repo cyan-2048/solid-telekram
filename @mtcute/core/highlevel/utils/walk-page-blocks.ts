@@ -43,6 +43,7 @@ function walkRichText(text: tl.TypeRichText | undefined, visitor: PageBlockVisit
     case 'textBankCard':
     case 'textDate':
     case 'textMentionName':
+    case 'textButton':
       walkRichText(text.text, visitor)
       break
     case 'textConcat':
@@ -134,6 +135,7 @@ function walkPageBlock(block: tl.TypePageBlock | undefined, visitor: PageBlockVi
     case 'pageBlockAudio':
     case 'pageBlockMap':
     case 'inputPageBlockMap':
+    case 'pageBlockDocument':
       walkPageCaption(block.caption, visitor)
       break
     case 'pageBlockCover':
@@ -149,6 +151,9 @@ function walkPageBlock(block: tl.TypePageBlock | undefined, visitor: PageBlockVi
       walkPageCaption(block.caption, visitor)
       break
     case 'pageBlockChannel':
+      break
+    case 'pageBlockButtonRow':
+      for (const button of block.buttons) walkRichText(button.text, visitor)
       break
     case 'pageBlockTable':
       walkRichText(block.title, visitor)

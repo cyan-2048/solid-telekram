@@ -86,6 +86,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     stargifts_available: flags2.19?true
      *     paid_messages_available: flags2.20?true
+     *     has_welcome_messages: flags2.24?true
      *     stargifts_count: flags2.18?int
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
@@ -163,6 +164,7 @@ export declare namespace tlCompat {
      *     assigned: flags.13?true
      *     from_offer: flags.14?true
      *     craft: flags.16?true
+     *     name_hidden: flags.17?true
      *     from_id: flags.6?Peer
      *     peer: flags.7?Peer
      *     saved_id: flags.7?long
@@ -171,6 +173,7 @@ export declare namespace tlCompat {
      *     can_resell_at: flags.10?int
      *     drop_original_details_stars: flags.12?long
      *     can_craft_at: flags.15?int
+     *     message: flags.18?TextWithEntities
      */
     interface RawMessageActionStarGiftUnique_layer197 {
         _: 'messageActionStarGiftUnique_layer197';
@@ -488,7 +491,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -651,11 +654,13 @@ export declare namespace tlCompat {
      *     assigned: flags.13?true
      *     from_offer: flags.14?true
      *     craft: flags.16?true
+     *     name_hidden: flags.17?true
      *     resale_amount: flags.8?StarsAmount
      *     can_transfer_at: flags.9?int
      *     can_resell_at: flags.10?int
      *     drop_original_details_stars: flags.12?long
      *     can_craft_at: flags.15?int
+     *     message: flags.18?TextWithEntities
      */
     interface RawMessageActionStarGiftUnique_layer202 {
         _: 'messageActionStarGiftUnique_layer202';
@@ -752,6 +757,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     has_welcome_messages: flags2.24?true
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
      *     guard_bot_id: flags2.23?int53
@@ -887,7 +893,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -1210,9 +1216,11 @@ export declare namespace tlCompat {
      *     assigned: flags.13?true
      *     from_offer: flags.14?true
      *     craft: flags.16?true
+     *     name_hidden: flags.17?true
      *     resale_amount: flags.8?StarsAmount
      *     drop_original_details_stars: flags.12?long
      *     can_craft_at: flags.15?int
+     *     message: flags.18?TextWithEntities
      * Removed arguments: resale_stars
      */
     interface RawMessageActionStarGiftUnique_layer210 {
@@ -1340,6 +1348,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     has_welcome_messages: flags2.24?true
      *     main_tab: flags2.22?ProfileTab
      *     guard_bot_id: flags2.23?int53
      */
@@ -1638,8 +1647,10 @@ export declare namespace tlCompat {
      *     assigned: flags.13?true
      *     from_offer: flags.14?true
      *     craft: flags.16?true
+     *     name_hidden: flags.17?true
      *     drop_original_details_stars: flags.12?long
      *     can_craft_at: flags.15?int
+     *     message: flags.18?TextWithEntities
      */
     interface RawMessageActionStarGiftUnique_layer214 {
         _: 'messageActionStarGiftUnique_layer214';
@@ -1931,7 +1942,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -2112,7 +2123,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -2216,7 +2227,9 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     craft: flags.16?true
+     *     name_hidden: flags.17?true
      *     can_craft_at: flags.15?int
+     *     message: flags.18?TextWithEntities
      */
     interface RawMessageActionStarGiftUnique_layer221 {
         _: 'messageActionStarGiftUnique_layer221';
@@ -2239,11 +2252,7 @@ export declare namespace tlCompat {
         dropOriginalDetailsStars?: Long;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonCopy_layer221 {
         _: 'keyboardButtonCopy_layer221';
@@ -2251,10 +2260,7 @@ export declare namespace tlCompat {
         copyText: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawInputKeyboardButtonRequestPeer_layer221 {
         _: 'inputKeyboardButtonRequestPeer_layer221';
@@ -2267,11 +2273,7 @@ export declare namespace tlCompat {
         maxQuantity: number;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonRequestPeer_layer221 {
         _: 'keyboardButtonRequestPeer_layer221';
@@ -2281,11 +2283,7 @@ export declare namespace tlCompat {
         maxQuantity: number;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonSimpleWebView_layer221 {
         _: 'keyboardButtonSimpleWebView_layer221';
@@ -2293,11 +2291,7 @@ export declare namespace tlCompat {
         url: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonWebView_layer221 {
         _: 'keyboardButtonWebView_layer221';
@@ -2305,11 +2299,7 @@ export declare namespace tlCompat {
         url: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonUserProfile_layer221 {
         _: 'keyboardButtonUserProfile_layer221';
@@ -2317,11 +2307,7 @@ export declare namespace tlCompat {
         userId: number;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawInputKeyboardButtonUserProfile_layer221 {
         _: 'inputKeyboardButtonUserProfile_layer221';
@@ -2329,10 +2315,7 @@ export declare namespace tlCompat {
         userId: tl.TypeInputUser;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonRequestPoll_layer221 {
         _: 'keyboardButtonRequestPoll_layer221';
@@ -2340,10 +2323,7 @@ export declare namespace tlCompat {
         text: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawInputKeyboardButtonUrlAuth_layer221 {
         _: 'inputKeyboardButtonUrlAuth_layer221';
@@ -2354,10 +2334,7 @@ export declare namespace tlCompat {
         bot: tl.TypeInputUser;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonUrlAuth_layer221 {
         _: 'keyboardButtonUrlAuth_layer221';
@@ -2367,32 +2344,21 @@ export declare namespace tlCompat {
         buttonId: number;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonBuy_layer221 {
         _: 'keyboardButtonBuy_layer221';
         text: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonGame_layer221 {
         _: 'keyboardButtonGame_layer221';
         text: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonSwitchInline_layer221 {
         _: 'keyboardButtonSwitchInline_layer221';
@@ -2402,32 +2368,21 @@ export declare namespace tlCompat {
         peerTypes?: tl.TypeInlineQueryPeerType[];
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonRequestGeoLocation_layer221 {
         _: 'keyboardButtonRequestGeoLocation_layer221';
         text: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonRequestPhone_layer221 {
         _: 'keyboardButtonRequestPhone_layer221';
         text: string;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonCallback_layer221 {
         _: 'keyboardButtonCallback_layer221';
@@ -2436,11 +2391,7 @@ export declare namespace tlCompat {
         data: Uint8Array;
     }
     /**
-     * Compared to the current schema, changes from this entry:
-     * 
-     * Added arguments:
-     *     flags: #
-     *     style: flags.10?KeyboardButtonStyle
+     * Entry was removed from the schema
      */
     interface RawKeyboardButtonUrl_layer221 {
         _: 'keyboardButtonUrl_layer221';
@@ -2453,6 +2404,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     flags: #
      *     style: flags.10?KeyboardButtonStyle
+     *     type: ButtonType
      */
     interface RawKeyboardButton_layer221 {
         _: 'keyboardButton_layer221';
@@ -2532,7 +2484,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -2829,7 +2781,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -2924,6 +2876,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     has_welcome_messages: flags2.24?true
      *     guard_bot_id: flags2.23?int53
      */
     interface RawChannelFull_layer225 {
@@ -3032,7 +2985,7 @@ export declare namespace tlCompat {
         date: number;
         message: string;
         media?: tlCompat.TypeMessageMedia;
-        replyMarkup?: tl.TypeReplyMarkup;
+        replyMarkup?: tlCompat.TypeReplyMarkup;
         entities?: tl.TypeMessageEntity[];
         views?: number;
         forwards?: number;
@@ -3181,13 +3134,243 @@ export declare namespace tlCompat {
         botVerificationIcon?: Long;
         sendPaidMessagesStars?: Long;
     }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     collapsed: flags.0?true
+     */
+    interface RawPageBlockBlockquote_layer228 {
+        _: 'pageBlockBlockquote_layer228';
+        text: tl.TypeRichText;
+        caption: tl.TypeRichText;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     name_hidden: flags.17?true
+     *     message: flags.18?TextWithEntities
+     */
+    interface RawMessageActionStarGiftUnique_layer228 {
+        _: 'messageActionStarGiftUnique_layer228';
+        upgrade?: boolean;
+        transferred?: boolean;
+        saved?: boolean;
+        refunded?: boolean;
+        prepaidUpgrade?: boolean;
+        assigned?: boolean;
+        fromOffer?: boolean;
+        craft?: boolean;
+        gift: tlCompat.TypeStarGift;
+        canExportAt?: number;
+        transferStars?: Long;
+        fromId?: tl.TypePeer;
+        peer?: tl.TypePeer;
+        savedId?: Long;
+        resaleAmount?: tl.TypeStarsAmount;
+        canTransferAt?: number;
+        canResellAt?: number;
+        dropOriginalDetailsStars?: Long;
+        canCraftAt?: number;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     flags: #
+     *     force_reply: flags.5?true
+     * Changed arguments:
+     *     rows: Vector<KeyboardButtonRow> =>
+     * Vector<KeyboardInlineButtonRow>
+     */
+    interface RawReplyInlineMarkup_layer228 {
+        _: 'replyInlineMarkup_layer228';
+        rows: tl.TypeKeyboardButtonRow[];
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonCopy_layer228 {
+        _: 'keyboardButtonCopy_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        copyText: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawInputKeyboardButtonRequestPeer_layer228 {
+        _: 'inputKeyboardButtonRequestPeer_layer228';
+        nameRequested?: boolean;
+        usernameRequested?: boolean;
+        photoRequested?: boolean;
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        buttonId: number;
+        peerType: tl.TypeRequestPeerType;
+        maxQuantity: number;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonRequestPeer_layer228 {
+        _: 'keyboardButtonRequestPeer_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        buttonId: number;
+        peerType: tl.TypeRequestPeerType;
+        maxQuantity: number;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonSimpleWebView_layer228 {
+        _: 'keyboardButtonSimpleWebView_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        url: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonWebView_layer228 {
+        _: 'keyboardButtonWebView_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        url: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonUserProfile_layer228 {
+        _: 'keyboardButtonUserProfile_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        userId: number;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawInputKeyboardButtonUserProfile_layer228 {
+        _: 'inputKeyboardButtonUserProfile_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        userId: tl.TypeInputUser;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonRequestPoll_layer228 {
+        _: 'keyboardButtonRequestPoll_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        quiz?: boolean;
+        text: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawInputKeyboardButtonUrlAuth_layer228 {
+        _: 'inputKeyboardButtonUrlAuth_layer228';
+        requestWriteAccess?: boolean;
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        fwdText?: string;
+        url: string;
+        bot: tl.TypeInputUser;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonUrlAuth_layer228 {
+        _: 'keyboardButtonUrlAuth_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        fwdText?: string;
+        url: string;
+        buttonId: number;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonBuy_layer228 {
+        _: 'keyboardButtonBuy_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonGame_layer228 {
+        _: 'keyboardButtonGame_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonSwitchInline_layer228 {
+        _: 'keyboardButtonSwitchInline_layer228';
+        samePeer?: boolean;
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        query: string;
+        peerTypes?: tl.TypeInlineQueryPeerType[];
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonRequestGeoLocation_layer228 {
+        _: 'keyboardButtonRequestGeoLocation_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonRequestPhone_layer228 {
+        _: 'keyboardButtonRequestPhone_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonCallback_layer228 {
+        _: 'keyboardButtonCallback_layer228';
+        requiresPassword?: boolean;
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        data: Uint8Array;
+    }
+    /**
+     * Entry was removed from the schema
+     */
+    interface RawKeyboardButtonUrl_layer228 {
+        _: 'keyboardButtonUrl_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        url: string;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     type: ButtonType
+     */
+    interface RawKeyboardButton_layer228 {
+        _: 'keyboardButton_layer228';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+    }
     interface RpcCallReturn {
     }
     type TypeStarGift = tlCompat.RawStarGiftUnique_layer197 | tlCompat.RawStarGiftUnique_layer198 | tlCompat.RawStarGiftUnique_layer202 | tlCompat.RawStarGift_layer202 | tlCompat.RawStarGiftUnique_layer206 | tlCompat.RawStarGift_layer206 | tlCompat.RawStarGift_layer209 | tlCompat.RawStarGiftUnique_layer210 | tlCompat.RawStarGiftUnique_layer211 | tlCompat.RawStarGift_layer211 | tlCompat.RawStarGiftUnique_layer214 | tlCompat.RawStarGift_layer216 | tlCompat.RawStarGiftUnique_layer218 | tlCompat.RawStarGift_layer218 | tlCompat.RawStarGiftUnique_layer221 | tl.TypeStarGift
     type TypeEmojiStatus = tlCompat.RawEmojiStatus_layer197 | tlCompat.RawEmojiStatusUntil_layer214 | tl.TypeEmojiStatus
     type TypeMessageMedia = tlCompat.RawMessageMediaDocument_layer197 | tlCompat.RawMessageMediaDice_layer220 | tlCompat.RawMessageMediaPoll_layer223 | tlCompat.RawMessageMediaPhoto_layer223 | tl.TypeMessageMedia
     type TypeChatFull = tlCompat.RawChannelFull_layer197 | tlCompat.RawChannelFull_layer204 | tlCompat.RawChannelFull_layer211 | tlCompat.RawChannelFull_layer225 | tl.TypeChatFull
-    type TypeMessageAction = tlCompat.RawMessageActionStarGiftUnique_layer197 | tlCompat.RawMessageActionStarGift_layer197 | tlCompat.RawMessageActionStarGiftUnique_layer202 | tlCompat.RawMessageActionPaidMessagesPrice_layer203 | tlCompat.RawMessageActionStarGiftUnique_layer210 | tlCompat.RawMessageActionStarGift_layer211 | tlCompat.RawMessageActionSetChatTheme_layer211 | tlCompat.RawMessageActionStarGiftUnique_layer214 | tlCompat.RawMessageActionStarGift_layer216 | tlCompat.RawMessageActionGiftCode_layer216 | tlCompat.RawMessageActionGiftPremium_layer216 | tlCompat.RawMessageActionStarGift_layer218 | tlCompat.RawMessageActionStarGiftUnique_layer221 | tl.TypeMessageAction
+    type TypeMessageAction = tlCompat.RawMessageActionStarGiftUnique_layer197 | tlCompat.RawMessageActionStarGift_layer197 | tlCompat.RawMessageActionStarGiftUnique_layer202 | tlCompat.RawMessageActionPaidMessagesPrice_layer203 | tlCompat.RawMessageActionStarGiftUnique_layer210 | tlCompat.RawMessageActionStarGift_layer211 | tlCompat.RawMessageActionSetChatTheme_layer211 | tlCompat.RawMessageActionStarGiftUnique_layer214 | tlCompat.RawMessageActionStarGift_layer216 | tlCompat.RawMessageActionGiftCode_layer216 | tlCompat.RawMessageActionGiftPremium_layer216 | tlCompat.RawMessageActionStarGift_layer218 | tlCompat.RawMessageActionStarGiftUnique_layer221 | tlCompat.RawMessageActionStarGiftUnique_layer228 | tl.TypeMessageAction
     type TypeUserFull = tlCompat.RawUserFull_layer199 | tlCompat.RawUserFull_layer200 | tlCompat.RawUserFull_layer209 | tlCompat.RawUserFull_layer210 | tlCompat.RawUserFull_layer211 | tlCompat.RawUserFull_layer214 | tlCompat.RawUserFull_layer223 | tl.TypeUserFull
     type TypePremiumGiftOption = tlCompat.RawPremiumGiftOption_layer199
     type TypeUser = tlCompat.RawUser_layer199 | tlCompat.RawUser_layer216 | tlCompat.RawUser_layer227 | tl.TypeUser
@@ -3199,16 +3382,17 @@ export declare namespace tlCompat {
     type TypeTodoCompletion = tlCompat.RawTodoCompletion_layer216 | tl.TypeTodoCompletion
     type TypeWebPageAttribute = tlCompat.RawWebPageAttributeStarGiftAuction_layer218 | tl.TypeWebPageAttribute
     type TypeStarGiftAttribute = tlCompat.RawStarGiftAttributeBackdrop_layer221 | tlCompat.RawStarGiftAttributePattern_layer221 | tlCompat.RawStarGiftAttributeModel_layer221 | tl.TypeStarGiftAttribute
-    type TypeKeyboardButton = tlCompat.RawKeyboardButtonCopy_layer221 | tlCompat.RawInputKeyboardButtonRequestPeer_layer221 | tlCompat.RawKeyboardButtonRequestPeer_layer221 | tlCompat.RawKeyboardButtonSimpleWebView_layer221 | tlCompat.RawKeyboardButtonWebView_layer221 | tlCompat.RawKeyboardButtonUserProfile_layer221 | tlCompat.RawInputKeyboardButtonUserProfile_layer221 | tlCompat.RawKeyboardButtonRequestPoll_layer221 | tlCompat.RawInputKeyboardButtonUrlAuth_layer221 | tlCompat.RawKeyboardButtonUrlAuth_layer221 | tlCompat.RawKeyboardButtonBuy_layer221 | tlCompat.RawKeyboardButtonGame_layer221 | tlCompat.RawKeyboardButtonSwitchInline_layer221 | tlCompat.RawKeyboardButtonRequestGeoLocation_layer221 | tlCompat.RawKeyboardButtonRequestPhone_layer221 | tlCompat.RawKeyboardButtonCallback_layer221 | tlCompat.RawKeyboardButtonUrl_layer221 | tlCompat.RawKeyboardButton_layer221 | tl.TypeKeyboardButton
+    type TypeKeyboardButton = tlCompat.RawKeyboardButtonCopy_layer221 | tlCompat.RawInputKeyboardButtonRequestPeer_layer221 | tlCompat.RawKeyboardButtonRequestPeer_layer221 | tlCompat.RawKeyboardButtonSimpleWebView_layer221 | tlCompat.RawKeyboardButtonWebView_layer221 | tlCompat.RawKeyboardButtonUserProfile_layer221 | tlCompat.RawInputKeyboardButtonUserProfile_layer221 | tlCompat.RawKeyboardButtonRequestPoll_layer221 | tlCompat.RawInputKeyboardButtonUrlAuth_layer221 | tlCompat.RawKeyboardButtonUrlAuth_layer221 | tlCompat.RawKeyboardButtonBuy_layer221 | tlCompat.RawKeyboardButtonGame_layer221 | tlCompat.RawKeyboardButtonSwitchInline_layer221 | tlCompat.RawKeyboardButtonRequestGeoLocation_layer221 | tlCompat.RawKeyboardButtonRequestPhone_layer221 | tlCompat.RawKeyboardButtonCallback_layer221 | tlCompat.RawKeyboardButtonUrl_layer221 | tlCompat.RawKeyboardButton_layer221 | tlCompat.RawKeyboardButtonCopy_layer228 | tlCompat.RawInputKeyboardButtonRequestPeer_layer228 | tlCompat.RawKeyboardButtonRequestPeer_layer228 | tlCompat.RawKeyboardButtonSimpleWebView_layer228 | tlCompat.RawKeyboardButtonWebView_layer228 | tlCompat.RawKeyboardButtonUserProfile_layer228 | tlCompat.RawInputKeyboardButtonUserProfile_layer228 | tlCompat.RawKeyboardButtonRequestPoll_layer228 | tlCompat.RawInputKeyboardButtonUrlAuth_layer228 | tlCompat.RawKeyboardButtonUrlAuth_layer228 | tlCompat.RawKeyboardButtonBuy_layer228 | tlCompat.RawKeyboardButtonGame_layer228 | tlCompat.RawKeyboardButtonSwitchInline_layer228 | tlCompat.RawKeyboardButtonRequestGeoLocation_layer228 | tlCompat.RawKeyboardButtonRequestPhone_layer228 | tlCompat.RawKeyboardButtonCallback_layer228 | tlCompat.RawKeyboardButtonUrl_layer228 | tlCompat.RawKeyboardButton_layer228 | tl.TypeKeyboardButton
     type TypeChatParticipant = tlCompat.RawChatParticipantAdmin_layer222 | tlCompat.RawChatParticipantCreator_layer222 | tlCompat.RawChatParticipant_layer222 | tl.TypeChatParticipant
     type TypePollResults = tlCompat.RawPollResults_layer223 | tl.TypePollResults
     type TypePollAnswerVoters = tlCompat.RawPollAnswerVoters_layer223 | tl.TypePollAnswerVoters
     type TypePoll = tlCompat.RawPoll_layer223 | tlCompat.RawPoll_layer224 | tl.TypePoll
     type TypePollAnswer = tlCompat.RawPollAnswer_layer223 | tl.TypePollAnswer
-    type TypePageBlock = tlCompat.RawPageBlockOrderedList_layer225 | tl.TypePageBlock
+    type TypePageBlock = tlCompat.RawPageBlockOrderedList_layer225 | tlCompat.RawPageBlockBlockquote_layer228 | tl.TypePageBlock
     type TypePageListOrderedItem = tlCompat.RawPageListOrderedItemBlocks_layer225 | tlCompat.RawPageListOrderedItemText_layer225 | tl.TypePageListOrderedItem
     type TypePageListItem = tlCompat.RawPageListItemBlocks_layer225 | tlCompat.RawPageListItemText_layer225 | tl.TypePageListItem
     type TypeBotCommand = tlCompat.RawBotCommand_layer227 | tl.TypeBotCommand
+    type TypeReplyMarkup = tlCompat.RawReplyInlineMarkup_layer228 | tl.TypeReplyMarkup
 
     type TlObject =
         | tlCompat.RawStarGiftUnique_layer197
@@ -3314,5 +3498,26 @@ export declare namespace tlCompat {
         | tlCompat.RawChannel_layer227
         | tlCompat.RawBotCommand_layer227
         | tlCompat.RawUser_layer227
+        | tlCompat.RawPageBlockBlockquote_layer228
+        | tlCompat.RawMessageActionStarGiftUnique_layer228
+        | tlCompat.RawReplyInlineMarkup_layer228
+        | tlCompat.RawKeyboardButtonCopy_layer228
+        | tlCompat.RawInputKeyboardButtonRequestPeer_layer228
+        | tlCompat.RawKeyboardButtonRequestPeer_layer228
+        | tlCompat.RawKeyboardButtonSimpleWebView_layer228
+        | tlCompat.RawKeyboardButtonWebView_layer228
+        | tlCompat.RawKeyboardButtonUserProfile_layer228
+        | tlCompat.RawInputKeyboardButtonUserProfile_layer228
+        | tlCompat.RawKeyboardButtonRequestPoll_layer228
+        | tlCompat.RawInputKeyboardButtonUrlAuth_layer228
+        | tlCompat.RawKeyboardButtonUrlAuth_layer228
+        | tlCompat.RawKeyboardButtonBuy_layer228
+        | tlCompat.RawKeyboardButtonGame_layer228
+        | tlCompat.RawKeyboardButtonSwitchInline_layer228
+        | tlCompat.RawKeyboardButtonRequestGeoLocation_layer228
+        | tlCompat.RawKeyboardButtonRequestPhone_layer228
+        | tlCompat.RawKeyboardButtonCallback_layer228
+        | tlCompat.RawKeyboardButtonUrl_layer228
+        | tlCompat.RawKeyboardButton_layer228
         | tl.TlObject
 }

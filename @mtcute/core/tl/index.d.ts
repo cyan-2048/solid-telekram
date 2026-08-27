@@ -1,6 +1,6 @@
 import _Long from 'long';
 export declare namespace tl {
-    const LAYER = 228;
+    const LAYER = 229;
 
     type Long = _Long;
     type RawLong = Uint8Array;
@@ -3214,6 +3214,7 @@ export class RpcError extends Error {
          * chat translation popup</a> should be hidden.
          */
         translationsDisabled?: boolean;
+        hasWelcomeMessages?: boolean;
         /**
          * ID of the chat
          */
@@ -3434,6 +3435,7 @@ export class RpcError extends Error {
          * enable paid messages »</a> in this supergroup.
          */
         paidMessagesAvailable?: boolean;
+        hasWelcomeMessages?: boolean;
         /**
          * ID of the channel
          */
@@ -5918,6 +5920,7 @@ export class RpcError extends Error {
          * »</a>.
          */
         craft?: boolean;
+        nameHidden?: boolean;
         /**
          * The collectible gift.
          */
@@ -5981,6 +5984,7 @@ export class RpcError extends Error {
          * »</a> only starting from the specified unixtime.
          */
         canCraftAt?: number;
+        message?: tl.TypeTextWithEntities;
     }
     /**
      * Sent from peer A to B, indicates that A refunded all
@@ -6382,6 +6386,10 @@ export class RpcError extends Error {
     interface RawMessageActionChangeCommunity {
         _: 'messageActionChangeCommunity';
         communityId?: number;
+    }
+    interface RawMessageActionChatJoinedViaCommunity {
+        _: 'messageActionChatJoinedViaCommunity';
+        communityId: number;
     }
     /**
      * Chat
@@ -10895,9 +10903,10 @@ export class RpcError extends Error {
         _: 'updateEphemeralBotCallbackQuery';
         queryId: Long;
         userId: number;
-        peer: tl.TypePeer;
+        peer?: tl.TypePeer;
         msgId: number;
         data: Uint8Array;
+        chatInstance?: Long;
         message: tl.TypeEphemeralMessage;
     }
     interface RawUpdateBotStarsSubscription {
@@ -12108,6 +12117,8 @@ export class RpcError extends Error {
      */
     interface RawSendMessageTextDraftAction {
         _: 'sendMessageTextDraftAction';
+        canStop?: boolean;
+        keepOnStop?: boolean;
         /**
          * Live draft ID: used by graphical clients to slightly change
          * the rendering behavior, see
@@ -12125,13 +12136,21 @@ export class RpcError extends Error {
     }
     interface RawInputSendMessageRichMessageDraftAction {
         _: 'inputSendMessageRichMessageDraftAction';
+        canStop?: boolean;
+        keepOnStop?: boolean;
         randomId: Long;
         richMessage: tl.TypeInputRichMessage;
     }
     interface RawSendMessageRichMessageDraftAction {
         _: 'sendMessageRichMessageDraftAction';
+        canStop?: boolean;
+        keepOnStop?: boolean;
         randomId: Long;
         richMessage: tl.TypeRichMessage;
+    }
+    interface RawSendMessageStopDraftAction {
+        _: 'sendMessageStopDraftAction';
+        randomId: Long;
     }
     /**
      * Whether people will be able to see our exact last online
@@ -13494,616 +13513,7 @@ export class RpcError extends Error {
          * Button text
          */
         text: string;
-    }
-    /**
-     * URL button
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients open <code>url</code>, showing a
-     * confirmation prompt unless the URL is one of the
-     * <a href="https://github.com/DrKLO/Telegram/blob/68d51749c4fcbaffa584829f23936565df55e08b/TMessagesProj/src/main/java/org/telegram/messenger/browser/Browser.java#L680">internal
-     * URIs</a>.
-     */
-    interface RawKeyboardButtonUrl {
-        _: 'keyboardButtonUrl';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button label
-         */
-        text: string;
-        /**
-         * URL
-         */
-        url: string;
-    }
-    /**
-     * Callback button
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients send <code>data</code> to the bot,
-     * optionally providing the user's
-     * <a href="https://core.telegram.org/api/srp">2FA SRP
-     * parameters</a> for identity verification, as described in
-     * <a href="https://core.telegram.org/api/bots/buttons#callback-queries">callback
-     * queries</a>.
-     */
-    interface RawKeyboardButtonCallback {
-        _: 'keyboardButtonCallback';
-        /**
-         * Whether the user should verify their identity by entering
-         * their <a href="https://core.telegram.org/api/srp">2FA SRP
-         * parameters</a> to the
-         * {@link messages.RawGetBotCallbackAnswerRequest} method.
-         * NOTE: telegram and the bot WILL NOT have access to the
-         * plaintext password, thanks to
-         * <a href="https://core.telegram.org/api/srp">SRP</a>. This
-         * button is mainly used by the official
-         * <a href="https://t.me/botfather">@botfather</a> bot, for
-         * verifying the user's identity before transferring ownership
-         * of a bot to another user.
-         */
-        requiresPassword?: boolean;
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * Callback data
-         */
-        data: Uint8Array;
-    }
-    /**
-     * Button to request a user's phone number
-     * 
-     * Available only in private chats, in
-     * {@link RawReplyKeyboardMarkup}.
-     * 
-     * When pressed, clients must request permission from the user
-     * to send the current user's contact to the chat, replying to
-     * the message that attached the
-     * {@link RawReplyKeyboardMarkup}.
-     */
-    interface RawKeyboardButtonRequestPhone {
-        _: 'keyboardButtonRequestPhone';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-    }
-    /**
-     * Button to request a user's geolocation
-     * 
-     * Available only in private chats, in
-     * {@link RawReplyKeyboardMarkup}.
-     * 
-     * When pressed, clients must request permission from the user
-     * to send the current user's geolocation to the chat, replying
-     * to the message that attached the
-     * {@link RawReplyKeyboardMarkup}.
-     */
-    interface RawKeyboardButtonRequestGeoLocation {
-        _: 'keyboardButtonRequestGeoLocation';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-    }
-    /**
-     * Button to switch the user to inline mode
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients must insert the bot's username and
-     * <code>query</code> into the chat input field, triggering an
-     * <a href="https://core.telegram.org/api/bots/inline">inline
-     * query</a>.
-     * 
-     * If <code>same_peer</code> is set, clients use the current
-     * chat. Otherwise, clients prompt the user to select a chat,
-     * filtered by <code>peer_types</code> if specified.
-     */
-    interface RawKeyboardButtonSwitchInline {
-        _: 'keyboardButtonSwitchInline';
-        /**
-         * If set, pressing the button will insert the bot's username
-         * and the specified inline <code>query</code> in the current
-         * chat's input field.
-         */
-        samePeer?: boolean;
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button label
-         */
-        text: string;
-        /**
-         * The inline query to use
-         */
-        query: string;
-        /**
-         * Filter to use when selecting chats.
-         */
-        peerTypes?: tl.TypeInlineQueryPeerType[];
-    }
-    /**
-     * Button to start a game
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients must open the {@link RawGame} from the
-     * attached {@link RawMessageMediaGame} constructor by invoking
-     * {@link messages.RawGetBotCallbackAnswerRequest} with the
-     * <code>game</code> flag set, as described in
-     * <a href="https://core.telegram.org/api/bots/games#starting-a-game">Starting
-     * a game</a>.
-     */
-    interface RawKeyboardButtonGame {
-        _: 'keyboardButtonGame';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-    }
-    /**
-     * Button to buy a product
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients must start the
-     * <a href="https://core.telegram.org/api/payments">payment
-     * flow for the attached invoice</a>.
-     */
-    interface RawKeyboardButtonBuy {
-        _: 'keyboardButtonBuy';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-    }
-    /**
-     * Button to request a user to authorize via URL using
-     * <a href="https://telegram.org/blog/privacy-discussions-web-bots#meet-seamless-web-bots">Seamless
-     * Telegram Login</a>. When the user clicks on such a button,
-     * {@link messages.RawRequestUrlAuthRequest} should be called,
-     * providing the <code>button_id</code> and the ID of the
-     * container message. The returned
-     * {@link RawUrlAuthResultRequest} object will contain more
-     * details about the authorization request
-     * (<code>request_write_access</code> if the bot would like to
-     * send messages to the user along with the username of the bot
-     * which will be used for user authorization). Finally, the
-     * user can choose to call
-     * {@link messages.RawAcceptUrlAuthRequest} to get a
-     * {@link RawUrlAuthResultAccepted} with the URL to open
-     * instead of the <code>url</code> of this constructor, or a
-     * {@link RawUrlAuthResultDefault}, in which case the
-     * <code>url</code> of this constructor must be opened,
-     * instead. If the user refuses the authorization request but
-     * still wants to open the link, the <code>url</code> of this
-     * constructor must be used.
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     */
-    interface RawKeyboardButtonUrlAuth {
-        _: 'keyboardButtonUrlAuth';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button label
-         */
-        text: string;
-        /**
-         * New text of the button in forwarded messages.
-         */
-        fwdText?: string;
-        /**
-         * An HTTP URL to be opened with user authorization data added
-         * to the query string when the button is pressed. If the user
-         * refuses to provide authorization data, the original URL
-         * without information about the user will be opened. The data
-         * added is the same as described in
-         * <a href="https://core.telegram.org/widgets/login#receiving-authorization-data">Receiving
-         * authorization data</a>.
-         * 
-         * 
-         * 
-         * <strong>NOTE</strong>: Services must <strong>always</strong>
-         * check the hash of the received data to verify the
-         * authentication and the integrity of the data as described in
-         * <a href="https://core.telegram.org/widgets/login#checking-authorization">Checking
-         * authorization</a>.
-         */
-        url: string;
-        /**
-         * ID of the button to pass to
-         * {@link messages.RawRequestUrlAuthRequest}
-         */
-        buttonId: number;
-    }
-    /**
-     * Button to request a user to
-     * {@link messages.RawAcceptUrlAuthRequest} via URL using
-     * <a href="https://telegram.org/blog/privacy-discussions-web-bots#meet-seamless-web-bots">Seamless
-     * Telegram Login</a>.
-     * 
-     * Use this constructor to send a
-     * {@link RawKeyboardButtonUrlAuth} button in an
-     * <a href="https://core.telegram.org/bots/features#inline-keyboards">inline
-     * keyboard</a>.
-     */
-    interface RawInputKeyboardButtonUrlAuth {
-        _: 'inputKeyboardButtonUrlAuth';
-        /**
-         * Set this flag to request the permission for your bot to send
-         * messages to the user.
-         */
-        requestWriteAccess?: boolean;
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * New text of the button in forwarded messages.
-         */
-        fwdText?: string;
-        /**
-         * An HTTP URL to be opened with user authorization data added
-         * to the query string when the button is pressed. If the user
-         * refuses to provide authorization data, the original URL
-         * without information about the user will be opened. The data
-         * added is the same as described in
-         * <a href="https://core.telegram.org/widgets/login#receiving-authorization-data">Receiving
-         * authorization data</a>.
-         * 
-         * NOTE: You must always check the hash of the received data to
-         * verify the authentication and the integrity of the data as
-         * described in
-         * <a href="https://core.telegram.org/widgets/login#checking-authorization">Checking
-         * authorization</a>.
-         */
-        url: string;
-        /**
-         * Username of a bot, which will be used for user
-         * authorization. See
-         * <a href="https://core.telegram.org/widgets/login#setting-up-a-bot">Setting
-         * up a bot</a> for more details. If not specified, the current
-         * bot's username will be assumed. The url's domain must be the
-         * same as the domain linked with the bot. See
-         * <a href="https://core.telegram.org/widgets/login#linking-your-domain-to-the-bot">Linking
-         * your domain to the bot</a> for more details.
-         */
-        bot: tl.TypeInputUser;
-    }
-    /**
-     * Button to request a poll from the user
-     * 
-     * Available only in private chats, in
-     * {@link RawReplyKeyboardMarkup}.
-     * 
-     * When pressed, clients prompt the user to create and send a
-     * <a href="https://core.telegram.org/api/poll">poll</a>,
-     * replying to the message that attached the
-     * {@link RawReplyKeyboardMarkup}. If <code>quiz</code> is set,
-     * the prompt must create a quiz poll.
-     */
-    interface RawKeyboardButtonRequestPoll {
-        _: 'keyboardButtonRequestPoll';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * If set, only quiz polls can be sent
-         */
-        quiz?: boolean;
-        /**
-         * Button text
-         */
-        text: string;
-    }
-    /**
-     * Button that links directly to a user profile
-     * 
-     * Use this constructor to send a
-     * {@link RawKeyboardButtonUserProfile} button in an
-     * <a href="https://core.telegram.org/bots/features#inline-keyboards">inline
-     * keyboard</a>.
-     */
-    interface RawInputKeyboardButtonUserProfile {
-        _: 'inputKeyboardButtonUserProfile';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * User ID
-         */
-        userId: tl.TypeInputUser;
-    }
-    /**
-     * Button that links directly to a user profile
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients must open the profile of the user
-     * identified by <code>user_id</code>.
-     */
-    interface RawKeyboardButtonUserProfile {
-        _: 'keyboardButtonUserProfile';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * User ID
-         */
-        userId: number;
-    }
-    /**
-     * Button to open a
-     * <a href="https://core.telegram.org/api/bots/webapps">bot
-     * mini app</a> using
-     * {@link messages.RawRequestWebViewRequest}, sending over user
-     * information after user confirmation.
-     * 
-     * Can only be sent or received as part of an inline keyboard,
-     * use {@link RawKeyboardButtonSimpleWebView} for reply
-     * keyboards.
-     * 
-     * When pressed, clients must open an
-     * <a href="https://core.telegram.org/api/bots/webapps#inline-button-mini-apps">Inline
-     * Button Mini App</a> using
-     * {@link messages.RawRequestWebViewRequest}, passing
-     * <code>url</code> to
-     * {@link messages.RawRequestWebViewRequest}.<code>url</code>.
-     */
-    interface RawKeyboardButtonWebView {
-        _: 'keyboardButtonWebView';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * <a href="https://core.telegram.org/api/bots/webapps">Web app
-         * url</a>
-         */
-        url: string;
-    }
-    /**
-     * Button to open a
-     * <a href="https://core.telegram.org/api/bots/webapps">bot
-     * mini app</a> using
-     * {@link messages.RawRequestSimpleWebViewRequest}, without
-     * sending user information to the web app.
-     * 
-     * Can only be sent or received as part of a reply keyboard,
-     * use {@link RawKeyboardButtonWebView} for inline keyboards.
-     * 
-     * When pressed, clients must open a
-     * <a href="https://core.telegram.org/api/bots/webapps#keyboard-button-mini-apps">Keyboard
-     * Button Mini App</a> using
-     * {@link messages.RawRequestSimpleWebViewRequest}, passing
-     * <code>url</code> to
-     * {@link messages.RawRequestSimpleWebViewRequest}.<code>url</code>.
-     */
-    interface RawKeyboardButtonSimpleWebView {
-        _: 'keyboardButtonSimpleWebView';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * <a href="https://core.telegram.org/api/bots/webapps">Web app
-         * URL</a>
-         */
-        url: string;
-    }
-    /**
-     * Prompts the user to select and share one or more peers with
-     * the bot using
-     * {@link messages.RawSendBotRequestedPeerRequest}
-     * 
-     * Available only in private chats, in
-     * {@link RawReplyKeyboardMarkup}.
-     * 
-     * See
-     * <a href="https://core.telegram.org/api/bots/buttons#peer-requests">peer
-     * requests</a> for the full flow.
-     */
-    interface RawKeyboardButtonRequestPeer {
-        _: 'keyboardButtonRequestPeer';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * Button ID, to be passed to
-         * {@link messages.RawSendBotRequestedPeerRequest}.
-         */
-        buttonId: number;
-        /**
-         * Filtering criteria to use for the peer selection list shown
-         * to the user. 
-         * 
-         * The list should display all existing peers of the specified
-         * type, and should also offer an option for the user to create
-         * and immediately use one or more (up to
-         * <code>max_quantity</code>) peers of the specified type, if
-         * needed.
-         */
-        peerType: tl.TypeRequestPeerType;
-        /**
-         * Maximum number of peers that can be chosen.
-         */
-        maxQuantity: number;
-    }
-    /**
-     * Prompts the user to select and share one or more peers with
-     * the bot using
-     * {@link messages.RawSendBotRequestedPeerRequest}.
-     * 
-     * Use this constructor to send a
-     * {@link RawKeyboardButtonRequestPeer} button in a
-     * <a href="https://core.telegram.org/bots/features#keyboards">reply
-     * keyboard</a> in a private chat.
-     * 
-     * See
-     * <a href="https://core.telegram.org/api/bots/buttons#peer-requests">peer
-     * requests</a> for the full flow.
-     */
-    interface RawInputKeyboardButtonRequestPeer {
-        _: 'inputKeyboardButtonRequestPeer';
-        /**
-         * Set this flag to request the peer's name.
-         */
-        nameRequested?: boolean;
-        /**
-         * Set this flag to request the peer's <code>@username</code>
-         * (if any).
-         */
-        usernameRequested?: boolean;
-        /**
-         * Set this flag to request the peer's photo (if any).
-         */
-        photoRequested?: boolean;
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Button text
-         */
-        text: string;
-        /**
-         * Button ID, to be passed to
-         * {@link messages.RawSendBotRequestedPeerRequest}.
-         */
-        buttonId: number;
-        /**
-         * Filtering criteria to use for the peer selection list shown
-         * to the user. 
-         * 
-         * The list should display all existing peers of the specified
-         * type, and should also offer an option for the user to create
-         * and immediately use one or more (up to
-         * <code>max_quantity</code>) peers of the specified type, if
-         * needed.
-         */
-        peerType: tl.TypeRequestPeerType;
-        /**
-         * Maximum number of peers that can be chosen.
-         */
-        maxQuantity: number;
-    }
-    /**
-     * Clipboard button
-     * 
-     * Available only in {@link RawReplyInlineMarkup}.
-     * 
-     * When pressed, clients must copy <code>copy_text</code> to
-     * the clipboard.
-     */
-    interface RawKeyboardButtonCopy {
-        _: 'keyboardButtonCopy';
-        /**
-         * Button style, see
-         * <a href="https://core.telegram.org/api/bots/buttons#button-styles">here
-         * »</a> for more info on button styles.
-         */
-        style?: tl.TypeKeyboardButtonStyle;
-        /**
-         * Title of the button
-         */
-        text: string;
-        /**
-         * The text that will be copied to the clipboard
-         */
-        copyText: string;
+        type: tl.TypeButtonType;
     }
     /**
      * Inline keyboard row
@@ -14206,6 +13616,7 @@ export class RpcError extends Error {
          * regular keyboard is hidden.
          */
         persistent?: boolean;
+        forceReply?: boolean;
         /**
          * Button row
          */
@@ -14221,10 +13632,11 @@ export class RpcError extends Error {
      */
     interface RawReplyInlineMarkup {
         _: 'replyInlineMarkup';
+        forceReply?: boolean;
         /**
          * Bot or inline keyboard rows
          */
-        rows: tl.TypeKeyboardButtonRow[];
+        rows: tl.TypeKeyboardInlineButtonRow[];
     }
     /**
      * Unknown message entity
@@ -16605,6 +16017,12 @@ export class RpcError extends Error {
         text: tl.TypeRichText;
         oldText: tl.TypeRichText;
     }
+    interface RawTextButton {
+        _: 'textButton';
+        text: tl.TypeRichText;
+        type: tl.TypeInlineButtonType;
+        style?: tl.TypeRichButtonStyle;
+    }
     /**
      * Unsupported IV element
      */
@@ -16731,6 +16149,7 @@ export class RpcError extends Error {
      */
     interface RawPageBlockBlockquote {
         _: 'pageBlockBlockquote';
+        collapsed?: boolean;
         /**
          * Quote contents
          */
@@ -16958,6 +16377,7 @@ export class RpcError extends Error {
          * Is the table striped?
          */
         striped?: boolean;
+        compact?: boolean;
         /**
          * Title
          */
@@ -17082,6 +16502,18 @@ export class RpcError extends Error {
         _: 'pageBlockBlockquoteBlocks';
         blocks: tl.TypePageBlock[];
         caption: tl.TypeRichText;
+    }
+    interface RawPageBlockButtonRow {
+        _: 'pageBlockButtonRow';
+        alignLeft?: boolean;
+        alignCenter?: boolean;
+        alignRight?: boolean;
+        buttons: tl.TypePageButton[];
+    }
+    interface RawPageBlockDocument {
+        _: 'pageBlockDocument';
+        documentId: Long;
+        caption: tl.TypePageCaption;
     }
     /**
      * The phone call was missed, see
@@ -20626,6 +20058,7 @@ export class RpcError extends Error {
          */
         manageRanks?: boolean;
         manageLinkedPeers?: boolean;
+        manageWelcomeMessages?: boolean;
     }
     /**
      * Represents the rights of a normal user in a
@@ -23795,6 +23228,7 @@ export class RpcError extends Error {
          * Buy the gift using TON.
          */
         ton?: boolean;
+        showName?: boolean;
         /**
          * Slug of the gift to buy.
          */
@@ -23803,6 +23237,7 @@ export class RpcError extends Error {
          * The receiver of the gift.
          */
         toId: tl.TypeInputPeer;
+        message?: tl.TypeTextWithEntities;
     }
     /**
      * <a href="https://core.telegram.org/api/gifts#prepaying-for-someone-elses-upgrade">Separately
@@ -30631,9 +30066,12 @@ export class RpcError extends Error {
     interface RawEphemeralMessage {
         _: 'ephemeralMessage';
         out?: boolean;
+        welcomeTemplate?: boolean;
+        invertMedia?: boolean;
+        noforwards?: boolean;
         id: number;
         fromId: tl.TypePeer;
-        peerId: tl.TypePeer;
+        peerId?: tl.TypePeer;
         receiverId: number;
         topMsgId?: number;
         date: number;
@@ -30642,6 +30080,117 @@ export class RpcError extends Error {
         media?: tl.TypeMessageMedia;
         replyMarkup?: tl.TypeReplyMarkup;
         replyTo?: tl.TypeMessageReplyHeader;
+        richMessage?: tl.TypeRichMessage;
+        chatInstance?: Long;
+        anchorMsgId?: number;
+    }
+    interface RawButtonTypeDefault {
+        _: 'buttonTypeDefault';
+    }
+    interface RawButtonTypeRequestPhone {
+        _: 'buttonTypeRequestPhone';
+    }
+    interface RawButtonTypeRequestGeoLocation {
+        _: 'buttonTypeRequestGeoLocation';
+    }
+    interface RawButtonTypeRequestPoll {
+        _: 'buttonTypeRequestPoll';
+        quiz?: boolean;
+    }
+    interface RawButtonTypeRequestPeer {
+        _: 'buttonTypeRequestPeer';
+        buttonId: number;
+        peerType: tl.TypeRequestPeerType;
+        maxQuantity: number;
+    }
+    interface RawInputButtonTypeRequestPeer {
+        _: 'inputButtonTypeRequestPeer';
+        nameRequested?: boolean;
+        usernameRequested?: boolean;
+        photoRequested?: boolean;
+        buttonId: number;
+        peerType: tl.TypeRequestPeerType;
+        maxQuantity: number;
+    }
+    interface RawButtonTypeSimpleWebView {
+        _: 'buttonTypeSimpleWebView';
+        url: string;
+    }
+    interface RawInlineButtonTypeUrl {
+        _: 'inlineButtonTypeUrl';
+        url: string;
+    }
+    interface RawInlineButtonTypeUrlAuth {
+        _: 'inlineButtonTypeUrlAuth';
+        fwdText?: string;
+        url: string;
+        buttonId: number;
+    }
+    interface RawInputInlineButtonTypeUrlAuth {
+        _: 'inputInlineButtonTypeUrlAuth';
+        requestWriteAccess?: boolean;
+        fwdText?: string;
+        url: string;
+        bot?: tl.TypeInputUser;
+    }
+    interface RawInlineButtonTypeWebView {
+        _: 'inlineButtonTypeWebView';
+        url: string;
+    }
+    interface RawInlineButtonTypeCallback {
+        _: 'inlineButtonTypeCallback';
+        requiresPassword?: boolean;
+        data: Uint8Array;
+    }
+    interface RawInlineButtonTypeGame {
+        _: 'inlineButtonTypeGame';
+    }
+    interface RawInlineButtonTypeBuy {
+        _: 'inlineButtonTypeBuy';
+    }
+    interface RawInlineButtonTypeSwitchInline {
+        _: 'inlineButtonTypeSwitchInline';
+        samePeer?: boolean;
+        query: string;
+        peerTypes?: tl.TypeInlineQueryPeerType[];
+    }
+    interface RawInlineButtonTypeUserProfile {
+        _: 'inlineButtonTypeUserProfile';
+        userId: number;
+    }
+    interface RawInputInlineButtonTypeUserProfile {
+        _: 'inputInlineButtonTypeUserProfile';
+        userId: tl.TypeInputUser;
+    }
+    interface RawInlineButtonTypeCopy {
+        _: 'inlineButtonTypeCopy';
+        copyText: string;
+    }
+    interface RawInlineButtonTypeDisabled {
+        _: 'inlineButtonTypeDisabled';
+    }
+    interface RawKeyboardInlineButton {
+        _: 'keyboardInlineButton';
+        style?: tl.TypeKeyboardButtonStyle;
+        text: string;
+        type: tl.TypeInlineButtonType;
+    }
+    interface RawKeyboardInlineButtonRow {
+        _: 'keyboardInlineButtonRow';
+        buttons: tl.TypeKeyboardInlineButton[];
+    }
+    interface RawRichButtonStyle {
+        _: 'richButtonStyle';
+        bgPrimary?: boolean;
+        bgDanger?: boolean;
+        bgSuccess?: boolean;
+        link?: boolean;
+    }
+    interface RawPageButton {
+        _: 'pageButton';
+        text: tl.TypeRichText;
+        type: tl.TypeInlineButtonType;
+        style?: tl.TypeRichButtonStyle;
     }
     /**
      * Invokes a query after successful completion of one of the
@@ -30867,7 +30416,7 @@ export class RpcError extends Error {
          */
         query: X;
     }
-    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, aicompose.RpcCallReturn, communities.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn, ephemeral.RpcCallReturn {
+    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, aicompose.RpcCallReturn, communities.RpcCallReturn, ephemeral.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn {
         'invokeAfterMsg': any
         'invokeAfterMsgs': any
         'initConnection': any
@@ -30999,7 +30548,7 @@ export class RpcError extends Error {
     /**
      * Object describing actions connected to a service message.
      */
-    type TypeMessageAction = tl.RawMessageActionEmpty | tl.RawMessageActionChatCreate | tl.RawMessageActionChatEditTitle | tl.RawMessageActionChatEditPhoto | tl.RawMessageActionChatDeletePhoto | tl.RawMessageActionChatAddUser | tl.RawMessageActionChatDeleteUser | tl.RawMessageActionChatJoinedByLink | tl.RawMessageActionChannelCreate | tl.RawMessageActionChatMigrateTo | tl.RawMessageActionChannelMigrateFrom | tl.RawMessageActionPinMessage | tl.RawMessageActionHistoryClear | tl.RawMessageActionGameScore | tl.RawMessageActionPaymentSentMe | tl.RawMessageActionPaymentSent | tl.RawMessageActionPhoneCall | tl.RawMessageActionScreenshotTaken | tl.RawMessageActionCustomAction | tl.RawMessageActionBotAllowed | tl.RawMessageActionSecureValuesSentMe | tl.RawMessageActionSecureValuesSent | tl.RawMessageActionContactSignUp | tl.RawMessageActionGeoProximityReached | tl.RawMessageActionGroupCall | tl.RawMessageActionInviteToGroupCall | tl.RawMessageActionSetMessagesTTL | tl.RawMessageActionGroupCallScheduled | tl.RawMessageActionSetChatTheme | tl.RawMessageActionChatJoinedByRequest | tl.RawMessageActionWebViewDataSentMe | tl.RawMessageActionWebViewDataSent | tl.RawMessageActionGiftPremium | tl.RawMessageActionTopicCreate | tl.RawMessageActionTopicEdit | tl.RawMessageActionSuggestProfilePhoto | tl.RawMessageActionRequestedPeer | tl.RawMessageActionSetChatWallPaper | tl.RawMessageActionGiftCode | tl.RawMessageActionGiveawayLaunch | tl.RawMessageActionGiveawayResults | tl.RawMessageActionBoostApply | tl.RawMessageActionRequestedPeerSentMe | tl.RawMessageActionPaymentRefunded | tl.RawMessageActionGiftStars | tl.RawMessageActionPrizeStars | tl.RawMessageActionStarGift | tl.RawMessageActionStarGiftUnique | tl.RawMessageActionPaidMessagesRefunded | tl.RawMessageActionPaidMessagesPrice | tl.RawMessageActionConferenceCall | tl.RawMessageActionTodoCompletions | tl.RawMessageActionTodoAppendTasks | tl.RawMessageActionSuggestedPostApproval | tl.RawMessageActionSuggestedPostSuccess | tl.RawMessageActionSuggestedPostRefund | tl.RawMessageActionGiftTon | tl.RawMessageActionSuggestBirthday | tl.RawMessageActionStarGiftPurchaseOffer | tl.RawMessageActionStarGiftPurchaseOfferDeclined | tl.RawMessageActionNewCreatorPending | tl.RawMessageActionChangeCreator | tl.RawMessageActionNoForwardsToggle | tl.RawMessageActionNoForwardsRequest | tl.RawMessageActionPollAppendAnswer | tl.RawMessageActionPollDeleteAnswer | tl.RawMessageActionManagedBotCreated | tl.RawMessageActionChangeCommunity
+    type TypeMessageAction = tl.RawMessageActionEmpty | tl.RawMessageActionChatCreate | tl.RawMessageActionChatEditTitle | tl.RawMessageActionChatEditPhoto | tl.RawMessageActionChatDeletePhoto | tl.RawMessageActionChatAddUser | tl.RawMessageActionChatDeleteUser | tl.RawMessageActionChatJoinedByLink | tl.RawMessageActionChannelCreate | tl.RawMessageActionChatMigrateTo | tl.RawMessageActionChannelMigrateFrom | tl.RawMessageActionPinMessage | tl.RawMessageActionHistoryClear | tl.RawMessageActionGameScore | tl.RawMessageActionPaymentSentMe | tl.RawMessageActionPaymentSent | tl.RawMessageActionPhoneCall | tl.RawMessageActionScreenshotTaken | tl.RawMessageActionCustomAction | tl.RawMessageActionBotAllowed | tl.RawMessageActionSecureValuesSentMe | tl.RawMessageActionSecureValuesSent | tl.RawMessageActionContactSignUp | tl.RawMessageActionGeoProximityReached | tl.RawMessageActionGroupCall | tl.RawMessageActionInviteToGroupCall | tl.RawMessageActionSetMessagesTTL | tl.RawMessageActionGroupCallScheduled | tl.RawMessageActionSetChatTheme | tl.RawMessageActionChatJoinedByRequest | tl.RawMessageActionWebViewDataSentMe | tl.RawMessageActionWebViewDataSent | tl.RawMessageActionGiftPremium | tl.RawMessageActionTopicCreate | tl.RawMessageActionTopicEdit | tl.RawMessageActionSuggestProfilePhoto | tl.RawMessageActionRequestedPeer | tl.RawMessageActionSetChatWallPaper | tl.RawMessageActionGiftCode | tl.RawMessageActionGiveawayLaunch | tl.RawMessageActionGiveawayResults | tl.RawMessageActionBoostApply | tl.RawMessageActionRequestedPeerSentMe | tl.RawMessageActionPaymentRefunded | tl.RawMessageActionGiftStars | tl.RawMessageActionPrizeStars | tl.RawMessageActionStarGift | tl.RawMessageActionStarGiftUnique | tl.RawMessageActionPaidMessagesRefunded | tl.RawMessageActionPaidMessagesPrice | tl.RawMessageActionConferenceCall | tl.RawMessageActionTodoCompletions | tl.RawMessageActionTodoAppendTasks | tl.RawMessageActionSuggestedPostApproval | tl.RawMessageActionSuggestedPostSuccess | tl.RawMessageActionSuggestedPostRefund | tl.RawMessageActionGiftTon | tl.RawMessageActionSuggestBirthday | tl.RawMessageActionStarGiftPurchaseOffer | tl.RawMessageActionStarGiftPurchaseOfferDeclined | tl.RawMessageActionNewCreatorPending | tl.RawMessageActionChangeCreator | tl.RawMessageActionNoForwardsToggle | tl.RawMessageActionNoForwardsRequest | tl.RawMessageActionPollAppendAnswer | tl.RawMessageActionPollDeleteAnswer | tl.RawMessageActionManagedBotCreated | tl.RawMessageActionChangeCommunity | tl.RawMessageActionChatJoinedViaCommunity
     function isAnyMessageAction(o: object): o is TypeMessageAction
     /**
      * Chat info.
@@ -31156,7 +30705,7 @@ export class RpcError extends Error {
      * 
      * API schema:
      */
-    type TypeSendMessageAction = tl.RawSendMessageTypingAction | tl.RawSendMessageCancelAction | tl.RawSendMessageRecordVideoAction | tl.RawSendMessageUploadVideoAction | tl.RawSendMessageRecordAudioAction | tl.RawSendMessageUploadAudioAction | tl.RawSendMessageUploadPhotoAction | tl.RawSendMessageUploadDocumentAction | tl.RawSendMessageGeoLocationAction | tl.RawSendMessageChooseContactAction | tl.RawSendMessageGamePlayAction | tl.RawSendMessageRecordRoundAction | tl.RawSendMessageUploadRoundAction | tl.RawSpeakingInGroupCallAction | tl.RawSendMessageHistoryImportAction | tl.RawSendMessageChooseStickerAction | tl.RawSendMessageEmojiInteraction | tl.RawSendMessageEmojiInteractionSeen | tl.RawSendMessageTextDraftAction | tl.RawInputSendMessageRichMessageDraftAction | tl.RawSendMessageRichMessageDraftAction
+    type TypeSendMessageAction = tl.RawSendMessageTypingAction | tl.RawSendMessageCancelAction | tl.RawSendMessageRecordVideoAction | tl.RawSendMessageUploadVideoAction | tl.RawSendMessageRecordAudioAction | tl.RawSendMessageUploadAudioAction | tl.RawSendMessageUploadPhotoAction | tl.RawSendMessageUploadDocumentAction | tl.RawSendMessageGeoLocationAction | tl.RawSendMessageChooseContactAction | tl.RawSendMessageGamePlayAction | tl.RawSendMessageRecordRoundAction | tl.RawSendMessageUploadRoundAction | tl.RawSpeakingInGroupCallAction | tl.RawSendMessageHistoryImportAction | tl.RawSendMessageChooseStickerAction | tl.RawSendMessageEmojiInteraction | tl.RawSendMessageEmojiInteractionSeen | tl.RawSendMessageTextDraftAction | tl.RawInputSendMessageRichMessageDraftAction | tl.RawSendMessageRichMessageDraftAction | tl.RawSendMessageStopDraftAction
     function isAnySendMessageAction(o: object): o is TypeSendMessageAction
     /**
      * Privacy <strong>keys</strong> together with
@@ -31286,7 +30835,7 @@ export class RpcError extends Error {
     /**
      * Bot or inline keyboard buttons
      */
-    type TypeKeyboardButton = tl.RawKeyboardButton | tl.RawKeyboardButtonUrl | tl.RawKeyboardButtonCallback | tl.RawKeyboardButtonRequestPhone | tl.RawKeyboardButtonRequestGeoLocation | tl.RawKeyboardButtonSwitchInline | tl.RawKeyboardButtonGame | tl.RawKeyboardButtonBuy | tl.RawKeyboardButtonUrlAuth | tl.RawInputKeyboardButtonUrlAuth | tl.RawKeyboardButtonRequestPoll | tl.RawInputKeyboardButtonUserProfile | tl.RawKeyboardButtonUserProfile | tl.RawKeyboardButtonWebView | tl.RawKeyboardButtonSimpleWebView | tl.RawKeyboardButtonRequestPeer | tl.RawInputKeyboardButtonRequestPeer | tl.RawKeyboardButtonCopy
+    type TypeKeyboardButton = tl.RawKeyboardButton
     function isAnyKeyboardButton(o: object): o is TypeKeyboardButton
     /**
      * Bot or inline keyboard rows
@@ -31427,14 +30976,14 @@ export class RpcError extends Error {
     /**
      * Rich text
      */
-    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor | tl.RawTextMath | tl.RawTextCustomEmoji | tl.RawTextSpoiler | tl.RawTextMention | tl.RawTextHashtag | tl.RawTextBotCommand | tl.RawTextCashtag | tl.RawTextAutoUrl | tl.RawTextAutoEmail | tl.RawTextAutoPhone | tl.RawTextBankCard | tl.RawTextMentionName | tl.RawTextDate | tl.RawTextDiff
+    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor | tl.RawTextMath | tl.RawTextCustomEmoji | tl.RawTextSpoiler | tl.RawTextMention | tl.RawTextHashtag | tl.RawTextBotCommand | tl.RawTextCashtag | tl.RawTextAutoUrl | tl.RawTextAutoEmail | tl.RawTextAutoPhone | tl.RawTextBankCard | tl.RawTextMentionName | tl.RawTextDate | tl.RawTextDiff | tl.RawTextButton
     function isAnyRichText(o: object): o is TypeRichText
     /**
      * Represents an
      * <a href="https://instantview.telegram.org/">instant view
      * page element</a>
      */
-    type TypePageBlock = tl.RawPageBlockUnsupported | tl.RawPageBlockTitle | tl.RawPageBlockSubtitle | tl.RawPageBlockAuthorDate | tl.RawPageBlockHeader | tl.RawPageBlockSubheader | tl.RawPageBlockParagraph | tl.RawPageBlockPreformatted | tl.RawPageBlockFooter | tl.RawPageBlockDivider | tl.RawPageBlockAnchor | tl.RawPageBlockList | tl.RawPageBlockBlockquote | tl.RawPageBlockPullquote | tl.RawPageBlockPhoto | tl.RawPageBlockVideo | tl.RawPageBlockCover | tl.RawPageBlockEmbed | tl.RawPageBlockEmbedPost | tl.RawPageBlockCollage | tl.RawPageBlockSlideshow | tl.RawPageBlockChannel | tl.RawPageBlockAudio | tl.RawPageBlockKicker | tl.RawPageBlockTable | tl.RawPageBlockOrderedList | tl.RawPageBlockDetails | tl.RawPageBlockRelatedArticles | tl.RawPageBlockMap | tl.RawPageBlockHeading1 | tl.RawPageBlockHeading2 | tl.RawPageBlockHeading3 | tl.RawPageBlockHeading4 | tl.RawPageBlockHeading5 | tl.RawPageBlockHeading6 | tl.RawPageBlockMath | tl.RawPageBlockThinking | tl.RawInputPageBlockMap | tl.RawPageBlockBlockquoteBlocks
+    type TypePageBlock = tl.RawPageBlockUnsupported | tl.RawPageBlockTitle | tl.RawPageBlockSubtitle | tl.RawPageBlockAuthorDate | tl.RawPageBlockHeader | tl.RawPageBlockSubheader | tl.RawPageBlockParagraph | tl.RawPageBlockPreformatted | tl.RawPageBlockFooter | tl.RawPageBlockDivider | tl.RawPageBlockAnchor | tl.RawPageBlockList | tl.RawPageBlockBlockquote | tl.RawPageBlockPullquote | tl.RawPageBlockPhoto | tl.RawPageBlockVideo | tl.RawPageBlockCover | tl.RawPageBlockEmbed | tl.RawPageBlockEmbedPost | tl.RawPageBlockCollage | tl.RawPageBlockSlideshow | tl.RawPageBlockChannel | tl.RawPageBlockAudio | tl.RawPageBlockKicker | tl.RawPageBlockTable | tl.RawPageBlockOrderedList | tl.RawPageBlockDetails | tl.RawPageBlockRelatedArticles | tl.RawPageBlockMap | tl.RawPageBlockHeading1 | tl.RawPageBlockHeading2 | tl.RawPageBlockHeading3 | tl.RawPageBlockHeading4 | tl.RawPageBlockHeading5 | tl.RawPageBlockHeading6 | tl.RawPageBlockMath | tl.RawPageBlockThinking | tl.RawInputPageBlockMap | tl.RawPageBlockBlockquoteBlocks | tl.RawPageBlockButtonRow | tl.RawPageBlockDocument
     function isAnyPageBlock(o: object): o is TypePageBlock
     /**
      * Why was the phone call discarded?
@@ -33205,6 +32754,18 @@ export class RpcError extends Error {
     function isAnyCommunityPeerRequest(o: object): o is TypeCommunityPeerRequest
     type TypeEphemeralMessage = tl.RawEphemeralMessage
     function isAnyEphemeralMessage(o: object): o is TypeEphemeralMessage
+    type TypeButtonType = tl.RawButtonTypeDefault | tl.RawButtonTypeRequestPhone | tl.RawButtonTypeRequestGeoLocation | tl.RawButtonTypeRequestPoll | tl.RawButtonTypeRequestPeer | tl.RawInputButtonTypeRequestPeer | tl.RawButtonTypeSimpleWebView
+    function isAnyButtonType(o: object): o is TypeButtonType
+    type TypeInlineButtonType = tl.RawInlineButtonTypeUrl | tl.RawInlineButtonTypeUrlAuth | tl.RawInputInlineButtonTypeUrlAuth | tl.RawInlineButtonTypeWebView | tl.RawInlineButtonTypeCallback | tl.RawInlineButtonTypeGame | tl.RawInlineButtonTypeBuy | tl.RawInlineButtonTypeSwitchInline | tl.RawInlineButtonTypeUserProfile | tl.RawInputInlineButtonTypeUserProfile | tl.RawInlineButtonTypeCopy | tl.RawInlineButtonTypeDisabled
+    function isAnyInlineButtonType(o: object): o is TypeInlineButtonType
+    type TypeKeyboardInlineButton = tl.RawKeyboardInlineButton
+    function isAnyKeyboardInlineButton(o: object): o is TypeKeyboardInlineButton
+    type TypeKeyboardInlineButtonRow = tl.RawKeyboardInlineButtonRow
+    function isAnyKeyboardInlineButtonRow(o: object): o is TypeKeyboardInlineButtonRow
+    type TypeRichButtonStyle = tl.RawRichButtonStyle
+    function isAnyRichButtonStyle(o: object): o is TypeRichButtonStyle
+    type TypePageButton = tl.RawPageButton
+    function isAnyPageButton(o: object): o is TypePageButton
 
     namespace storage {
         /**
@@ -33749,6 +33310,11 @@ export class RpcError extends Error {
              * object.
              */
             options: tl.TypeDataJSON;
+        }
+        interface RawFirebasePnvIntent {
+            _: 'auth.firebasePnvIntent';
+            nonce: string;
+            digitalCredentialPayload: string;
         }
         /**
          * Send the verification code for login
@@ -34466,6 +34032,30 @@ export class RpcError extends Error {
              */
             fromAuthKeyId?: Long;
         }
+        /**
+         * RPC method returns {@link tl.auth.TypeFirebasePnvIntent}
+         */
+        interface RawInitFirebasePnvLoginRequest {
+            _: 'auth.initFirebasePnvLogin';
+            apiId: number;
+            apiHash: string;
+        }
+        /**
+         * RPC method returns {@link tl.auth.TypeAuthorization}
+         */
+        interface RawFinishFirebasePnvLoginRequest {
+            _: 'auth.finishFirebasePnvLogin';
+            googleToken: string;
+        }
+        /**
+         * RPC method returns {@link tl.auth.TypeAuthorization}
+         */
+        interface RawFirebasePnvSignUpRequest {
+            _: 'auth.firebasePnvSignUp';
+            noJoinedNotifications?: boolean;
+            firstName: string;
+            lastName: string;
+        }
         interface RpcCallReturn {
             'auth.sendCode': tl.auth.TypeSentCode
             'auth.signUp': tl.auth.TypeAuthorization
@@ -34493,6 +34083,9 @@ export class RpcError extends Error {
             'auth.checkPaidAuth': tl.auth.TypeSentCode
             'auth.initPasskeyLogin': tl.auth.TypePasskeyLoginOptions
             'auth.finishPasskeyLogin': tl.auth.TypeAuthorization
+            'auth.initFirebasePnvLogin': tl.auth.TypeFirebasePnvIntent
+            'auth.finishFirebasePnvLogin': tl.auth.TypeAuthorization
+            'auth.firebasePnvSignUp': tl.auth.TypeAuthorization
         }
         /**
          * Contains info on a confirmation code message sent via SMS,
@@ -34548,6 +34141,8 @@ export class RpcError extends Error {
          */
         type TypePasskeyLoginOptions = tl.auth.RawPasskeyLoginOptions
         function isAnyPasskeyLoginOptions(o: object): o is TypePasskeyLoginOptions
+        type TypeFirebasePnvIntent = tl.auth.RawFirebasePnvIntent
+        function isAnyFirebasePnvIntent(o: object): o is TypeFirebasePnvIntent
 }
 
     namespace contacts {
@@ -35821,23 +35416,9 @@ export class RpcError extends Error {
          */
         interface RawDhConfig {
             _: 'messages.dhConfig';
-            /**
-             * New value <strong>prime</strong>, see
-             * <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wikipedia</a>
-             */
             g: number;
-            /**
-             * New value <strong>primitive root</strong>, see
-             * <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wikipedia</a>
-             */
             p: Uint8Array;
-            /**
-             * Version of set of parameters
-             */
             version: number;
-            /**
-             * Random sequence of bytes of assigned length
-             */
             random: Uint8Array;
         }
         /**
@@ -38090,6 +37671,7 @@ export class RpcError extends Error {
              * relevant Stars will be withdrawn from the bot's balance.
              */
             allowPaidFloodskip?: boolean;
+            fromEphemeral?: boolean;
             /**
              * Source of messages
              */
@@ -64790,6 +64372,116 @@ export class RpcError extends Error {
         function isAnyParticipantJoinedChats(o: object): o is TypeParticipantJoinedChats
 }
 
+    namespace ephemeral {
+        interface RawWelcomeMessagesNotModified {
+            _: 'ephemeral.welcomeMessagesNotModified';
+        }
+        interface RawWelcomeMessages {
+            _: 'ephemeral.welcomeMessages';
+            hash: Long;
+            messages: tl.TypeEphemeralMessage[];
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawSendMessageRequest {
+            _: 'ephemeral.sendMessage';
+            invertMedia?: boolean;
+            welcome?: boolean;
+            anchor?: boolean;
+            noforwards?: boolean;
+            peer?: tl.TypeInputPeer;
+            receiverId: tl.TypeInputUser;
+            queryId?: Long;
+            message: string;
+            entities?: tl.TypeMessageEntity[];
+            media?: tl.TypeInputMedia;
+            replyMarkup?: tl.TypeReplyMarkup;
+            richMessage?: tl.TypeInputRichMessage;
+            randomId: Long;
+            replyTo?: tl.TypeInputReplyTo;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteMessageRequest {
+            _: 'ephemeral.deleteMessage';
+            peer?: tl.TypeInputPeer;
+            receiverId: tl.TypeInputUser;
+            id: number;
+        }
+        /**
+         * RPC method returns {@link tl.TypeReportResult}
+         */
+        interface RawReportMessageRequest {
+            _: 'ephemeral.reportMessage';
+            peer: tl.TypeInputPeer;
+            id: number;
+            option: Uint8Array;
+            message: string;
+        }
+        /**
+         * RPC method returns {@link tl.messages.TypeBotCallbackAnswer}
+         */
+        interface RawGetCallbackAnswerRequest {
+            _: 'ephemeral.getCallbackAnswer';
+            peer: tl.TypeInputPeer;
+            id: number;
+            data?: Uint8Array;
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawEditMessageRequest {
+            _: 'ephemeral.editMessage';
+            invertMedia?: boolean;
+            welcome?: boolean;
+            peer?: tl.TypeInputPeer;
+            receiverId: tl.TypeInputUser;
+            id: number;
+            message?: string;
+            media?: tl.TypeInputMedia;
+            entities?: tl.TypeMessageEntity[];
+            replyMarkup?: tl.TypeReplyMarkup;
+            richMessage?: tl.TypeInputRichMessage;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteWelcomeMessageRequest {
+            _: 'ephemeral.deleteWelcomeMessage';
+            peer: tl.TypeInputPeer;
+            id: number;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteAllWelcomeMessagesRequest {
+            _: 'ephemeral.deleteAllWelcomeMessages';
+            peer: tl.TypeInputPeer;
+        }
+        /**
+         * RPC method returns {@link tl.ephemeral.TypeWelcomeMessages}
+         */
+        interface RawGetWelcomeMessagesRequest {
+            _: 'ephemeral.getWelcomeMessages';
+            peer: tl.TypeInputPeer;
+            hash: Long;
+        }
+        interface RpcCallReturn {
+            'ephemeral.sendMessage': tl.TypeUpdates
+            'ephemeral.deleteMessage': boolean
+            'ephemeral.reportMessage': tl.TypeReportResult
+            'ephemeral.getCallbackAnswer': tl.messages.TypeBotCallbackAnswer
+            'ephemeral.editMessage': tl.TypeUpdates
+            'ephemeral.deleteWelcomeMessage': boolean
+            'ephemeral.deleteAllWelcomeMessages': boolean
+            'ephemeral.getWelcomeMessages': tl.ephemeral.TypeWelcomeMessages
+        }
+        type TypeWelcomeMessages = tl.ephemeral.RawWelcomeMessagesNotModified | tl.ephemeral.RawWelcomeMessages
+        function isAnyWelcomeMessages(o: object): o is TypeWelcomeMessages
+}
+
     namespace mtcute {
         interface RawDummyUpdate {
             _: 'mtcute.dummyUpdate';
@@ -64992,73 +64684,6 @@ export class RpcError extends Error {
             'folders.editPeerFolders': tl.TypeUpdates
         }
 }
-
-    namespace ephemeral {
-        /**
-         * RPC method returns {@link tl.TypeUpdates}
-         */
-        interface RawSendMessageRequest {
-            _: 'ephemeral.sendMessage';
-            peer: tl.TypeInputPeer;
-            receiverId: tl.TypeInputUser;
-            queryId?: Long;
-            message: string;
-            entities?: tl.TypeMessageEntity[];
-            media?: tl.TypeInputMedia;
-            replyMarkup?: tl.TypeReplyMarkup;
-            richMessage?: tl.TypeInputRichMessage;
-            randomId: Long;
-            replyTo?: tl.TypeInputReplyTo;
-        }
-        /**
-         * RPC method returns boolean
-         */
-        interface RawDeleteMessageRequest {
-            _: 'ephemeral.deleteMessage';
-            peer: tl.TypeInputPeer;
-            receiverId: tl.TypeInputUser;
-            id: number;
-        }
-        /**
-         * RPC method returns {@link tl.TypeReportResult}
-         */
-        interface RawReportMessageRequest {
-            _: 'ephemeral.reportMessage';
-            peer: tl.TypeInputPeer;
-            id: number;
-            option: Uint8Array;
-            message: string;
-        }
-        /**
-         * RPC method returns {@link tl.messages.TypeBotCallbackAnswer}
-         */
-        interface RawGetCallbackAnswerRequest {
-            _: 'ephemeral.getCallbackAnswer';
-            peer: tl.TypeInputPeer;
-            id: number;
-            data?: Uint8Array;
-        }
-        /**
-         * RPC method returns {@link tl.TypeUpdates}
-         */
-        interface RawEditMessageRequest {
-            _: 'ephemeral.editMessage';
-            peer: tl.TypeInputPeer;
-            receiverId: tl.TypeInputUser;
-            id: number;
-            message?: string;
-            media?: tl.TypeInputMedia;
-            entities?: tl.TypeMessageEntity[];
-            replyMarkup?: tl.TypeReplyMarkup;
-        }
-        interface RpcCallReturn {
-            'ephemeral.sendMessage': tl.TypeUpdates
-            'ephemeral.deleteMessage': boolean
-            'ephemeral.reportMessage': tl.TypeReportResult
-            'ephemeral.getCallbackAnswer': tl.messages.TypeBotCallbackAnswer
-            'ephemeral.editMessage': tl.TypeUpdates
-        }
-}
     type RpcMethod =
         | tl.RawInvokeAfterMsgRequest
         | tl.RawInvokeAfterMsgsRequest
@@ -65097,6 +64722,9 @@ export class RpcError extends Error {
         | tl.auth.RawCheckPaidAuthRequest
         | tl.auth.RawInitPasskeyLoginRequest
         | tl.auth.RawFinishPasskeyLoginRequest
+        | tl.auth.RawInitFirebasePnvLoginRequest
+        | tl.auth.RawFinishFirebasePnvLoginRequest
+        | tl.auth.RawFirebasePnvSignUpRequest
         | tl.account.RawRegisterDeviceRequest
         | tl.account.RawUnregisterDeviceRequest
         | tl.account.RawUpdateNotifySettingsRequest
@@ -65867,6 +65495,9 @@ export class RpcError extends Error {
         | tl.ephemeral.RawReportMessageRequest
         | tl.ephemeral.RawGetCallbackAnswerRequest
         | tl.ephemeral.RawEditMessageRequest
+        | tl.ephemeral.RawDeleteWelcomeMessageRequest
+        | tl.ephemeral.RawDeleteAllWelcomeMessagesRequest
+        | tl.ephemeral.RawGetWelcomeMessagesRequest
         | tl.mtcute.RawCustomMethodRequest
 
     type TlObject =
@@ -66055,6 +65686,7 @@ export class RpcError extends Error {
         | tl.RawMessageActionPollDeleteAnswer
         | tl.RawMessageActionManagedBotCreated
         | tl.RawMessageActionChangeCommunity
+        | tl.RawMessageActionChatJoinedViaCommunity
         | tl.RawDialog
         | tl.RawDialogFolder
         | tl.RawDialogCommunity
@@ -66371,6 +66003,7 @@ export class RpcError extends Error {
         | tl.RawSendMessageTextDraftAction
         | tl.RawInputSendMessageRichMessageDraftAction
         | tl.RawSendMessageRichMessageDraftAction
+        | tl.RawSendMessageStopDraftAction
         | tl.contacts.RawFound
         | tl.RawInputPrivacyKeyStatusTimestamp
         | tl.RawInputPrivacyKeyChatInvite
@@ -66474,23 +66107,6 @@ export class RpcError extends Error {
         | tl.RawBotCommand
         | tl.RawBotInfo
         | tl.RawKeyboardButton
-        | tl.RawKeyboardButtonUrl
-        | tl.RawKeyboardButtonCallback
-        | tl.RawKeyboardButtonRequestPhone
-        | tl.RawKeyboardButtonRequestGeoLocation
-        | tl.RawKeyboardButtonSwitchInline
-        | tl.RawKeyboardButtonGame
-        | tl.RawKeyboardButtonBuy
-        | tl.RawKeyboardButtonUrlAuth
-        | tl.RawInputKeyboardButtonUrlAuth
-        | tl.RawKeyboardButtonRequestPoll
-        | tl.RawInputKeyboardButtonUserProfile
-        | tl.RawKeyboardButtonUserProfile
-        | tl.RawKeyboardButtonWebView
-        | tl.RawKeyboardButtonSimpleWebView
-        | tl.RawKeyboardButtonRequestPeer
-        | tl.RawInputKeyboardButtonRequestPeer
-        | tl.RawKeyboardButtonCopy
         | tl.RawKeyboardButtonRow
         | tl.RawReplyKeyboardHide
         | tl.RawReplyKeyboardForceReply
@@ -66665,6 +66281,7 @@ export class RpcError extends Error {
         | tl.RawTextMentionName
         | tl.RawTextDate
         | tl.RawTextDiff
+        | tl.RawTextButton
         | tl.RawPageBlockUnsupported
         | tl.RawPageBlockTitle
         | tl.RawPageBlockSubtitle
@@ -66704,6 +66321,8 @@ export class RpcError extends Error {
         | tl.RawPageBlockThinking
         | tl.RawInputPageBlockMap
         | tl.RawPageBlockBlockquoteBlocks
+        | tl.RawPageBlockButtonRow
+        | tl.RawPageBlockDocument
         | tl.RawPhoneCallDiscardReasonMissed
         | tl.RawPhoneCallDiscardReasonDisconnect
         | tl.RawPhoneCallDiscardReasonHangup
@@ -67511,6 +67130,32 @@ export class RpcError extends Error {
         | tl.communities.RawParticipantJoinedChats
         | tl.messages.RawTranslatedRichMessage
         | tl.messages.RawComposedRichMessageWithAI
+        | tl.RawButtonTypeDefault
+        | tl.RawButtonTypeRequestPhone
+        | tl.RawButtonTypeRequestGeoLocation
+        | tl.RawButtonTypeRequestPoll
+        | tl.RawButtonTypeRequestPeer
+        | tl.RawInputButtonTypeRequestPeer
+        | tl.RawButtonTypeSimpleWebView
+        | tl.RawInlineButtonTypeUrl
+        | tl.RawInlineButtonTypeUrlAuth
+        | tl.RawInputInlineButtonTypeUrlAuth
+        | tl.RawInlineButtonTypeWebView
+        | tl.RawInlineButtonTypeCallback
+        | tl.RawInlineButtonTypeGame
+        | tl.RawInlineButtonTypeBuy
+        | tl.RawInlineButtonTypeSwitchInline
+        | tl.RawInlineButtonTypeUserProfile
+        | tl.RawInputInlineButtonTypeUserProfile
+        | tl.RawInlineButtonTypeCopy
+        | tl.RawInlineButtonTypeDisabled
+        | tl.RawKeyboardInlineButton
+        | tl.RawKeyboardInlineButtonRow
+        | tl.RawRichButtonStyle
+        | tl.RawPageButton
+        | tl.ephemeral.RawWelcomeMessagesNotModified
+        | tl.ephemeral.RawWelcomeMessages
+        | tl.auth.RawFirebasePnvIntent
         | tl.mtcute.RawDummyUpdate
         | tl.mtcute.RawDummyInputPeerMinUser
         | tl.mtcute.RawDummyInputPeerMinChannel
@@ -67551,6 +67196,9 @@ export class RpcError extends Error {
         | tl.auth.RawCheckPaidAuthRequest
         | tl.auth.RawInitPasskeyLoginRequest
         | tl.auth.RawFinishPasskeyLoginRequest
+        | tl.auth.RawInitFirebasePnvLoginRequest
+        | tl.auth.RawFinishFirebasePnvLoginRequest
+        | tl.auth.RawFirebasePnvSignUpRequest
         | tl.account.RawRegisterDeviceRequest
         | tl.account.RawUnregisterDeviceRequest
         | tl.account.RawUpdateNotifySettingsRequest
@@ -68321,6 +67969,9 @@ export class RpcError extends Error {
         | tl.ephemeral.RawReportMessageRequest
         | tl.ephemeral.RawGetCallbackAnswerRequest
         | tl.ephemeral.RawEditMessageRequest
+        | tl.ephemeral.RawDeleteWelcomeMessageRequest
+        | tl.ephemeral.RawDeleteAllWelcomeMessagesRequest
+        | tl.ephemeral.RawGetWelcomeMessagesRequest
         | tl.mtcute.RawCustomMethodRequest
 }
 export declare function isAnyError(o: object): o is tl.TypeError
@@ -68708,6 +68359,12 @@ export declare function isAnyRichMessage(o: object): o is tl.TypeRichMessage
 export declare function isAnyCommunityPeer(o: object): o is tl.TypeCommunityPeer
 export declare function isAnyCommunityPeerRequest(o: object): o is tl.TypeCommunityPeerRequest
 export declare function isAnyEphemeralMessage(o: object): o is tl.TypeEphemeralMessage
+export declare function isAnyButtonType(o: object): o is tl.TypeButtonType
+export declare function isAnyInlineButtonType(o: object): o is tl.TypeInlineButtonType
+export declare function isAnyKeyboardInlineButton(o: object): o is tl.TypeKeyboardInlineButton
+export declare function isAnyKeyboardInlineButtonRow(o: object): o is tl.TypeKeyboardInlineButtonRow
+export declare function isAnyRichButtonStyle(o: object): o is tl.TypeRichButtonStyle
+export declare function isAnyPageButton(o: object): o is tl.TypePageButton
 export declare function isAnyStorage_FileType(o: object): o is tl.storage.TypeFileType
 export declare function isAnyAuth_SentCode(o: object): o is tl.auth.TypeSentCode
 export declare function isAnyAuth_Authorization(o: object): o is tl.auth.TypeAuthorization
@@ -68718,6 +68375,7 @@ export declare function isAnyAuth_SentCodeType(o: object): o is tl.auth.TypeSent
 export declare function isAnyAuth_LoginToken(o: object): o is tl.auth.TypeLoginToken
 export declare function isAnyAuth_LoggedOut(o: object): o is tl.auth.TypeLoggedOut
 export declare function isAnyAuth_PasskeyLoginOptions(o: object): o is tl.auth.TypePasskeyLoginOptions
+export declare function isAnyAuth_FirebasePnvIntent(o: object): o is tl.auth.TypeFirebasePnvIntent
 export declare function isAnyContacts_Contacts(o: object): o is tl.contacts.TypeContacts
 export declare function isAnyContacts_ImportedContacts(o: object): o is tl.contacts.TypeImportedContacts
 export declare function isAnyContacts_Blocked(o: object): o is tl.contacts.TypeBlocked
@@ -68928,6 +68586,7 @@ export declare function isAnyFragment_CollectibleInfo(o: object): o is tl.fragme
 export declare function isAnyAicompose_Tones(o: object): o is tl.aicompose.TypeTones
 export declare function isAnyCommunities_PeerLinkRequests(o: object): o is tl.communities.TypePeerLinkRequests
 export declare function isAnyCommunities_ParticipantJoinedChats(o: object): o is tl.communities.TypeParticipantJoinedChats
+export declare function isAnyEphemeral_WelcomeMessages(o: object): o is tl.ephemeral.TypeWelcomeMessages
 export declare function isAnyMtcute_Update(o: object): o is tl.mtcute.TypeUpdate
 export declare function isAnyMtcute_InputPeer(o: object): o is tl.mtcute.TypeInputPeer
 

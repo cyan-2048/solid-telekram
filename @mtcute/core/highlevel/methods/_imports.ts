@@ -104,6 +104,7 @@ import {
   ReplyMarkup,
   RichMediaUploadCache,
   SavedStarGift,
+  SendableTypingStatus,
   SentCode,
   StarGift,
   StarGiftUnique,

@@ -97,6 +97,9 @@ export interface ForwardMessageOptions {
 
   /** Video timestamp to use for the forwarded video */
   videoTimestamp?: number
+
+  /** Whether the messages being forwarded are ephemeral messages */
+  fromEphemeral?: boolean
 }
 
 /**
@@ -161,6 +164,7 @@ export async function forwardMessagesById(
     allowPaidFloodskip,
     videoTimestamp,
     allowPaidStars: params.allowPaidMessages,
+    fromEphemeral: params.fromEphemeral,
     topMsgId: toThreadId,
     replyTo: toMonoforumPeer
       ? {

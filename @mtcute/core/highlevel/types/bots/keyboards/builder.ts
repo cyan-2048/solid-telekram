@@ -1,14 +1,21 @@
 import type { tl } from '../../../../tl/index.js'
 
-import type { InlineKeyboardMarkup, ReplyKeyboardMarkup } from './types.js'
+import type {
+  InlineKeyboardMarkup,
+  InputBotKeyboardButton,
+  InputInlineKeyboardButton,
+  InputReplyKeyboardButton,
+  ReplyKeyboardMarkup,
+} from './types.js'
 
-export type ButtonLike = tl.TypeKeyboardButton | false | null | undefined | void
+export type ButtonLike<Button extends InputBotKeyboardButton = InputBotKeyboardButton>
+  = Button | false | null | undefined | void
 
 /**
  * Builder for bot keyboards
  */
-export class BotKeyboardBuilder {
-  private _buttons: tl.TypeKeyboardButton[][] = []
+export class BotKeyboardBuilder<Button extends InputBotKeyboardButton = InputInlineKeyboardButton> {
+  private _buttons: Button[][] = []
 
   constructor(readonly maxRowWidth: number | null = 3) {}
 
@@ -17,10 +24,10 @@ export class BotKeyboardBuilder {
    *
    * @param buttons  Buttons to add
    */
-  push(...buttons: (ButtonLike | (() => ButtonLike))[]): this {
+  push(...buttons: (ButtonLike<Button> | (() => ButtonLike<Button>))[]): this {
     if (!buttons.length) return this
 
-    let row: tl.TypeKeyboardButton[] = []
+    let row: Button[] = []
     buttons.forEach((btn) => {
       if (typeof btn === 'function') btn = btn()
       if (!btn) return
@@ -45,14 +52,14 @@ export class BotKeyboardBuilder {
    *
    * @param row  Row or a function that will populate it
    */
-  row(row: ButtonLike[] | ((arr: ButtonLike[]) => void)): this {
+  row(row: ButtonLike<Button>[] | ((arr: ButtonLike<Button>[]) => void)): this {
     if (typeof row === 'function') {
       const fn = row
       row = []
       fn(row)
     }
 
-    const normal = row.filter(Boolean) as tl.TypeKeyboardButton[]
+    const normal = row.filter(Boolean) as Button[]
     if (normal.length) this._buttons.push(normal)
 
     return this
@@ -64,7 +71,7 @@ export class BotKeyboardBuilder {
    * @param btn  Button to add
    * @param force  Whether to forcefully add the button (i.e. do not wrap)
    */
-  append(btn: ButtonLike | (() => ButtonLike), force = false): this {
+  append(btn: ButtonLike<Button> | (() => ButtonLike<Button>), force = false): this {
     if (typeof btn === 'function') btn = btn()
     if (!btn) return this
 
@@ -83,17 +90,24 @@ export class BotKeyboardBuilder {
   /**
    * Return contents of this builder as an inline keyboard
    */
-  asInline(): InlineKeyboardMarkup {
-    return {
-      type: 'inline',
-      buttons: this._buttons,
-    }
+  asInline(
+    this: BotKeyboardBuilder<InputInlineKeyboardButton>,
+    params: Omit<InlineKeyboardMarkup, 'type' | 'buttons'> = {},
+  ): InlineKeyboardMarkup {
+    const ret = params as tl.Mutable<InlineKeyboardMarkup>
+    ret.type = 'inline'
+    ret.buttons = this._buttons
+
+    return ret
   }
 
   /**
    * Return contents of this builder as a reply keyboard
    */
-  asReply(params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {}): ReplyKeyboardMarkup {
+  asReply(
+    this: BotKeyboardBuilder<InputReplyKeyboardButton>,
+    params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
+  ): ReplyKeyboardMarkup {
     const ret = params as tl.Mutable<ReplyKeyboardMarkup>
     ret.type = 'reply'
     ret.buttons = this._buttons

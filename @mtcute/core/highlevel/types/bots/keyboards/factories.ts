@@ -1,20 +1,43 @@
 import type {
+  BotKeyboardButtonStyle,
+  CallbackButton,
+  CopyButton,
+  DisabledButton,
+  GameButton,
   InlineKeyboardMarkup,
+  InputInlineKeyboardButton,
+  InputReplyKeyboardButton,
+  PayButton,
   ReplyKeyboardForceReply,
   ReplyKeyboardHide,
   ReplyKeyboardMarkup,
   ReplyMarkup,
+  RequestContactButton,
+  RequestGeoButton,
+  RequestPeerButton,
+  RequestPollButton,
+  SwitchInlineButton,
+  TextButton,
+  UrlAuthButton,
+  UrlButton,
+  UserProfileButton,
+  WebViewButton,
 } from './types.js'
 import { utf8 } from '@fuman/utils'
 
 import { tl } from '../../../../tl/index.js'
 import { assertNever } from '../../../../types/utils.js'
-
 import { toInputUser } from '../../../utils/peer-utils.js'
 import { BotKeyboardBuilder } from './builder.js'
+import { _toInlineButton, _toReplyButton } from './normalize.js'
 
-/** Create a keyboard builder */
-export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
+/** Create a builder for an inline keyboard */
+export function builder(maxRowWidth?: number | null): BotKeyboardBuilder<InputInlineKeyboardButton> {
+  return new BotKeyboardBuilder(maxRowWidth)
+}
+
+/** Create a builder for a reply keyboard */
+export function replyBuilder(maxRowWidth?: number | null): BotKeyboardBuilder<InputReplyKeyboardButton> {
   return new BotKeyboardBuilder(maxRowWidth)
 }
 
@@ -22,12 +45,17 @@ export function builder(maxRowWidth?: number | null): BotKeyboardBuilder {
  * Create an inline keyboard markup
  *
  * @param buttons  Two-dimensional array of buttons
+ * @param params  Additional parameters for the keyboard
  */
-export function inline(buttons: tl.TypeKeyboardButton[][]): InlineKeyboardMarkup {
-  return {
-    type: 'inline',
-    buttons,
-  }
+export function inline(
+  buttons: InputInlineKeyboardButton[][],
+  params: Omit<InlineKeyboardMarkup, 'type' | 'buttons'> = {},
+): InlineKeyboardMarkup {
+  const ret = params as tl.Mutable<InlineKeyboardMarkup>
+  ret.type = 'inline'
+  ret.buttons = buttons
+
+  return ret
 }
 
 /**
@@ -37,7 +65,7 @@ export function inline(buttons: tl.TypeKeyboardButton[][]): InlineKeyboardMarkup
  * @param params  Additional parameters for the keyboard
  */
 export function reply(
-  buttons: tl.TypeKeyboardButton[][],
+  buttons: InputReplyKeyboardButton[][],
   params: Omit<ReplyKeyboardMarkup, 'type' | 'buttons'> = {},
 ): ReplyKeyboardMarkup {
   const ret = params as tl.Mutable<ReplyKeyboardMarkup>
@@ -72,6 +100,10 @@ export function forceReply(params: Omit<ReplyKeyboardForceReply, 'type'> = {}): 
   return ret
 }
 
+interface ButtonOptions {
+  style?: BotKeyboardButtonStyle
+}
+
 /**
  * Create a text-only keyboard button.
  *
@@ -79,11 +111,8 @@ export function forceReply(params: Omit<ReplyKeyboardForceReply, 'type'> = {}): 
  *
  * @param text  Button text
  */
-export function text(text: string): tl.RawKeyboardButton {
-  return {
-    _: 'keyboardButton',
-    text,
-  }
+export function text(text: string, options?: ButtonOptions): TextButton {
+  return { type: 'text', text, style: options?.style }
 }
 
 /**
@@ -94,11 +123,8 @@ export function text(text: string): tl.RawKeyboardButton {
  *
  * @param text  Button text
  */
-export function requestContact(text: string): tl.RawKeyboardButtonRequestPhone {
-  return {
-    _: 'keyboardButtonRequestPhone',
-    text,
-  }
+export function requestContact(text: string, options?: ButtonOptions): RequestContactButton {
+  return { type: 'request_contact', text, style: options?.style }
 }
 
 /**
@@ -109,11 +135,8 @@ export function requestContact(text: string): tl.RawKeyboardButtonRequestPhone {
  *
  * @param text  Button text
  */
-export function requestGeo(text: string): tl.RawKeyboardButtonRequestGeoLocation {
-  return {
-    _: 'keyboardButtonRequestGeoLocation',
-    text,
-  }
+export function requestGeo(text: string, options?: ButtonOptions): RequestGeoButton {
+  return { type: 'request_geo', text, style: options?.style }
 }
 
 /**
@@ -125,12 +148,24 @@ export function requestGeo(text: string): tl.RawKeyboardButtonRequestGeoLocation
  * @param text  Button text
  * @param quiz  If set, only quiz polls can be sent
  */
-export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonRequestPoll {
-  return {
-    _: 'keyboardButtonRequestPoll',
-    text,
-    quiz,
-  }
+export function requestPoll(text: string, quiz?: boolean, options?: ButtonOptions): RequestPollButton {
+  return { type: 'request_poll', text, quiz, style: options?.style }
+}
+
+/**
+ * Button to request a peer from the user
+ *
+ * Used for reply keyboards, not inline!
+ *
+ * @param text  Text of the button
+ * @param buttonId  ID of the button that will later be passed to the service message
+ */
+export function requestPeer(
+  text: string,
+  buttonId: number,
+  params: ButtonOptions & Omit<RequestPeerButton, 'type' | 'text' | 'buttonId' | 'style'>,
+): RequestPeerButton {
+  return { ...params, type: 'request_peer', text, buttonId, style: params.style }
 }
 
 /**
@@ -141,44 +176,35 @@ export function requestPoll(text: string, quiz?: boolean): tl.RawKeyboardButtonR
  * @param text  Button text
  * @param url  URL
  */
-export function url(
-  text: string,
-  url: string,
-  options?: { style?: tl.RawKeyboardButtonStyle },
-): tl.RawKeyboardButtonUrl {
-  return {
-    _: 'keyboardButtonUrl',
-    text,
-    url,
-    style: options?.style,
-  }
+export function url(text: string, url: string, options?: ButtonOptions): UrlButton {
+  return { type: 'url', text, url, style: options?.style }
 }
 
 /**
- * Create a keyboard button with a link.
+ * Create a keyboard button with callback data.
  *
  * Used for inline keyboards, not reply!
  *
  * @param text  Button text
  * @param data  Callback data (1-64 bytes). String will be converted to `Buffer`
- * @param requiresPassword
- *   Whether the user should verify their identity by entering 2FA password.
- *   See more: {@link tl.RawKeyboardButtonCallback#requiresPassword}
  */
 export function callback(
   text: string,
   data: string | Uint8Array,
-  options?: {
+  options?: ButtonOptions & {
+    /**
+     * Whether the user should verify their identity by entering 2FA password.
+     * See more: {@link tl.RawInlineButtonTypeCallback#requiresPassword}
+     */
     requiresPassword?: boolean
-    style?: tl.RawKeyboardButtonStyle
   },
-): tl.RawKeyboardButtonCallback {
+): CallbackButton {
   return {
-    _: 'keyboardButtonCallback',
+    type: 'callback',
     text,
+    data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
     requiresPassword: options?.requiresPassword,
     style: options?.style,
-    data: typeof data === 'string' ? utf8.encoder.encode(data) : data,
   }
 }
 
@@ -192,27 +218,12 @@ export function callback(
  * Used for inline keyboards, not reply!
  *
  * @param text  Button text
- * @param query  Inline query (can be empty or omitted)
  */
-export function switchInline(text: string, options?: {
-  /**
-   * Inline query (can be empty or omitted)
-   */
-  query?: string
-  /**
-   * If set, pressing the button will insert the bot's username
-   * and the specified inline query in the current chat's input field
-   */
-  currentChat?: boolean
-  style?: tl.RawKeyboardButtonStyle
-}): tl.RawKeyboardButtonSwitchInline {
-  return {
-    _: 'keyboardButtonSwitchInline',
-    samePeer: options?.currentChat,
-    style: options?.style,
-    text,
-    query: options?.query ?? '',
-  }
+export function switchInline(
+  text: string,
+  options?: ButtonOptions & Omit<SwitchInlineButton, 'type' | 'text' | 'style'>,
+): SwitchInlineButton {
+  return { ...options, type: 'switch_inline', text, style: options?.style }
 }
 
 /**
@@ -225,8 +236,8 @@ export function switchInline(text: string, options?: {
  * game is inferred from {@link InputMedia.game},
  * thus this button should only be used with it.
  */
-export function game(text: string, options?: { style?: tl.RawKeyboardButtonStyle }): tl.RawKeyboardButtonGame {
-  return { _: 'keyboardButtonGame', text, style: options?.style }
+export function game(text: string, options?: ButtonOptions): GameButton {
+  return { type: 'game', text, style: options?.style }
 }
 
 /**
@@ -239,8 +250,8 @@ export function game(text: string, options?: { style?: tl.RawKeyboardButtonStyle
  * invoice is inferred from {@link InputMedia.invoice},
  * thus this button should only be used with it.
  */
-export function pay(text: string, options?: { style?: tl.RawKeyboardButtonStyle }): tl.RawKeyboardButtonBuy {
-  return { _: 'keyboardButtonBuy', text, style: options?.style }
+export function pay(text: string, options?: ButtonOptions): PayButton {
+  return { type: 'pay', text, style: options?.style }
 }
 
 /**
@@ -249,138 +260,58 @@ export function pay(text: string, options?: { style?: tl.RawKeyboardButtonStyle 
  * Used for inline keyboards, not reply!
  *
  * @param text  Button label
- * @param url  Authorization URL (see {@link tl.RawInputKeyboardButtonUrlAuth})
+ * @param url  Authorization URL (see {@link tl.RawInputInlineButtonTypeUrlAuth})
  * @param params
  */
 export function urlAuth(
   text: string,
   url: string,
-  params: {
-    /**
-     * Button label when forwarded
-     */
-    fwdText?: string
-
-    /**
-     * Whether to request the permission for
-     * your bot to send messages to the user
-     */
-    requestWriteAccess?: boolean
-
-    style?: tl.RawKeyboardButtonStyle
-
-    /**
-     * Bot, which will be used for user authorization.
-     * `url` domain must be the same as the domain linked
-     * with the bot.
-     *
-     * @default  current bot
-     */
-    bot?: tl.TypeInputUser
-  } = {},
-): tl.RawInputKeyboardButtonUrlAuth {
-  return {
-    _: 'inputKeyboardButtonUrlAuth',
-    text,
-    url,
-    bot: params.bot ?? {
-      _: 'inputUserSelf',
-    },
-    fwdText: params.fwdText,
-    requestWriteAccess: params.requestWriteAccess,
-    style: params.style,
-  }
+  params: ButtonOptions & Omit<UrlAuthButton, 'type' | 'text' | 'url' | 'style'> = {},
+): UrlAuthButton {
+  return { ...params, type: 'url_auth', text, url, style: params.style }
 }
 
 /**
  * Button to open webview
  *
  * Used for both inline keyboards and reply ones
+ * (in the latter case it is sent as a simple webview button)
  *
  * @param text  Button label
  * @param url  WebView URL
  */
-export function webView(
-  text: string,
-  url: string,
-  options?: { style?: tl.RawKeyboardButtonStyle },
-): tl.RawKeyboardButtonWebView {
-  return {
-    _: 'keyboardButtonWebView',
-    text,
-    url,
-    style: options?.style,
-  }
+export function webView(text: string, url: string, options?: ButtonOptions): WebViewButton {
+  return { type: 'webview', text, url, style: options?.style }
 }
 
 /**
  * Button to open user profile
  *
+ * Used for inline keyboards, not reply!
+ *
  * @param text  Text of the button
  * @param user  User to be opened (use {@link TelegramClient.resolvePeer})
  */
-export function userProfile(
-  text: string,
-  user: tl.TypeInputPeer,
-  options?: { style?: tl.RawKeyboardButtonStyle },
-): tl.RawInputKeyboardButtonUserProfile {
-  return {
-    _: 'inputKeyboardButtonUserProfile',
-    text,
-    userId: toInputUser(user),
-    style: options?.style,
-  }
-}
-
-/**
- * Button to request a peer from the user
- *
- * @param text  Text of the button
- * @param buttonId  ID of the button that will later be passed to the service message
- */
-export function requestPeer(
-  text: string,
-  buttonId: number,
-  params: {
-    /**
-     * Peer type, along with filters
-     */
-    peerType: tl.TypeRequestPeerType
-
-    /**
-     * Maximum number of peers to be selected
-     *
-     * @default  1
-     */
-    count?: number
-
-    style?: tl.RawKeyboardButtonStyle
-  },
-): tl.RawKeyboardButtonRequestPeer {
-  return {
-    _: 'keyboardButtonRequestPeer',
-    text,
-    buttonId,
-    peerType: params.peerType,
-    maxQuantity: params.count ?? 1,
-    style: params.style,
-  }
+export function userProfile(text: string, user: tl.TypeInputPeer, options?: ButtonOptions): UserProfileButton {
+  return { type: 'user_profile', text, user: toInputUser(user), style: options?.style }
 }
 
 /**
  * Button to copy text to the user's clipboard
+ *
+ * Used for inline keyboards, not reply!
  */
-export function copy(params: {
-  text: string
-  copyText?: string
-  style?: tl.RawKeyboardButtonStyle
-}): tl.RawKeyboardButtonCopy {
-  return {
-    _: 'keyboardButtonCopy',
-    text: params.text,
-    copyText: params?.copyText ?? params.text,
-    style: params.style,
-  }
+export function copy(params: ButtonOptions & Omit<CopyButton, 'type' | 'style'>): CopyButton {
+  return { ...params, type: 'copy', style: params.style }
+}
+
+/**
+ * Button that does nothing when pressed
+ *
+ * Used for inline keyboards, not reply!
+ */
+export function disabled(text: string, options?: ButtonOptions): DisabledButton {
+  return { type: 'disabled', text, style: options?.style }
 }
 
 /**
@@ -389,16 +320,14 @@ export function copy(params: {
  * @param buttons  Two-dimensional array of buttons
  * @param predicate  Button text or predicate function
  */
-export function findButton(
-  buttons: tl.TypeKeyboardButton[][],
-  predicate: string | ((btn: tl.TypeKeyboardButton) => boolean),
-): tl.TypeKeyboardButton | null {
+export function findButton<T extends { text: string }>(
+  buttons: T[][],
+  predicate: string | ((btn: T) => boolean),
+): T | null {
   if (typeof predicate === 'string') {
     const text = predicate
 
-    predicate = (btn) => {
-      return 'text' in btn && btn.text === text
-    }
+    predicate = btn => btn.text === text
   }
 
   for (const row of buttons) {
@@ -418,25 +347,18 @@ export function _rowsTo2d(rows: tl.RawKeyboardButtonRow[]): tl.TypeKeyboardButto
 }
 
 /** @internal */
-export function _2dToRows(arr: tl.TypeKeyboardButton[][], inline: boolean): tl.RawKeyboardButtonRow[] {
-  return arr.map((row) => {
-    if (!inline) {
-      // le cringe
-      row = row.map(btn =>
-        btn._ === 'keyboardButtonWebView'
-          ? {
-              ...btn,
-              _: 'keyboardButtonSimpleWebView',
-            }
-          : btn,
-      )
-    }
+export function _inlineRowsTo2d(rows: tl.RawKeyboardInlineButtonRow[]): tl.TypeKeyboardInlineButton[][] {
+  return rows.map(it => it.buttons)
+}
 
-    return {
-      _: 'keyboardButtonRow',
-      buttons: row,
-    }
-  })
+/** @internal */
+export function _2dToRows(arr: InputReplyKeyboardButton[][]): tl.RawKeyboardButtonRow[] {
+  return arr.map(row => ({ _: 'keyboardButtonRow', buttons: row.map(_toReplyButton) }))
+}
+
+/** @internal */
+export function _2dToInlineRows(arr: InputInlineKeyboardButton[][]): tl.RawKeyboardInlineButtonRow[] {
+  return arr.map(row => ({ _: 'keyboardInlineButtonRow', buttons: row.map(_toInlineButton) }))
 }
 
 /** @internal */
@@ -452,8 +374,9 @@ export function _convertToTl(obj?: ReplyMarkup): tl.TypeReplyMarkup | undefined 
         singleUse: obj.singleUse,
         selective: obj.selective,
         persistent: obj.persistent,
+        forceReply: obj.forceReply,
         placeholder: obj.placeholder,
-        rows: _2dToRows(obj.buttons, false),
+        rows: _2dToRows(obj.buttons),
       }
     case 'reply_hide':
       return {
@@ -470,7 +393,8 @@ export function _convertToTl(obj?: ReplyMarkup): tl.TypeReplyMarkup | undefined 
     case 'inline':
       return {
         _: 'replyInlineMarkup',
-        rows: _2dToRows(obj.buttons, true),
+        forceReply: obj.forceReply,
+        rows: _2dToInlineRows(obj.buttons),
       }
     default:
       assertNever(obj)

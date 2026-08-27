@@ -1,12 +1,12 @@
 import type { tl } from '../../../tl/index.js'
 
 import type { ITelegramClient } from '../../client.types.js'
-import type { InputPeerLike, TypingStatus } from '../../types/index.js'
+import type { InputPeerLike, SendableTypingStatus } from '../../types/index.js'
 import { assertNever } from '../../../types/utils.js'
 import { assertTrue } from '../../../utils/type-assertions.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
-export function _mapTypingStatus(status: Exclude<TypingStatus, 'interaction' | 'interaction_seen'>, progress: number = 0): tl.TypeSendMessageAction {
+export function _mapTypingStatus(status: SendableTypingStatus, progress: number = 0): tl.TypeSendMessageAction {
   switch (status) {
     case 'typing':
       return { _: 'sendMessageTypingAction' }
@@ -62,7 +62,7 @@ export function _mapTypingStatus(status: Exclude<TypingStatus, 'interaction' | '
 export async function sendTyping(
   client: ITelegramClient,
   chatId: InputPeerLike,
-  status: Exclude<TypingStatus, 'interaction' | 'interaction_seen'> | tl.TypeSendMessageAction = 'typing',
+  status: SendableTypingStatus | tl.TypeSendMessageAction = 'typing',
   params?: {
     /**
      * For `upload_*` and history import actions, progress of the upload

@@ -22,6 +22,7 @@
  *  - `sticker`: User is choosing a sticker
  *  - `interaction`: User has sent an emoji interaction
  *  - `interaction_seen`: User is watching a previously sent emoji interaction
+ *  - `stop_draft`: User has requested to stop the ongoing draft streaming
  */
 export type TypingStatus
   = | 'typing'
@@ -42,3 +43,7 @@ export type TypingStatus
     | 'sticker'
     | 'interaction'
     | 'interaction_seen'
+    | 'stop_draft'
+
+/** {@link TypingStatus} values that can be sent by the client as-is */
+export type SendableTypingStatus = Exclude<TypingStatus, 'interaction' | 'interaction_seen' | 'stop_draft'>

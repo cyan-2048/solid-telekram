@@ -6,15 +6,13 @@ import type { ReplyMarkup } from '../../types/bots/keyboards/index.js'
 import type { InputText } from '../../types/misc/entities.js'
 import type { InputPeerLike } from '../../types/peers/index.js'
 import type { CommonSendParams } from './send-common.js'
-import { MtTypeAssertionError } from '../../../types/errors.js'
 import { randomLong } from '../../../utils/long-utils.js'
 import { getMarkedPeerId } from '../../../utils/peer-utils.js'
 import { BotKeyboard } from '../../types/bots/keyboards/index.js'
 import { Message } from '../../types/messages/message.js'
-import { PeersIndex } from '../../types/peers/index.js'
 import { createDummyUpdate } from '../../updates/utils.js'
 import { inputPeerToPeer } from '../../utils/peer-utils.js'
-import { _getRawPeerBatched } from '../chats/batched-queries.js'
+import { _buildPeersIndex } from '../chats/build-peers-index.js'
 
 import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
@@ -177,40 +175,6 @@ export async function sendText(
       client.handleClientUpdate(createDummyUpdate(res.pts, res.ptsCount))
     }
 
-    const peers = new PeersIndex()
-
-    const fetchPeer = async (peer: tl.TypePeer | tl.TypeInputPeer): Promise<void> => {
-      const id = getMarkedPeerId(peer)
-
-      let cached = await client.storage.peers.getCompleteById(id)
-
-      if (!cached) {
-        cached = await _getRawPeerBatched(client, await resolvePeer(client, peer))
-      }
-
-      if (!cached) {
-        throw new MtTypeAssertionError('sendText (@ getFullPeerById)', 'user | chat', 'null')
-      }
-
-      switch (cached._) {
-        case 'user':
-          peers.users.set(cached.id, cached)
-          break
-        case 'chat':
-        case 'chatForbidden':
-        case 'channel':
-        case 'channelForbidden':
-          peers.chats.set(cached.id, cached)
-          break
-        default:
-          throw new MtTypeAssertionError(
-            'sendText (@ users.getUsers)',
-            'user | chat | channel', // not very accurate, but good enough
-            cached._,
-          )
-      }
-    }
-
     const peersToFetch: (tl.TypePeer | tl.TypeInputPeer)[] = [peer, msg.fromId!]
     if (savedPeerId) peersToFetch.push(savedPeerId)
     if (replyToHeader?._ === 'messageReplyHeader' && replyToHeader.replyToPeerId) {
@@ -219,7 +183,7 @@ export async function sendText(
       peersToFetch.push(replyToHeader.peer)
     }
 
-    await Promise.all(peersToFetch.map(fetchPeer))
+    const peers = await _buildPeersIndex(client, 'sendText', peersToFetch)
 
     if (
       replyToHeader?._ === 'messageReplyHeader'
