@@ -181,6 +181,8 @@ export default defineConfig({
 		},
 		// minify: false,
 
+		// sourceMap: { js: "inline-source-map" },
+
 		dataUriLimit: 0,
 
 		distPath: {
