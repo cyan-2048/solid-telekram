@@ -701,7 +701,7 @@ export default function Home(props: { hidden: boolean }) {
 									setStatusbarColor("#1c96c3");
 									setSoftkeys("New chat", "", "tg:more");
 								}}
-								onKeyDown={(e) => {
+								onKeyUp={(e) => {
 									if (e.key == "SoftLeft") {
 										$previousView.set("home");
 										$view.set("new_chat");

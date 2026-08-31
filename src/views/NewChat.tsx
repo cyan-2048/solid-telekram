@@ -20,10 +20,12 @@ import { startActivity } from "@/lib/webActivities";
 import { tg, dialogsJar, contactsJar, sortDialogs } from "@globals";
 import { $room, $view, setStatusbarColor } from "@/stores";
 import { useStore } from "@nanostores/solid";
+import { cloudphone } from "@/config";
+import * as contacts from "@/lib/lib_wallace/contacts";
 
 const contactsMinisearch = contactsJar.search;
 
-const SUPPORTS_IMPORT_CONTACTS = Boolean(navigator.mozContacts);
+const SUPPORTS_IMPORT_CONTACTS = !cloudphone;
 
 function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 	const SN_ID_OPTIONS = createUniqueId();
@@ -43,11 +45,11 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 
 	return (
 		<Options onClose={props.onClose} title="Options">
-			<Show when={SUPPORTS_IMPORT_CONTACTS}>
+			<Show when={!cloudphone}>
 				<OptionsItem
 					classList={{ [styles.option]: true }}
 					tabIndex={-1}
-					on:sn-enter-down={async () => {
+					on:sn-enter-up={async () => {
 						startActivity<{ contact: mozContact }>("pick", {
 							type: ["webcontacts/contact"],
 						}).then(async (data) => {
@@ -73,7 +75,7 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 			</Show>
 			<OptionsItem
 				classList={{ [styles.option]: true }}
-				on:sn-enter-down={async () => {
+				on:sn-enter-up={async () => {
 					contactsJar.clear();
 					await sleep();
 					contactsJar.reload();
@@ -86,8 +88,18 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 			<Show when={SUPPORTS_IMPORT_CONTACTS}>
 				<OptionsItem
 					classList={{ [styles.option]: true }}
-					on:sn-enter-down={async () => {
-						const count = await navigator.mozContacts.getCount().then((a) => a);
+					on:sn-enter-up={async () => {
+						(document.activeElement as HTMLElement)?.blur();
+
+						const count =
+							import.meta.env.KAIOS == 2
+								? await navigator.mozContacts.getCount().then((a) => a)
+								: await contacts.getCount();
+
+						if (count == 0) {
+							props.onClose();
+						}
+
 						if (count > 100) {
 							// KaiOS only, does not require modal
 							if (!confirm("You have more than 100 contacts, are you sure you want to import them all?")) return;
@@ -106,6 +118,26 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 					tabIndex={-1}
 				>
 					Import contacts
+				</OptionsItem>
+			</Show>
+			<Show when={props.user}>
+				<OptionsItem
+					classList={{ [styles.option]: true }}
+					on:sn-enter-up={() => {
+						const user = props.user!;
+						props.onClose();
+						queueMicrotask(async () => {
+							if (confirm("Are you sure you want to delete this contact?")) {
+								await tg.deleteContacts(user);
+								contactsJar.remove(user.id);
+								await sleep();
+								SpatialNavigation.focus("new_chat");
+							}
+						});
+					}}
+					tabIndex={-1}
+				>
+					Delete Contact
 				</OptionsItem>
 			</Show>
 		</Options>
@@ -243,6 +275,8 @@ export default function NewChat(props: { onClose: () => void }) {
 
 	const cachedContacts = useStore(contactsJar.$cached);
 
+	let _goBack = false;
+
 	return (
 		<>
 			<Content before={<Header>New chat{cachedContacts().length ? ` (${cachedContacts().length})` : ""}</Header>}>
@@ -255,6 +289,8 @@ export default function NewChat(props: { onClose: () => void }) {
 								return;
 							}
 
+							_goBack = true;
+
 							e.preventDefault();
 						}
 					}}
@@ -263,7 +299,7 @@ export default function NewChat(props: { onClose: () => void }) {
 							props.onClose();
 						}
 
-						if (e.key == "Backspace") {
+						if (e.key == "Backspace" && _goBack) {
 							props.onClose();
 						}
 					}}

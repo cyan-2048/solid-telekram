@@ -60,7 +60,14 @@
 			"desktop-notification": {},
 			"tcp-socket": { "description": "Required to do any TCP" },
 			"volumemanager": {},
-			"device-storage:sdcard": { "access": "readwrite" }
+			"device-storage:sdcard": { "access": "readwrite" },
+			"audio-channel-normal": {
+				"description": "Needed to play this app's audio content on the normal channel"
+			},
+			"audio-channel-content": {
+				"description": "To play audio in background"
+			},
+			"contacts": { "access": "readonly" }
 		}
 	}
 }

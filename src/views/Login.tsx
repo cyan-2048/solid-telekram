@@ -239,6 +239,11 @@ export default function Login() {
 		if (cachedCountryFromLS) {
 			const found = countries().find((a) => a.c == cachedCountryFromLS);
 			found && setCountry((countryCache = found));
+			// make sure the country code is always cached, even for users
+			// who cached their iso2 before the country_code key existed
+			if (found && !$cachedPhoneNumber.get().country_code) {
+				$cachedPhoneNumber.setKey("country_code", found.a);
+			}
 		} else {
 			// uses timezone fingerprinting to get the country of the current user
 			const { guess, getCountryForTimezone } = await import("@/lib/geoguessr");
@@ -267,6 +272,7 @@ export default function Login() {
 
 				console.log("cached country set!");
 				$cachedPhoneNumber.setKey("iso2", countryCache.c);
+				$cachedPhoneNumber.setKey("country_code", countryCache.a);
 			}
 		}
 	});
@@ -555,6 +561,7 @@ export default function Login() {
 						countrySetViaPicker = true;
 						setCountry((countryCache = e));
 						$cachedPhoneNumber.setKey("iso2", countryCache.c);
+						$cachedPhoneNumber.setKey("country_code", countryCache.a);
 
 						setShowPicker(false);
 						inputRef.focus();

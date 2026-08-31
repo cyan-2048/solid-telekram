@@ -130,7 +130,7 @@ if (cloudphone) {
 	$sendByEnter.set(false);
 }
 
-export const $cachedPhoneNumber = persistentMap("phone:", { number: "", iso2: "" }, noListen);
+export const $cachedPhoneNumber = persistentMap("phone:", { number: "", iso2: "", country_code: "" }, noListen);
 
 /**
  * - none - no proxies are used, can use worker
