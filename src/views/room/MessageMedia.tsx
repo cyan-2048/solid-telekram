@@ -2,6 +2,7 @@ import * as styles from "./MessageItem.module.scss";
 
 import {
 	batch,
+	createComputed,
 	createEffect,
 	createMemo,
 	createRenderEffect,
@@ -762,6 +763,55 @@ export function DiceMedia(props: FocusableMediaProps) {
 	);
 }
 
+interface Dimensions {
+	width: number;
+	height: number;
+}
+
+function calculateConstrainedDimensions(originalWidth: number, originalHeight: number): Dimensions {
+	// Height constraints
+	const TARGET_HEIGHT = 256;
+	const MIN_HEIGHT = 50;
+	const MAX_HEIGHT = 0.5 * window.innerHeight; // 50vh
+
+	// Width constraint
+	const MAX_WIDTH = 0.85 * window.innerWidth - 8; // 85vw - 8px
+
+	// Apply height constraints
+	let finalHeight = TARGET_HEIGHT;
+	finalHeight = Math.max(finalHeight, MIN_HEIGHT);
+	finalHeight = Math.min(finalHeight, MAX_HEIGHT);
+
+	// Calculate initial width maintaining aspect ratio
+	const aspectRatio = originalWidth / originalHeight;
+	let finalWidth = finalHeight * aspectRatio;
+
+	// Apply max-width constraint
+	if (finalWidth > MAX_WIDTH) {
+		finalWidth = MAX_WIDTH;
+		// Recalculate height to maintain aspect ratio
+		finalHeight = finalWidth / aspectRatio;
+	}
+
+	return {
+		width: Math.round(finalWidth),
+		height: Math.round(finalHeight),
+	};
+}
+
+function calculateConstrainedDimensionsForFocusable(originalWidth: number, originalHeight: number): Dimensions {
+	const MAX_WIDTH = 0.85 * window.innerWidth - 8;
+	const aspectRatio = originalWidth / originalHeight;
+
+	const finalWidth = Math.min(originalWidth, MAX_WIDTH);
+	const finalHeight = finalWidth / aspectRatio;
+
+	return {
+		width: Math.round(finalWidth),
+		height: Math.round(finalHeight),
+	};
+}
+
 function PhotoMedia(props: FocusableMediaProps) {
 	const { showChecks, media: _media } = useMessageContext();
 
@@ -772,9 +822,23 @@ function PhotoMedia(props: FocusableMediaProps) {
 
 	const [progress, setProgress] = createSignal(0);
 
-	createEffect(() => {
+	const [width, setWidth] = createSignal(0);
+	const [height, setHeight] = createSignal(0);
+
+	createComputed(() => {
 		const media = _media() as Photo;
 		const thumb = media.getThumbnail(Thumbnail.THUMB_STRIP);
+
+		setWidth(0);
+		setHeight(0);
+
+		if (media.height && media.width) {
+			const dimensions = props.focusable
+				? calculateConstrainedDimensionsForFocusable(media.width, media.height)
+				: calculateConstrainedDimensions(media.width, media.height);
+			setWidth(dimensions.width);
+			setHeight(dimensions.height);
+		}
 
 		let url!: string;
 
@@ -787,7 +851,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 		});
 	});
 
-	createEffect(() => {
+	createComputed(() => {
 		const media = _media() as Photo;
 
 		// this is good enough?
@@ -802,7 +866,7 @@ function PhotoMedia(props: FocusableMediaProps) {
 			thumb,
 			"url",
 			(url) => {
-				setLoading(false);
+				// setLoading(false);
 				setSrc(url);
 			},
 			setProgress,
@@ -818,14 +882,30 @@ function PhotoMedia(props: FocusableMediaProps) {
 				props.onFocus?.(_media()!);
 			}}
 			tabIndex={props.focusable ? -1 : undefined}
-			classList={{ [styles.photo]: true, focusable: !!props.focusable }}
+			classList={{
+				[styles.photo]: true,
+				[styles.constrained]: Boolean(width() && height()),
+				focusable: !!props.focusable,
+			}}
+			style={{
+				width: width() ? "100%" : undefined,
+				"min-width": width() ? width() + "px" : undefined,
+				height: height() ? height() + "px" : undefined,
+			}}
 		>
 			<Show when={thumb() && (loading() || !src() || showUnsupported())}>
 				<img class={styles.thumb} src={thumb()}></img>
-				<ProgressSpinner class={styles.spinner} size={40} progress={progress()} showClose></ProgressSpinner>
+				<Show when={!src()}>
+					<ProgressSpinner class={styles.spinner} size={40} progress={progress()} showClose></ProgressSpinner>
+				</Show>
 			</Show>
 			<Show when={src()}>
-				<img src={src() + "#-moz-samplesize=2"}></img>
+				<img
+					src={src() + "#-moz-samplesize=2"}
+					onLoad={() => {
+						setLoading(false);
+					}}
+				></img>
 			</Show>
 			<Show when={showChecks()}>
 				<MediaChecks />

@@ -4319,6 +4319,9 @@ export interface TelegramClient extends ITelegramClient {
        */
       media?: InputMediaLike
 
+      /** New rich message content */
+      richMessage?: InputRichMessage
+
       /**
        * Whether to disable links preview in this message
        */
@@ -4337,12 +4340,15 @@ export interface TelegramClient extends ITelegramClient {
       scheduleDate?: Date | number
 
       /**
-       * For media, upload progress callback.
+       * For media and rich message attachments, upload progress callback.
        *
        * @param uploaded  Number of bytes uploaded
        * @param total  Total file size in bytes
        */
       progressCallback?: (uploaded: number, total: number) => void
+
+      /** Cache for uploaded rich message media, see {@link createRichStreamingDraft} */
+      uploadCache?: RichMediaUploadCache
 
       /**
        * Whether to dispatch the edit message event

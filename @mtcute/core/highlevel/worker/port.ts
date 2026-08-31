@@ -23,7 +23,9 @@ export interface TelegramWorkerPortOptions {
   platform: ICorePlatform
 }
 
+/*
 const WORKER_HEARTBEAT_INTERVAL = 10_000
+*/
 
 let _nextConnectionId = 0
 
@@ -82,9 +84,11 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     this._connection = this.connectToWorker(this.options.worker, this._onMessage)
     this._invoker = new WorkerInvoker(this._connection[0], this.workerId, this.connectionId)
     this._invoker.connect()
+    /*
     this._heartbeatTimer = setInterval(() => {
       this._invoker.heartbeat()
     }, WORKER_HEARTBEAT_INTERVAL)
+    */
     this._cancelBeforeExit = this.platform.beforeExit(() => {
       void this.destroy()
     })

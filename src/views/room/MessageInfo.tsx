@@ -400,6 +400,7 @@ export default function MessageInfo(props: { onClose: () => void }) {
 	return (
 		<>
 			<Content>
+				<Wallpaper classList={{ [styles.wallpaper]: true }} />
 				<div
 					ref={viewRef}
 					tabIndex={0}
@@ -454,7 +455,6 @@ export default function MessageInfo(props: { onClose: () => void }) {
 					}}
 				>
 					<div class={styles.container}>
-						<Wallpaper classList={{ [styles.wallpaper]: true }} />
 						{/* <div
 							style={{
 								"text-align": "center",

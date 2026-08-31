@@ -4,9 +4,11 @@ import type { ITelegramClient } from '../../client.types.js'
 import type {
   InputMediaLike,
   InputMessageId,
+  InputRichMessage,
   InputText,
   Message,
   ReplyMarkup,
+  RichMediaUploadCache,
 } from '../../types/index.js'
 import {
   BotKeyboard,
@@ -17,6 +19,7 @@ import { _normalizeInputText } from '../misc/normalize-text.js'
 import { resolvePeer } from '../users/resolve-peer.js'
 
 import { _findMessageInUpdate } from './find-in-update.js'
+import { _normalizeInputRichMessage } from './normalize-rich-message.js'
 
 /**
  * Edit message text, media, reply markup and schedule date.
@@ -40,6 +43,9 @@ export async function editMessage(
      */
     media?: InputMediaLike
 
+    /** New rich message content */
+    richMessage?: InputRichMessage
+
     /**
      * Whether to disable links preview in this message
      */
@@ -58,12 +64,15 @@ export async function editMessage(
     scheduleDate?: Date | number
 
     /**
-     * For media, upload progress callback.
+     * For media and rich message attachments, upload progress callback.
      *
      * @param uploaded  Number of bytes uploaded
      * @param total  Total file size in bytes
      */
     progressCallback?: (uploaded: number, total: number) => void
+
+    /** Cache for uploaded rich message media, see {@link createRichStreamingDraft} */
+    uploadCache?: RichMediaUploadCache
 
     /**
      * Whether to dispatch the edit message event
@@ -86,6 +95,7 @@ export async function editMessage(
   let content: string | undefined
   let entities: tl.TypeMessageEntity[] | undefined
   let media: tl.TypeInputMedia | undefined
+  const peer = await resolvePeer(client, chatId)
 
   if (params.media) {
     media = await _normalizeInputMedia(client, params.media, params)
@@ -104,12 +114,20 @@ export async function editMessage(
   const res = await client.call({
     _: 'messages.editMessage',
     id: message,
-    peer: await resolvePeer(client, chatId),
+    peer,
     noWebpage: params.disableWebPreview,
     replyMarkup: BotKeyboard._convertToTl(params.replyMarkup),
     message: content,
     entities,
     media,
+    richMessage: params.richMessage
+      ? await _normalizeInputRichMessage(client, peer, params.richMessage, {
+          progressCallback: params.progressCallback
+            ? (_id, uploaded, total) => params.progressCallback?.(uploaded, total)
+            : undefined,
+          uploadCache: params.uploadCache,
+        })
+      : undefined,
     invertMedia: params.invertMedia,
   }, {
     businessConnectionId: params.businessConnectionId,

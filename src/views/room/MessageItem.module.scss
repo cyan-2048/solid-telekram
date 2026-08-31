@@ -6,13 +6,15 @@
 .view_message_info {
 	height: 100%;
 	overflow: auto;
-	background-color: white;
+	display: flex;
+	flex-direction: column;
 
 	.container {
 		position: relative;
 		z-index: 1;
 
 		.wallpaper {
+			background-attachment: fixed;
 			position: absolute;
 			overflow: hidden;
 			top: 0;
@@ -52,6 +54,7 @@
 	&_more_info {
 		margin-top: -1px;
 		background-color: white;
+		flex: 1;
 	}
 }
 
@@ -663,6 +666,12 @@ span.extra_width {
 
 	height: 256px;
 
+	&:global(.focusable) {
+		max-height: unset;
+		height: unset;
+		max-width: calc(85vh - 8px);
+	}
+
 	img,
 	video {
 		display: block;
@@ -675,8 +684,15 @@ span.extra_width {
 	}
 }
 
+.constrained img {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
 .thumb {
 	filter: blur(10px);
+	image-rendering: optimizeSpeed;
 }
 
 .reply + .photo {

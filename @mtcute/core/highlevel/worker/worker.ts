@@ -14,8 +14,10 @@ import {
   serializeResult,
 } from './protocol.js'
 
+/*
 const WORKER_HEARTBEAT_TIMEOUT = 60_000
 const WORKER_HEARTBEAT_SWEEP_INTERVAL = 10_000
+*/
 
 export interface TelegramWorkerOptions<T extends WorkerCustomMethods> {
   client: BaseTelegramClient
@@ -111,8 +113,10 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
 
     this.broadcast = broadcast
     this._cleanup.push(cleanup)
+    /*
     this._heartbeatSweep = setInterval(this.sweepExpiredConnections, WORKER_HEARTBEAT_SWEEP_INTERVAL)
     this._mounted = true
+    */
 
     const client = this.client
     const prevLogHandler = client.log.mgr.handler
@@ -221,6 +225,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
     })
   }
 
+  /*
   private sweepExpiredConnections = (): void => {
     const now = Date.now()
 
@@ -231,6 +236,7 @@ export abstract class TelegramWorker<T extends WorkerCustomMethods> {
       this.onRelease(connectionId)
     }
   }
+  */
 
   private onRelease(connectionId: string): void {
     const wasActive = this.activeConnections.delete(connectionId)
