@@ -1008,7 +1008,7 @@ function VideoMedia(props: FocusableMediaProps) {
 
 	const [isNoThumbGif, setIsNoThumbGif] = createSignal(false);
 
-	createEffect(() => {
+	createComputed(() => {
 		const media = message().media as Video;
 
 		setIsGif(media.isLegacyGif ? 1 : media.isAnimation);
@@ -1028,7 +1028,7 @@ function VideoMedia(props: FocusableMediaProps) {
 		});
 	});
 
-	createEffect(() => {
+	createComputed(() => {
 		const media = message().media as Video;
 
 		const thumb = media.getThumbnail("m");
@@ -1038,7 +1038,7 @@ function VideoMedia(props: FocusableMediaProps) {
 		}
 	});
 
-	createEffect(() => {
+	createComputed(() => {
 		const video = message().media as Video;
 		const media = video.thumbnails.find((a) => a.isVideo) || video;
 

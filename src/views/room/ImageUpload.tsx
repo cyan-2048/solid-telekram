@@ -34,6 +34,8 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 
 	let itemRef!: HTMLDivElement;
 
+	let _goBack = false;
+
 	return (
 		<>
 			<div
@@ -105,7 +107,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 					class={styles.caption_textbox}
 					placeholder="Add a caption..."
 					onKeyUp={(e) => {
-						if (e.key == "Backspace") {
+						if (e.key == "Backspace" && _goBack) {
 							sleep(10).then(() => props.onSend(false));
 						}
 					}}
@@ -116,6 +118,7 @@ export default function ImageUpload(props: { src: Blob; isVideo?: boolean; onSen
 							sleep(10).then(() => props.onSend(value));
 						}
 						if (e.key == "Backspace" && value === "") {
+							_goBack = true;
 							e.preventDefault();
 						}
 

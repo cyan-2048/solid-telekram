@@ -590,7 +590,10 @@ export default function MessageInfo(props: { onClose: () => void }) {
 
 																if ("id" in preview) {
 																	props.onClose();
-																	const dialog = await tg.getPeerDialogs(preview).then((a) => a[0]);
+																	const dialog = await tg
+																		.getPeerDialogs(preview)
+																		.then((a) => a[0])
+																		.catch(() => null);
 
 																	if (dialog) {
 																		const uiDialog = dialogsJar.add(dialog);
@@ -606,6 +609,43 @@ export default function MessageInfo(props: { onClose: () => void }) {
 																setChatPreview(preview);
 
 																return;
+															}
+
+															if (deeplink.type == "phone") {
+																const peer = await tg.resolvePhoneNumber(deeplink.phoneNumber).catch(() => null);
+																if (peer) {
+																	const dialog = await tg
+																		.getPeerDialogs(peer)
+																		.then((a) => a[0])
+																		.catch(() => null);
+
+																	if (dialog) {
+																		// const peer = dialog.peer;
+
+																		const uiDialog = dialogsJar.add(dialog);
+																		sortDialogs();
+																		onClose();
+
+																		if (!uiDialog.messages.hasLoadedBefore) {
+																			uiDialog.messages.loadMore();
+																		}
+
+																		batch(() => {
+																			setStatusbarColor("#1c96c3");
+																			$room.set(uiDialog);
+																			$view.set("room");
+																		});
+
+																		SpatialNavigation.resume();
+																	} else {
+																		SpatialNavigation.resume();
+																		_previousFocus?.focus();
+
+																		toaster("Phone number not found.");
+																	}
+
+																	return;
+																}
 															}
 
 															SpatialNavigation.resume();
