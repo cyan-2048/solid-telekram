@@ -239,9 +239,7 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 			const reply = replyingMessage();
 			if (edit) {
 				typeInTextbox(md.unparse(edit.textWithEntities), _textboxRef);
-			}
-
-			if (reply) {
+			} else if (reply) {
 				const nonFloatingTextbox = document.querySelector<HTMLPreElement | HTMLInputElement>(".roomTextbox");
 
 				if (nonFloatingTextbox) {
@@ -468,13 +466,15 @@ export default function RoomTextBox(props: { message?: UIMessage; floating?: boo
 			});
 
 			if (editing) {
-				tg.editMessage({
-					message: editing.raw,
-					text: entities,
-					shouldDispatch: true,
-				}).then((msg) => {
-					dialog.messages.update(msg.id, msg);
-				});
+				if (text().trim() != md.unparse(editing.textWithEntities)) {
+					tg.editMessage({
+						message: editing.raw,
+						text: entities,
+						shouldDispatch: true,
+					}).then((msg) => {
+						dialog.messages.update(msg.id, msg);
+					});
+				}
 			} else if (replying) {
 				const upload = dialog.createUpload(entities, replying);
 
