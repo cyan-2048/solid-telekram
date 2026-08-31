@@ -444,7 +444,10 @@ const toastConnections = navigator.mozApps
 export async function toaster(text: string, opts?: ToastOptions) {
 	const latency = opts?.latency ?? 2000;
 
-	if (opts?.native) {
+	// default to native toast on KaiOS 3.0+
+	const native = opts?.native ?? (import.meta.env.KAIOS != 2 ? !document.hidden : false);
+
+	if (native) {
 		// thanks tbrrss
 		if (typeof WebActivity != "undefined") {
 			const s = new WebActivity("show-toast", {
@@ -452,6 +455,7 @@ export async function toaster(text: string, opts?: ToastOptions) {
 				timeout: latency,
 			});
 			await s.start();
+			return;
 		}
 
 		const conns = await toastConnections;
