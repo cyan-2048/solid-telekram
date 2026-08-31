@@ -109,8 +109,7 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 
 						const result = await importKaiContacts(tg, cached.length ? cached : await contactsJar.reload());
 
-						if (!result) return;
-						if (result.length) {
+						if (result && result.length) {
 							contactsJar.addAll(result);
 						}
 						props.onClose();
