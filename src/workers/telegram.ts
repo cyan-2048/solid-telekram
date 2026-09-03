@@ -23,6 +23,22 @@ let onLine = true;
 
 class KaiPlatform extends WebPlatform {
 	onNetworkChanged(fn: (connected: boolean) => void): () => void {
+		if (import.meta.env.KAIOS != 2) {
+			if ("connection" in navigator) {
+				try {
+					const connection = navigator.connection as any;
+
+					const onlineHandler = () => fn(connection.type != "none");
+
+					connection.ontypechange = onlineHandler;
+
+					return () => {
+						connection.ontypechange = null;
+					};
+				} catch {}
+			}
+		}
+
 		const onlineHandler = () => fn(onLine);
 
 		EE.on("online", onlineHandler);
@@ -31,6 +47,14 @@ class KaiPlatform extends WebPlatform {
 	}
 
 	isOnline(): boolean {
+		if (import.meta.env.KAIOS != 2) {
+			if ("connection" in navigator) {
+				try {
+					return (navigator.connection as any).type != "none";
+				} catch {}
+			}
+		}
+
 		return onLine;
 	}
 }

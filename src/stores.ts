@@ -164,6 +164,8 @@ export const $view = atom<Views>("home");
 export const $previousView = atom<Views>("home");
 
 export const $room = atom<UIDialog | null>(null);
+/** homescreen is currently selection mode */
+export const $dialogSelectMode = atom(false);
 
 export const $handledDialogRefocus = atom(false);
 

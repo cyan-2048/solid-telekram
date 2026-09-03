@@ -23,6 +23,7 @@ import {
 	$handledDialogRefocus,
 	$previousView,
 	$room,
+	$dialogSelectMode,
 	$view,
 	setStatusbarColor,
 } from "@/stores";
@@ -39,7 +40,7 @@ import { unparse } from "@/lib/unparse";
 import { MarkdownText } from "@components/Markdown";
 import DialogsJar from "@/ui/DialogJar";
 import debounce from "lodash-es/debounce";
-import { dialogsJar } from "@globals";
+import { dialogsJar, EE } from "@globals";
 import Options from "@components/Options";
 import OptionsItem from "@components/OptionsItem";
 import { Portal } from "solid-js/web";
@@ -364,7 +365,7 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				onFocus={() => {
 					props.$.syncMuted();
 					setStatusbarColor("#1c96c3");
-					setSoftkeys("New chat", "OPEN", "tg:more");
+					$dialogSelectMode.get() ? setSoftkeys("", "SELECT", "") : setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
 					if (props.isLast?.()) props.loadMore?.();
 				}}
@@ -373,12 +374,14 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				}}
 				onKeyUp={(e) => {
 					if (e.key == "SoftLeft") {
+						if ($dialogSelectMode.get()) return;
 						$previousView.set("home");
 						$view.set("new_chat");
 					}
 				}}
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
+						if ($dialogSelectMode.get()) return;
 						props.$.syncMuted();
 						setShowOptions(true);
 					}
@@ -390,6 +393,12 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				}}
 				on:sn-enter-up={() => {
 					batch(() => {
+						if ($dialogSelectMode.get()) {
+							$dialogSelectMode.set(false);
+							EE.emit("dialog_selected", props.$);
+							return;
+						}
+
 						$room.set(props.$);
 						$view.set("room");
 					});
@@ -699,10 +708,11 @@ export default function Home(props: { hidden: boolean }) {
 								onFocus={(e) => {
 									e.currentTarget.scrollIntoView(false);
 									setStatusbarColor("#1c96c3");
-									setSoftkeys("New chat", "", "tg:more");
+									$dialogSelectMode.get() ? setSoftkeys("", "", "") : setSoftkeys("New chat", "", "tg:more");
 								}}
 								onKeyUp={(e) => {
 									if (e.key == "SoftLeft") {
+										if ($dialogSelectMode.get()) return;
 										$previousView.set("home");
 										$view.set("new_chat");
 									}
