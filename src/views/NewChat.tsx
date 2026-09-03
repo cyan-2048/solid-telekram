@@ -22,13 +22,26 @@ import { $room, $view, setStatusbarColor } from "@/stores";
 import { useStore } from "@nanostores/solid";
 import { cloudphone } from "@/config";
 import * as contacts from "@/lib/lib_wallace/contacts";
+import ISpinner from "./components/ISpinner";
 
 const contactsMinisearch = contactsJar.search;
 
 const SUPPORTS_IMPORT_CONTACTS = !cloudphone;
 
+function ImportingContactsLoading() {
+	return (
+		<div class={styles.loadingContacts}>
+			<div class={styles.spinner}>
+				<ISpinner large />
+			</div>
+		</div>
+	);
+}
+
 function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 	const SN_ID_OPTIONS = createUniqueId();
+
+	const [importingContacts, setImportingContacs] = createSignal(false);
 
 	onMount(() => {
 		SpatialNavigation.add(SN_ID_OPTIONS, {
@@ -44,102 +57,125 @@ function OptionsContactItem(props: { user: User | null; onClose: () => void }) {
 	});
 
 	return (
-		<Options onClose={props.onClose} title="Options">
-			<Show when={!cloudphone}>
+		<>
+			<Options onClose={props.onClose} title="Options">
+				<Show when={!cloudphone}>
+					<OptionsItem
+						classList={{ [styles.option]: true }}
+						tabIndex={-1}
+						on:sn-enter-up={async () => {
+							startActivity<{ contact: mozContact }>("pick", {
+								type: ["webcontacts/contact"],
+							}).then(async (data) => {
+								const contact = data?.contact;
+
+								if (contact) {
+									const cached = contactsJar.$cached.get();
+
+									const result = await importKaiContact(
+										tg,
+										cached.length ? cached : await contactsJar.reload(),
+										contact,
+									);
+
+									if (!result) return;
+									if (result.length) {
+										contactsJar.addAll(result);
+									}
+								}
+							});
+
+							props.onClose();
+						}}
+					>
+						Add new contact
+					</OptionsItem>
+				</Show>
 				<OptionsItem
 					classList={{ [styles.option]: true }}
-					tabIndex={-1}
 					on:sn-enter-up={async () => {
-						startActivity<{ contact: mozContact }>("pick", {
-							type: ["webcontacts/contact"],
-						}).then(async (data) => {
-							const contact = data?.contact;
+						contactsJar.clear();
+						await sleep();
+						contactsJar.reload();
+						props.onClose();
+					}}
+					tabIndex={-1}
+				>
+					Reload contacts
+				</OptionsItem>
+				<Show when={SUPPORTS_IMPORT_CONTACTS}>
+					<OptionsItem
+						classList={{ [styles.option]: true }}
+						on:sn-enter-up={async () => {
+							(document.activeElement as HTMLElement)?.blur();
 
-							if (contact) {
-								const cached = contactsJar.$cached.get();
+							if (import.meta.env.DEV) {
+								setImportingContacs(true);
+								await sleep(3_000);
+								props.onClose();
+								return;
+							}
 
-								const result = await importKaiContact(tg, cached.length ? cached : await contactsJar.reload(), contact);
+							const count =
+								import.meta.env.KAIOS == 2
+									? await navigator.mozContacts.getCount().then((a) => a)
+									: await contacts.getCount();
 
-								if (!result) return;
-								if (result.length) {
-									contactsJar.addAll(result);
+							if (count == 0) {
+								props.onClose();
+							}
+
+							if (count > 100) {
+								// KaiOS only, does not require modal
+								if (!confirm("You have more than 100 contacts, are you sure you want to import them all?")) {
+									props.onClose();
+									return;
 								}
 							}
-						});
 
-						props.onClose();
-					}}
-				>
-					Add new contact
-				</OptionsItem>
-			</Show>
-			<OptionsItem
-				classList={{ [styles.option]: true }}
-				on:sn-enter-up={async () => {
-					contactsJar.clear();
-					await sleep();
-					contactsJar.reload();
-					props.onClose();
-				}}
-				tabIndex={-1}
-			>
-				Reload contacts
-			</OptionsItem>
-			<Show when={SUPPORTS_IMPORT_CONTACTS}>
-				<OptionsItem
-					classList={{ [styles.option]: true }}
-					on:sn-enter-up={async () => {
-						(document.activeElement as HTMLElement)?.blur();
+							setImportingContacs(true);
 
-						const count =
-							import.meta.env.KAIOS == 2
-								? await navigator.mozContacts.getCount().then((a) => a)
-								: await contacts.getCount();
+							const cached = contactsJar.$cached.get();
 
-						if (count == 0) {
-							props.onClose();
-						}
+							const result = await importKaiContacts(tg, cached.length ? cached : await contactsJar.reload());
 
-						if (count > 100) {
-							// KaiOS only, does not require modal
-							if (!confirm("You have more than 100 contacts, are you sure you want to import them all?")) return;
-						}
-
-						const cached = contactsJar.$cached.get();
-
-						const result = await importKaiContacts(tg, cached.length ? cached : await contactsJar.reload());
-
-						if (result && result.length) {
-							contactsJar.addAll(result);
-						}
-						props.onClose();
-					}}
-					tabIndex={-1}
-				>
-					Import contacts
-				</OptionsItem>
-			</Show>
-			<Show when={props.user}>
-				<OptionsItem
-					classList={{ [styles.option]: true }}
-					on:sn-enter-up={() => {
-						const user = props.user!;
-						props.onClose();
-						queueMicrotask(async () => {
-							if (confirm("Are you sure you want to delete this contact?")) {
-								await tg.deleteContacts(user);
-								contactsJar.remove(user.id);
-								await sleep();
-								SpatialNavigation.focus("new_chat");
+							if (result && result.length) {
+								contactsJar.addAll(result);
 							}
-						});
-					}}
-					tabIndex={-1}
-				>
-					Delete Contact
-				</OptionsItem>
+							props.onClose();
+						}}
+						tabIndex={-1}
+					>
+						Import contacts
+					</OptionsItem>
+				</Show>
+				<Show when={props.user}>
+					<OptionsItem
+						classList={{ [styles.option]: true }}
+						on:sn-enter-up={() => {
+							const user = props.user!;
+							props.onClose();
+							queueMicrotask(async () => {
+								if (confirm("Are you sure you want to delete this contact?")) {
+									await tg.deleteContacts(user);
+									contactsJar.remove(user.id);
+									await sleep();
+									SpatialNavigation.focus("new_chat");
+								}
+							});
+						}}
+						tabIndex={-1}
+					>
+						Delete Contact
+					</OptionsItem>
+				</Show>
+			</Options>
+			<Show when={importingContacts()}>
+				<Portal>
+					<ImportingContactsLoading />
+				</Portal>
 			</Show>
-		</Options>
+		</>
 	);
 }
 

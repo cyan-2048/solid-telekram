@@ -21,5 +21,8 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 	"git.addAICoAuthor": "off",
-	"js/ts.experimental.useTsgo": false
+	"js/ts.experimental.useTsgo": false,
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
 }
