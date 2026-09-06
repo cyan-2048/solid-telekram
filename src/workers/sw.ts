@@ -312,7 +312,7 @@ async function fireNotification(data: any) {
 	let icon = "/icon56.png";
 
 	if (data.badge && !Number.isNaN(Number(data.badge)) && String(data.badge).length < 5) {
-		icon = generateIcon(data.badge);
+		icon = await generateIcon(data.badge);
 	}
 
 	let markedPeerId: number = 0;
