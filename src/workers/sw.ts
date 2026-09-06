@@ -243,7 +243,7 @@ async function openApp(notification: Notification) {
 			for (var i = 0; i < clientList.length; i++) {
 				let client = clientList[i];
 				if ("focus" in client) {
-					client.postMessage({ type: "window-open" });
+					client.postMessage("window-open");
 					return client.focus();
 				}
 			}

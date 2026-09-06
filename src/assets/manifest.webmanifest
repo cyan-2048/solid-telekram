@@ -73,8 +73,7 @@
 		"activities": {
 			"share": {
 				"filters": {
-					"type": ["image/*", "audio/*", "video/*", "url", "text/vcard"],
-					"number": { "max": 5 }
+					"type": ["image/*", "audio/*", "video/*", "url", "text/vcard"]
 				},
 				"returnValue": true
 			}

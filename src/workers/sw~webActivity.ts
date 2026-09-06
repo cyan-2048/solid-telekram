@@ -14,7 +14,7 @@ async function openApp(source: any) {
 	for (var i = 0; i < clientList.length; i++) {
 		let client = clientList[i];
 		if ("focus" in client) {
-			client.postMessage({ type: "window-open" });
+			client.postMessage("window-open");
 			client.postMessage({ type: "telekram.webactivity", source });
 			return client.focus();
 		}
@@ -22,8 +22,11 @@ async function openApp(source: any) {
 
 	if (typeof sw.clients.openWindow == "function") {
 		return sw.clients
-			.openWindow(new URL("/", self.location.origin) + "index.html")
-			.then((client) => client?.focus())
+			.openWindow(
+				"/index.html",
+				// @ts-ignore
+				{ disposition: "window" },
+			)
 			.then((client) => client?.postMessage({ type: "telekram.webactivity", source }));
 	}
 }

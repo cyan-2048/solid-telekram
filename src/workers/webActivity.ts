@@ -1,5 +1,6 @@
 import { sleep } from "@/helpers";
 import { $dialogSelectMode, $room, $view, setStatusbarColor } from "@/stores";
+import type { UIMessageUploading } from "@/ui/UIDialog";
 import type UIDialog from "@/ui/UIDialog";
 import { toaster } from "@/utils";
 import { EE, sortDialogs, tg } from "@globals";
@@ -96,29 +97,62 @@ function handleDialogSelectedForMedia(dialog: UIDialog | null, blobs: Blob[], ty
 			progress: 0.5,
 		});
 
-		const upload = dialog.createUpload();
+		// sendMediaGroup only accepts up to 10 media files per call, so split
+		// the selection into chunks of 10. Each chunk gets its own upload and
+		// runs concurrently with the others.
+		const CHUNK_SIZE = 10;
+		const chunks: Array<{
+			blobs: Blob[];
+			offset: number;
+			chunkTotalSize: number;
+			uploadedBytes: number[];
+			upload: UIMessageUploading;
+		}> = [];
 
-		tg.sendMediaGroup(
-			dialog.peer,
-			blobs.map((blob, i) =>
-				isImage
-					? InputMedia.photo(blob)
-					: isVideo
-						? handleVideoBlob(blob)
-						: InputMedia.document(blob, { fileName: filenames[i] }),
-			),
-			{ shouldDispatch: true, abortSignal: upload.abortSignal },
-		)
-			.then((msgs) => {
-				dialog.removeUpload(upload);
-				dialog.messages.addBulk(msgs);
+		for (let i = 0; i < blobs.length; i += CHUNK_SIZE) {
+			const upload = dialog.createUpload();
+			const chunk = blobs.slice(i, i + CHUNK_SIZE);
+			const chunkTotalSize = chunk.reduce((a, b) => a + b.size, 0);
+			upload.setFileSize(chunkTotalSize);
+			chunks.push({ blobs: chunk, offset: i, chunkTotalSize: chunkTotalSize, upload, uploadedBytes: [] });
+		}
+
+		const sendChunk = ({ blobs: chunk, offset, chunkTotalSize, upload, uploadedBytes }: (typeof chunks)[number]) =>
+			tg.sendMediaGroup(
+				dialog.peer,
+				chunk.map((blob, i) =>
+					isImage
+						? InputMedia.photo(blob)
+						: isVideo
+							? handleVideoBlob(blob)
+							: InputMedia.document(blob, { fileName: filenames[offset + i] }),
+				),
+				{
+					shouldDispatch: true,
+					abortSignal: upload.abortSignal,
+					progressCallback: (index, uploaded) => {
+						uploadedBytes[index] = uploaded;
+						const totalUploaded = uploadedBytes.reduce((a, b) => a + b, 0);
+
+						upload.setUploaded(totalUploaded);
+
+						const progress = Math.ceil((totalUploaded / chunkTotalSize) * 100);
+						upload.setProgress(progress);
+					},
+				},
+			);
+
+		Promise.all(chunks.map(sendChunk))
+			.then((results) => {
+				chunks.forEach(({ upload }) => dialog.removeUpload(upload));
+				dialog.messages.addBulk(results.reduce((acc, msgs) => acc.concat(msgs), []));
 				sortDialogs();
 			})
 			.catch((err) => {
 				console.error("UPLOAD FILE ERROR", err);
-				upload.abort();
+				chunks.forEach(({ upload }) => upload.abort());
 				sleep(3000).then(() => {
-					dialog.removeUpload(upload);
+					chunks.forEach(({ upload }) => dialog.removeUpload(upload));
 				});
 			})
 			.finally(() => {

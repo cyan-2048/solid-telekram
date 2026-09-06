@@ -33,22 +33,21 @@ async function handleAppUpdateIfNeeded() {
 if ("serviceWorker" in navigator && !import.meta.env.DEV && !isCloudphone) {
 	console.log("START SERVICE WORKER", ServiceWorkerURL);
 
+	navigator.serviceWorker.addEventListener("message", (event) => {
+		console.log("[SW]addEventListener:", event.data);
+
+		if (import.meta.env.KAIOS != 2) {
+			if (event.data == "window-open") {
+				window.open(location.origin + "/manifest.webmanifest", "__blank__", "kind=app,noopener=yes");
+			}
+		}
+	});
+
 	navigator.serviceWorker
 		.register(ServiceWorkerURL)
 		.then(() => {
 			if (navigator.serviceWorker.controller) {
 				navigator.serviceWorker.controller.postMessage({ type: 1, visibilityState: document.visibilityState });
-				navigator.serviceWorker.addEventListener("message", (event) => {
-					console.log("[SW]addEventListener:", event.data);
-				});
-			}
-
-			if (import.meta.env.KAIOS != 2) {
-				navigator.serviceWorker.addEventListener("message", (event) => {
-					if (event.data?.type == "window-open") {
-						window.open(location.origin + "/manifest.webmanifest", "__blank__", "kind=app,noopener=yes");
-					}
-				});
 			}
 		})
 		.catch((error) => {
