@@ -14,6 +14,7 @@ if (import.meta.env.CLOUDPHONE) {
 render(() => <App />, document.getElementById("root")!);
 
 import "./workers/pushNotifications.ts";
+import "./workers/webActivity.ts";
 
 // #region Integrity Check
 // export const integrityCheck = import("./lib/checkIntegrity").then((m) =>

@@ -60,7 +60,7 @@ export const EE = new EventEmitter<{
 	audio_rewind: () => void;
 	audio_stop: () => void;
 	requestJump: (msgId: number, chatId: number) => void;
-	dialog_selected: (dialog: UIDialog) => void;
+	dialog_selected: (dialog: UIDialog | null) => void;
 }>();
 
 export const dialogsJar = DialogsJar.jar;

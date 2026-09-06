@@ -2,6 +2,12 @@ console.info("[SW] sw.ts start!");
 
 import { openDB } from "idb";
 import { generateIcon } from "./sw~badges";
+
+// import "./sw~webActivity";
+if (import.meta.env.KAIOS != 2) {
+	require("./sw~webActivity");
+}
+
 import { decodeBase64Url, decryptTelegramPushPayload } from "./pushCrypto";
 import emojiRegex from "emoji-regex";
 
@@ -20,16 +26,19 @@ let notoColorEmojiFix = false;
 function collapse(str: string) {
 	const trimmed = str.replace(/\s+/g, " ").trim();
 
-	if (notoColorEmojiFix) {
-		return trimmed.replace(emojiMatcher, (emoji) => {
-			if (emoji.length == 2 || emoji.length == 1) {
-				if (kaiosEmojiMatcher.test(emoji)) {
-					return emoji;
+	// this issue is only relevant to KaiOS 2.5
+	if (import.meta.env.KAIOS == 2) {
+		if (notoColorEmojiFix) {
+			return trimmed.replace(emojiMatcher, (emoji) => {
+				if (emoji.length == 2 || emoji.length == 1) {
+					if (kaiosEmojiMatcher.test(emoji)) {
+						return emoji;
+					}
 				}
-			}
 
-			return PLACEHOLDER_CHARACTER_EMOJI;
-		});
+				return PLACEHOLDER_CHARACTER_EMOJI;
+			});
+		}
 	}
 
 	return trimmed;
@@ -179,20 +188,24 @@ async function resolvePushPayload(payload: unknown): Promise<Record<string, unkn
 }
 
 sw.addEventListener("message", (event) => {
-	console.log("[SW] on message:", event.data);
-	switch (event.data.type) {
+	const data = event.data;
+	console.log("[SW] on message:", data);
+
+	if (!data) return;
+
+	switch (data.type) {
 		case 0: // clearNotification
 			break;
 		case 1: // visibilityState
-			visibilityState = event.data.visibilityState;
+			visibilityState = data.visibilityState;
 			console.log("[SW] visibilityState :", visibilityState);
 			break;
 		case 2: // test fire notification
-			console.log("firing notification: ", event.data);
-			fireNotification(event.data);
+			console.log("firing notification: ", data);
+			fireNotification(data);
 			break;
 		case 3: // notoColorEmojiFix
-			notoColorEmojiFix = event.data.needsFix;
+			notoColorEmojiFix = data.needsFix;
 			break;
 	}
 });

@@ -358,6 +358,19 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 
 	const [showOptions, setShowOptions] = createSignal(false);
 
+	const isSelectionMode = useStore_($dialogSelectMode);
+
+	createEffect(() => {
+		const isFocused = focused();
+		const selectMode = isSelectionMode();
+
+		untrack(() => {
+			if (isFocused) {
+				selectMode ? setSoftkeys("", "SELECT", "Cancel") : setSoftkeys("New chat", "OPEN", "tg:more");
+			}
+		});
+	});
+
 	return (
 		<>
 			<div
@@ -365,7 +378,6 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				onFocus={() => {
 					props.$.syncMuted();
 					setStatusbarColor("#1c96c3");
-					$dialogSelectMode.get() ? setSoftkeys("", "SELECT", "") : setSoftkeys("New chat", "OPEN", "tg:more");
 					setFocused(true);
 					if (props.isLast?.()) props.loadMore?.();
 				}}
@@ -381,9 +393,22 @@ function DialogItem(props: { $: UIDialog; isSearchResult?: boolean; isLast?: () 
 				}}
 				onKeyDown={(e) => {
 					if (e.key == "SoftRight") {
-						if ($dialogSelectMode.get()) return;
+						if ($dialogSelectMode.get()) {
+							$dialogSelectMode.set(false);
+							EE.emit("dialog_selected", null);
+							return;
+						}
 						props.$.syncMuted();
 						setShowOptions(true);
+					}
+
+					if (e.key == "Backspace" && $dialogSelectMode.get()) {
+						e.preventDefault();
+						e.stopImmediatePropagation();
+						e.stopPropagation();
+
+						$dialogSelectMode.set(false);
+						EE.emit("dialog_selected", null);
 					}
 				}}
 				on:sn-enter-down={() => {

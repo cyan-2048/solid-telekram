@@ -17,6 +17,7 @@ function md5(input: string | Buffer) {
 
 const isKai3 = process.env.KAIOS == "3";
 const isKai4 = process.env.KAIOS == "4";
+const isKai2 = !isKai4 && !isKai3;
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -86,6 +87,14 @@ export function pluginServiceWorker(): RsbuildPlugin {
 							new rspack.DefinePlugin({
 								"import.meta.env.KAIOS": isKai3 ? 3 : isKai4 ? 4 : 2,
 							}),
+							new rspack.SwcJsMinimizerRspackPlugin({
+								minimizerOptions: {
+									compress: {
+										passes: 5,
+										unused: true,
+									},
+								},
+							}),
 						],
 
 						resolve: {
@@ -108,7 +117,7 @@ export function pluginServiceWorker(): RsbuildPlugin {
 							},
 						},
 
-						target: ["es2015", "webworker"],
+						target: [isKai2 ? "es2015" : "es2020", "webworker"],
 
 						module: {
 							rules: [
