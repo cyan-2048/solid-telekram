@@ -130,6 +130,24 @@ export default function DebugView() {
 						Test ++Toast
 					</KaiButton>
 					<KaiButton
+						on:sn-enter-down={() => {
+							toaster("Native Toast", { native: true });
+						}}
+						tabIndex={0}
+						classList={{ debug: true }}
+					>
+						Native Toast
+					</KaiButton>
+					<KaiButton
+						on:sn-enter-down={() => {
+							toaster("Non-Native Toast", { native: false });
+						}}
+						tabIndex={0}
+						classList={{ debug: true }}
+					>
+						Non-Native Toast
+					</KaiButton>
+					<KaiButton
 						on:sn-enter-down={async () => {
 							const result = await modals.prompt("Text", "Default Value");
 							toaster("" + result);

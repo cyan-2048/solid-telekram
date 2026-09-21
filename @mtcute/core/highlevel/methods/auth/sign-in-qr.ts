@@ -31,6 +31,9 @@ export async function signInQr(
     /**
      * Function that will be called when the user has scanned the QR code
      * (i.e. when `updateLoginToken` is received), and the library is finalizing the auth
+     *
+     * Note: `onUrlUpdated` can be invoked again after this callback fires, in case the
+     * authorization fails due to slow network.
      */
     onQrScanned?: () => void
 
@@ -158,11 +161,14 @@ export async function signInQr(
             if (tl.RpcError.is(e, 'SESSION_PASSWORD_NEEDED') && params.password) {
               return await handle2fa(params.password)
             }
+            if (tl.RpcError.is(e, 'AUTH_TOKEN_EXPIRED') && params.password) {
+              continue loop
+            }
 
             throw e
           }
 
-          assertTypeIs('auth.importLoginToken', res2, 'auth.loginTokenSuccess')
+          assertTypeIs(res2, 'auth.loginTokenSuccess')
           break loop
         }
         case 'auth.loginTokenSuccess':
@@ -177,7 +183,7 @@ export async function signInQr(
       },
       { abortSignal },
     )
-    assertTypeIs('users.getUsers', self, 'user')
+    assertTypeIs(self, 'user')
 
     await client.notifyLoggedIn(self)
 

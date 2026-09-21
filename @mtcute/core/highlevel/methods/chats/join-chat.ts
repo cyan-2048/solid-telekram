@@ -13,7 +13,7 @@ import { resolveChannel } from '../users/resolve-peer.js'
  * - `status: 'ok'` - the chat was joined successfully
  * - `status: 'request_sent'` - a join request was sent and needs to be approved by the chat admin
  * - `status: 'webview'` - a guard bot requested you to open a webview before joining the chat
- *   (use `messages.requestChatJoinWebView` with `queryId` to obtain the webview url)
+ *   (use {@link openJoinChatWebview} with `queryId` to open it)
  */
 export type JoinChatResult
   = | { status: 'ok', chat: Chat }
@@ -56,7 +56,7 @@ export async function joinChat(client: ITelegramClient, chatId: InputPeerLike): 
 
   switch (res._) {
     case 'messages.chatInviteJoinResultOk':
-      assertIsUpdatesGroup('joinChat', res.updates)
+      assertIsUpdatesGroup(res.updates)
       client.handleClientUpdate(res.updates)
 
       return { status: 'ok', chat: new Chat(res.updates.chats[0]) }

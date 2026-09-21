@@ -253,7 +253,7 @@ export async function doAuthorization(
   await sendPlainMessage({ _: 'mt_req_pq_multi', nonce })
   const resPq = await readNext()
 
-  mtpAssertTypeIs('auth step 1', resPq, 'mt_resPQ')
+  mtpAssertTypeIs(resPq, 'mt_resPQ')
 
   if (!typed.equal(resPq.nonce, nonce)) {
     throw new MtSecurityError('Step 1: invalid nonce from server')
@@ -315,7 +315,7 @@ export async function doAuthorization(
   })
   const serverDhParams = await readNext()
 
-  mtpAssertTypeIs('auth step 2', serverDhParams, 'mt_server_DH_params_ok')
+  mtpAssertTypeIs(serverDhParams, 'mt_server_DH_params_ok')
 
   if (!typed.equal(serverDhParams.nonce, nonce)) {
     throw new MtSecurityError('Step 2: invalid nonce from server')
@@ -343,7 +343,7 @@ export async function doAuthorization(
     throw new MtSecurityError('Step 3: invalid inner data hash')
   }
 
-  mtpAssertTypeIs('auth step 3', serverDhInner, 'mt_server_DH_inner_data')
+  mtpAssertTypeIs(serverDhInner, 'mt_server_DH_inner_data')
 
   if (!typed.equal(serverDhInner.nonce, nonce)) {
     throw new Error('Step 3: invalid nonce from server')
@@ -438,7 +438,7 @@ export async function doAuthorization(
     const dhGen = await readNext()
 
     if (!mtp.isAnySet_client_DH_params_answer(dhGen)) {
-      throw new MtTypeAssertionError('auth step 4', 'set_client_DH_params_answer', dhGen._)
+      throw new MtTypeAssertionError('set_client_DH_params_answer', dhGen._)
     }
 
     if (!typed.equal(dhGen.nonce, nonce)) {
@@ -452,7 +452,7 @@ export async function doAuthorization(
 
     if (dhGen._ === 'mt_dh_gen_fail') {
       // in theory i would be supposed to calculate newNonceHash, but why, we are failing anyway
-      throw new MtTypeAssertionError('auth step 4', '!mt_dh_gen_fail', dhGen._)
+      throw new MtTypeAssertionError('not mt_dh_gen_fail', dhGen._)
     }
 
     if (dhGen._ === 'mt_dh_gen_retry') {

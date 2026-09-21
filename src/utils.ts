@@ -342,7 +342,7 @@ export async function startLoginQr(
 		}
 	}
 
-	return signInQr(tg, params);
+	return tg.signInQr(params);
 }
 
 // #endregion tg.start methods
@@ -436,13 +436,16 @@ interface ToastOptions {
 	native?: boolean;
 }
 
-const toastConnections = navigator.mozApps
-	?.getSelf()
-	.then((a) => a.connect("systoaster"))
-	.catch(() => null);
+const toastConnections =
+	import.meta.env.KAIOS != 2
+		? null
+		: navigator.mozApps
+				?.getSelf()
+				.then((a) => a.connect("systoaster"))
+				.catch(() => null);
 
 export async function toaster(text: string, opts?: ToastOptions) {
-	const latency = opts?.latency ?? 2000;
+	const latency = opts?.latency ?? 2500;
 
 	// default to native toast on KaiOS 3.0+
 	const native = opts?.native ?? (import.meta.env.KAIOS != 2 ? !document.hidden : false);
@@ -452,13 +455,20 @@ export async function toaster(text: string, opts?: ToastOptions) {
 		if (typeof WebActivity != "undefined") {
 			const s = new WebActivity("show-toast", {
 				text,
-				timeout: latency,
+				// add 600 for breathing ground for animation
+				timeout: latency + 600,
 			});
-			await s.start();
-			return;
+			if (
+				await s
+					.start()
+					.then(() => true)
+					.catch(() => false)
+			) {
+				return;
+			}
 		}
 
-		const conns = await toastConnections;
+		const conns = import.meta.env.KAIOS == 2 ? await toastConnections : null;
 
 		if (conns) {
 			conns.forEach((conn) => conn.postMessage({ message: text, latency }));

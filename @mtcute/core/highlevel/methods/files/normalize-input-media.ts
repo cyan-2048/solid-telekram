@@ -1,6 +1,7 @@
 import type { ITelegramClient } from '../../client.types.js'
 import type { UploadFileLike } from '../../types/files/utils.js'
-import type { InputMediaLike } from '../../types/media/input-media/types.js'
+import type { InputMediaLike, InputPollAnswer } from '../../types/media/input-media/types.js'
+import type { InputText } from '../../types/misc/entities.js'
 
 import { parseFileId, tdFileId } from '@mtcute/file-id'
 import Long from 'long'
@@ -51,11 +52,11 @@ export async function _normalizeInputMedia(
   }
 
   if (tl.isAnyInputPhoto(media)) {
-    assertTypeIs('normalizeInputMedia (@ photo)', media, 'inputPhoto')
+    assertTypeIs(media, 'inputPhoto')
     return { _: 'inputMediaPhoto', id: media }
   }
   if (tl.isAnyInputDocument(media)) {
-    assertTypeIs('normalizeInputMedia (@ document)', media, 'inputDocument')
+    assertTypeIs(media, 'inputDocument')
     return { _: 'inputMediaDocument', id: media }
   }
 
@@ -160,23 +161,7 @@ export async function _normalizeInputMedia(
   }
 
   if (media.type === 'poll' || media.type === 'quiz') {
-    // eslint-disable-next-line ts/await-thenable
-    const answers: tl.TypePollAnswer[] = await Promise.all(media.answers.map((ans) => {
-      if (typeof ans === 'string') return { _: 'inputPollAnswer', text: inputTextToTl(ans) }
-      if (tl.isAnyPollAnswer(ans)) return ans
-      if ('media' in ans && ans.media) {
-        return _normalizeInputMedia(client, ans.media, params, true).then(m => ({
-          _: 'inputPollAnswer' as const,
-          text: inputTextToTl(ans.text),
-          media: m,
-        }))
-      }
-
-      return {
-        _: 'inputPollAnswer' as const,
-        text: inputTextToTl(ans.text),
-      }
-    }))
+    const answers = await Promise.all(media.answers.map(ans => _normalizeInputPollAnswer(client, ans, params)))
 
     let correct: number[] | undefined
     let solution: string | undefined
@@ -216,6 +201,8 @@ export async function _normalizeInputMedia(
         revotingDisabled: media.disableRevoting,
         shuffleAnswers: media.shuffleAnswers,
         hideResultsUntilClose: media.hideResultsUntilClose,
+        subscribersOnly: media.subscribersOnly,
+        countriesIso2: media.countries,
         hash: Long.ZERO,
       },
       correctAnswers: correct,
@@ -337,7 +324,7 @@ export async function _normalizeInputMedia(
   let livePhotoVideo: tl.TypeInputDocument | undefined
   if (media.type === 'photo' && media.livePhotoVideo) {
     const inputMedia = await _normalizeInputMedia(client, media.livePhotoVideo, params, true)
-    assertTypeIs('uploadMediaIfNeeded', inputMedia, 'inputMediaDocument')
+    assertTypeIs(inputMedia, 'inputMediaDocument')
     livePhotoVideo = inputMedia.id
   }
 
@@ -352,8 +339,8 @@ export async function _normalizeInputMedia(
     }, { abortSignal: params.abortSignal })
 
     if (photo) {
-      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaPhoto')
-      assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.photo!, 'photo')
+      assertTypeIs(res, 'messageMediaPhoto')
+      assertTypeIs(res.photo!, 'photo')
 
       return {
         _: 'inputMediaPhoto',
@@ -369,8 +356,8 @@ export async function _normalizeInputMedia(
         video: livePhotoVideo,
       }
     }
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res, 'messageMediaDocument')
-    assertTypeIs('normalizeInputMedia (@ messages.uploadMedia)', res.document!, 'document')
+    assertTypeIs(res, 'messageMediaDocument')
+    assertTypeIs(res.document!, 'document')
 
     return {
       _: 'inputMediaDocument',
@@ -537,4 +524,26 @@ export async function _normalizeInputMedia(
     },
     false,
   )
+}
+
+/**
+ * Normalize a poll answer to `PollAnswer`,
+ * uploading its media if needed.
+ *
+ * @internal
+ * @noemit
+ */
+export async function _normalizeInputPollAnswer(
+  client: ITelegramClient,
+  answer: InputText | tl.TypePollAnswer | InputPollAnswer,
+  params: Parameters<typeof _normalizeInputMedia>[2] = {},
+): Promise<tl.TypePollAnswer> {
+  if (typeof answer !== 'string' && tl.isAnyPollAnswer(answer)) return answer
+  if (typeof answer === 'string' || 'entities' in answer) return { _: 'inputPollAnswer', text: inputTextToTl(answer) }
+
+  return {
+    _: 'inputPollAnswer',
+    text: inputTextToTl(answer.text),
+    media: 'media' in answer && answer.media ? await _normalizeInputMedia(client, answer.media, params, true) : undefined,
+  }
 }

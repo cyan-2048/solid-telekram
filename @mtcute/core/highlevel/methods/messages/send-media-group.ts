@@ -29,7 +29,7 @@ export async function sendMediaGroup(
   client: ITelegramClient,
   chatId: InputPeerLike,
   medias: (InputMediaLike | string)[],
-  params?: CommonSendParams & {
+  params?: Omit<CommonSendParams, 'scheduleRepeatPeriod' | 'suggestedPost'> & {
     /**
      * Whether to invert media position.
      *
@@ -125,7 +125,7 @@ export async function sendMediaGroup(
     },
   )
 
-  assertIsUpdatesGroup('sendMediaGroup', res)
+  assertIsUpdatesGroup(res)
   client.handleClientUpdate(res)
 
   const peers = PeersIndex.from(res)

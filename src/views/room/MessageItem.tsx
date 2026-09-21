@@ -32,7 +32,17 @@ import {
 	batch,
 } from "solid-js";
 import { DiceMedia, StickerMedia, switchMessageMedia } from "./MessageMedia";
-import type { TextWithEntities, MessageMediaType, MessageMedia, Message, User, Peer, Audio, tl } from "@mtcute/core";
+import type {
+	TextWithEntities,
+	MessageMediaType,
+	MessageMedia,
+	Message,
+	User,
+	Peer,
+	Audio,
+	tl,
+	Document,
+} from "@mtcute/core";
 import { md } from "@mtcute/markdown-parser";
 import type { TelegramClient } from "@mtcute/web";
 
@@ -1020,7 +1030,11 @@ function MessageContainer(props: { children: JSXElement }) {
 
 					const type = mediaType();
 
-					if (type == "voice" || type == "audio") {
+					if (
+						type == "voice" ||
+						type == "audio" ||
+						(type == "document" && (media() as Document).mimeType.startsWith("audio"))
+					) {
 						setSoftkeys("tg:arrow_down", "PLAY", "tg:more");
 						return;
 					}
@@ -1035,7 +1049,10 @@ function MessageContainer(props: { children: JSXElement }) {
 					if (type == "voice") {
 						setAudioPlaying(true);
 						SpatialNavigation.pause();
-					} else if (type == "audio") {
+					} else if (
+						type == "audio" ||
+						(type == "document" && type == "document" && (media() as Document).mimeType.startsWith("audio"))
+					) {
 						setShowMusicPlayer(true);
 					} else {
 						setShowMessageInfo(true);
