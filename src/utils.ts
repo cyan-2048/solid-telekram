@@ -448,7 +448,7 @@ export async function toaster(text: string, opts?: ToastOptions) {
 	const latency = opts?.latency ?? 2500;
 
 	// default to native toast on KaiOS 3.0+
-	const native = opts?.native ?? (import.meta.env.KAIOS != 2 ? !document.hidden : false);
+	const native = typeof opts?.native == "boolean" ? opts.native : import.meta.env.KAIOS != 2 ? !document.hidden : false;
 
 	if (native) {
 		// thanks tbrrss
