@@ -3,7 +3,6 @@
 import type { RsbuildPlugin } from "@rsbuild/core";
 import fs from "fs";
 import { resolve } from "path";
-import { execSync } from "child_process";
 
 const isKai2 = process.env.KAIOS != "3" && process.env.KAIOS != "4";
 const isKai3 = process.env.KAIOS == "3";
@@ -34,12 +33,16 @@ function getManifest() {
 export function pluginKaiOSManifest(): RsbuildPlugin {
 	const appVersion = getAppVersion() ?? "1.0.0";
 
-	process.env.APP_VERSION = appVersion;
-
 	return {
 		name: "kai-manifest-plugin",
 		enforce: "post",
 		setup(api) {
+			api.modifyRsbuildConfig((config) => {
+				Object.assign(config.source?.define || {}, {
+					"import.meta.env.APP_VERSION": JSON.stringify(appVersion),
+				});
+			});
+
 			api.onAfterBuild(() => {});
 
 			api.processAssets(
