@@ -146,6 +146,7 @@ export async function _convertToTl(
         message,
         entities,
         replyMarkup: BotKeyboard._convertToTl(obj.replyMarkup),
+        noWebpage: obj.disableWebPreview,
         invertMedia: obj.invertMedia,
       }
     }
@@ -174,6 +175,7 @@ export async function _convertToTl(
           _: 'inputGeoPoint',
           lat: obj.latitude,
           long: obj.longitude,
+          accuracyRadius: obj.accuracy,
         },
         // fields will be `undefined` if this is a `geo`
         heading: (obj as InputMediaGeoLive).heading,

@@ -91,6 +91,7 @@ export declare namespace tlCompat {
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
      *     guard_bot_id: flags2.23?int53
+     *     share_theme: flags2.25?ShareTheme
      */
     interface RawChannelFull_layer197 {
         _: 'channelFull_layer197';
@@ -154,7 +155,7 @@ export declare namespace tlCompat {
         boostsApplied?: number;
         boostsUnrestrict?: number;
         emojiset?: tl.TypeStickerSet;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
     }
     /**
      * Compared to the current schema, changes from this entry:
@@ -267,6 +268,8 @@ export declare namespace tlCompat {
      *     saved_music: flags2.21?Document
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      * Removed arguments: theme_emoticon, premium_gifts
      */
     interface RawUserFull_layer199 {
@@ -316,7 +319,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
     }
     /**
      * Entry was removed from the schema
@@ -398,9 +401,11 @@ export declare namespace tlCompat {
      *     broadcast_messages_allowed: flags2.16?true
      *     monoforum: flags2.17?true
      *     forum_tabs: flags2.19?true
+     *     in_news: flags2.21?true
      *     send_paid_messages_stars: flags2.14?long
      *     linked_monoforum_id: flags2.18?int53
      *     linked_community_id: flags2.20?int53
+     *     pinned_msg_id: flags2.22?int
      * Changed arguments:
      *     stories_max_id: flags2.4?int => flags2.4?RecentStory
      */
@@ -524,6 +529,8 @@ export declare namespace tlCompat {
      *     saved_music: flags2.21?Document
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      * Removed arguments: theme_emoticon
      */
     interface RawUserFull_layer200 {
@@ -572,7 +579,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
     }
     /**
@@ -689,8 +696,10 @@ export declare namespace tlCompat {
      *     broadcast_messages_allowed: flags2.16?true
      *     monoforum: flags2.17?true
      *     forum_tabs: flags2.19?true
+     *     in_news: flags2.21?true
      *     linked_monoforum_id: flags2.18?int53
      *     linked_community_id: flags2.20?int53
+     *     pinned_msg_id: flags2.22?int
      * Changed arguments:
      *     stories_max_id: flags2.4?int => flags2.4?RecentStory
      */
@@ -761,6 +770,7 @@ export declare namespace tlCompat {
      *     send_paid_messages_stars: flags2.21?long
      *     main_tab: flags2.22?ProfileTab
      *     guard_bot_id: flags2.23?int53
+     *     share_theme: flags2.25?ShareTheme
      */
     interface RawChannelFull_layer204 {
         _: 'channelFull_layer204';
@@ -826,7 +836,7 @@ export declare namespace tlCompat {
         boostsApplied?: number;
         boostsUnrestrict?: number;
         emojiset?: tl.TypeStickerSet;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         stargiftsCount?: number;
     }
     /**
@@ -990,6 +1000,7 @@ export declare namespace tlCompat {
      *     reply_to_ephemeral: flags.13?true
      *     todo_item_id: flags.11?int
      *     poll_option: flags.12?bytes
+     *     quote_rich: flags.14?Vector<RichText>
      */
     interface RawMessageReplyHeader_layer206 {
         _: 'messageReplyHeader_layer206';
@@ -1020,6 +1031,8 @@ export declare namespace tlCompat {
      *     saved_music: flags2.21?Document
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      * Removed arguments: theme_emoticon
      */
     interface RawUserFull_layer209 {
@@ -1069,7 +1082,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
         disallowedGifts?: tl.TypeDisallowedGiftsSettings;
     }
@@ -1123,6 +1136,8 @@ export declare namespace tlCompat {
      *     saved_music: flags2.21?Document
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      * Removed arguments: theme_emoticon
      */
     interface RawUserFull_layer210 {
@@ -1172,7 +1187,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
         disallowedGifts?: tl.TypeDisallowedGiftsSettings;
         starsRating?: tl.TypeStarsRating;
@@ -1288,6 +1303,8 @@ export declare namespace tlCompat {
      *     saved_music: flags2.21?Document
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      * Removed arguments: theme_emoticon
      */
     interface RawUserFull_layer211 {
@@ -1337,7 +1354,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
         disallowedGifts?: tl.TypeDisallowedGiftsSettings;
         starsRating?: tl.TypeStarsRating;
@@ -1351,6 +1368,7 @@ export declare namespace tlCompat {
      *     has_welcome_messages: flags2.24?true
      *     main_tab: flags2.22?ProfileTab
      *     guard_bot_id: flags2.23?int53
+     *     share_theme: flags2.25?ShareTheme
      */
     interface RawChannelFull_layer211 {
         _: 'channelFull_layer211';
@@ -1416,7 +1434,7 @@ export declare namespace tlCompat {
         boostsApplied?: number;
         boostsUnrestrict?: number;
         emojiset?: tl.TypeStickerSet;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         stargiftsCount?: number;
         sendPaidMessagesStars?: Long;
     }
@@ -1540,6 +1558,8 @@ export declare namespace tlCompat {
      *     unofficial_security_risk: flags2.26?true
      *     note: flags2.22?TextWithEntities
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      */
     interface RawUserFull_layer214 {
         _: 'userFull_layer214';
@@ -1588,7 +1608,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
         disallowedGifts?: tl.TypeDisallowedGiftsSettings;
         starsRating?: tl.TypeStarsRating;
@@ -1721,7 +1741,9 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     in_news: flags2.21?true
      *     linked_community_id: flags2.20?int53
+     *     pinned_msg_id: flags2.22?int
      * Changed arguments:
      *     stories_max_id: flags2.4?int => flags2.4?RecentStory
      */
@@ -2510,6 +2532,8 @@ export declare namespace tlCompat {
      * Added arguments:
      *     unofficial_security_risk: flags2.26?true
      *     bot_manager_id: flags2.25?int53
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
      */
     interface RawUserFull_layer223 {
         _: 'userFull_layer223';
@@ -2560,7 +2584,7 @@ export declare namespace tlCompat {
         personalChannelMessage?: number;
         stargiftsCount?: number;
         starrefProgram?: tl.TypeStarRefProgram;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         sendPaidMessagesStars?: Long;
         disallowedGifts?: tl.TypeDisallowedGiftsSettings;
         starsRating?: tl.TypeStarsRating;
@@ -2703,6 +2727,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     reply_to_ephemeral: flags.13?true
      *     poll_option: flags.12?bytes
+     *     quote_rich: flags.14?Vector<RichText>
      */
     interface RawMessageReplyHeader_layer223 {
         _: 'messageReplyHeader_layer223';
@@ -2878,6 +2903,7 @@ export declare namespace tlCompat {
      * Added arguments:
      *     has_welcome_messages: flags2.24?true
      *     guard_bot_id: flags2.23?int53
+     *     share_theme: flags2.25?ShareTheme
      */
     interface RawChannelFull_layer225 {
         _: 'channelFull_layer225';
@@ -2943,7 +2969,7 @@ export declare namespace tlCompat {
         boostsApplied?: number;
         boostsUnrestrict?: number;
         emojiset?: tl.TypeStickerSet;
-        botVerification?: tl.TypeBotVerification;
+        botVerification?: tlCompat.TypeBotVerification;
         stargiftsCount?: number;
         sendPaidMessagesStars?: Long;
         mainTab?: tl.TypeProfileTab;
@@ -3009,7 +3035,9 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     in_news: flags2.21?true
      *     linked_community_id: flags2.20?int53
+     *     pinned_msg_id: flags2.22?int
      */
     interface RawChannel_layer227 {
         _: 'channel_layer227';
@@ -3364,20 +3392,274 @@ export declare namespace tlCompat {
         style?: tl.TypeKeyboardButtonStyle;
         text: string;
     }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Changed arguments:
+     *     description: string => TextWithEntities
+     */
+    interface RawBotVerification_layer229 {
+        _: 'botVerification_layer229';
+        botId: number;
+        icon: Long;
+        description: string;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Changed arguments:
+     *     custom_description: flags.0?string =>
+     * flags.0?TextWithEntities
+     */
+    interface RawBotVerifierSettings_layer229 {
+        _: 'botVerifierSettings_layer229';
+        canModifyCustomDescription?: boolean;
+        icon: Long;
+        company: string;
+        customDescription?: string;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     wallet_card: flags2.19?wallet.Card
+     *     share_theme: flags2.27?ShareTheme
+     */
+    interface RawUserFull_layer231 {
+        _: 'userFull_layer231';
+        blocked?: boolean;
+        phoneCallsAvailable?: boolean;
+        phoneCallsPrivate?: boolean;
+        canPinMessage?: boolean;
+        hasScheduled?: boolean;
+        videoCallsAvailable?: boolean;
+        voiceMessagesForbidden?: boolean;
+        translationsDisabled?: boolean;
+        storiesPinnedAvailable?: boolean;
+        blockedMyStoriesFrom?: boolean;
+        wallpaperOverridden?: boolean;
+        contactRequirePremium?: boolean;
+        readDatesPrivate?: boolean;
+        sponsoredEnabled?: boolean;
+        canViewRevenue?: boolean;
+        botCanManageEmojiStatus?: boolean;
+        displayGiftsButton?: boolean;
+        noforwardsMyEnabled?: boolean;
+        noforwardsPeerEnabled?: boolean;
+        unofficialSecurityRisk?: boolean;
+        id: number;
+        about?: string;
+        settings: tl.TypePeerSettings;
+        personalPhoto?: tl.TypePhoto;
+        profilePhoto?: tl.TypePhoto;
+        fallbackPhoto?: tl.TypePhoto;
+        notifySettings: tl.TypePeerNotifySettings;
+        botInfo?: tl.TypeBotInfo;
+        pinnedMsgId?: number;
+        commonChatsCount: number;
+        folderId?: number;
+        ttlPeriod?: number;
+        theme?: tl.TypeChatTheme;
+        privateForwardName?: string;
+        botGroupAdminRights?: tl.TypeChatAdminRights;
+        botBroadcastAdminRights?: tl.TypeChatAdminRights;
+        wallpaper?: tl.TypeWallPaper;
+        stories?: tl.TypePeerStories;
+        businessWorkHours?: tl.TypeBusinessWorkHours;
+        businessLocation?: tl.TypeBusinessLocation;
+        businessGreetingMessage?: tl.TypeBusinessGreetingMessage;
+        businessAwayMessage?: tl.TypeBusinessAwayMessage;
+        businessIntro?: tl.TypeBusinessIntro;
+        birthday?: tl.TypeBirthday;
+        personalChannelId?: number;
+        personalChannelMessage?: number;
+        stargiftsCount?: number;
+        starrefProgram?: tl.TypeStarRefProgram;
+        botVerification?: tlCompat.TypeBotVerification;
+        sendPaidMessagesStars?: Long;
+        disallowedGifts?: tl.TypeDisallowedGiftsSettings;
+        starsRating?: tl.TypeStarsRating;
+        starsMyPendingRating?: tl.TypeStarsRating;
+        starsMyPendingRatingDate?: number;
+        mainTab?: tl.TypeProfileTab;
+        savedMusic?: tl.TypeDocument;
+        note?: tl.TypeTextWithEntities;
+        botManagerId?: number;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     in_news: flags2.21?true
+     *     pinned_msg_id: flags2.22?int
+     */
+    interface RawChannel_layer231 {
+        _: 'channel_layer231';
+        creator?: boolean;
+        left?: boolean;
+        broadcast?: boolean;
+        verified?: boolean;
+        megagroup?: boolean;
+        restricted?: boolean;
+        signatures?: boolean;
+        min?: boolean;
+        scam?: boolean;
+        hasLink?: boolean;
+        hasGeo?: boolean;
+        slowmodeEnabled?: boolean;
+        callActive?: boolean;
+        callNotEmpty?: boolean;
+        fake?: boolean;
+        gigagroup?: boolean;
+        noforwards?: boolean;
+        joinToSend?: boolean;
+        joinRequest?: boolean;
+        forum?: boolean;
+        storiesHidden?: boolean;
+        storiesHiddenMin?: boolean;
+        storiesUnavailable?: boolean;
+        signatureProfiles?: boolean;
+        autotranslation?: boolean;
+        broadcastMessagesAllowed?: boolean;
+        monoforum?: boolean;
+        forumTabs?: boolean;
+        id: number;
+        accessHash?: Long;
+        title: string;
+        username?: string;
+        photo: tl.TypeChatPhoto;
+        date: number;
+        restrictionReason?: tl.TypeRestrictionReason[];
+        adminRights?: tl.TypeChatAdminRights;
+        bannedRights?: tl.TypeChatBannedRights;
+        defaultBannedRights?: tl.TypeChatBannedRights;
+        participantsCount?: number;
+        usernames?: tl.TypeUsername[];
+        storiesMaxId?: tl.TypeRecentStory;
+        color?: tl.TypePeerColor;
+        profileColor?: tl.TypePeerColor;
+        emojiStatus?: tlCompat.TypeEmojiStatus;
+        level?: number;
+        subscriptionUntilDate?: number;
+        botVerificationIcon?: Long;
+        sendPaidMessagesStars?: Long;
+        linkedMonoforumId?: number;
+        linkedCommunityId?: number;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     share_theme: flags2.25?ShareTheme
+     */
+    interface RawChannelFull_layer231 {
+        _: 'channelFull_layer231';
+        canViewParticipants?: boolean;
+        canSetUsername?: boolean;
+        canSetStickers?: boolean;
+        hiddenPrehistory?: boolean;
+        canSetLocation?: boolean;
+        hasScheduled?: boolean;
+        canViewStats?: boolean;
+        blocked?: boolean;
+        canDeleteChannel?: boolean;
+        antispam?: boolean;
+        participantsHidden?: boolean;
+        translationsDisabled?: boolean;
+        storiesPinnedAvailable?: boolean;
+        viewForumAsMessages?: boolean;
+        restrictedSponsored?: boolean;
+        canViewRevenue?: boolean;
+        paidMediaAllowed?: boolean;
+        canViewStarsRevenue?: boolean;
+        paidReactionsAvailable?: boolean;
+        stargiftsAvailable?: boolean;
+        paidMessagesAvailable?: boolean;
+        hasWelcomeMessages?: boolean;
+        id: number;
+        about: string;
+        participantsCount?: number;
+        adminsCount?: number;
+        kickedCount?: number;
+        bannedCount?: number;
+        onlineCount?: number;
+        readInboxMaxId: number;
+        readOutboxMaxId: number;
+        unreadCount: number;
+        chatPhoto: tl.TypePhoto;
+        notifySettings: tl.TypePeerNotifySettings;
+        exportedInvite?: tl.TypeExportedChatInvite;
+        botInfo: tl.TypeBotInfo[];
+        migratedFromChatId?: Long;
+        migratedFromMaxId?: number;
+        pinnedMsgId?: number;
+        stickerset?: tl.TypeStickerSet;
+        availableMinId?: number;
+        folderId?: number;
+        linkedChatId?: number;
+        location?: tl.TypeChannelLocation;
+        slowmodeSeconds?: number;
+        slowmodeNextSendDate?: number;
+        statsDc?: number;
+        pts: number;
+        call?: tl.TypeInputGroupCall;
+        ttlPeriod?: number;
+        pendingSuggestions?: string[];
+        groupcallDefaultJoinAs?: tl.TypePeer;
+        themeEmoticon?: string;
+        requestsPending?: number;
+        recentRequesters?: number[];
+        defaultSendAs?: tl.TypePeer;
+        availableReactions?: tl.TypeChatReactions;
+        reactionsLimit?: number;
+        stories?: tl.TypePeerStories;
+        wallpaper?: tl.TypeWallPaper;
+        boostsApplied?: number;
+        boostsUnrestrict?: number;
+        emojiset?: tl.TypeStickerSet;
+        botVerification?: tlCompat.TypeBotVerification;
+        stargiftsCount?: number;
+        sendPaidMessagesStars?: Long;
+        mainTab?: tl.TypeProfileTab;
+        guardBotId?: number;
+    }
+    /**
+     * Compared to the current schema, changes from this entry:
+     * 
+     * Added arguments:
+     *     quote_rich: flags.14?Vector<RichText>
+     */
+    interface RawMessageReplyHeader_layer231 {
+        _: 'messageReplyHeader_layer231';
+        replyToScheduled?: boolean;
+        forumTopic?: boolean;
+        quote?: boolean;
+        replyToEphemeral?: boolean;
+        replyToMsgId?: number;
+        replyToPeerId?: tl.TypePeer;
+        replyFrom?: tl.TypeMessageFwdHeader;
+        replyMedia?: tlCompat.TypeMessageMedia;
+        replyToTopId?: number;
+        quoteText?: string;
+        quoteEntities?: tl.TypeMessageEntity[];
+        quoteOffset?: number;
+        todoItemId?: number;
+        pollOption?: Uint8Array;
+    }
     interface RpcCallReturn {
     }
     type TypeStarGift = tlCompat.RawStarGiftUnique_layer197 | tlCompat.RawStarGiftUnique_layer198 | tlCompat.RawStarGiftUnique_layer202 | tlCompat.RawStarGift_layer202 | tlCompat.RawStarGiftUnique_layer206 | tlCompat.RawStarGift_layer206 | tlCompat.RawStarGift_layer209 | tlCompat.RawStarGiftUnique_layer210 | tlCompat.RawStarGiftUnique_layer211 | tlCompat.RawStarGift_layer211 | tlCompat.RawStarGiftUnique_layer214 | tlCompat.RawStarGift_layer216 | tlCompat.RawStarGiftUnique_layer218 | tlCompat.RawStarGift_layer218 | tlCompat.RawStarGiftUnique_layer221 | tl.TypeStarGift
     type TypeEmojiStatus = tlCompat.RawEmojiStatus_layer197 | tlCompat.RawEmojiStatusUntil_layer214 | tl.TypeEmojiStatus
     type TypeMessageMedia = tlCompat.RawMessageMediaDocument_layer197 | tlCompat.RawMessageMediaDice_layer220 | tlCompat.RawMessageMediaPoll_layer223 | tlCompat.RawMessageMediaPhoto_layer223 | tl.TypeMessageMedia
-    type TypeChatFull = tlCompat.RawChannelFull_layer197 | tlCompat.RawChannelFull_layer204 | tlCompat.RawChannelFull_layer211 | tlCompat.RawChannelFull_layer225 | tl.TypeChatFull
+    type TypeChatFull = tlCompat.RawChannelFull_layer197 | tlCompat.RawChannelFull_layer204 | tlCompat.RawChannelFull_layer211 | tlCompat.RawChannelFull_layer225 | tlCompat.RawChannelFull_layer231 | tl.TypeChatFull
     type TypeMessageAction = tlCompat.RawMessageActionStarGiftUnique_layer197 | tlCompat.RawMessageActionStarGift_layer197 | tlCompat.RawMessageActionStarGiftUnique_layer202 | tlCompat.RawMessageActionPaidMessagesPrice_layer203 | tlCompat.RawMessageActionStarGiftUnique_layer210 | tlCompat.RawMessageActionStarGift_layer211 | tlCompat.RawMessageActionSetChatTheme_layer211 | tlCompat.RawMessageActionStarGiftUnique_layer214 | tlCompat.RawMessageActionStarGift_layer216 | tlCompat.RawMessageActionGiftCode_layer216 | tlCompat.RawMessageActionGiftPremium_layer216 | tlCompat.RawMessageActionStarGift_layer218 | tlCompat.RawMessageActionStarGiftUnique_layer221 | tlCompat.RawMessageActionStarGiftUnique_layer228 | tl.TypeMessageAction
-    type TypeUserFull = tlCompat.RawUserFull_layer199 | tlCompat.RawUserFull_layer200 | tlCompat.RawUserFull_layer209 | tlCompat.RawUserFull_layer210 | tlCompat.RawUserFull_layer211 | tlCompat.RawUserFull_layer214 | tlCompat.RawUserFull_layer223 | tl.TypeUserFull
+    type TypeUserFull = tlCompat.RawUserFull_layer199 | tlCompat.RawUserFull_layer200 | tlCompat.RawUserFull_layer209 | tlCompat.RawUserFull_layer210 | tlCompat.RawUserFull_layer211 | tlCompat.RawUserFull_layer214 | tlCompat.RawUserFull_layer223 | tlCompat.RawUserFull_layer231 | tl.TypeUserFull
     type TypePremiumGiftOption = tlCompat.RawPremiumGiftOption_layer199
     type TypeUser = tlCompat.RawUser_layer199 | tlCompat.RawUser_layer216 | tlCompat.RawUser_layer227 | tl.TypeUser
-    type TypeChat = tlCompat.RawChannel_layer199 | tlCompat.RawChannel_layer203 | tlCompat.RawChannel_layer216 | tlCompat.RawChannel_layer227 | tl.TypeChat
+    type TypeChat = tlCompat.RawChannel_layer199 | tlCompat.RawChannel_layer203 | tlCompat.RawChannel_layer216 | tlCompat.RawChannel_layer227 | tlCompat.RawChannel_layer231 | tl.TypeChat
     type TypeMessage = tlCompat.RawMessage_layer199 | tlCompat.RawMessageService_layer204 | tlCompat.RawMessage_layer204 | tlCompat.RawMessage_layer216 | tlCompat.RawMessage_layer220 | tlCompat.RawMessage_layer222 | tlCompat.RawMessage_layer224 | tlCompat.RawMessage_layer225 | tl.TypeMessage
     type TypePhoneCallDiscardReason = tlCompat.RawPhoneCallDiscardReasonAllowGroupCall_layer202 | tl.TypePhoneCallDiscardReason
-    type TypeMessageReplyHeader = tlCompat.RawMessageReplyHeader_layer206 | tlCompat.RawMessageReplyHeader_layer223 | tl.TypeMessageReplyHeader
+    type TypeMessageReplyHeader = tlCompat.RawMessageReplyHeader_layer206 | tlCompat.RawMessageReplyHeader_layer223 | tlCompat.RawMessageReplyHeader_layer231 | tl.TypeMessageReplyHeader
     type TypeStoryItem = tlCompat.RawStoryItem_layer210 | tlCompat.RawStoryItem_layer223 | tl.TypeStoryItem
     type TypeTodoCompletion = tlCompat.RawTodoCompletion_layer216 | tl.TypeTodoCompletion
     type TypeWebPageAttribute = tlCompat.RawWebPageAttributeStarGiftAuction_layer218 | tl.TypeWebPageAttribute
@@ -3393,6 +3675,8 @@ export declare namespace tlCompat {
     type TypePageListItem = tlCompat.RawPageListItemBlocks_layer225 | tlCompat.RawPageListItemText_layer225 | tl.TypePageListItem
     type TypeBotCommand = tlCompat.RawBotCommand_layer227 | tl.TypeBotCommand
     type TypeReplyMarkup = tlCompat.RawReplyInlineMarkup_layer228 | tl.TypeReplyMarkup
+    type TypeBotVerification = tlCompat.RawBotVerification_layer229 | tl.TypeBotVerification
+    type TypeBotVerifierSettings = tlCompat.RawBotVerifierSettings_layer229 | tl.TypeBotVerifierSettings
 
     type TlObject =
         | tlCompat.RawStarGiftUnique_layer197
@@ -3519,5 +3803,11 @@ export declare namespace tlCompat {
         | tlCompat.RawKeyboardButtonCallback_layer228
         | tlCompat.RawKeyboardButtonUrl_layer228
         | tlCompat.RawKeyboardButton_layer228
+        | tlCompat.RawBotVerification_layer229
+        | tlCompat.RawBotVerifierSettings_layer229
+        | tlCompat.RawUserFull_layer231
+        | tlCompat.RawChannel_layer231
+        | tlCompat.RawChannelFull_layer231
+        | tlCompat.RawMessageReplyHeader_layer231
         | tl.TlObject
 }

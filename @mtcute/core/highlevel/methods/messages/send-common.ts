@@ -90,6 +90,9 @@ export interface CommonSendParams {
    */
   quote?: TextWithEntities
 
+  /** Quoted rich text, for quoting rich messages */
+  quoteRich?: tl.TypeRichText[]
+
   /**
    * Offset of the start of the quote in the message.
    */
@@ -240,7 +243,7 @@ export async function _processCommonSendParameters(
       throw new MtArgumentError('mustReply used, but replyTo was not passed')
     }
 
-    const msg = await getMessages(client, peer, replyTo)
+    const [msg] = await getMessages(client, peer, replyTo)
 
     if (!msg) {
       throw new MtMessageNotFoundError(getMarkedPeerId(peer), replyTo, 'to reply to')
@@ -262,6 +265,7 @@ export async function _processCommonSendParameters(
       quoteText: params.quote?.text,
       quoteEntities: params.quote?.entities as tl.TypeMessageEntity[],
       quoteOffset: params.quoteOffset,
+      quoteRich: params.quoteRich,
       monoforumPeerId: params.toMonoforumPeer ? await resolvePeer(client, params.toMonoforumPeer) : undefined,
       todoItemId: params.replyToTodoItem,
       pollOption: params.replyToPollOption,

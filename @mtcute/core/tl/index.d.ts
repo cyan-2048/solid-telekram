@@ -1,6 +1,6 @@
 import _Long from 'long';
 export declare namespace tl {
-    const LAYER = 229;
+    const LAYER = 232;
 
     type Long = _Long;
     type RawLong = Uint8Array;
@@ -2987,6 +2987,7 @@ export class RpcError extends Error {
          * set, enables the tabbed forum UI »</a>.
          */
         forumTabs?: boolean;
+        inNews?: boolean;
         /**
          * ID of the channel, see
          * <a href="https://core.telegram.org/api/peers#peer-id">here
@@ -3126,6 +3127,7 @@ export class RpcError extends Error {
          */
         linkedMonoforumId?: number;
         linkedCommunityId?: number;
+        pinnedMsgId?: number;
     }
     /**
      * Indicates a channel/supergroup we can't access because we
@@ -3685,6 +3687,7 @@ export class RpcError extends Error {
          */
         mainTab?: tl.TypeProfileTab;
         guardBotId?: number;
+        shareTheme?: tl.TypeShareTheme;
     }
     interface RawCommunityFull {
         _: 'communityFull';
@@ -6391,6 +6394,27 @@ export class RpcError extends Error {
         _: 'messageActionChatJoinedViaCommunity';
         communityId: number;
     }
+    interface RawMessageActionGramTransfer {
+        _: 'messageActionGramTransfer';
+        commentEncrypted?: boolean;
+        amount: Long;
+        peerAddress: string;
+        transactionId: string;
+        comment?: string;
+    }
+    interface RawMessageActionWalletTonConnectRequest {
+        _: 'messageActionWalletTonConnectRequest';
+        accepted?: boolean;
+        declined?: boolean;
+        sessionId: Long;
+        expires: number;
+        topic?: string;
+        traceId?: string;
+        dappName?: string;
+    }
+    interface RawMessageActionNoPaidMessagesTokenUsed {
+        _: 'messageActionNoPaidMessagesTokenUsed';
+    }
     /**
      * Chat
      */
@@ -7504,6 +7528,8 @@ export class RpcError extends Error {
          * it.
          */
         botManagerId?: number;
+        walletCard?: tl.wallet.TypeCard;
+        shareTheme?: tl.TypeShareTheme;
     }
     /**
      * A contact of the current user that is registered in the
@@ -10918,6 +10944,32 @@ export class RpcError extends Error {
         payload: Uint8Array;
         qts: number;
     }
+    interface RawUpdateWalletState {
+        _: 'updateWalletState';
+        state: tl.TypeWalletState;
+    }
+    interface RawUpdateSentWalletTransaction {
+        _: 'updateSentWalletTransaction';
+        gasless?: boolean;
+        msgHash: string;
+        transaction?: tl.TypeWalletTransaction;
+    }
+    interface RawUpdateWalletGaslessInfo {
+        _: 'updateWalletGaslessInfo';
+        available?: boolean;
+        left: number;
+        resetAt: number;
+        minAmount: Long;
+        relayerAddress: string;
+    }
+    interface RawUpdateWalletTonConnectSession {
+        _: 'updateWalletTonConnectSession';
+        session: tl.TypeTonConnectSession;
+    }
+    interface RawUpdateWalletTonConnectPendingDisconnect {
+        _: 'updateWalletTonConnectPendingDisconnect';
+        sessionIds: Long[];
+    }
     /**
      * The number of queued updates in the common message box is
      * too large to be delivered passively through the socket,
@@ -12722,24 +12774,9 @@ export class RpcError extends Error {
      */
     interface RawDocumentAttributeCustomEmoji {
         _: 'documentAttributeCustomEmoji';
-        /**
-         * Whether this custom emoji can be sent by non-Premium users
-         */
         free?: boolean;
-        /**
-         * Whether the color of this TGS custom emoji should be changed
-         * to the text color when used in messages, the accent color if
-         * used as emoji status, white on chat photos, or another
-         * appropriate color based on context.
-         */
         textColor?: boolean;
-        /**
-         * The actual emoji
-         */
         alt: string;
-        /**
-         * The emoji stickerset to which this emoji belongs.
-         */
         stickerset: tl.TypeInputStickerSet;
     }
     /**
@@ -14211,6 +14248,11 @@ export class RpcError extends Error {
          * <a href="https://core.telegram.org/api/entities#entity-length">UTF-16
          * code units</a>)
          */
+        length: number;
+    }
+    interface RawMessageEntityTonAddress {
+        _: 'messageEntityTonAddress';
+        offset: number;
         length: number;
     }
     /**
@@ -16022,6 +16064,10 @@ export class RpcError extends Error {
         text: tl.TypeRichText;
         type: tl.TypeInlineButtonType;
         style?: tl.TypeRichButtonStyle;
+    }
+    interface RawTextTonAddress {
+        _: 'textTonAddress';
+        text: tl.TypeRichText;
     }
     /**
      * Unsupported IV element
@@ -20587,6 +20633,7 @@ export class RpcError extends Error {
          * (if present) or "Unverified App"
          */
         isApp?: boolean;
+        requestWallet?: boolean;
         /**
          * Username of a bot, which will be used for user
          * authorization. If not specified, the current bot's username
@@ -20639,6 +20686,8 @@ export class RpcError extends Error {
          * confirmation prompt when present
          */
         verifiedAppName?: string;
+        tcSessionId?: Long;
+        tcClientId?: string;
     }
     /**
      * Details about an accepted authorization request, for more
@@ -21666,6 +21715,7 @@ export class RpcError extends Error {
          * directed at.
          */
         pollOption?: Uint8Array;
+        quoteRich?: tl.TypeRichText[];
     }
     /**
      * Represents a reply to a
@@ -24093,6 +24143,8 @@ export class RpcError extends Error {
          * Whether the username is active.
          */
         active?: boolean;
+        deletable?: boolean;
+        expired?: boolean;
         /**
          * The username.
          */
@@ -25087,6 +25139,7 @@ export class RpcError extends Error {
          * <code>option</code> bytes of the desired answer.
          */
         pollOption?: Uint8Array;
+        quoteRich?: tl.TypeRichText[];
     }
     /**
      * Reply to a story.
@@ -28222,7 +28275,7 @@ export class RpcError extends Error {
         /**
          * An optional default description for the verification
          */
-        customDescription?: string;
+        customDescription?: tl.TypeTextWithEntities;
     }
     /**
      * Describes a
@@ -28242,7 +28295,7 @@ export class RpcError extends Error {
         /**
          * Verification description
          */
-        description: string;
+        description: tl.TypeTextWithEntities;
     }
     /**
      * The model of a
@@ -29648,25 +29701,6 @@ export class RpcError extends Error {
         response: tl.TypeInputPasskeyResponse;
     }
     /**
-     * Alternative
-     * <a href="https://core.telegram.org/api/passkeys">passkey</a>
-     * credential that proves ownership of the account's phone
-     * number through a Firebase Phone Number Verification (PNV)
-     * token, used on official apps where a full WebAuthn
-     * {@link RawInputPasskeyCredentialPublicKey} cannot be
-     * created, in a way similar to
-     * <a href="https://core.telegram.org/api/auth">Firebase SMS
-     * authentication »</a>.
-     */
-    interface RawInputPasskeyCredentialFirebasePNV {
-        _: 'inputPasskeyCredentialFirebasePNV';
-        /**
-         * Firebase Phone Number Verification token attesting that the
-         * user controls the phone number associated with the account.
-         */
-        pnvToken: string;
-    }
-    /**
      * Contains the default background palette of a
      * <a href="https://core.telegram.org/api/gifts#listing-all-possible-collectible-variants">gift
      * type »</a>.
@@ -30192,6 +30226,225 @@ export class RpcError extends Error {
         type: tl.TypeInlineButtonType;
         style?: tl.TypeRichButtonStyle;
     }
+    interface RawCurrencyRate {
+        _: 'currencyRate';
+        currency: string;
+        rate: Double;
+    }
+    interface RawOnrampMethodAvailability {
+        _: 'onrampMethodAvailability';
+        available?: boolean;
+        paymentMethod: string;
+    }
+    interface RawOnrampProviderInfo {
+        _: 'onrampProviderInfo';
+        supportsBaseCurrencies?: boolean;
+        supportsLimits?: boolean;
+        supportsQuote?: boolean;
+        id: string;
+        name: string;
+        cryptoCurrencies: string[];
+    }
+    interface RawOnrampAvailability {
+        _: 'onrampAvailability';
+        allowed?: boolean;
+        buyAllowed?: boolean;
+        countryCode: string;
+        state?: string;
+        methods: tl.TypeOnrampMethodAvailability[];
+    }
+    interface RawOnrampLimits {
+        _: 'onrampLimits';
+        baseCurrency: string;
+        baseMinAmount: string;
+        baseMaxAmount: string;
+        cryptoMinAmount: string;
+        cryptoMaxAmount: string;
+        paymentMethod: string;
+    }
+    interface RawOnrampQuote {
+        _: 'onrampQuote';
+        baseCurrency: string;
+        baseAmount: string;
+        cryptoCurrency: string;
+        cryptoAmount: string;
+        cryptoPrice: string;
+        feeAmount: string;
+        extraFeeAmount: string;
+        networkFeeAmount: string;
+        totalAmount: string;
+        paymentMethod: string;
+        expiresDate: number;
+    }
+    interface RawOnrampSession {
+        _: 'onrampSession';
+        provider: string;
+        sessionId: string;
+        url: string;
+        expiresDate: number;
+    }
+    interface RawWalletStateEmpty {
+        _: 'walletStateEmpty';
+        creating?: boolean;
+    }
+    interface RawWalletState {
+        _: 'walletState';
+        backupEnabled?: boolean;
+        canExportPhrase?: boolean;
+        canEnableBackup?: boolean;
+        address: string;
+        publicKey: Uint8Array;
+        balance: Long;
+    }
+    interface RawWalletUserAddress {
+        _: 'walletUserAddress';
+        userId?: number;
+        address: string;
+        publicKey: Uint8Array;
+    }
+    interface RawWalletTransactionPeerUser {
+        _: 'walletTransactionPeerUser';
+        userId: number;
+        address: string;
+        domain?: string;
+    }
+    interface RawWalletTransactionPeerAddress {
+        _: 'walletTransactionPeerAddress';
+        address: string;
+        domain?: string;
+    }
+    interface RawWalletTransactionPeerOnramp {
+        _: 'walletTransactionPeerOnramp';
+        address: string;
+        domain?: string;
+        providerName: string;
+    }
+    interface RawWalletTransactionPeerUnsupported {
+        _: 'walletTransactionPeerUnsupported';
+    }
+    interface RawWalletTransactionPeerChannel {
+        _: 'walletTransactionPeerChannel';
+        channelId: number;
+        address: string;
+        domain?: string;
+    }
+    interface RawWalletTransactionPeerTelegramGift {
+        _: 'walletTransactionPeerTelegramGift';
+        ownProfile?: boolean;
+    }
+    interface RawWalletTransaction {
+        _: 'walletTransaction';
+        incoming?: boolean;
+        gasless?: boolean;
+        failed?: boolean;
+        keyChange?: boolean;
+        commentEncrypted?: boolean;
+        id: string;
+        amount: Long;
+        fee: Long;
+        date: number;
+        peer: tl.TypeWalletTransactionPeer;
+        comment?: string;
+        txHash?: string;
+        nft?: tl.wallet.TypeNftItem;
+    }
+    interface RawWalletOwnershipProof {
+        _: 'walletOwnershipProof';
+        timestamp: number;
+        signature: Uint8Array;
+    }
+    interface RawInputWalletNew {
+        _: 'inputWalletNew';
+    }
+    interface RawInputWalletImported {
+        _: 'inputWalletImported';
+        publicKey: Uint8Array;
+        anchorPublicKey?: Uint8Array;
+        proof: tl.TypeWalletOwnershipProof;
+    }
+    interface RawTonConnectManifest {
+        _: 'tonConnectManifest';
+        url: string;
+        name: string;
+        icon?: tl.TypeWebDocument;
+    }
+    interface RawTonConnectSession {
+        _: 'tonConnectSession';
+        pending?: boolean;
+        closing?: boolean;
+        closed?: boolean;
+        id: Long;
+        dappClientId: string;
+        clientId?: string;
+        nonce: Uint8Array;
+        manifest?: tl.TypeTonConnectManifest;
+        manifestError?: number;
+        date: number;
+    }
+    interface RawTonConnectNextEventId {
+        _: 'tonConnectNextEventId';
+        eventId: Long;
+    }
+    interface RawTonConnectRequest {
+        _: 'tonConnectRequest';
+        sessionId: Long;
+        msgId: number;
+        body: Uint8Array;
+        expires: number;
+        topic?: string;
+        traceId?: string;
+    }
+    interface RawInputTonConnectOauthSession {
+        _: 'inputTonConnectOauthSession';
+        sessionId: Long;
+        challengeAnswer: Uint8Array;
+        body: Uint8Array;
+        proof: tl.TypeWalletOwnershipProof;
+    }
+    interface RawExportedNoPaidMessagesToken {
+        _: 'exportedNoPaidMessagesToken';
+        token: string;
+        url: string;
+        expires?: number;
+    }
+    interface RawShareThemeDefault {
+        _: 'shareThemeDefault';
+    }
+    interface RawShareThemeEmojiBackdrop {
+        _: 'shareThemeEmojiBackdrop';
+        backdropId?: number;
+        emojis?: tl.TypeReaction[];
+    }
+    interface RawShareThemeGift {
+        _: 'shareThemeGift';
+        stargift: tl.TypeStarGift;
+    }
+    interface RawInputShareThemeGift {
+        _: 'inputShareThemeGift';
+        stargift: tl.TypeInputSavedStarGift;
+    }
+    interface RawShareThemeBackdropOption {
+        _: 'shareThemeBackdropOption';
+        backdropId: number;
+        name: string;
+        centerColor: number;
+        edgeColor: number;
+        patternColor: number;
+        textColor: number;
+    }
+    interface RawShareThemeBackdropsNotModified {
+        _: 'shareThemeBackdropsNotModified';
+    }
+    interface RawShareThemeBackdrops {
+        _: 'shareThemeBackdrops';
+        hash: number;
+        backdrops: tl.TypeShareThemeBackdropOption[];
+    }
+    interface RawInputWalletCardSticker {
+        _: 'inputWalletCardSticker';
+        coordinates: tl.TypeMediaAreaCoordinates;
+        nftAddress: string;
+    }
     /**
      * Invokes a query after successful completion of one of the
      * previous queries.
@@ -30416,7 +30669,7 @@ export class RpcError extends Error {
          */
         query: X;
     }
-    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, aicompose.RpcCallReturn, communities.RpcCallReturn, ephemeral.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn {
+    interface RpcCallReturn extends storage.RpcCallReturn, auth.RpcCallReturn, contacts.RpcCallReturn, messages.RpcCallReturn, updates.RpcCallReturn, photos.RpcCallReturn, upload.RpcCallReturn, help.RpcCallReturn, account.RpcCallReturn, channels.RpcCallReturn, payments.RpcCallReturn, phone.RpcCallReturn, stats.RpcCallReturn, stickers.RpcCallReturn, users.RpcCallReturn, chatlists.RpcCallReturn, bots.RpcCallReturn, stories.RpcCallReturn, premium.RpcCallReturn, smsjobs.RpcCallReturn, fragment.RpcCallReturn, aicompose.RpcCallReturn, communities.RpcCallReturn, ephemeral.RpcCallReturn, toncenter.RpcCallReturn, wallet.RpcCallReturn, mtcute.RpcCallReturn, langpack.RpcCallReturn, folders.RpcCallReturn {
         'invokeAfterMsg': any
         'invokeAfterMsgs': any
         'initConnection': any
@@ -30548,7 +30801,7 @@ export class RpcError extends Error {
     /**
      * Object describing actions connected to a service message.
      */
-    type TypeMessageAction = tl.RawMessageActionEmpty | tl.RawMessageActionChatCreate | tl.RawMessageActionChatEditTitle | tl.RawMessageActionChatEditPhoto | tl.RawMessageActionChatDeletePhoto | tl.RawMessageActionChatAddUser | tl.RawMessageActionChatDeleteUser | tl.RawMessageActionChatJoinedByLink | tl.RawMessageActionChannelCreate | tl.RawMessageActionChatMigrateTo | tl.RawMessageActionChannelMigrateFrom | tl.RawMessageActionPinMessage | tl.RawMessageActionHistoryClear | tl.RawMessageActionGameScore | tl.RawMessageActionPaymentSentMe | tl.RawMessageActionPaymentSent | tl.RawMessageActionPhoneCall | tl.RawMessageActionScreenshotTaken | tl.RawMessageActionCustomAction | tl.RawMessageActionBotAllowed | tl.RawMessageActionSecureValuesSentMe | tl.RawMessageActionSecureValuesSent | tl.RawMessageActionContactSignUp | tl.RawMessageActionGeoProximityReached | tl.RawMessageActionGroupCall | tl.RawMessageActionInviteToGroupCall | tl.RawMessageActionSetMessagesTTL | tl.RawMessageActionGroupCallScheduled | tl.RawMessageActionSetChatTheme | tl.RawMessageActionChatJoinedByRequest | tl.RawMessageActionWebViewDataSentMe | tl.RawMessageActionWebViewDataSent | tl.RawMessageActionGiftPremium | tl.RawMessageActionTopicCreate | tl.RawMessageActionTopicEdit | tl.RawMessageActionSuggestProfilePhoto | tl.RawMessageActionRequestedPeer | tl.RawMessageActionSetChatWallPaper | tl.RawMessageActionGiftCode | tl.RawMessageActionGiveawayLaunch | tl.RawMessageActionGiveawayResults | tl.RawMessageActionBoostApply | tl.RawMessageActionRequestedPeerSentMe | tl.RawMessageActionPaymentRefunded | tl.RawMessageActionGiftStars | tl.RawMessageActionPrizeStars | tl.RawMessageActionStarGift | tl.RawMessageActionStarGiftUnique | tl.RawMessageActionPaidMessagesRefunded | tl.RawMessageActionPaidMessagesPrice | tl.RawMessageActionConferenceCall | tl.RawMessageActionTodoCompletions | tl.RawMessageActionTodoAppendTasks | tl.RawMessageActionSuggestedPostApproval | tl.RawMessageActionSuggestedPostSuccess | tl.RawMessageActionSuggestedPostRefund | tl.RawMessageActionGiftTon | tl.RawMessageActionSuggestBirthday | tl.RawMessageActionStarGiftPurchaseOffer | tl.RawMessageActionStarGiftPurchaseOfferDeclined | tl.RawMessageActionNewCreatorPending | tl.RawMessageActionChangeCreator | tl.RawMessageActionNoForwardsToggle | tl.RawMessageActionNoForwardsRequest | tl.RawMessageActionPollAppendAnswer | tl.RawMessageActionPollDeleteAnswer | tl.RawMessageActionManagedBotCreated | tl.RawMessageActionChangeCommunity | tl.RawMessageActionChatJoinedViaCommunity
+    type TypeMessageAction = tl.RawMessageActionEmpty | tl.RawMessageActionChatCreate | tl.RawMessageActionChatEditTitle | tl.RawMessageActionChatEditPhoto | tl.RawMessageActionChatDeletePhoto | tl.RawMessageActionChatAddUser | tl.RawMessageActionChatDeleteUser | tl.RawMessageActionChatJoinedByLink | tl.RawMessageActionChannelCreate | tl.RawMessageActionChatMigrateTo | tl.RawMessageActionChannelMigrateFrom | tl.RawMessageActionPinMessage | tl.RawMessageActionHistoryClear | tl.RawMessageActionGameScore | tl.RawMessageActionPaymentSentMe | tl.RawMessageActionPaymentSent | tl.RawMessageActionPhoneCall | tl.RawMessageActionScreenshotTaken | tl.RawMessageActionCustomAction | tl.RawMessageActionBotAllowed | tl.RawMessageActionSecureValuesSentMe | tl.RawMessageActionSecureValuesSent | tl.RawMessageActionContactSignUp | tl.RawMessageActionGeoProximityReached | tl.RawMessageActionGroupCall | tl.RawMessageActionInviteToGroupCall | tl.RawMessageActionSetMessagesTTL | tl.RawMessageActionGroupCallScheduled | tl.RawMessageActionSetChatTheme | tl.RawMessageActionChatJoinedByRequest | tl.RawMessageActionWebViewDataSentMe | tl.RawMessageActionWebViewDataSent | tl.RawMessageActionGiftPremium | tl.RawMessageActionTopicCreate | tl.RawMessageActionTopicEdit | tl.RawMessageActionSuggestProfilePhoto | tl.RawMessageActionRequestedPeer | tl.RawMessageActionSetChatWallPaper | tl.RawMessageActionGiftCode | tl.RawMessageActionGiveawayLaunch | tl.RawMessageActionGiveawayResults | tl.RawMessageActionBoostApply | tl.RawMessageActionRequestedPeerSentMe | tl.RawMessageActionPaymentRefunded | tl.RawMessageActionGiftStars | tl.RawMessageActionPrizeStars | tl.RawMessageActionStarGift | tl.RawMessageActionStarGiftUnique | tl.RawMessageActionPaidMessagesRefunded | tl.RawMessageActionPaidMessagesPrice | tl.RawMessageActionConferenceCall | tl.RawMessageActionTodoCompletions | tl.RawMessageActionTodoAppendTasks | tl.RawMessageActionSuggestedPostApproval | tl.RawMessageActionSuggestedPostSuccess | tl.RawMessageActionSuggestedPostRefund | tl.RawMessageActionGiftTon | tl.RawMessageActionSuggestBirthday | tl.RawMessageActionStarGiftPurchaseOffer | tl.RawMessageActionStarGiftPurchaseOfferDeclined | tl.RawMessageActionNewCreatorPending | tl.RawMessageActionChangeCreator | tl.RawMessageActionNoForwardsToggle | tl.RawMessageActionNoForwardsRequest | tl.RawMessageActionPollAppendAnswer | tl.RawMessageActionPollDeleteAnswer | tl.RawMessageActionManagedBotCreated | tl.RawMessageActionChangeCommunity | tl.RawMessageActionChatJoinedViaCommunity | tl.RawMessageActionGramTransfer | tl.RawMessageActionWalletTonConnectRequest | tl.RawMessageActionNoPaidMessagesTokenUsed
     function isAnyMessageAction(o: object): o is TypeMessageAction
     /**
      * Chat info.
@@ -30633,7 +30886,7 @@ export class RpcError extends Error {
     /**
      * Object contains info on events occurred.
      */
-    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateNewEphemeralMessage | tl.RawUpdateDeleteEphemeralMessages | tl.RawUpdateEditEphemeralMessage | tl.RawUpdateEphemeralBotCallbackQuery | tl.RawUpdateBotStarsSubscription | tl.mtcute.RawDummyUpdate
+    type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateNewEphemeralMessage | tl.RawUpdateDeleteEphemeralMessages | tl.RawUpdateEditEphemeralMessage | tl.RawUpdateEphemeralBotCallbackQuery | tl.RawUpdateBotStarsSubscription | tl.RawUpdateWalletState | tl.RawUpdateSentWalletTransaction | tl.RawUpdateWalletGaslessInfo | tl.RawUpdateWalletTonConnectSession | tl.RawUpdateWalletTonConnectPendingDisconnect | tl.mtcute.RawDummyUpdate
     function isAnyUpdate(o: object): o is TypeUpdate
     /**
      * Object which is perceived by the client without a call on
@@ -30852,7 +31105,7 @@ export class RpcError extends Error {
      * 
      * API schema:
      */
-    type TypeMessageEntity = tl.RawMessageEntityUnknown | tl.RawMessageEntityMention | tl.RawMessageEntityHashtag | tl.RawMessageEntityBotCommand | tl.RawMessageEntityUrl | tl.RawMessageEntityEmail | tl.RawMessageEntityBold | tl.RawMessageEntityItalic | tl.RawMessageEntityCode | tl.RawMessageEntityPre | tl.RawMessageEntityTextUrl | tl.RawMessageEntityMentionName | tl.RawInputMessageEntityMentionName | tl.RawMessageEntityPhone | tl.RawMessageEntityCashtag | tl.RawMessageEntityUnderline | tl.RawMessageEntityStrike | tl.RawMessageEntityBankCard | tl.RawMessageEntitySpoiler | tl.RawMessageEntityCustomEmoji | tl.RawMessageEntityBlockquote | tl.RawMessageEntityFormattedDate | tl.RawMessageEntityDiffInsert | tl.RawMessageEntityDiffReplace | tl.RawMessageEntityDiffDelete
+    type TypeMessageEntity = tl.RawMessageEntityUnknown | tl.RawMessageEntityMention | tl.RawMessageEntityHashtag | tl.RawMessageEntityBotCommand | tl.RawMessageEntityUrl | tl.RawMessageEntityEmail | tl.RawMessageEntityBold | tl.RawMessageEntityItalic | tl.RawMessageEntityCode | tl.RawMessageEntityPre | tl.RawMessageEntityTextUrl | tl.RawMessageEntityMentionName | tl.RawInputMessageEntityMentionName | tl.RawMessageEntityPhone | tl.RawMessageEntityCashtag | tl.RawMessageEntityUnderline | tl.RawMessageEntityStrike | tl.RawMessageEntityBankCard | tl.RawMessageEntitySpoiler | tl.RawMessageEntityCustomEmoji | tl.RawMessageEntityBlockquote | tl.RawMessageEntityFormattedDate | tl.RawMessageEntityDiffInsert | tl.RawMessageEntityDiffReplace | tl.RawMessageEntityDiffDelete | tl.RawMessageEntityTonAddress
     function isAnyMessageEntity(o: object): o is TypeMessageEntity
     /**
      * Represents a channel
@@ -30976,7 +31229,7 @@ export class RpcError extends Error {
     /**
      * Rich text
      */
-    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor | tl.RawTextMath | tl.RawTextCustomEmoji | tl.RawTextSpoiler | tl.RawTextMention | tl.RawTextHashtag | tl.RawTextBotCommand | tl.RawTextCashtag | tl.RawTextAutoUrl | tl.RawTextAutoEmail | tl.RawTextAutoPhone | tl.RawTextBankCard | tl.RawTextMentionName | tl.RawTextDate | tl.RawTextDiff | tl.RawTextButton
+    type TypeRichText = tl.RawTextEmpty | tl.RawTextPlain | tl.RawTextBold | tl.RawTextItalic | tl.RawTextUnderline | tl.RawTextStrike | tl.RawTextFixed | tl.RawTextUrl | tl.RawTextEmail | tl.RawTextConcat | tl.RawTextSubscript | tl.RawTextSuperscript | tl.RawTextMarked | tl.RawTextPhone | tl.RawTextImage | tl.RawTextAnchor | tl.RawTextMath | tl.RawTextCustomEmoji | tl.RawTextSpoiler | tl.RawTextMention | tl.RawTextHashtag | tl.RawTextBotCommand | tl.RawTextCashtag | tl.RawTextAutoUrl | tl.RawTextAutoEmail | tl.RawTextAutoPhone | tl.RawTextBankCard | tl.RawTextMentionName | tl.RawTextDate | tl.RawTextDiff | tl.RawTextButton | tl.RawTextTonAddress
     function isAnyRichText(o: object): o is TypeRichText
     /**
      * Represents an
@@ -32673,7 +32926,7 @@ export class RpcError extends Error {
      * <a href="https://core.telegram.org/api/passkeys">passkey
      * »</a> or to log in with one.
      */
-    type TypeInputPasskeyCredential = tl.RawInputPasskeyCredentialPublicKey | tl.RawInputPasskeyCredentialFirebasePNV
+    type TypeInputPasskeyCredential = tl.RawInputPasskeyCredentialPublicKey
     function isAnyInputPasskeyCredential(o: object): o is TypeInputPasskeyCredential
     /**
      * Contains the default background palette of a
@@ -32766,6 +33019,52 @@ export class RpcError extends Error {
     function isAnyRichButtonStyle(o: object): o is TypeRichButtonStyle
     type TypePageButton = tl.RawPageButton
     function isAnyPageButton(o: object): o is TypePageButton
+    type TypeCurrencyRate = tl.RawCurrencyRate
+    function isAnyCurrencyRate(o: object): o is TypeCurrencyRate
+    type TypeOnrampMethodAvailability = tl.RawOnrampMethodAvailability
+    function isAnyOnrampMethodAvailability(o: object): o is TypeOnrampMethodAvailability
+    type TypeOnrampProviderInfo = tl.RawOnrampProviderInfo
+    function isAnyOnrampProviderInfo(o: object): o is TypeOnrampProviderInfo
+    type TypeOnrampAvailability = tl.RawOnrampAvailability
+    function isAnyOnrampAvailability(o: object): o is TypeOnrampAvailability
+    type TypeOnrampLimits = tl.RawOnrampLimits
+    function isAnyOnrampLimits(o: object): o is TypeOnrampLimits
+    type TypeOnrampQuote = tl.RawOnrampQuote
+    function isAnyOnrampQuote(o: object): o is TypeOnrampQuote
+    type TypeOnrampSession = tl.RawOnrampSession
+    function isAnyOnrampSession(o: object): o is TypeOnrampSession
+    type TypeWalletState = tl.RawWalletStateEmpty | tl.RawWalletState
+    function isAnyWalletState(o: object): o is TypeWalletState
+    type TypeWalletUserAddress = tl.RawWalletUserAddress
+    function isAnyWalletUserAddress(o: object): o is TypeWalletUserAddress
+    type TypeWalletTransactionPeer = tl.RawWalletTransactionPeerUser | tl.RawWalletTransactionPeerAddress | tl.RawWalletTransactionPeerOnramp | tl.RawWalletTransactionPeerUnsupported | tl.RawWalletTransactionPeerChannel | tl.RawWalletTransactionPeerTelegramGift
+    function isAnyWalletTransactionPeer(o: object): o is TypeWalletTransactionPeer
+    type TypeWalletTransaction = tl.RawWalletTransaction
+    function isAnyWalletTransaction(o: object): o is TypeWalletTransaction
+    type TypeWalletOwnershipProof = tl.RawWalletOwnershipProof
+    function isAnyWalletOwnershipProof(o: object): o is TypeWalletOwnershipProof
+    type TypeInputWalletReplacement = tl.RawInputWalletNew | tl.RawInputWalletImported
+    function isAnyInputWalletReplacement(o: object): o is TypeInputWalletReplacement
+    type TypeTonConnectManifest = tl.RawTonConnectManifest
+    function isAnyTonConnectManifest(o: object): o is TypeTonConnectManifest
+    type TypeTonConnectSession = tl.RawTonConnectSession
+    function isAnyTonConnectSession(o: object): o is TypeTonConnectSession
+    type TypeTonConnectNextEventId = tl.RawTonConnectNextEventId
+    function isAnyTonConnectNextEventId(o: object): o is TypeTonConnectNextEventId
+    type TypeTonConnectRequest = tl.RawTonConnectRequest
+    function isAnyTonConnectRequest(o: object): o is TypeTonConnectRequest
+    type TypeInputTonConnectOauthSession = tl.RawInputTonConnectOauthSession
+    function isAnyInputTonConnectOauthSession(o: object): o is TypeInputTonConnectOauthSession
+    type TypeExportedNoPaidMessagesToken = tl.RawExportedNoPaidMessagesToken
+    function isAnyExportedNoPaidMessagesToken(o: object): o is TypeExportedNoPaidMessagesToken
+    type TypeShareTheme = tl.RawShareThemeDefault | tl.RawShareThemeEmojiBackdrop | tl.RawShareThemeGift | tl.RawInputShareThemeGift
+    function isAnyShareTheme(o: object): o is TypeShareTheme
+    type TypeShareThemeBackdropOption = tl.RawShareThemeBackdropOption
+    function isAnyShareThemeBackdropOption(o: object): o is TypeShareThemeBackdropOption
+    type TypeShareThemeBackdrops = tl.RawShareThemeBackdropsNotModified | tl.RawShareThemeBackdrops
+    function isAnyShareThemeBackdrops(o: object): o is TypeShareThemeBackdrops
+    type TypeInputWalletCardSticker = tl.RawInputWalletCardSticker
+    function isAnyInputWalletCardSticker(o: object): o is TypeInputWalletCardSticker
 
     namespace storage {
         /**
@@ -34033,10 +34332,18 @@ export class RpcError extends Error {
             fromAuthKeyId?: Long;
         }
         /**
+         * RPC method returns boolean
+         */
+        interface RawCancelWebTokenAuthorizationRequest {
+            _: 'auth.cancelWebTokenAuthorization';
+            webAuthToken: string;
+        }
+        /**
          * RPC method returns {@link tl.auth.TypeFirebasePnvIntent}
          */
         interface RawInitFirebasePnvLoginRequest {
             _: 'auth.initFirebasePnvLogin';
+            exceptIds?: Long[];
             apiId: number;
             apiHash: string;
         }
@@ -34083,6 +34390,7 @@ export class RpcError extends Error {
             'auth.checkPaidAuth': tl.auth.TypeSentCode
             'auth.initPasskeyLogin': tl.auth.TypePasskeyLoginOptions
             'auth.finishPasskeyLogin': tl.auth.TypeAuthorization
+            'auth.cancelWebTokenAuthorization': boolean
             'auth.initFirebasePnvLogin': tl.auth.TypeFirebasePnvIntent
             'auth.finishFirebasePnvLogin': tl.auth.TypeAuthorization
             'auth.firebasePnvSignUp': tl.auth.TypeAuthorization
@@ -35061,6 +35369,23 @@ export class RpcError extends Error {
              */
             note: tl.TypeTextWithEntities;
         }
+        /**
+         * RPC method returns
+         * {@link tl.TypeExportedNoPaidMessagesToken}
+         */
+        interface RawExportNoPaidMessagesTokenRequest {
+            _: 'contacts.exportNoPaidMessagesToken';
+            revoke?: boolean;
+            temporary?: boolean;
+        }
+        /**
+         * RPC method returns {@link tl.TypeUser}
+         */
+        interface RawImportNoPaidMessagesTokenRequest {
+            _: 'contacts.importNoPaidMessagesToken';
+            userId: tl.TypeInputUser;
+            token: string;
+        }
         interface RpcCallReturn {
             'contacts.getContactIDs': number[]
             'contacts.getStatuses': tl.TypeContactStatus[]
@@ -35090,6 +35415,8 @@ export class RpcError extends Error {
             'contacts.getBirthdays': tl.contacts.TypeContactBirthdays
             'contacts.getSponsoredPeers': tl.contacts.TypeSponsoredPeers
             'contacts.updateContactNote': boolean
+            'contacts.exportNoPaidMessagesToken': tl.TypeExportedNoPaidMessagesToken
+            'contacts.importNoPaidMessagesToken': tl.TypeUser
         }
         /**
          * Info on the current user's contact list.
@@ -40770,6 +41097,7 @@ export class RpcError extends Error {
              * {@link messages.RawCheckUrlAuthMatchCodeRequest}
              */
             matchCode?: string;
+            tonconnectSession?: tl.TypeInputTonConnectOauthSession;
         }
         /**
          * Should be called after the user hides the
@@ -45467,6 +45795,21 @@ export class RpcError extends Error {
             themeParams?: tl.TypeDataJSON;
             platform: string;
         }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawSetShareThemeRequest {
+            _: 'messages.setShareTheme';
+            peer: tl.TypeInputPeer;
+            theme: tl.TypeShareTheme;
+        }
+        /**
+         * RPC method returns {@link tl.TypeShareThemeBackdrops}
+         */
+        interface RawGetShareThemeBackdropsRequest {
+            _: 'messages.getShareThemeBackdrops';
+            hash: number;
+        }
         interface RpcCallReturn {
             'messages.getMessages': tl.messages.TypeMessages
             'messages.getDialogs': tl.messages.TypeDialogs
@@ -45727,6 +46070,8 @@ export class RpcError extends Error {
             'messages.translateRichMessage': tl.messages.TypeTranslatedRichMessage
             'messages.composeRichMessageWithAI': tl.messages.TypeComposedRichMessageWithAI
             'messages.requestChatJoinWebView': tl.TypeWebViewResult
+            'messages.setShareTheme': boolean
+            'messages.getShareThemeBackdrops': tl.TypeShareThemeBackdrops
         }
         /**
          * Object contains a list of chats with messages and auxiliary
@@ -55129,6 +55474,16 @@ export class RpcError extends Error {
              */
             attributes: tl.TypeStarGiftAttribute[];
         }
+        interface RawCurrencyRates {
+            _: 'payments.currencyRates';
+            rates: tl.TypeCurrencyRate[];
+        }
+        interface RawStarGiftDepositPayload {
+            _: 'payments.starGiftDepositPayload';
+            nftAddress: string;
+            payload: Uint8Array;
+            amount: Long;
+        }
         /**
          * Get a payment form
          * 
@@ -56447,12 +56802,7 @@ export class RpcError extends Error {
              * The collectible gift to export.
              */
             stargift: tl.TypeInputSavedStarGift;
-            /**
-             * The current user's 2FA password, passed as
-             * <a href="https://core.telegram.org/api/srp">specified here
-             * »</a>.
-             */
-            password: tl.TypeInputCheckPasswordSRP;
+            tmpPassword: Uint8Array;
         }
         /**
          * Enables or disables the reception of notifications every
@@ -57102,6 +57452,109 @@ export class RpcError extends Error {
              */
             stargift: tl.TypeInputSavedStarGift[];
         }
+        /**
+         * RPC method returns {@link tl.payments.TypeCurrencyRates}
+         */
+        interface RawGetCurrencyRatesRequest {
+            _: 'payments.getCurrencyRates';
+        }
+        /**
+         * RPC method returns {@link tl.TypeOnrampProviderInfo} array
+         */
+        interface RawGetOnrampProvidersRequest {
+            _: 'payments.getOnrampProviders';
+            cryptoCurrency?: string;
+        }
+        /**
+         * RPC method returns string array
+         */
+        interface RawGetOnrampBaseCurrenciesRequest {
+            _: 'payments.getOnrampBaseCurrencies';
+            provider: string;
+            cryptoCurrency: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeOnrampAvailability}
+         */
+        interface RawGetOnrampAvailabilityRequest {
+            _: 'payments.getOnrampAvailability';
+            provider: string;
+            cryptoCurrency: string;
+            baseCurrency?: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeOnrampLimits}
+         */
+        interface RawGetOnrampLimitsRequest {
+            _: 'payments.getOnrampLimits';
+            provider: string;
+            cryptoCurrency: string;
+            baseCurrency: string;
+            paymentMethod?: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeOnrampQuote}
+         */
+        interface RawGetOnrampQuoteRequest {
+            _: 'payments.getOnrampQuote';
+            provider: string;
+            cryptoCurrency: string;
+            baseCurrency: string;
+            baseAmount?: string;
+            cryptoAmount?: string;
+            paymentMethod?: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeOnrampSession}
+         */
+        interface RawCreateOnrampSessionRequest {
+            _: 'payments.createOnrampSession';
+            provider: string;
+            cryptoCurrency: string;
+            address: string;
+            paymentMethod?: string;
+            baseCurrency?: string;
+            baseAmount?: string;
+            memo?: string;
+            theme?: string;
+            successReturnUrl?: string;
+            failReturnUrl?: string;
+            cryptoAmount?: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawWithdrawStarGiftRequest {
+            _: 'payments.withdrawStarGift';
+            keepOnProfile?: boolean;
+            stargift: tl.TypeInputSavedStarGift;
+            tmpPassword: Uint8Array;
+        }
+        /**
+         * RPC method returns
+         * {@link tl.payments.TypeStarGiftDepositPayload}
+         */
+        interface RawDepositStarGiftRequest {
+            _: 'payments.depositStarGift';
+            hideSender?: boolean;
+            peer: tl.TypeInputPeer;
+            slug: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDisplayStarGiftRequest {
+            _: 'payments.displayStarGift';
+            peer?: tl.TypeInputPeer;
+            slug: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawDeleteStarGiftRequest {
+            _: 'payments.deleteStarGift';
+            stargift: tl.TypeInputSavedStarGift;
+        }
         interface RpcCallReturn {
             'payments.getPaymentForm': tl.payments.TypePaymentForm
             'payments.getPaymentReceipt': tl.payments.TypePaymentReceipt
@@ -57168,6 +57621,17 @@ export class RpcError extends Error {
             'payments.getStarGiftUpgradeAttributes': tl.payments.TypeStarGiftUpgradeAttributes
             'payments.getCraftStarGifts': tl.payments.TypeSavedStarGifts
             'payments.craftStarGift': tl.TypeUpdates
+            'payments.getCurrencyRates': tl.payments.TypeCurrencyRates
+            'payments.getOnrampProviders': tl.TypeOnrampProviderInfo[]
+            'payments.getOnrampBaseCurrencies': string[]
+            'payments.getOnrampAvailability': tl.TypeOnrampAvailability
+            'payments.getOnrampLimits': tl.TypeOnrampLimits
+            'payments.getOnrampQuote': tl.TypeOnrampQuote
+            'payments.createOnrampSession': tl.TypeOnrampSession
+            'payments.withdrawStarGift': boolean
+            'payments.depositStarGift': tl.payments.TypeStarGiftDepositPayload
+            'payments.displayStarGift': boolean
+            'payments.deleteStarGift': boolean
         }
         /**
          * Payment form
@@ -57355,6 +57819,10 @@ export class RpcError extends Error {
          */
         type TypeStarGiftUpgradeAttributes = tl.payments.RawStarGiftUpgradeAttributes
         function isAnyStarGiftUpgradeAttributes(o: object): o is TypeStarGiftUpgradeAttributes
+        type TypeCurrencyRates = tl.payments.RawCurrencyRates
+        function isAnyCurrencyRates(o: object): o is TypeCurrencyRates
+        type TypeStarGiftDepositPayload = tl.payments.RawStarGiftDepositPayload
+        function isAnyStarGiftDepositPayload(o: object): o is TypeStarGiftDepositPayload
 }
 
     namespace phone {
@@ -61673,7 +62141,7 @@ export class RpcError extends Error {
              * If not set, <code>Was verified by organization
              * "organization_name"</code> will be used as description.
              */
-            customDescription?: string;
+            customDescription?: tl.TypeTextWithEntities;
         }
         /**
          * Obtain a list of similarly themed bots, selected based on
@@ -61711,6 +62179,7 @@ export class RpcError extends Error {
          */
         interface RawCheckUsernameRequest {
             _: 'bots.checkUsername';
+            additional?: boolean;
             /**
              * Username to check; only letters, digits and underscores are
              * allowed, must end in <code>bot</code>, and the full username
@@ -61908,6 +62377,22 @@ export class RpcError extends Error {
             queryId: Long;
             result: tl.TypeJoinChatBotResult;
         }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawAddUsernameRequest {
+            _: 'bots.addUsername';
+            bot: tl.TypeInputUser;
+            username: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawRemoveUsernameRequest {
+            _: 'bots.removeUsername';
+            bot: tl.TypeInputUser;
+            username: string;
+        }
         interface RpcCallReturn {
             'bots.sendCustomRequest': tl.TypeDataJSON
             'bots.answerWebhookJSONQuery': boolean
@@ -61947,6 +62432,8 @@ export class RpcError extends Error {
             'bots.getAccessSettings': tl.bots.TypeAccessSettings
             'bots.editAccessSettings': boolean
             'bots.setJoinChatResults': boolean
+            'bots.addUsername': boolean
+            'bots.removeUsername': boolean
         }
         /**
          * Localized name, about text and description of a bot.
@@ -64482,6 +64969,401 @@ export class RpcError extends Error {
         function isAnyWelcomeMessages(o: object): o is TypeWelcomeMessages
 }
 
+    namespace toncenter {
+        interface RawApiResponse {
+            _: 'toncenter.apiResponse';
+            response: tl.TypeDataJSON;
+        }
+        interface RawStreamingUrl {
+            _: 'toncenter.streamingUrl';
+            url: string;
+            expires: number;
+        }
+        /**
+         * RPC method returns {@link tl.toncenter.TypeApiResponse}
+         */
+        interface RawPerformApiRequestRequest {
+            _: 'toncenter.performApiRequest';
+            post?: boolean;
+            endpoint: string;
+            query?: string;
+            payload?: string;
+        }
+        /**
+         * RPC method returns {@link tl.toncenter.TypeStreamingUrl}
+         */
+        interface RawGetStreamingUrlRequest {
+            _: 'toncenter.getStreamingUrl';
+        }
+        interface RpcCallReturn {
+            'toncenter.performApiRequest': tl.toncenter.TypeApiResponse
+            'toncenter.getStreamingUrl': tl.toncenter.TypeStreamingUrl
+        }
+        type TypeApiResponse = tl.toncenter.RawApiResponse
+        function isAnyApiResponse(o: object): o is TypeApiResponse
+        type TypeStreamingUrl = tl.toncenter.RawStreamingUrl
+        function isAnyStreamingUrl(o: object): o is TypeStreamingUrl
+}
+
+    namespace wallet {
+        interface RawUserAddresses {
+            _: 'wallet.userAddresses';
+            addresses: tl.TypeWalletUserAddress[];
+            users: tl.TypeUser[];
+        }
+        interface RawTransactions {
+            _: 'wallet.transactions';
+            balance: Long;
+            transactions: tl.TypeWalletTransaction[];
+            nextOffset?: string;
+            chats: tl.TypeChat[];
+            users: tl.TypeUser[];
+        }
+        interface RawSecretPhraseParts {
+            _: 'wallet.secretPhraseParts';
+            token: string;
+            dcs: number[];
+        }
+        interface RawEncryptedSecretPhrasePart {
+            _: 'wallet.encryptedSecretPhrasePart';
+            data: Uint8Array;
+        }
+        interface RawHolderDc {
+            _: 'wallet.holderDc';
+            dc: number;
+            publicKey: Uint8Array;
+        }
+        interface RawProofChallenge {
+            _: 'wallet.proofChallenge';
+            payload: string;
+            expires: number;
+            domain: string;
+        }
+        interface RawTonConnectChallenge {
+            _: 'wallet.tonConnectChallenge';
+            challenge: Uint8Array;
+            eventId: Long;
+        }
+        interface RawTonConnectPending {
+            _: 'wallet.tonConnectPending';
+            session: tl.TypeTonConnectSession;
+            requests: tl.TypeTonConnectRequest[];
+        }
+        interface RawTonConnectSessions {
+            _: 'wallet.tonConnectSessions';
+            sessions: tl.TypeTonConnectSession[];
+        }
+        interface RawExistingBalance {
+            _: 'wallet.existingBalance';
+            hasBalance?: boolean;
+            url: string;
+        }
+        interface RawNftAttribute {
+            _: 'wallet.nftAttribute';
+            traitType: string;
+            value: string;
+        }
+        interface RawNftItem {
+            _: 'wallet.nftItem';
+            collectionAddress?: string;
+            address: string;
+            ownerAddress: string;
+            index: string;
+            name?: string;
+            description?: string;
+            image?: tl.TypeWebDocument;
+            imageSmall?: tl.TypeWebDocument;
+            contentUrl?: tl.TypeWebDocument;
+            lottie?: tl.TypeWebDocument;
+            attributes?: tl.wallet.TypeNftAttribute[];
+            extra?: tl.TypeDataJSON;
+            gift?: tl.TypeStarGift;
+        }
+        interface RawNftItems {
+            _: 'wallet.nftItems';
+            items: tl.wallet.TypeNftItem[];
+            nextOffset?: string;
+        }
+        interface RawCardSticker {
+            _: 'wallet.cardSticker';
+            coordinates: tl.TypeMediaAreaCoordinates;
+            nft: tl.wallet.TypeNftItem;
+        }
+        interface RawCard {
+            _: 'wallet.card';
+            stickers?: tl.wallet.TypeCardSticker[];
+            bgNftItem?: tl.wallet.TypeNftItem;
+            address: string;
+            balance: Long;
+        }
+        /**
+         * RPC method returns {@link tl.TypeWalletState}
+         */
+        interface RawGetStateRequest {
+            _: 'wallet.getState';
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeUserAddresses}
+         */
+        interface RawGetUserAddressesRequest {
+            _: 'wallet.getUserAddresses';
+            force?: boolean;
+            id: tl.TypeInputUser[];
+            addresses: string[];
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTransactions}
+         */
+        interface RawGetTransactionsRequest {
+            _: 'wallet.getTransactions';
+            inbound?: boolean;
+            outbound?: boolean;
+            offset: string;
+            limit: number;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTransactions}
+         */
+        interface RawGetTransactionsByIDsRequest {
+            _: 'wallet.getTransactionsByIDs';
+            id: string[];
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTransactions}
+         */
+        interface RawGetTransactionsByMsgHashRequest {
+            _: 'wallet.getTransactionsByMsgHash';
+            msgHash: string[];
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeSecretPhraseParts}
+         */
+        interface RawExportSecretPhraseRequest {
+            _: 'wallet.exportSecretPhrase';
+            password?: tl.TypeInputCheckPasswordSRP;
+        }
+        /**
+         * RPC method returns
+         * {@link tl.wallet.TypeEncryptedSecretPhrasePart}
+         */
+        interface RawFetchEncryptedSecretPhrasePartRequest {
+            _: 'wallet.fetchEncryptedSecretPhrasePart';
+            token: string;
+            publicKey: Uint8Array;
+        }
+        /**
+         * RPC method returns {@link tl.TypeWalletState}
+         */
+        interface RawReplaceWalletRequest {
+            _: 'wallet.replaceWallet';
+            wallet: tl.TypeInputWalletReplacement;
+            password?: tl.TypeInputCheckPasswordSRP;
+        }
+        /**
+         * RPC method returns {@link tl.TypeWalletState}
+         */
+        interface RawDisableBackupRequest {
+            _: 'wallet.disableBackup';
+            password?: tl.TypeInputCheckPasswordSRP;
+            newPublicKey?: Uint8Array;
+            proof?: tl.TypeWalletOwnershipProof;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeHolderDc} array
+         */
+        interface RawGetBackupHolderDcsRequest {
+            _: 'wallet.getBackupHolderDcs';
+        }
+        /**
+         * RPC method returns {@link tl.TypeWalletState}
+         */
+        interface RawEnableBackupRequest {
+            _: 'wallet.enableBackup';
+            parts: Uint8Array[];
+            newPublicKey?: Uint8Array;
+            proof?: tl.TypeWalletOwnershipProof;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeProofChallenge}
+         */
+        interface RawGetProofChallengeRequest {
+            _: 'wallet.getProofChallenge';
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawSendTransferRequest {
+            _: 'wallet.sendTransfer';
+            dataNormal: Uint8Array;
+            dataGasless?: Uint8Array;
+            userId: tl.TypeInputUser;
+            randomId: Long;
+        }
+        /**
+         * RPC method returns {@link tl.TypeUpdates}
+         */
+        interface RawGetGaslessInfoRequest {
+            _: 'wallet.getGaslessInfo';
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeExistingBalance}
+         */
+        interface RawGetExistingWaltBalanceRequest {
+            _: 'wallet.getExistingWaltBalance';
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeNftItems}
+         */
+        interface RawGetNftsRequest {
+            _: 'wallet.getNfts';
+            offset: string;
+            limit: number;
+        }
+        /**
+         * RPC method returns {@link tl.TypeTonConnectSession}
+         */
+        interface RawTonConnectCreateSessionRequest {
+            _: 'wallet.tonConnectCreateSession';
+            dappClientId: string;
+            manifestUrl: string;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTonConnectChallenge}
+         */
+        interface RawTonConnectRegisterKeyRequest {
+            _: 'wallet.tonConnectRegisterKey';
+            sessionId: Long;
+            clientId: string;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawTonConnectSubmitConnectResultRequest {
+            _: 'wallet.tonConnectSubmitConnectResult';
+            error?: boolean;
+            sessionId: Long;
+            challengeAnswer: Uint8Array;
+            body: Uint8Array;
+            traceId?: string;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTonConnectPending}
+         */
+        interface RawTonConnectGetPendingRequest {
+            _: 'wallet.tonConnectGetPending';
+            dappClientId?: string;
+            sessionId?: Long;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawTonConnectClaimRequestRequest {
+            _: 'wallet.tonConnectClaimRequest';
+            declined?: boolean;
+            sessionId: Long;
+            msgId: number;
+            appRequestId: string;
+            challengeAnswer?: Uint8Array;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawTonConnectSubmitResponseRequest {
+            _: 'wallet.tonConnectSubmitResponse';
+            sessionId: Long;
+            msgId: number;
+            body: Uint8Array;
+            traceId?: string;
+        }
+        /**
+         * RPC method returns {@link tl.TypeTonConnectNextEventId}
+         */
+        interface RawTonConnectNextEventIdRequest {
+            _: 'wallet.tonConnectNextEventId';
+            sessionId: Long;
+        }
+        /**
+         * RPC method returns boolean
+         */
+        interface RawTonConnectCloseSessionRequest {
+            _: 'wallet.tonConnectCloseSession';
+            sessionId: Long;
+            body?: Uint8Array;
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeTonConnectSessions}
+         */
+        interface RawTonConnectGetSessionsRequest {
+            _: 'wallet.tonConnectGetSessions';
+        }
+        /**
+         * RPC method returns {@link tl.wallet.TypeCard}
+         */
+        interface RawSetCardStickersRequest {
+            _: 'wallet.setCardStickers';
+            stickers: tl.TypeInputWalletCardSticker[];
+            bgNftAddress?: string;
+        }
+        interface RpcCallReturn {
+            'wallet.getState': tl.TypeWalletState
+            'wallet.getUserAddresses': tl.wallet.TypeUserAddresses
+            'wallet.getTransactions': tl.wallet.TypeTransactions
+            'wallet.getTransactionsByIDs': tl.wallet.TypeTransactions
+            'wallet.getTransactionsByMsgHash': tl.wallet.TypeTransactions
+            'wallet.exportSecretPhrase': tl.wallet.TypeSecretPhraseParts
+            'wallet.fetchEncryptedSecretPhrasePart': tl.wallet.TypeEncryptedSecretPhrasePart
+            'wallet.replaceWallet': tl.TypeWalletState
+            'wallet.disableBackup': tl.TypeWalletState
+            'wallet.getBackupHolderDcs': tl.wallet.TypeHolderDc[]
+            'wallet.enableBackup': tl.TypeWalletState
+            'wallet.getProofChallenge': tl.wallet.TypeProofChallenge
+            'wallet.sendTransfer': tl.TypeUpdates
+            'wallet.getGaslessInfo': tl.TypeUpdates
+            'wallet.getExistingWaltBalance': tl.wallet.TypeExistingBalance
+            'wallet.getNfts': tl.wallet.TypeNftItems
+            'wallet.tonConnectCreateSession': tl.TypeTonConnectSession
+            'wallet.tonConnectRegisterKey': tl.wallet.TypeTonConnectChallenge
+            'wallet.tonConnectSubmitConnectResult': boolean
+            'wallet.tonConnectGetPending': tl.wallet.TypeTonConnectPending
+            'wallet.tonConnectClaimRequest': boolean
+            'wallet.tonConnectSubmitResponse': boolean
+            'wallet.tonConnectNextEventId': tl.TypeTonConnectNextEventId
+            'wallet.tonConnectCloseSession': boolean
+            'wallet.tonConnectGetSessions': tl.wallet.TypeTonConnectSessions
+            'wallet.setCardStickers': tl.wallet.TypeCard
+        }
+        type TypeUserAddresses = tl.wallet.RawUserAddresses
+        function isAnyUserAddresses(o: object): o is TypeUserAddresses
+        type TypeTransactions = tl.wallet.RawTransactions
+        function isAnyTransactions(o: object): o is TypeTransactions
+        type TypeSecretPhraseParts = tl.wallet.RawSecretPhraseParts
+        function isAnySecretPhraseParts(o: object): o is TypeSecretPhraseParts
+        type TypeEncryptedSecretPhrasePart = tl.wallet.RawEncryptedSecretPhrasePart
+        function isAnyEncryptedSecretPhrasePart(o: object): o is TypeEncryptedSecretPhrasePart
+        type TypeHolderDc = tl.wallet.RawHolderDc
+        function isAnyHolderDc(o: object): o is TypeHolderDc
+        type TypeProofChallenge = tl.wallet.RawProofChallenge
+        function isAnyProofChallenge(o: object): o is TypeProofChallenge
+        type TypeTonConnectChallenge = tl.wallet.RawTonConnectChallenge
+        function isAnyTonConnectChallenge(o: object): o is TypeTonConnectChallenge
+        type TypeTonConnectPending = tl.wallet.RawTonConnectPending
+        function isAnyTonConnectPending(o: object): o is TypeTonConnectPending
+        type TypeTonConnectSessions = tl.wallet.RawTonConnectSessions
+        function isAnyTonConnectSessions(o: object): o is TypeTonConnectSessions
+        type TypeExistingBalance = tl.wallet.RawExistingBalance
+        function isAnyExistingBalance(o: object): o is TypeExistingBalance
+        type TypeNftAttribute = tl.wallet.RawNftAttribute
+        function isAnyNftAttribute(o: object): o is TypeNftAttribute
+        type TypeNftItem = tl.wallet.RawNftItem
+        function isAnyNftItem(o: object): o is TypeNftItem
+        type TypeNftItems = tl.wallet.RawNftItems
+        function isAnyNftItems(o: object): o is TypeNftItems
+        type TypeCardSticker = tl.wallet.RawCardSticker
+        function isAnyCardSticker(o: object): o is TypeCardSticker
+        type TypeCard = tl.wallet.RawCard
+        function isAnyCard(o: object): o is TypeCard
+}
+
     namespace mtcute {
         interface RawDummyUpdate {
             _: 'mtcute.dummyUpdate';
@@ -64510,7 +65392,7 @@ export class RpcError extends Error {
         /**
          * Object contains info on events occurred.
          */
-        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateNewEphemeralMessage | tl.RawUpdateDeleteEphemeralMessages | tl.RawUpdateEditEphemeralMessage | tl.RawUpdateEphemeralBotCallbackQuery | tl.RawUpdateBotStarsSubscription | tl.mtcute.RawDummyUpdate
+        type TypeUpdate = tl.RawUpdateNewMessage | tl.RawUpdateMessageID | tl.RawUpdateDeleteMessages | tl.RawUpdateUserTyping | tl.RawUpdateChatUserTyping | tl.RawUpdateChatParticipants | tl.RawUpdateUserStatus | tl.RawUpdateUserName | tl.RawUpdateNewAuthorization | tl.RawUpdateNewEncryptedMessage | tl.RawUpdateEncryptedChatTyping | tl.RawUpdateEncryption | tl.RawUpdateEncryptedMessagesRead | tl.RawUpdateChatParticipantAdd | tl.RawUpdateChatParticipantDelete | tl.RawUpdateDcOptions | tl.RawUpdateNotifySettings | tl.RawUpdateServiceNotification | tl.RawUpdatePrivacy | tl.RawUpdateUserPhone | tl.RawUpdateReadHistoryInbox | tl.RawUpdateReadHistoryOutbox | tl.RawUpdateWebPage | tl.RawUpdateReadMessagesContents | tl.RawUpdateChannelTooLong | tl.RawUpdateChannel | tl.RawUpdateNewChannelMessage | tl.RawUpdateReadChannelInbox | tl.RawUpdateDeleteChannelMessages | tl.RawUpdateChannelMessageViews | tl.RawUpdateChatParticipantAdmin | tl.RawUpdateNewStickerSet | tl.RawUpdateStickerSetsOrder | tl.RawUpdateStickerSets | tl.RawUpdateSavedGifs | tl.RawUpdateBotInlineQuery | tl.RawUpdateBotInlineSend | tl.RawUpdateEditChannelMessage | tl.RawUpdateBotCallbackQuery | tl.RawUpdateEditMessage | tl.RawUpdateInlineBotCallbackQuery | tl.RawUpdateReadChannelOutbox | tl.RawUpdateDraftMessage | tl.RawUpdateReadFeaturedStickers | tl.RawUpdateRecentStickers | tl.RawUpdateConfig | tl.RawUpdatePtsChanged | tl.RawUpdateChannelWebPage | tl.RawUpdateDialogPinned | tl.RawUpdatePinnedDialogs | tl.RawUpdateBotWebhookJSON | tl.RawUpdateBotWebhookJSONQuery | tl.RawUpdateBotShippingQuery | tl.RawUpdateBotPrecheckoutQuery | tl.RawUpdatePhoneCall | tl.RawUpdateLangPackTooLong | tl.RawUpdateLangPack | tl.RawUpdateFavedStickers | tl.RawUpdateChannelReadMessagesContents | tl.RawUpdateContactsReset | tl.RawUpdateChannelAvailableMessages | tl.RawUpdateDialogUnreadMark | tl.RawUpdateMessagePoll | tl.RawUpdateChatDefaultBannedRights | tl.RawUpdateFolderPeers | tl.RawUpdatePeerSettings | tl.RawUpdatePeerLocated | tl.RawUpdateNewScheduledMessage | tl.RawUpdateDeleteScheduledMessages | tl.RawUpdateTheme | tl.RawUpdateGeoLiveViewed | tl.RawUpdateLoginToken | tl.RawUpdateMessagePollVote | tl.RawUpdateDialogFilter | tl.RawUpdateDialogFilterOrder | tl.RawUpdateDialogFilters | tl.RawUpdatePhoneCallSignalingData | tl.RawUpdateChannelMessageForwards | tl.RawUpdateReadChannelDiscussionInbox | tl.RawUpdateReadChannelDiscussionOutbox | tl.RawUpdatePeerBlocked | tl.RawUpdateChannelUserTyping | tl.RawUpdatePinnedMessages | tl.RawUpdatePinnedChannelMessages | tl.RawUpdateChat | tl.RawUpdateGroupCallParticipants | tl.RawUpdateGroupCall | tl.RawUpdatePeerHistoryTTL | tl.RawUpdateChatParticipant | tl.RawUpdateChannelParticipant | tl.RawUpdateBotStopped | tl.RawUpdateGroupCallConnection | tl.RawUpdateBotCommands | tl.RawUpdatePendingJoinRequests | tl.RawUpdateBotChatInviteRequester | tl.RawUpdateMessageReactions | tl.RawUpdateAttachMenuBots | tl.RawUpdateWebViewResultSent | tl.RawUpdateBotMenuButton | tl.RawUpdateSavedRingtones | tl.RawUpdateTranscribedAudio | tl.RawUpdateReadFeaturedEmojiStickers | tl.RawUpdateUserEmojiStatus | tl.RawUpdateRecentEmojiStatuses | tl.RawUpdateRecentReactions | tl.RawUpdateMoveStickerSetToTop | tl.RawUpdateMessageExtendedMedia | tl.RawUpdateUser | tl.RawUpdateAutoSaveSettings | tl.RawUpdateStory | tl.RawUpdateReadStories | tl.RawUpdateStoryID | tl.RawUpdateStoriesStealthMode | tl.RawUpdateSentStoryReaction | tl.RawUpdateBotChatBoost | tl.RawUpdateChannelViewForumAsMessages | tl.RawUpdatePeerWallpaper | tl.RawUpdateBotMessageReaction | tl.RawUpdateBotMessageReactions | tl.RawUpdateSavedDialogPinned | tl.RawUpdatePinnedSavedDialogs | tl.RawUpdateSavedReactionTags | tl.RawUpdateSmsJob | tl.RawUpdateQuickReplies | tl.RawUpdateNewQuickReply | tl.RawUpdateDeleteQuickReply | tl.RawUpdateQuickReplyMessage | tl.RawUpdateDeleteQuickReplyMessages | tl.RawUpdateBotBusinessConnect | tl.RawUpdateBotNewBusinessMessage | tl.RawUpdateBotEditBusinessMessage | tl.RawUpdateBotDeleteBusinessMessage | tl.RawUpdateNewStoryReaction | tl.RawUpdateStarsBalance | tl.RawUpdateBusinessBotCallbackQuery | tl.RawUpdateStarsRevenueStatus | tl.RawUpdateBotPurchasedPaidMedia | tl.RawUpdatePaidReactionPrivacy | tl.RawUpdateSentPhoneCode | tl.RawUpdateGroupCallChainBlocks | tl.RawUpdateReadMonoForumInbox | tl.RawUpdateReadMonoForumOutbox | tl.RawUpdateMonoForumNoPaidException | tl.RawUpdateGroupCallMessage | tl.RawUpdateGroupCallEncryptedMessage | tl.RawUpdatePinnedForumTopic | tl.RawUpdatePinnedForumTopics | tl.RawUpdateDeleteGroupCallMessages | tl.RawUpdateStarGiftAuctionState | tl.RawUpdateStarGiftAuctionUserState | tl.RawUpdateEmojiGameInfo | tl.RawUpdateStarGiftCraftFail | tl.RawUpdateChatParticipantRank | tl.RawUpdateManagedBot | tl.RawUpdateBotGuestChatQuery | tl.RawUpdateAiComposeTones | tl.RawUpdateJoinChatWebViewDecision | tl.RawUpdateNewBotConnection | tl.RawUpdateWebBrowserSettings | tl.RawUpdateWebBrowserException | tl.RawUpdateNewEphemeralMessage | tl.RawUpdateDeleteEphemeralMessages | tl.RawUpdateEditEphemeralMessage | tl.RawUpdateEphemeralBotCallbackQuery | tl.RawUpdateBotStarsSubscription | tl.RawUpdateWalletState | tl.RawUpdateSentWalletTransaction | tl.RawUpdateWalletGaslessInfo | tl.RawUpdateWalletTonConnectSession | tl.RawUpdateWalletTonConnectPendingDisconnect | tl.mtcute.RawDummyUpdate
         function isAnyUpdate(o: object): o is TypeUpdate
         /**
          * Peer
@@ -64722,6 +65604,7 @@ export class RpcError extends Error {
         | tl.auth.RawCheckPaidAuthRequest
         | tl.auth.RawInitPasskeyLoginRequest
         | tl.auth.RawFinishPasskeyLoginRequest
+        | tl.auth.RawCancelWebTokenAuthorizationRequest
         | tl.auth.RawInitFirebasePnvLoginRequest
         | tl.auth.RawFinishFirebasePnvLoginRequest
         | tl.auth.RawFirebasePnvSignUpRequest
@@ -64888,6 +65771,8 @@ export class RpcError extends Error {
         | tl.contacts.RawGetBirthdaysRequest
         | tl.contacts.RawGetSponsoredPeersRequest
         | tl.contacts.RawUpdateContactNoteRequest
+        | tl.contacts.RawExportNoPaidMessagesTokenRequest
+        | tl.contacts.RawImportNoPaidMessagesTokenRequest
         | tl.messages.RawGetMessagesRequest
         | tl.messages.RawGetDialogsRequest
         | tl.messages.RawGetHistoryRequest
@@ -65147,6 +66032,8 @@ export class RpcError extends Error {
         | tl.messages.RawTranslateRichMessageRequest
         | tl.messages.RawComposeRichMessageWithAIRequest
         | tl.messages.RawRequestChatJoinWebViewRequest
+        | tl.messages.RawSetShareThemeRequest
+        | tl.messages.RawGetShareThemeBackdropsRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -65284,6 +66171,8 @@ export class RpcError extends Error {
         | tl.bots.RawGetAccessSettingsRequest
         | tl.bots.RawEditAccessSettingsRequest
         | tl.bots.RawSetJoinChatResultsRequest
+        | tl.bots.RawAddUsernameRequest
+        | tl.bots.RawRemoveUsernameRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -65349,6 +66238,17 @@ export class RpcError extends Error {
         | tl.payments.RawGetStarGiftUpgradeAttributesRequest
         | tl.payments.RawGetCraftStarGiftsRequest
         | tl.payments.RawCraftStarGiftRequest
+        | tl.payments.RawGetCurrencyRatesRequest
+        | tl.payments.RawGetOnrampProvidersRequest
+        | tl.payments.RawGetOnrampBaseCurrenciesRequest
+        | tl.payments.RawGetOnrampAvailabilityRequest
+        | tl.payments.RawGetOnrampLimitsRequest
+        | tl.payments.RawGetOnrampQuoteRequest
+        | tl.payments.RawCreateOnrampSessionRequest
+        | tl.payments.RawWithdrawStarGiftRequest
+        | tl.payments.RawDepositStarGiftRequest
+        | tl.payments.RawDisplayStarGiftRequest
+        | tl.payments.RawDeleteStarGiftRequest
         | tl.stickers.RawCreateStickerSetRequest
         | tl.stickers.RawRemoveStickerFromSetRequest
         | tl.stickers.RawChangeStickerPositionRequest
@@ -65498,6 +66398,34 @@ export class RpcError extends Error {
         | tl.ephemeral.RawDeleteWelcomeMessageRequest
         | tl.ephemeral.RawDeleteAllWelcomeMessagesRequest
         | tl.ephemeral.RawGetWelcomeMessagesRequest
+        | tl.toncenter.RawPerformApiRequestRequest
+        | tl.toncenter.RawGetStreamingUrlRequest
+        | tl.wallet.RawGetStateRequest
+        | tl.wallet.RawGetUserAddressesRequest
+        | tl.wallet.RawGetTransactionsRequest
+        | tl.wallet.RawGetTransactionsByIDsRequest
+        | tl.wallet.RawGetTransactionsByMsgHashRequest
+        | tl.wallet.RawExportSecretPhraseRequest
+        | tl.wallet.RawFetchEncryptedSecretPhrasePartRequest
+        | tl.wallet.RawReplaceWalletRequest
+        | tl.wallet.RawDisableBackupRequest
+        | tl.wallet.RawGetBackupHolderDcsRequest
+        | tl.wallet.RawEnableBackupRequest
+        | tl.wallet.RawGetProofChallengeRequest
+        | tl.wallet.RawSendTransferRequest
+        | tl.wallet.RawGetGaslessInfoRequest
+        | tl.wallet.RawGetExistingWaltBalanceRequest
+        | tl.wallet.RawGetNftsRequest
+        | tl.wallet.RawTonConnectCreateSessionRequest
+        | tl.wallet.RawTonConnectRegisterKeyRequest
+        | tl.wallet.RawTonConnectSubmitConnectResultRequest
+        | tl.wallet.RawTonConnectGetPendingRequest
+        | tl.wallet.RawTonConnectClaimRequestRequest
+        | tl.wallet.RawTonConnectSubmitResponseRequest
+        | tl.wallet.RawTonConnectNextEventIdRequest
+        | tl.wallet.RawTonConnectCloseSessionRequest
+        | tl.wallet.RawTonConnectGetSessionsRequest
+        | tl.wallet.RawSetCardStickersRequest
         | tl.mtcute.RawCustomMethodRequest
 
     type TlObject =
@@ -65687,6 +66615,9 @@ export class RpcError extends Error {
         | tl.RawMessageActionManagedBotCreated
         | tl.RawMessageActionChangeCommunity
         | tl.RawMessageActionChatJoinedViaCommunity
+        | tl.RawMessageActionGramTransfer
+        | tl.RawMessageActionWalletTonConnectRequest
+        | tl.RawMessageActionNoPaidMessagesTokenUsed
         | tl.RawDialog
         | tl.RawDialogFolder
         | tl.RawDialogCommunity
@@ -65930,6 +66861,11 @@ export class RpcError extends Error {
         | tl.RawUpdateEditEphemeralMessage
         | tl.RawUpdateEphemeralBotCallbackQuery
         | tl.RawUpdateBotStarsSubscription
+        | tl.RawUpdateWalletState
+        | tl.RawUpdateSentWalletTransaction
+        | tl.RawUpdateWalletGaslessInfo
+        | tl.RawUpdateWalletTonConnectSession
+        | tl.RawUpdateWalletTonConnectPendingDisconnect
         | tl.updates.RawState
         | tl.updates.RawDifferenceEmpty
         | tl.updates.RawDifference
@@ -66137,6 +67073,7 @@ export class RpcError extends Error {
         | tl.RawMessageEntityDiffInsert
         | tl.RawMessageEntityDiffReplace
         | tl.RawMessageEntityDiffDelete
+        | tl.RawMessageEntityTonAddress
         | tl.RawInputChannelEmpty
         | tl.RawInputChannel
         | tl.RawInputChannelFromMessage
@@ -66282,6 +67219,7 @@ export class RpcError extends Error {
         | tl.RawTextDate
         | tl.RawTextDiff
         | tl.RawTextButton
+        | tl.RawTextTonAddress
         | tl.RawPageBlockUnsupported
         | tl.RawPageBlockTitle
         | tl.RawPageBlockSubtitle
@@ -67079,7 +68017,6 @@ export class RpcError extends Error {
         | tl.RawInputPasskeyResponseRegister
         | tl.RawInputPasskeyResponseLogin
         | tl.RawInputPasskeyCredentialPublicKey
-        | tl.RawInputPasskeyCredentialFirebasePNV
         | tl.RawStarGiftBackground
         | tl.RawStarGiftAuctionRound
         | tl.RawStarGiftAuctionRoundExtendable
@@ -67155,7 +68092,60 @@ export class RpcError extends Error {
         | tl.RawPageButton
         | tl.ephemeral.RawWelcomeMessagesNotModified
         | tl.ephemeral.RawWelcomeMessages
+        | tl.RawCurrencyRate
+        | tl.payments.RawCurrencyRates
+        | tl.toncenter.RawApiResponse
+        | tl.toncenter.RawStreamingUrl
+        | tl.RawOnrampMethodAvailability
+        | tl.RawOnrampProviderInfo
+        | tl.RawOnrampAvailability
+        | tl.RawOnrampLimits
+        | tl.RawOnrampQuote
+        | tl.RawOnrampSession
+        | tl.RawWalletStateEmpty
+        | tl.RawWalletState
+        | tl.RawWalletUserAddress
+        | tl.wallet.RawUserAddresses
+        | tl.RawWalletTransactionPeerUser
+        | tl.RawWalletTransactionPeerAddress
+        | tl.RawWalletTransactionPeerOnramp
+        | tl.RawWalletTransactionPeerUnsupported
+        | tl.RawWalletTransactionPeerChannel
+        | tl.RawWalletTransactionPeerTelegramGift
+        | tl.RawWalletTransaction
+        | tl.wallet.RawTransactions
+        | tl.wallet.RawSecretPhraseParts
+        | tl.wallet.RawEncryptedSecretPhrasePart
+        | tl.wallet.RawHolderDc
+        | tl.wallet.RawProofChallenge
+        | tl.RawWalletOwnershipProof
+        | tl.RawInputWalletNew
+        | tl.RawInputWalletImported
+        | tl.RawTonConnectManifest
+        | tl.RawTonConnectSession
+        | tl.wallet.RawTonConnectChallenge
+        | tl.RawTonConnectNextEventId
+        | tl.RawTonConnectRequest
+        | tl.wallet.RawTonConnectPending
+        | tl.wallet.RawTonConnectSessions
+        | tl.wallet.RawExistingBalance
+        | tl.wallet.RawNftAttribute
+        | tl.wallet.RawNftItem
+        | tl.wallet.RawNftItems
         | tl.auth.RawFirebasePnvIntent
+        | tl.RawInputTonConnectOauthSession
+        | tl.RawExportedNoPaidMessagesToken
+        | tl.RawShareThemeDefault
+        | tl.RawShareThemeEmojiBackdrop
+        | tl.RawShareThemeGift
+        | tl.RawInputShareThemeGift
+        | tl.RawShareThemeBackdropOption
+        | tl.RawShareThemeBackdropsNotModified
+        | tl.RawShareThemeBackdrops
+        | tl.RawInputWalletCardSticker
+        | tl.wallet.RawCardSticker
+        | tl.wallet.RawCard
+        | tl.payments.RawStarGiftDepositPayload
         | tl.mtcute.RawDummyUpdate
         | tl.mtcute.RawDummyInputPeerMinUser
         | tl.mtcute.RawDummyInputPeerMinChannel
@@ -67196,6 +68186,7 @@ export class RpcError extends Error {
         | tl.auth.RawCheckPaidAuthRequest
         | tl.auth.RawInitPasskeyLoginRequest
         | tl.auth.RawFinishPasskeyLoginRequest
+        | tl.auth.RawCancelWebTokenAuthorizationRequest
         | tl.auth.RawInitFirebasePnvLoginRequest
         | tl.auth.RawFinishFirebasePnvLoginRequest
         | tl.auth.RawFirebasePnvSignUpRequest
@@ -67362,6 +68353,8 @@ export class RpcError extends Error {
         | tl.contacts.RawGetBirthdaysRequest
         | tl.contacts.RawGetSponsoredPeersRequest
         | tl.contacts.RawUpdateContactNoteRequest
+        | tl.contacts.RawExportNoPaidMessagesTokenRequest
+        | tl.contacts.RawImportNoPaidMessagesTokenRequest
         | tl.messages.RawGetMessagesRequest
         | tl.messages.RawGetDialogsRequest
         | tl.messages.RawGetHistoryRequest
@@ -67621,6 +68614,8 @@ export class RpcError extends Error {
         | tl.messages.RawTranslateRichMessageRequest
         | tl.messages.RawComposeRichMessageWithAIRequest
         | tl.messages.RawRequestChatJoinWebViewRequest
+        | tl.messages.RawSetShareThemeRequest
+        | tl.messages.RawGetShareThemeBackdropsRequest
         | tl.updates.RawGetStateRequest
         | tl.updates.RawGetDifferenceRequest
         | tl.updates.RawGetChannelDifferenceRequest
@@ -67758,6 +68753,8 @@ export class RpcError extends Error {
         | tl.bots.RawGetAccessSettingsRequest
         | tl.bots.RawEditAccessSettingsRequest
         | tl.bots.RawSetJoinChatResultsRequest
+        | tl.bots.RawAddUsernameRequest
+        | tl.bots.RawRemoveUsernameRequest
         | tl.payments.RawGetPaymentFormRequest
         | tl.payments.RawGetPaymentReceiptRequest
         | tl.payments.RawValidateRequestedInfoRequest
@@ -67823,6 +68820,17 @@ export class RpcError extends Error {
         | tl.payments.RawGetStarGiftUpgradeAttributesRequest
         | tl.payments.RawGetCraftStarGiftsRequest
         | tl.payments.RawCraftStarGiftRequest
+        | tl.payments.RawGetCurrencyRatesRequest
+        | tl.payments.RawGetOnrampProvidersRequest
+        | tl.payments.RawGetOnrampBaseCurrenciesRequest
+        | tl.payments.RawGetOnrampAvailabilityRequest
+        | tl.payments.RawGetOnrampLimitsRequest
+        | tl.payments.RawGetOnrampQuoteRequest
+        | tl.payments.RawCreateOnrampSessionRequest
+        | tl.payments.RawWithdrawStarGiftRequest
+        | tl.payments.RawDepositStarGiftRequest
+        | tl.payments.RawDisplayStarGiftRequest
+        | tl.payments.RawDeleteStarGiftRequest
         | tl.stickers.RawCreateStickerSetRequest
         | tl.stickers.RawRemoveStickerFromSetRequest
         | tl.stickers.RawChangeStickerPositionRequest
@@ -67972,6 +68980,34 @@ export class RpcError extends Error {
         | tl.ephemeral.RawDeleteWelcomeMessageRequest
         | tl.ephemeral.RawDeleteAllWelcomeMessagesRequest
         | tl.ephemeral.RawGetWelcomeMessagesRequest
+        | tl.toncenter.RawPerformApiRequestRequest
+        | tl.toncenter.RawGetStreamingUrlRequest
+        | tl.wallet.RawGetStateRequest
+        | tl.wallet.RawGetUserAddressesRequest
+        | tl.wallet.RawGetTransactionsRequest
+        | tl.wallet.RawGetTransactionsByIDsRequest
+        | tl.wallet.RawGetTransactionsByMsgHashRequest
+        | tl.wallet.RawExportSecretPhraseRequest
+        | tl.wallet.RawFetchEncryptedSecretPhrasePartRequest
+        | tl.wallet.RawReplaceWalletRequest
+        | tl.wallet.RawDisableBackupRequest
+        | tl.wallet.RawGetBackupHolderDcsRequest
+        | tl.wallet.RawEnableBackupRequest
+        | tl.wallet.RawGetProofChallengeRequest
+        | tl.wallet.RawSendTransferRequest
+        | tl.wallet.RawGetGaslessInfoRequest
+        | tl.wallet.RawGetExistingWaltBalanceRequest
+        | tl.wallet.RawGetNftsRequest
+        | tl.wallet.RawTonConnectCreateSessionRequest
+        | tl.wallet.RawTonConnectRegisterKeyRequest
+        | tl.wallet.RawTonConnectSubmitConnectResultRequest
+        | tl.wallet.RawTonConnectGetPendingRequest
+        | tl.wallet.RawTonConnectClaimRequestRequest
+        | tl.wallet.RawTonConnectSubmitResponseRequest
+        | tl.wallet.RawTonConnectNextEventIdRequest
+        | tl.wallet.RawTonConnectCloseSessionRequest
+        | tl.wallet.RawTonConnectGetSessionsRequest
+        | tl.wallet.RawSetCardStickersRequest
         | tl.mtcute.RawCustomMethodRequest
 }
 export declare function isAnyError(o: object): o is tl.TypeError
@@ -68365,6 +69401,29 @@ export declare function isAnyKeyboardInlineButton(o: object): o is tl.TypeKeyboa
 export declare function isAnyKeyboardInlineButtonRow(o: object): o is tl.TypeKeyboardInlineButtonRow
 export declare function isAnyRichButtonStyle(o: object): o is tl.TypeRichButtonStyle
 export declare function isAnyPageButton(o: object): o is tl.TypePageButton
+export declare function isAnyCurrencyRate(o: object): o is tl.TypeCurrencyRate
+export declare function isAnyOnrampMethodAvailability(o: object): o is tl.TypeOnrampMethodAvailability
+export declare function isAnyOnrampProviderInfo(o: object): o is tl.TypeOnrampProviderInfo
+export declare function isAnyOnrampAvailability(o: object): o is tl.TypeOnrampAvailability
+export declare function isAnyOnrampLimits(o: object): o is tl.TypeOnrampLimits
+export declare function isAnyOnrampQuote(o: object): o is tl.TypeOnrampQuote
+export declare function isAnyOnrampSession(o: object): o is tl.TypeOnrampSession
+export declare function isAnyWalletState(o: object): o is tl.TypeWalletState
+export declare function isAnyWalletUserAddress(o: object): o is tl.TypeWalletUserAddress
+export declare function isAnyWalletTransactionPeer(o: object): o is tl.TypeWalletTransactionPeer
+export declare function isAnyWalletTransaction(o: object): o is tl.TypeWalletTransaction
+export declare function isAnyWalletOwnershipProof(o: object): o is tl.TypeWalletOwnershipProof
+export declare function isAnyInputWalletReplacement(o: object): o is tl.TypeInputWalletReplacement
+export declare function isAnyTonConnectManifest(o: object): o is tl.TypeTonConnectManifest
+export declare function isAnyTonConnectSession(o: object): o is tl.TypeTonConnectSession
+export declare function isAnyTonConnectNextEventId(o: object): o is tl.TypeTonConnectNextEventId
+export declare function isAnyTonConnectRequest(o: object): o is tl.TypeTonConnectRequest
+export declare function isAnyInputTonConnectOauthSession(o: object): o is tl.TypeInputTonConnectOauthSession
+export declare function isAnyExportedNoPaidMessagesToken(o: object): o is tl.TypeExportedNoPaidMessagesToken
+export declare function isAnyShareTheme(o: object): o is tl.TypeShareTheme
+export declare function isAnyShareThemeBackdropOption(o: object): o is tl.TypeShareThemeBackdropOption
+export declare function isAnyShareThemeBackdrops(o: object): o is tl.TypeShareThemeBackdrops
+export declare function isAnyInputWalletCardSticker(o: object): o is tl.TypeInputWalletCardSticker
 export declare function isAnyStorage_FileType(o: object): o is tl.storage.TypeFileType
 export declare function isAnyAuth_SentCode(o: object): o is tl.auth.TypeSentCode
 export declare function isAnyAuth_Authorization(o: object): o is tl.auth.TypeAuthorization
@@ -68540,6 +69599,8 @@ export declare function isAnyPayments_StarGiftAuctionState(o: object): o is tl.p
 export declare function isAnyPayments_StarGiftAuctionAcquiredGifts(o: object): o is tl.payments.TypeStarGiftAuctionAcquiredGifts
 export declare function isAnyPayments_StarGiftActiveAuctions(o: object): o is tl.payments.TypeStarGiftActiveAuctions
 export declare function isAnyPayments_StarGiftUpgradeAttributes(o: object): o is tl.payments.TypeStarGiftUpgradeAttributes
+export declare function isAnyPayments_CurrencyRates(o: object): o is tl.payments.TypeCurrencyRates
+export declare function isAnyPayments_StarGiftDepositPayload(o: object): o is tl.payments.TypeStarGiftDepositPayload
 export declare function isAnyPhone_PhoneCall(o: object): o is tl.phone.TypePhoneCall
 export declare function isAnyPhone_GroupCall(o: object): o is tl.phone.TypeGroupCall
 export declare function isAnyPhone_GroupParticipants(o: object): o is tl.phone.TypeGroupParticipants
@@ -68587,6 +69648,23 @@ export declare function isAnyAicompose_Tones(o: object): o is tl.aicompose.TypeT
 export declare function isAnyCommunities_PeerLinkRequests(o: object): o is tl.communities.TypePeerLinkRequests
 export declare function isAnyCommunities_ParticipantJoinedChats(o: object): o is tl.communities.TypeParticipantJoinedChats
 export declare function isAnyEphemeral_WelcomeMessages(o: object): o is tl.ephemeral.TypeWelcomeMessages
+export declare function isAnyToncenter_ApiResponse(o: object): o is tl.toncenter.TypeApiResponse
+export declare function isAnyToncenter_StreamingUrl(o: object): o is tl.toncenter.TypeStreamingUrl
+export declare function isAnyWallet_UserAddresses(o: object): o is tl.wallet.TypeUserAddresses
+export declare function isAnyWallet_Transactions(o: object): o is tl.wallet.TypeTransactions
+export declare function isAnyWallet_SecretPhraseParts(o: object): o is tl.wallet.TypeSecretPhraseParts
+export declare function isAnyWallet_EncryptedSecretPhrasePart(o: object): o is tl.wallet.TypeEncryptedSecretPhrasePart
+export declare function isAnyWallet_HolderDc(o: object): o is tl.wallet.TypeHolderDc
+export declare function isAnyWallet_ProofChallenge(o: object): o is tl.wallet.TypeProofChallenge
+export declare function isAnyWallet_TonConnectChallenge(o: object): o is tl.wallet.TypeTonConnectChallenge
+export declare function isAnyWallet_TonConnectPending(o: object): o is tl.wallet.TypeTonConnectPending
+export declare function isAnyWallet_TonConnectSessions(o: object): o is tl.wallet.TypeTonConnectSessions
+export declare function isAnyWallet_ExistingBalance(o: object): o is tl.wallet.TypeExistingBalance
+export declare function isAnyWallet_NftAttribute(o: object): o is tl.wallet.TypeNftAttribute
+export declare function isAnyWallet_NftItem(o: object): o is tl.wallet.TypeNftItem
+export declare function isAnyWallet_NftItems(o: object): o is tl.wallet.TypeNftItems
+export declare function isAnyWallet_CardSticker(o: object): o is tl.wallet.TypeCardSticker
+export declare function isAnyWallet_Card(o: object): o is tl.wallet.TypeCard
 export declare function isAnyMtcute_Update(o: object): o is tl.mtcute.TypeUpdate
 export declare function isAnyMtcute_InputPeer(o: object): o is tl.mtcute.TypeInputPeer
 
