@@ -130,3 +130,9 @@ fs.rmSync(mtcuteFolder, { recursive: true, force: true });
 
 copyAndMergeFolder(upstreamCore, coreFolder);
 copyAndMergeFolder(upstreamWeb, webFolder);
+
+const upstreamCorePackageJson = JSON.parse(
+	fs.readFileSync(path.resolve(upstreamPackages, "core", "package.json"), "utf8"),
+);
+
+fs.writeFileSync(path.resolve(mtcuteFolder, "version.txt"), `${upstreamCorePackageJson.version}`, "utf8");

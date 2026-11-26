@@ -18,6 +18,9 @@ const isKai3 = process.env.KAIOS == "3";
 const isCloudphone = process.env.CLOUDPHONE == "1";
 const isProd = process.env.NODE_ENV === "production";
 
+const mtcuteVersionPath = path.resolve(__dirname, "@mtcute", "version.txt");
+const mtcuteVersion = fs.existsSync(mtcuteVersionPath) ? fs.readFileSync(mtcuteVersionPath, "utf8").trim() : "";
+
 // replace BigInteger.ts with NativeBigInteger.ts on KaiOS 3.0
 const bigintFolder = path.resolve(__dirname, "@mtcute", "core", "utils", "bigint");
 const nativeBigIntAlias = {
@@ -109,6 +112,7 @@ export default defineConfig({
 			"import.meta.env.CLOUDPHONE": isCloudphone,
 			"import.meta.env.VITE_APP_ID": process.env.VITE_APP_ID || 0,
 			"import.meta.env.VITE_APP_HASH": JSON.stringify(process.env.VITE_APP_HASH || ""),
+			"import.meta.env.MTCUTE_VERSION": JSON.stringify(mtcuteVersion),
 		},
 	},
 

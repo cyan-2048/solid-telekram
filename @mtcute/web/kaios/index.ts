@@ -75,8 +75,6 @@ export class WebCryptoProvider implements ICryptoProvider {
   inflate(data: Uint8Array, maxSize: number): Uint8Array {
     const result = inflateSync(data)
 
-    console.log("hello?")
-
     if (result.length > maxSize) {
       throw new Error('Decompressed data exceeds maximum size')
     }

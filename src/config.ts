@@ -11,6 +11,8 @@ export const cloudphone: boolean =
 	localStorage.getItem("CLOUDPHONE_MODE") === "true" ||
 	navigator.userAgent.includes("Cloud Phone");
 
+export const mtcuteVersion = import.meta.env.MTCUTE_VERSION || "";
+
 /**
  * this means that the user is on an actual cloudphone device!
  */
