@@ -3,6 +3,7 @@ import type { MaybePromise } from '@mtcute/core'
 import type { IAesCtr, ICryptoProvider, IEncryptionScheme } from '../utils.js'
 import type { AsmCryptoProvider } from './asmjs/crypto.js'
 import type { WebCryptoProvider as WasmCryptoProvider } from './wasm/crypto.js'
+import { inflateSync } from './asmjs/fflate.js'
 
 export class WebCryptoProvider implements ICryptoProvider {
   instance!: AsmCryptoProvider | WasmCryptoProvider
@@ -69,5 +70,17 @@ export class WebCryptoProvider implements ICryptoProvider {
 
   hmacSha256(data: Uint8Array, key: Uint8Array): MaybePromise<Uint8Array> {
     return this.instance.hmacSha256(data, key)
+  }
+
+  inflate(data: Uint8Array, maxSize: number): Uint8Array {
+    const result = inflateSync(data)
+
+    console.log("hello?")
+
+    if (result.length > maxSize) {
+      throw new Error('Decompressed data exceeds maximum size')
+    }
+
+    return result as Uint8Array
   }
 }

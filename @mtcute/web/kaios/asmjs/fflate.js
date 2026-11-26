@@ -1,3 +1,4 @@
+/* eslint-disable */
 const u8 = Uint8Array,
 	u16 = Uint16Array,
 	i32 = Int32Array;
@@ -682,6 +683,10 @@ export function gunzipSync(data, opts) {
 		(opts && opts.out) || new u8(gzl(data)),
 		opts && opts.dictionary
 	);
+}
+
+export function inflateSync(data, opts) {
+  return inflt(data, { i: 2 }, opts && opts.out, opts && opts.dictionary);
 }
 
 const fltn = (d, p, t, o) => {

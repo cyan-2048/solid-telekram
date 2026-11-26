@@ -62,6 +62,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
   readonly changePrimaryDc: ITelegramClient['changePrimaryDc']
   readonly computeSrpParams: ITelegramClient['computeSrpParams']
   readonly computeNewPasswordHash: ITelegramClient['computeNewPasswordHash']
+  readonly inflate: ITelegramClient['inflate']
   readonly startUpdatesLoop: ITelegramClient['startUpdatesLoop']
   readonly stopUpdatesLoop: ITelegramClient['stopUpdatesLoop']
   readonly getMtprotoMessageId: ITelegramClient['getMtprotoMessageId']
@@ -116,6 +117,7 @@ export abstract class TelegramWorkerPort<Custom extends WorkerCustomMethods> imp
     this.changePrimaryDc = bind('changePrimaryDc')
     this.computeSrpParams = bind('computeSrpParams')
     this.computeNewPasswordHash = bind('computeNewPasswordHash')
+    this.inflate = bind('inflate')
     this.startUpdatesLoop = bind('startUpdatesLoop')
     this.stopUpdatesLoop = bind('stopUpdatesLoop')
     this.getMtprotoMessageId = bind('getMtprotoMessageId')

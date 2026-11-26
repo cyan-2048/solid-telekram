@@ -341,6 +341,7 @@ export declare namespace tlCompat {
      *     bot_can_manage_bots: flags2.18?true
      *     bot_guestchat: flags2.19?true
      *     bot_guard: flags2.20?true
+     *     bot_forum_sidebar: flags2.22?true
      *     send_paid_messages_stars: flags2.15?long
      *     linked_community_id: flags2.21?int53
      * Changed arguments:
@@ -402,6 +403,7 @@ export declare namespace tlCompat {
      *     monoforum: flags2.17?true
      *     forum_tabs: flags2.19?true
      *     in_news: flags2.21?true
+     *     forum_sidebar: flags2.23?true
      *     send_paid_messages_stars: flags2.14?long
      *     linked_monoforum_id: flags2.18?int53
      *     linked_community_id: flags2.20?int53
@@ -697,6 +699,7 @@ export declare namespace tlCompat {
      *     monoforum: flags2.17?true
      *     forum_tabs: flags2.19?true
      *     in_news: flags2.21?true
+     *     forum_sidebar: flags2.23?true
      *     linked_monoforum_id: flags2.18?int53
      *     linked_community_id: flags2.20?int53
      *     pinned_msg_id: flags2.22?int
@@ -1742,6 +1745,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     in_news: flags2.21?true
+     *     forum_sidebar: flags2.23?true
      *     linked_community_id: flags2.20?int53
      *     pinned_msg_id: flags2.22?int
      * Changed arguments:
@@ -1807,6 +1811,7 @@ export declare namespace tlCompat {
      *     bot_can_manage_bots: flags2.18?true
      *     bot_guestchat: flags2.19?true
      *     bot_guard: flags2.20?true
+     *     bot_forum_sidebar: flags2.22?true
      *     linked_community_id: flags2.21?int53
      * Changed arguments:
      *     stories_max_id: flags2.5?int => flags2.5?RecentStory
@@ -3036,6 +3041,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     in_news: flags2.21?true
+     *     forum_sidebar: flags2.23?true
      *     linked_community_id: flags2.20?int53
      *     pinned_msg_id: flags2.22?int
      */
@@ -3107,6 +3113,7 @@ export declare namespace tlCompat {
      * Compared to the current schema, changes from this entry:
      * 
      * Added arguments:
+     *     bot_forum_sidebar: flags2.22?true
      *     linked_community_id: flags2.21?int53
      */
     interface RawUser_layer227 {
@@ -3491,6 +3498,7 @@ export declare namespace tlCompat {
      * 
      * Added arguments:
      *     in_news: flags2.21?true
+     *     forum_sidebar: flags2.23?true
      *     pinned_msg_id: flags2.22?int
      */
     interface RawChannel_layer231 {
